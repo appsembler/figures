@@ -78,6 +78,7 @@ class LearnerReportRowData(models.Model):
     # Question: Do we need/desire a default sort order/sequence number for the
     # data for a given report?
     # sequence = models.IntegerField(blank=True, null=True)
+    display_order = models.IntegerField(blank=True, null=True)
     learner_report = models.ForeignKey(
         LearnerReport,
         related_name='learner_report',
@@ -85,3 +86,8 @@ class LearnerReportRowData(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE)
+
+    class Meta:
+        # How to order based on value in parent?
+        #ordering = ('')
+        pass
