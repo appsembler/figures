@@ -1,11 +1,10 @@
-console.log("running webpack.config.js...");
 
 // ./node_modules/.bin/webpack --config webpack.config.js --watch
 
 // 'use strict';
 
-var path = require("path")
-//const path = require('path');
+//var path = require("path")
+const path = require('path');
 
 var webpack = require('webpack')
 var BundleTracker = require('webpack-bundle-tracker')
@@ -18,12 +17,12 @@ module.exports = {
   entry: './assets/js/index.js', // entry point of our app. assets/js/index.js should require other js modules and dependencies it needs
 
   output: {
-      path: path.resolve('./assets/bundles/'),
+      path: path.resolve('./edx_figures/static/edx_figures_bundles/'),
       filename: "[name]-[hash].js",
   },
 
   plugins: [
-    new BundleTracker({filename: './webpack-stats.json'}),
+    new BundleTracker({filename: './edx_figures/webpack-stats.json'}),
   ],
 
   module: {
@@ -33,8 +32,6 @@ module.exports = {
   },
 
   resolve: {
-  //   modulesDirectories: ['node_modules', 'bower_components'],
-  //   //extensions: ['', '.js', '.jsx']
     extensions: ['.js', '.jsx']
   }
 }

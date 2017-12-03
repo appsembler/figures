@@ -4,9 +4,8 @@ This module provides default values for running edx-figures
 '''
 import os
 
+# APP_DIR should be the 'edx_figures' package directory
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-
-print('!!! edx-figures APP_DIR = {}'.format(APP_DIR))
 
 # Mapping to create settings root level keys
 ENV_KEYS = [
@@ -26,5 +25,3 @@ EDX_FIGURES = {
 
 webpack_bundle_dir_name = 'edx_figures_bundles/'
 webpack_stats_file = os.path.abspath(os.path.join(APP_DIR, 'webpack-stats.json'))
-
-staticfiles_dir = os.path.join(APP_DIR, 'assets')
