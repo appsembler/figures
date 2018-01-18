@@ -1,7 +1,7 @@
 {
   "name": "edx-figures",
   "version": "0.1.0",
-  "description": "Analytics for Open edX",
+  "description": "Reporting and data retrieval for Open edX",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,7 +12,7 @@
     "url": "git+https://github.com/appsembler/edx-figures.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/appsembler/edx-figures/issues"
   },

@@ -12,7 +12,7 @@ setup(
     version='0.1.0',
     packages=find_packages(),
     include_package_data=True,
-    license='MIT License',  # example license
+    license='MIT',
     description='Reporting and data retrieval for Open edX',
     long_description=README,
     url='https://www.appsembler.com/',
@@ -21,12 +21,11 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: X.Y',  # replace "X.Y" as appropriate
+        'Framework :: Django :: 1.8',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',  # example license
+        'License :: OSI Approved :: MIT Lincense',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        # Replace these appropriately if you are stuck on Python 2.
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Topic :: Internet :: WWW/HTTP',

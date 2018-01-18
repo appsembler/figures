@@ -7,13 +7,7 @@ import os
 # APP_DIR should be the 'edx_figures' package directory
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Mapping to create settings root level keys
-ENV_KEYS = [
-    {
-        'file': 'lms.env.json',
-        'key': 'EDX_FIGURES',
-    }
-]
+
 
 EDX_FIGURES = {
     'DEFAULT_REPORT_ENCODING': 'utf-8',
