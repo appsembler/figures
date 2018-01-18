@@ -1,0 +1,23 @@
+{% load render_bundle from webpack_loader %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <neta charset="UTF-8">
+    <title>edX Figures</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="Figures for Open edX">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  </head>
+  <body>
+    <div id="view-context-values"
+      data-cms-search-api-url={{ edx_figures_api_url }}
+      data-cms-search-api-url-ssl={{ edx_figures_api_url_ssl }}
+      data-placeholder=""
+      style="display:none">
+    </div>
+    <div class="page-header">edX Figures</div>
+    <div id="edx-figures-app" class="edx-figures-app">APPLICATION CONTENT</div>
+    <script>__REACT_DEVTOOLS_GLOBAL_HOOK__ = parent.__REACT_DEVTOOLS_GLOBAL_HOOK__</script>
+    {% render_bundle 'main' config='EDX_FIGURES_APP' %}
+  </body>
+</html>
