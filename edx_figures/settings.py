@@ -18,4 +18,4 @@ EDX_FIGURES = {
 }
 
 webpack_bundle_dir_name = 'edx_figures_bundles/'
-webpack_stats_file = os.path.abspath(os.path.join(APP_DIR, 'webpack-stats.json'))
+webpack_stats_file = os.path.abspath(os.path.join(APP_DIR, '../frontend/webpack-stats.json'))
