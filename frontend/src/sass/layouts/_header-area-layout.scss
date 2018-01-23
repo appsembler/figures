@@ -1,0 +1,19 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+
+.ef {
+
+  &--header-area {
+    background-color: $primary-color;
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+  }
+
+  &--header-logo {
+
+  }
+}
+
+.header_area {
+  background-color: $primary-color;
+  color: pick-visible-color($primary-color, #fff, $base-text-color);
+}

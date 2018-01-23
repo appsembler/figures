@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Route, NavLink } from 'react-router-dom';
+import Dashboard from 'base/views/Dashboard';
+import Test from 'base/views/Test';
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+      <main className="ef--layout-root">
+        <header>
+          <NavLink to="/figures/dashboard">Dashboard</NavLink>
+          <NavLink to="/figures/test">Test</NavLink>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+        <Route exact path="/figures/dashboard" component={Dashboard} />
+        <Route exact path="/figures/test" component={Test} />
+      </main>
     );
   }
 }
