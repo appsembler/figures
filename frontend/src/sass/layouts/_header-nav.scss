@@ -1,1 +1,35 @@
 @import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+
+.header-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+
+  &__link {
+    margin-right: calcRem(30);
+    font-size: $base-font-size;
+    font-weight: 400;
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+    text-decoration: none;
+    position: relative;
+
+    &:after {
+      position: absolute;
+      bottom: calcRem(-10);
+      height: calcRem(1);
+      width: 0;
+      left: 0;
+      background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+      content: '';
+      transition: all 0.2s ease-in-out;
+    }
+
+    &:hover {
+
+      &:after {
+        width: 100%;
+      }
+    }
+  }
+}

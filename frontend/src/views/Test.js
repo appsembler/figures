@@ -9,7 +9,7 @@ class Test extends Component {
     return (
       <div className="ef--layout-root">
         <HeaderAreaLayout />
-        <section class="ef--container ef--base-grid-layout">
+        <section className="ef--container ef--base-grid-layout">
 
         </section>
         <div className="App">

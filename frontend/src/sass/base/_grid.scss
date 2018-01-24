@@ -1,59 +1,56 @@
 @import '~base/sass/base/variables';
 
-.ef {
+.container {
+  width: 100%;
+  max-width: $max-grid-width;
+  margin: 0 auto;
+  padding: 0 calcRem(20);
+}
 
-  &--container {
-    width: 100%;
-    max-width: $max-grid-width;
-    margin: 0 auto;
-    padding: 0 2rem;
+.layout-root {
+  width: 100%;
+  padding: 0;
+  font-size: $rem-base-size + 0px;
+  font-family: $font-family;
+}
+
+.base-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: calcRem(10);
+}
+
+.grid-element {
+
+  &--full-width {
+    grid-column-end: span 4;
   }
 
-  &--layout-root {
-    width: 100%;
-    padding: 0;
-    font-size: $base-font-size;
-    font-family: $font-family;
-  }
+  &--three-quarter {
+    grid-column-end: span 3;
 
-  &--base-grid-layout {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 1rem;
-  }
-
-  &--grid-element {
-
-    &--full-width {
+    @media (max-width: $tablet-breakpoint) {
       grid-column-end: span 4;
     }
+  }
 
-    &--three-quarter {
-      grid-column-end: span 3;
+  &--one-half {
+    grid-column-end: span 2;
 
-      @media (max-width: $tablet-breakpoint) {
-        grid-column-end: span 4;
-      }
+    @media (max-width: $mobile-breakpoint) {
+      grid-column-end: span 4;
     }
+  }
 
-    &--one-half {
+  &--one-quarter {
+    grid-column-end: span 1;
+
+    @media (max-width: $tablet-breakpoint) {
       grid-column-end: span 2;
-
-      @media (max-width: $mobile-breakpoint) {
-        grid-column-end: span 4;
-      }
     }
 
-    &--one-quarter {
-      grid-column-end: span 1;
-
-      @media (max-width: $tablet-breakpoint) {
-        grid-column-end: span 2;
-      }
-
-      @media (max-width: $mobile-breakpoint) {
-        grid-column-end: span 4;
-      }
+    @media (max-width: $mobile-breakpoint) {
+      grid-column-end: span 4;
     }
   }
 }

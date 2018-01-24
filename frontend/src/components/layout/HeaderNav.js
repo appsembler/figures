@@ -1,23 +1,28 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
-import 'base/sass/layouts/_header-nav.scss';
+import styles from 'base/sass/layouts/_header-nav.scss';
+import AutoCompleteCourseSelect from 'base/components/inputs/AutoCompleteCourseSelect';
 
 class HeaderNav extends Component {
   render() {
     return (
-      <div className="ef--header-nav">
+      <div className={styles['header-nav']}>
         <NavLink
-          to="#"
-          className="ef--header-nav__link"
+          to="/dashboard"
+          className={styles['header-nav__link']}
         >
           Dashboard
         </NavLink>
         <NavLink
-          to="#"
-          className="ef--header-nav__link"
+          to="/test"
+          className={styles['header-nav__link']}
         >
           Reports
         </NavLink>
+        <AutoCompleteCourseSelect
+          negativeStyleButton
+          buttonText='Jump to a course'
+        />
       </div>
     );
   }

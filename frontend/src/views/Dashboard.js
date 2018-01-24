@@ -11,7 +11,7 @@ class Dashboard extends Component {
         <HeaderAreaLayout>
           <h1>Test</h1>
         </HeaderAreaLayout>
-        <section class="ef--container ef--base-grid-layout">
+        <section className="ef--container ef--base-grid-layout">
 
         </section>
         <div className="App">

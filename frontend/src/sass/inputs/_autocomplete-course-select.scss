@@ -1,0 +1,84 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+
+.ac-course-selector {
+  position: relative;
+}
+
+.selector-trigger-button {
+  border-radius: $elements-border-radius;
+  padding: calcRem(12) calcRem(20);
+  font-size: $base-font-size;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  background: none;
+  transition: all 0.2s ease-in-out;
+
+  &.positive {
+    border: calcRem(2) solid $primary-color;
+    color: $primary-color;
+  }
+
+  &.negative {
+    border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+  }
+
+  &:hover {
+    cursor: pointer;
+    background: #FFFFFF;
+    box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.15);
+    color: $primary-color;
+  }
+}
+
+.selector-modal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calcRem(320);
+  padding: calcRem(12) calcRem(20) calcRem(2);
+  background: #FFFFFF;
+  box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.15);
+  border-radius: $elements-border-radius;
+}
+
+.modal-dismiss {
+  font-size: calcRem(14);
+  border: none;
+  outline: none;
+  background: none;
+  padding: calcRem(12);
+  color: rgba($base-text-color, 0.5);
+  transition: all 0.3s ease-in-out;
+  position: absolute;
+  top: calcRem(2);
+  right: calcRem(8);
+  border-radius: $elements-border-radius;
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+.input {
+  box-shadow: none;
+  outline: none;
+  border: none;
+  font-size: $base-font-size;
+  padding-bottom: calcRem(12);
+  width: 100%;
+  color: $base-text-color;
+
+  &::placeholder {
+    color: rgba($base-text-color, 0.3);
+  }
+}
+
+.suggestion {
+  border-top: calcRem(1) solid rgba(#D8D8D8, 0.5);
+  padding: calcRem(10) 0;
+  color: $base-text-color;
+  font-size: $base-font-size;
+}

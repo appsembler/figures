@@ -1,19 +1,35 @@
 @import '~base/sass/base/variables';
 @import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
 
-.ef {
 
-  &--header-area {
-    background-color: $primary-color;
-    color: pick-visible-color($primary-color, #fff, $base-text-color);
-  }
+.header-area {
+  background-color: $primary-color;
+  color: pick-visible-color($primary-color, #fff, $base-text-color);
+  position: relative;
 
-  &--header-logo {
-
+  &:before {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+    width: 100%;
+    left: 0;
+    top: 0;
+    height: calcRem(15);
+    display: block;
+    opacity: 0.2;
+    content: '';
   }
 }
 
-.header_area {
-  background-color: $primary-color;
-  color: pick-visible-color($primary-color, #fff, $base-text-color);
+.header-top {
+  display: flex;
+  align-items: center;
+  padding: calcRem(20) 0;
+}
+
+.header-logo-container {
+
+}
+
+.header-logo {
+  height: calcRem(50);
 }

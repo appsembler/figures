@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import { Route, NavLink } from 'react-router-dom';
 import Dashboard from 'base/views/Dashboard';
 import Test from 'base/views/Test';
+import styles from 'base/sass/base/_grid.scss';
 
 class App extends Component {
   render() {
     return (
-      <main className="ef--layout-root">
+      <main className={styles['layout-root']}>
         <header>
           <NavLink to="/figures/dashboard">Dashboard</NavLink>
           <NavLink to="/figures/test">Test</NavLink>
