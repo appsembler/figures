@@ -1,0 +1,13 @@
+// Most of this is just to get the pesky default Open edX stylesheed with its superbroad element targeting out of the way.
+
+:global(input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled), button) {
+	background: none;
+	box-shadow: none;
+	text-shadow: none;
+	border: none;
+	outline: none;
+}
+
+:global(input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled), input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled), button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled), button) {
+  box-shadow: none;
+}

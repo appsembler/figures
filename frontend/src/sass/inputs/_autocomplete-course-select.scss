@@ -9,10 +9,15 @@
   border-radius: $elements-border-radius;
   padding: calcRem(12) calcRem(20);
   font-size: $base-font-size;
+  font-family: $font-family;
+  font-weight: 600;
+  letter-spacing: 0;
   border: none;
   box-shadow: none;
+  text-shadow: none;
   outline: none;
   background: none;
+  text-transform: none;
   transition: all 0.2s ease-in-out;
 
   &.positive {
@@ -25,7 +30,7 @@
     color: pick-visible-color($primary-color, #fff, $base-text-color);
   }
 
-  &:hover {
+  &:hover, &:hover:not(:disabled) {
     cursor: pointer;
     background: #FFFFFF;
     box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.15);
@@ -48,6 +53,8 @@
   font-size: calcRem(14);
   border: none;
   outline: none;
+  box-shadow: none;
+  text-shadow: none;
   background: none;
   padding: calcRem(12);
   color: rgba($base-text-color, 0.5);
@@ -57,22 +64,33 @@
   right: calcRem(8);
   border-radius: $elements-border-radius;
 
-  &:hover {
+  &:hover, &:hover:not(:disabled) {
     color: $primary-color;
+    background: none;
   }
 }
 
-.input {
-  box-shadow: none;
-  outline: none;
-  border: none;
-  font-size: $base-font-size;
-  padding-bottom: calcRem(12);
-  margin: 0 calcRem(20);
-  color: lighten($base-text-color, 20%);
+// we have to style inputs like this since the default Open edX stylesheet has these selectors and (sigh) has them target globally in the entire document. Essentially, that renders targeting purely by class name basically futile.
 
-  &::placeholder {
-    color: rgba($base-text-color, 0.3);
+textarea, input[type="text"], input[type="url"], input[type="email"], input[type="password"], input[type="tel"] {
+
+  &.input {
+    box-shadow: none;
+    outline: none;
+    border: none;
+    background: none;
+    border-radius: inherit;
+    font: inherit;
+    height: auto;
+    padding: inherit;
+    font-size: $base-font-size;
+    padding-bottom: calcRem(12);
+    margin: 0 calcRem(20);
+    color: lighten($base-text-color, 20%);
+
+    &::placeholder {
+      color: rgba($base-text-color, 0.3);
+    }
   }
 }
 
@@ -94,6 +112,11 @@
   margin: 0 calcRem(20);
   color: $base-text-color;
   font-size: $base-font-size;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 0.5;
+  }
 
   .suggestion-link {
     display: flex;
