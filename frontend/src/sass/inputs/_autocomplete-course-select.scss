@@ -37,8 +37,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: calcRem(320);
-  padding: calcRem(12) calcRem(20) calcRem(2);
+  width: calcRem(360);
+  padding: calcRem(17) 0 calcRem(7);
   background: #FFFFFF;
   box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.15);
   border-radius: $elements-border-radius;
@@ -53,7 +53,7 @@
   color: rgba($base-text-color, 0.5);
   transition: all 0.3s ease-in-out;
   position: absolute;
-  top: calcRem(2);
+  top: calcRem(7);
   right: calcRem(8);
   border-radius: $elements-border-radius;
 
@@ -68,17 +68,55 @@
   border: none;
   font-size: $base-font-size;
   padding-bottom: calcRem(12);
-  width: 100%;
-  color: $base-text-color;
+  margin: 0 calcRem(20);
+  color: lighten($base-text-color, 20%);
 
-  &::placeholder {
+  &::placeholder {
     color: rgba($base-text-color, 0.3);
   }
 }
 
+.suggestions-container {
+
+}
+
+.suggestionsList {
+  padding: 0;
+  margin: 0;
+  max-height: calcRem(300);
+  overflow-y: auto;
+}
+
 .suggestion {
+  list-style-type: none;
   border-top: calcRem(1) solid rgba(#D8D8D8, 0.5);
-  padding: calcRem(10) 0;
+  padding: calcRem(15) 0;
+  margin: 0 calcRem(20);
   color: $base-text-color;
   font-size: $base-font-size;
+
+  .suggestion-link {
+    display: flex;
+    align-items: baseline;
+    text-decoration: none;
+
+    &__course-id {
+      flex-grow: 1;
+      flex-shrink: 0;
+      font-weight: bold;
+      color: $primary-color;
+      font-size: calcRem(12);
+      min-width: calcRem(5);
+      margin-right: calcRem(10);
+    }
+
+    &__course-name {
+      color: $base-text-color;
+      font-size: $base-font-size;
+      flex-grow: 1;
+      flex-shrink: 1;
+      width: 100%;
+
+    }
+  }
 }

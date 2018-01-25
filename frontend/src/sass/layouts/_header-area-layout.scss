@@ -23,7 +23,7 @@
 .header-top {
   display: flex;
   align-items: center;
-  padding: calcRem(20) 0;
+  padding: calcRem(5) 0 calcRem(20);
 }
 
 .header-logo-container {

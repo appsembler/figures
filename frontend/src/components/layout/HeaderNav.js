@@ -8,13 +8,13 @@ class HeaderNav extends Component {
     return (
       <div className={styles['header-nav']}>
         <NavLink
-          to="/dashboard"
+          to="/figures/dashboard"
           className={styles['header-nav__link']}
         >
           Dashboard
         </NavLink>
         <NavLink
-          to="/test"
+          to="/figures/test"
           className={styles['header-nav__link']}
         >
           Reports

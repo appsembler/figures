@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
+import { Link } from 'react-router-dom';
 import styles from 'base/sass/inputs/_autocomplete-course-select.scss';
 import classNames from 'classnames/bind';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/fontawesome-free-solid'
+import { faTimes } from '@fortawesome/fontawesome-free-solid';
 
 let cx = classNames.bind(styles);
 
@@ -14,14 +15,13 @@ var coursesList = [
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
-
-  return inputLength === 0 ? [] : coursesList.filter(course => course.courseName.toLowerCase().slice(0, inputLength) === inputValue );
+  return inputLength === coursesList ? [] : coursesList.filter(course => ((course.courseName.toLowerCase().slice(0, inputLength) === inputValue) || (course.courseId.toLowerCase().slice(0, inputLength) === inputValue)) );
 };
 
-const getSuggestionValue = suggestion => suggestion.name;
+const getSuggestionValue = suggestion => suggestion.courseName;
 
 const renderSuggestion = suggestion => (
-  <div>{suggestion.courseId} {suggestion.courseName}</div>
+  <Link className={styles['suggestion-link']} to='/figures/test'><span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
 );
 
 class AutoCompleteCourseSelect extends Component {
@@ -36,11 +36,14 @@ class AutoCompleteCourseSelect extends Component {
 
     this.onChange = this.onChange.bind(this);
     this.modalTrigger = this.modalTrigger.bind(this);
+    this.storeInputReference = this.storeInputReference.bind(this);
   }
 
   modalTrigger = () => {
     this.setState({
       modalActive: !this.state.modalActive
+    }, () => {
+      this.state.modalActive && this.input.focus();
     });
   }
 
@@ -54,10 +57,24 @@ class AutoCompleteCourseSelect extends Component {
 
   }
 
+  onSuggestionSelected = () => {
+    this.setState({
+      modalActive: false,
+      value: '',
+      suggestions: [],
+    });
+  }
+
   onSuggestionsFetchRequested = ({ value }) => {
     this.setState({
       suggestions: getSuggestions(value)
     });
+  };
+
+  storeInputReference = autosuggest => {
+    if (autosuggest !== null) {
+      this.input = autosuggest.input;
+    }
   };
 
   render() {
@@ -66,9 +83,8 @@ class AutoCompleteCourseSelect extends Component {
     const inputProps = {
       placeholder: this.props.inputPlaceholder,
       value,
-      onChange: this.onChange,
+      onChange: this.onChange
     };
-
     coursesList = this.props.coursesList;
 
     return (
@@ -85,6 +101,7 @@ class AutoCompleteCourseSelect extends Component {
               inputProps = {inputProps}
               theme = {styles}
               alwaysRenderSuggestions
+              ref={this.storeInputReference}
             />
             <button onClick={this.modalTrigger} className={styles['modal-dismiss']}><FontAwesomeIcon icon={faTimes}/></button>
           </div>
@@ -99,6 +116,30 @@ AutoCompleteCourseSelect.defaultProps = {
   buttonText: 'Select a course',
   inputPlaceholder: 'Select or start typing',
   coursesList: [
+    {
+      courseId: 'A101',
+      courseName: 'This is the name of the course'
+    },
+    {
+      courseId: 'A102',
+      courseName: 'This is another name of the course'
+    },
+    {
+      courseId: 'A103',
+      courseName: 'My introduction to EdX Figures'
+    },
+    {
+      courseId: 'A101',
+      courseName: 'This is the name of the course'
+    },
+    {
+      courseId: 'A102',
+      courseName: 'This is another name of the course'
+    },
+    {
+      courseId: 'A103',
+      courseName: 'My introduction to EdX Figures'
+    },
     {
       courseId: 'A101',
       courseName: 'This is the name of the course'
