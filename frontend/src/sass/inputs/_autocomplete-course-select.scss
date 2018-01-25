@@ -1,23 +1,18 @@
 @import '~base/sass/base/variables';
 @import '~base/sass/base/functions';
+@import '~base/sass/base/mixins';
 
 .ac-course-selector {
   position: relative;
 }
 
 .selector-trigger-button {
+  @include override-edx-styles;
   border-radius: $elements-border-radius;
   padding: calcRem(12) calcRem(20);
   font-size: $base-font-size;
   font-family: $font-family;
   font-weight: 600;
-  letter-spacing: 0;
-  border: none;
-  box-shadow: none;
-  text-shadow: none;
-  outline: none;
-  background: none;
-  text-transform: none;
   transition: all 0.2s ease-in-out;
 
   &.positive {
@@ -50,12 +45,8 @@
 }
 
 .modal-dismiss {
+  @include override-edx-styles;
   font-size: calcRem(14);
-  border: none;
-  outline: none;
-  box-shadow: none;
-  text-shadow: none;
-  background: none;
   padding: calcRem(12);
   color: rgba($base-text-color, 0.5);
   transition: all 0.3s ease-in-out;
@@ -67,6 +58,7 @@
   &:hover, &:hover:not(:disabled) {
     color: $primary-color;
     background: none;
+    cursor: pointer;
   }
 }
 
@@ -75,14 +67,7 @@
 textarea, input[type="text"], input[type="url"], input[type="email"], input[type="password"], input[type="tel"] {
 
   &.input {
-    box-shadow: none;
-    outline: none;
-    border: none;
-    background: none;
-    border-radius: inherit;
-    font: inherit;
-    height: auto;
-    padding: inherit;
+    @include override-edx-styles;
     font-size: $base-font-size;
     padding-bottom: calcRem(12);
     margin: 0 calcRem(20);
