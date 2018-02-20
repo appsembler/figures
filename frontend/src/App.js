@@ -3,6 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import ReactCSSTransitionReplace from 'react-css-transition-replace';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import HeaderContentMaus from 'base/components/header-views/HeaderContentMaus';
+import HeaderContentCourse from 'base/components/header-views/HeaderContentCourse';
 import HeaderContentReportsList from 'base/components/header-views/HeaderContentReportsList';
 import { history } from './store';
 import 'base/sass/base/_base-overrides.scss';
@@ -24,6 +25,7 @@ class App extends Component {
                   <Switch location={history.location}>
                     <Route exact path="/figures/dashboard" component={HeaderContentMaus} />
                     <Route exact path="/figures/test" component={HeaderContentReportsList} />
+                    <Route exact path="/figures/course" component={HeaderContentCourse} />
                   </Switch>
                 </div>
               </ReactCSSTransitionReplace>
