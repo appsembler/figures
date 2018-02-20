@@ -47,6 +47,7 @@
   &:hover {
     background-color: pick-visible-color($primary-color, #fff, $base-text-color);
     color: pick-visible-color(pick-visible-color($primary-color, #fff, $base-text-color), #fff, $primary-color);
+    text-decoration: none;
   }
 }
 
@@ -65,5 +66,6 @@
   &:hover {
     color: pick-visible-color($primary-color, #fff, $base-text-color);
     background-color: $primary-color;
+    text-decoration: none;
   }
 }
