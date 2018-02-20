@@ -18,7 +18,7 @@ a.header-nav__link {
   &:after {
     position: absolute;
     bottom: calcRem(-10);
-    height: calcRem(1);
+    height: calcRem(2);
     width: 0;
     left: 0;
     background-color: pick-visible-color($primary-color, #fff, $base-text-color);
@@ -32,5 +32,14 @@ a.header-nav__link {
     &:after {
       width: 100%;
     }
+  }
+
+  &:focus {
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+  }
+
+  &.active {
+    font-weight: 800;
+    opacity: 0.6;
   }
 }

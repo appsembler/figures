@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from 'base/logo.svg';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
+import HeaderContentMaus from 'base/components/header-views/HeaderContentMaus';
 import 'base/App.css';
 import 'base/sass/base/_grid.scss';
 
@@ -9,7 +10,7 @@ class Dashboard extends Component {
     return (
       <div className="ef--layout-root">
         <HeaderAreaLayout>
-          <h1>Test</h1>
+          <HeaderContentMaus />
         </HeaderAreaLayout>
         <section className="ef--container ef--base-grid-layout">
 
