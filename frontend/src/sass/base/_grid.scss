@@ -55,3 +55,26 @@
     }
   }
 }
+
+// transitions styles
+:global(.page-leave) {
+  opacity: 1;
+  transition: all 0.4s ease-in-out;
+}
+:global(.page-leave.page-leave-active) {
+  opacity: 0;
+  transition: opacity .4s ease-in;
+}
+
+:global(.page-enter) {
+  opacity: 0;
+}
+:global(.page-enter.page-enter-active) {
+  opacity: 1;
+  /* Delay the enter animation until the leave completes */
+  transition: opacity .4s ease-in .6s;
+}
+
+:global(.page-height) {
+  transition: height .6s ease-in-out;
+}
