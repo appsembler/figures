@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { Link } from 'react-router-dom';
-import styles from 'base/sass/inputs/_autocomplete-course-select.scss';
+import styles from './_autocomplete-course-select.scss';
 import classNames from 'classnames/bind';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/fontawesome-free-solid';

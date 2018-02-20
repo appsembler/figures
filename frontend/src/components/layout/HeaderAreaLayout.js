@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames/bind';
 import PropTypes from 'prop-types';
-import styles from 'base/sass/layouts/_header-area-layout.scss';
+import styles from './_header-area-layout.scss';
 import HeaderNav from 'base/components/layout/HeaderNav';
 import figuresLogo from 'base/images/logo/edx-figures--logo--negative.svg';
 import ReactVivus from 'react-vivus';

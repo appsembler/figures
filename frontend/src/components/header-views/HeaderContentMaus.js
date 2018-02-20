@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
-import styles from 'base/sass/header-views/_header-content-maus.scss';
+import styles from './_header-content-maus.scss';
 import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import { faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/fontawesome-free-solid';

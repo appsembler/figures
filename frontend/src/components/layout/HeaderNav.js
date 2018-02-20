@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from 'base/sass/layouts/_header-nav.scss';
+import styles from './_header-nav.scss';
 import AutoCompleteCourseSelect from 'base/components/inputs/AutoCompleteCourseSelect';
 
 class HeaderNav extends Component {
