@@ -1,0 +1,79 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.header-content-maus {
+
+  &__wrapper {
+
+  }
+
+  .main-content {
+    margin-bottom: calcRem(30);
+    text-align: center;
+  }
+
+  .users-count {
+
+    .number {
+      display: block;
+      font-weight: 900;
+      font-size: calcRem(64);
+      line-height: 120%;
+    }
+
+    .text {
+      display: block;
+      font-weight: 900;
+      font-size: calcRem(18);
+      line-height: 120%;
+    }
+  }
+
+  .text-separator {
+    display: block;
+    width: calcRem(100);
+    height: calcRem(2);
+    background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+    margin: calcRem(20) auto;
+  }
+
+  .comparison-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $base-font-size;
+
+    &__icon {
+      flex-shrink: 0;
+      flex-grow: 0;
+      margin-right: calcRem(10);
+    }
+
+    &__text {
+      flex-shrink: 0;
+      flex-grow: 0;
+      margin-right: calcRem(10);
+      font-weight: regular;
+    }
+  }
+
+  .mau-history-link {
+    flex-shrink: 0;
+    flex-grow: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: calcRem(5) calcRem(10);
+    border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
+    border-radius: calcRem(50);
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+      color: pick-visible-color(pick-visible-color($primary-color, #fff, $base-text-color), #fff, $primary-color);
+    }
+  }
+}
