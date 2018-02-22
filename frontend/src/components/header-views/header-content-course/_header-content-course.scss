@@ -1,0 +1,99 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.header-content-course {
+
+
+  .main-content {
+    text-align: center;
+    margin: calcRem(30) auto calcRem(40);
+  }
+
+  .course-title {
+    font-size: calcRem(36);
+    margin-bottom: calcRem(15);
+  }
+
+  .course-info {
+    font-size: calcRem(16);
+    margin-bottom: calcRem(5);
+
+    .course-code {
+      font-weight: 800;
+    }
+
+    .course-info-separator {
+      margin-left: calcRem(10);
+      margin-right: calcRem(10);
+    }
+
+    .course-date {
+      font-weight: normal;
+    }
+  }
+
+  .learners-info {
+    font-size: calcRem(12);
+  }
+
+  .text-separator {
+    display: block;
+    width: calcRem(100);
+    height: calcRem(2);
+    background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+    margin: calcRem(20) auto;
+  }
+}
+
+.graph-labels-wrapper {
+  background: #fff;
+}
+.graph-labels-container {
+  padding-top: calcRem(10);
+
+  :global(.recharts-wrapper .recharts-cartesian-axis-tick text) {
+    font-size: calcRem(14);
+    fill: $primary-color;
+  }
+}
+
+.x-axis-tick {
+  transform: rotate(90);
+}
+
+.bar-tooltip {
+  position: relative;
+  left: calcRem(-60);
+  background-color: $base-text-color;
+  color: #fff;
+  width: calcRem(100);
+  border-radius: calcRem(5);
+  padding: calcRem(10);
+  text-align: center;
+
+  &:after {
+    top: 100%;
+  	left: 50%;
+  	border: solid transparent;
+  	content: " ";
+  	height: 0;
+  	width: 0;
+  	position: absolute;
+  	pointer-events: none;
+  	border-color: rgba(136, 183, 213, 0);
+  	border-top-color: $base-text-color;
+  	border-width: calcRem(10);
+  	margin-left: calcRem(-10);
+  }
+
+  .tooltip-value {
+    font-size: calcRem(14);
+    font-weight: bold;
+  }
+
+  p {
+    margin: 0;
+    font-size: calcRem(10);
+  }
+}
