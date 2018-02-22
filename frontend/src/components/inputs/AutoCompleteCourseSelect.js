@@ -20,10 +20,6 @@ const getSuggestions = value => {
 
 const getSuggestionValue = suggestion => suggestion.courseName;
 
-const renderSuggestion = suggestion => (
-  <Link className={styles['suggestion-link']} to='/figures/test'><span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
-);
-
 class AutoCompleteCourseSelect extends Component {
   constructor(props) {
     super(props);
@@ -41,7 +37,8 @@ class AutoCompleteCourseSelect extends Component {
 
   modalTrigger = () => {
     this.setState({
-      modalActive: !this.state.modalActive
+      modalActive: !this.state.modalActive,
+      value: ''
     }, () => {
       this.state.modalActive && this.input.focus();
     });
@@ -86,6 +83,11 @@ class AutoCompleteCourseSelect extends Component {
       onChange: this.onChange
     };
     coursesList = this.props.coursesList;
+
+    const renderSuggestion = suggestion => (
+      <Link className={styles['suggestion-link']} to='/figures/course' onClick={this.modalTrigger}><span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
+    );
+
 
     return (
       <div className={styles['ac-course-selector']}>
