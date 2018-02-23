@@ -1,0 +1,8 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.dashboard-content {
+  margin-top: calcRem(40);
+  padding-bottom: calcRem(50);
+}
