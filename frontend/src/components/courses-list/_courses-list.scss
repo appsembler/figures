@@ -1,0 +1,60 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.courses-list {
+  margin: calcRem(20) 0;
+  grid-column-end: span 4;
+
+  .header {
+    display: flex;
+    margin-bottom: calcRem(20);
+  }
+
+  .header-title {
+    font-weight: bold;
+    font-size: calcRem(24);
+    padding-left: calcRem(20);
+  }
+
+  .sort-container {
+    display: flex;
+    margin-left: auto;
+    padding-right: calcRem(10);
+    font-size: calcRem(12);
+    color: lighten($base-text-color, 30%);
+
+    span {
+      margin: calcRem(12) calcRem(10) 0 calcRem(10);
+    }
+
+    ul {
+      padding: 0;
+      margin: 0;
+      display: flex;
+    }
+
+    .sort-item {
+      list-style-type: none;
+      font-size: calcRem(14);
+      margin: calcRem(10) calcRem(10) 0 calcRem(10);
+      color: $base-text-color;
+      transition: 0.2s ease-in-out;
+      cursor: pointer;
+
+      &.active, &:hover {
+        color: $primary-color;
+      }
+
+      &.active {
+        font-weight: bold;
+      }
+    }
+  }
+
+  .items-container {
+    display: grid;
+    grid-gap: calcRem(20);
+    grid-auto-flow: dense;
+  }
+}
