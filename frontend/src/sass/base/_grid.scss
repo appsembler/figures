@@ -18,7 +18,8 @@
 .base-grid-layout {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-gap: calcRem(10);
+  grid-gap: calcRem(20);
+  grid-auto-flow: dense;
 }
 
 .grid-element {
