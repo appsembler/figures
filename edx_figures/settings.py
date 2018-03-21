@@ -1,21 +1,27 @@
 '''
-This module provides default values for running edx-figures
+This module provides default values for running edx-figures.
 
 '''
 import os
 
-# APP_DIR should be the 'edx_figures' package directory
+from django.conf import settings as django_settings
+
+# Specity the 'edx_figures' package directory
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Define our webpack asset bundling constants
+WEBPACK_BUNDLE_DIR_NAME = 'edx_figures_bundles/'
+WEBPACK_STATS_FILE = os.path.abspath(
+    os.path.join(APP_DIR, '../frontend/webpack-stats.json'))
 
+# This will raise an AttributeError if WEBPACK_LOADER is not defined in settings
+# We'll just let it fail
+django_settings.WEBPACK_LOADER.update(EDX_FIGURES_APP={
+    'BUNDLE_DIR_NAME': WEBPACK_BUNDLE_DIR_NAME,
+    'STATS_FILE': WEBPACK_STATS_FILE
+    })
 
+# Add edx-figures settings here. These are for edx-figures operational defaults
 EDX_FIGURES = {
-    'DEFAULT_REPORT_ENCODING': 'utf-8',
-    'REPORT_ROW_BUILDERS': {
-        'learners': 'edx_figures.builders.DemographicReportRowBuilder',
-        'grades': 'edx_figures.builders.GradeReportRowBuilder',
-    }
+    'APP_DIR': APP_DIR,
 }
-
-webpack_bundle_dir_name = 'edx_figures_bundles/'
-webpack_stats_file = os.path.abspath(os.path.join(APP_DIR, '../frontend/webpack-stats.json'))
