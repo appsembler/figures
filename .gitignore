@@ -105,3 +105,5 @@ node_modules
 # PyCharm
 .idea
 
+frontend/webpack-stats.json
+
