@@ -107,3 +107,6 @@ node_modules
 
 frontend/webpack-stats.json
 
+# Mac junk
+.DS_Store
+
