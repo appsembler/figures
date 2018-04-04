@@ -1,0 +1,14 @@
+@import '~base/sass/base/functions';
+
+$rem-base-size: 16;
+$base-font-size: calcRem(14);
+$max-grid-width: calcRem(1180);
+$mobile-breakpoint: calcRem(420);
+$tablet-breakpoint: calcRem(1020);
+
+$font-family: 'Open Sans', sans-serif;
+
+$primary-color: #259ED7;
+$base-text-color: #2C2A2F;
+
+$elements-border-radius: calcRem(10);

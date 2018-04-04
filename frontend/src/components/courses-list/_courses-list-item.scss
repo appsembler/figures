@@ -1,0 +1,123 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+
+.course-list-item {
+  border: calcRem(1) solid #efefef;
+  background-color: #fff;
+  box-shadow: 0 calcRem(2) calcRem(4) 0 rgba(0,0,0,0.25);
+  padding: calcRem(20);
+  transition: all 0.3s ease-in-out;
+  display: flex;
+
+  &:hover {
+    box-shadow: 0 calcRem(6) calcRem(12) 0 rgba(0,0,0,0.25);
+  }
+
+  .sections-separator {
+    display: flex;
+    margin: 0 calcRem(20);
+    background: lighten($base-text-color, 70%);
+    width: calcRem(1);
+  }
+
+  .general-info-section {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
+    flex-grow: 1;
+
+    .course-id {
+      display: block;
+      font-size: calcRem(14);
+      font-weight: bold;
+      color: $primary-color;
+      margin-bottom: calcRem(5);
+    }
+
+    .course-name {
+      display: block;
+      font-size: calcRem(18);
+      font-weight: bold;
+      color: $base-text-color;
+      margin-bottom: calcRem(10);
+    }
+
+    .label-value {
+      display: block;
+
+      .label {
+        display: inline-block;
+        width: calcRem(90);
+        color: lighten($base-text-color, 30%);
+        font-size: calcRem(12);
+      }
+
+      .value {
+        display: inline-block;
+        color: $base-text-color;
+        font-size: calcRem(14);
+        margin-right: calcRem(10);
+      }
+    }
+  }
+
+  .stats-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-shrink: 0;
+    flex-grow: 0;
+
+    .stats-section-inner {
+      display: flex;
+    }
+
+    .single-stat {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      width: calcRem(110);
+      text-align: center;
+      padding: 0 calcRem(5);
+
+      .stat-label {
+        display: block;
+        color: lighten($base-text-color, 30%);
+        font-size: calcRem(12);
+        margin-bottom: calcRem(5);
+      }
+
+      .stat-value {
+        display: block;
+        font-size: calcRem(22);
+        color: $primary-color;
+        font-weight: 800;
+      }
+    }
+  }
+
+  .button-section {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    flex-grow: 0;
+
+    .course-button {
+      font-size: calcRem(14);
+      padding: calcRem(10) calcRem(20);
+      font-weight: bold;
+      color: $primary-color;
+      border: calcRem(2) solid $primary-color;
+      background: transparent;
+      cursor: pointer;
+      border-radius: calcRem(30);
+      transition: all 0.3s ease-in-out;
+      text-decoration: none;
+
+      &:hover {
+        color: #fff;
+        background: $primary-color;
+      }
+    }
+  }
+}

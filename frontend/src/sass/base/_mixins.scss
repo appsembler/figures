@@ -1,0 +1,29 @@
+@mixin override-edx-styles {
+  box-shadow: none;
+  outline: none;
+  border: none;
+  background: none;
+  border-radius: inherit;
+  font: inherit;
+  height: auto;
+  width: auto;
+  padding: inherit;
+  letter-spacing: 0;
+  text-shadow: none;
+  text-transform: none;
+
+  &:hover, &:hover:not(:disabled) {
+    box-shadow: none;
+    outline: none;
+    border: none;
+    background: none;
+    border-radius: inherit;
+    font: inherit;
+    height: auto;
+    width: auto;
+    padding: inherit;
+    letter-spacing: 0;
+    text-shadow: none;
+    text-transform: none;
+  }
+}

@@ -1,0 +1,51 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.stat-bar-graph {
+
+  .stat-bar {
+    fill: $primary-color;
+  }
+
+  :global(.recharts-cartesian-axis-tick) {
+    font-size: calcRem(10);
+    fill: lighten($base-text-color, 30%);
+  }
+}
+
+.bar-tooltip {
+  position: relative;
+  left: calcRem(-40);
+  background-color: $base-text-color;
+  color: #fff;
+  width: calcRem(60);
+  border-radius: calcRem(5);
+  padding: calcRem(10);
+  text-align: center;
+
+  &:after {
+    top: 100%;
+  	left: 50%;
+  	border: solid transparent;
+  	content: " ";
+  	height: 0;
+  	width: 0;
+  	position: absolute;
+  	pointer-events: none;
+  	border-color: rgba(136, 183, 213, 0);
+  	border-top-color: $base-text-color;
+  	border-width: calcRem(10);
+  	margin-left: calcRem(-10);
+  }
+
+  .tooltip-value {
+    font-size: calcRem(14);
+    font-weight: bold;
+  }
+
+  p {
+    margin: 0;
+    font-size: calcRem(10);
+  }
+}

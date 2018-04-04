@@ -1,0 +1,31 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+
+.header-area {
+  background-color: $primary-color;
+  color: pick-visible-color($primary-color, #fff, $base-text-color);
+  position: relative;
+
+  &:before {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+    width: 100%;
+    left: 0;
+    top: 0;
+    height: calcRem(15);
+    display: block;
+    opacity: 0.2;
+    content: '';
+  }
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  padding: calcRem(5) 0 calcRem(20);
+}
+
+.header-logo-container {
+
+}

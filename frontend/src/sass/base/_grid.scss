@@ -1,0 +1,81 @@
+@import '~base/sass/base/variables';
+
+.container {
+  width: 100%;
+  max-width: $max-grid-width;
+  margin: 0 auto;
+  padding: 0 calcRem(20);
+}
+
+.layout-root {
+  width: 100%;
+  padding: 0;
+  font-size: $rem-base-size + 0px;
+  font-family: $font-family;
+  -webkit-font-smoothing: antialiased;
+}
+
+.base-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: calcRem(20);
+  grid-auto-flow: dense;
+}
+
+.grid-element {
+
+  &--full-width {
+    grid-column-end: span 4;
+  }
+
+  &--three-quarter {
+    grid-column-end: span 3;
+
+    @media (max-width: $tablet-breakpoint) {
+      grid-column-end: span 4;
+    }
+  }
+
+  &--one-half {
+    grid-column-end: span 2;
+
+    @media (max-width: $mobile-breakpoint) {
+      grid-column-end: span 4;
+    }
+  }
+
+  &--one-quarter {
+    grid-column-end: span 1;
+
+    @media (max-width: $tablet-breakpoint) {
+      grid-column-end: span 2;
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+      grid-column-end: span 4;
+    }
+  }
+}
+
+// transitions styles
+:global(.page-leave) {
+  opacity: 1;
+  transition: all 0.4s ease-in-out;
+}
+:global(.page-leave.page-leave-active) {
+  opacity: 0;
+  transition: opacity .4s ease-in;
+}
+
+:global(.page-enter) {
+  opacity: 0;
+}
+:global(.page-enter.page-enter-active) {
+  opacity: 1;
+  /* Delay the enter animation until the leave completes */
+  transition: opacity .4s ease-in .6s;
+}
+
+:global(.page-height) {
+  transition: height .6s ease-in-out;
+}

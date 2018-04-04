@@ -1,0 +1,71 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+
+@mixin button-hover-expand-outline {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+
+  &:after {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: calcRem(1) solid rgba(pick-visible-color($primary-color, #fff, $base-text-color), 0.5);
+    display: block;
+    content: '';
+    border-radius: calcRem(50);
+    transition: all 0.2s ease-in-out;
+  }
+
+  &:hover {
+
+    &:after {
+      top: calcRem(-6);
+      bottom: calcRem(-6);
+      left: calcRem(-6);
+      right: calcRem(-6);
+      border-width: calcRem(2);
+      transition: all 0.2s ease-in-out;
+      transition: all 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+  }
+}
+
+.header-option-button {
+  font-size: calcRem(14);
+  font-weight: 400;
+  color: pick-visible-color($primary-color, #fff, $base-text-color);
+  background-color: $primary-color;
+  text-decoration: none;
+  padding: calcRem(5) calcRem(15);
+  border: calcRem(1) solid pick-visible-color($primary-color, #fff, $base-text-color);
+  border-radius: calcRem(50);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+    color: pick-visible-color(pick-visible-color($primary-color, #fff, $base-text-color), #fff, $primary-color);
+    text-decoration: none;
+  }
+}
+
+.header-more-options-button {
+  font-size: calcRem(14);
+  font-weight: 400;
+  color: pick-visible-color($primary-color, #fff, $base-text-color);
+  background-color: $primary-color;
+  text-decoration: none;
+  padding: calcRem(5) calcRem(15);
+  border: calcRem(1) solid pick-visible-color($primary-color, #fff, $base-text-color);
+  border-radius: calcRem(50);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+    background-color: $primary-color;
+    text-decoration: none;
+  }
+}
