@@ -1,15 +1,6 @@
 """
+Settings file to run automated tests
 
-JLB: Copied/adapted from edx-ace
-
-These settings are here to use during tests, because django requires them.
-
-In a real-world use case, apps in this project are installed into other
-Django applications, so these settings will not be used.
-
-tried loading lms.envs.common. tests seemed to hang
-
-So being explicit
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -17,16 +8,12 @@ from __future__ import absolute_import, unicode_literals
 from os.path import abspath, dirname, join
 from path import Path 
 
-#from lms.envs.common import *
-
 
 def root(*args):
     """
     Get the absolute path of the given path relative to the project root.
     """
     return join(abspath(dirname(__file__)), *args)
-
-#TEST_ROOT = Path("/edx/app/edxapp/edx-platform/test_root")
 
 DATABASES = {
     'default': {
@@ -48,21 +35,9 @@ INSTALLED_APPS = (
     'devsite',
     'edx_figures',
 
-    # edx-platform installed apps
-
-    # Course data caching
-    #'openedx.core.djangoapps.content.course_overviews',
-    #'openedx.core.djangoapps.content.course_structures.apps.CourseStructuresConfig',
-    #'openedx.core.djangoapps.content.block_structure.apps.BlockStructureConfig',
-    #'lms.djangoapps.course_blocks',
-
-    # Student Identity Verification
-    #'lms.djangoapps.verify_student',
-    #'commerce',
-    #'student'
-
-    # edx-platform installed apps or Mocks
-    # For the mock modules, see edx-figures/tests/mocks
+    # edx-platform apps. Mocks are used by default
+    # See: edx-figures/tests/mocks/
+    # Also note the paths set in edx-figures/pytest.ini
     'openedx.core.djangoapps.content.course_overviews',
 
 )
@@ -84,7 +59,8 @@ REST_FRAMEWORK = {
     ]
 }
 
-
+# edx-figures requires the WEBPACK_LOADER dict to be declared
 WEBPACK_LOADER = {}
 
+# This is all we need to instantiate edx-figures with default settings
 from edx_figures.settings import EDX_FIGURES

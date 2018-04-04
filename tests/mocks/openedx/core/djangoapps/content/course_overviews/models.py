@@ -44,11 +44,11 @@ class CourseOverview(models.Model):
     id = models.CharField(db_index=True, primary_key=True, max_length=255)
     display_name = models.TextField(null=True)
     org = models.TextField(max_length=255, default='outdated_entry')
-    display_number_with_default = models.TextField()
+    number = models.TextField()
 
     @property
-    def number(self):
-        return self.display_number_with_default
+    def display_number_with_default(self):
+        return self.number
 
     @property
     def display_order_with_default(self):

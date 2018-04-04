@@ -57,8 +57,6 @@ class CoursesIndexView(ListAPIView):
         '''
 
         '''
-        print('\n\n CourseIndexView get_queryset called \n\n')
         queryset = super(CoursesIndexView, self).get_queryset()
-        # TODO: get via retriever, django_filter
 
         return queryset
