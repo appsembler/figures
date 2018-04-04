@@ -1,0 +1,13 @@
+{% extends "main_django.html" %}
+
+{% block title %}
+  {% block pagetitle %}{% endblock %} | EdX Figures Dev Site
+{% endblock %}
+
+{% block body %}
+    <h1>Welcome to the edX Figures development web site!</h1>
+    <h3>These are the links you are looking for:</h3>
+    <ul>
+      <li><a href="{% url 'edx-figures:edx-figures-home' %}">edX Figures UI</a></li>
+    </ul>
+{% endblock %}

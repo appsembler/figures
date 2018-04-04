@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="{% block html_language_code %}en{% endblock %}">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}edX Figures Dev Server{% endblock %} </title>
+</head>
+<body>
+  <div class="content-wrapper" id="content">
+    {% block body %}{% endblock %}
+  </div>
+</body>
+
+{% comment %}
+  This is the django template for developing edX Figures. 
+{% endcomment %}
