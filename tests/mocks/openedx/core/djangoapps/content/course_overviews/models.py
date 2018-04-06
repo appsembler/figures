@@ -44,7 +44,14 @@ class CourseOverview(models.Model):
     id = models.CharField(db_index=True, primary_key=True, max_length=255)
     display_name = models.TextField(null=True)
     org = models.TextField(max_length=255, default='outdated_entry')
+    # For the tests, the CourseOverviewFactory does a LazyAttribute on
+    # display_org_with_default
+    display_org_with_default = models.TextField()
     number = models.TextField()
+
+    @property
+    def display_name_with_default_escaped(self):
+        return self.display_name
 
     @property
     def display_number_with_default(self):
