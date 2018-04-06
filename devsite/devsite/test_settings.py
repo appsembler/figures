@@ -31,6 +31,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'rest_framework',
+    'django_countries',
     'django_filters',
     'devsite',
     'edx_figures',
@@ -39,6 +40,7 @@ INSTALLED_APPS = (
     # See: edx-figures/tests/mocks/
     # Also note the paths set in edx-figures/pytest.ini
     'openedx.core.djangoapps.content.course_overviews',
+    'student',
 
 )
 
