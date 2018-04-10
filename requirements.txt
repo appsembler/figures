@@ -1,3 +1,4 @@
+# Requirements needed for the edx_figures app
 
 django-webpack-loader==0.5.0
 
