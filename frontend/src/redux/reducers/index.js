@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
-import reports from './reportsReducers';
+import report from './reportReducers';
 
 export default combineReducers({
-  reports,
+  report,
   routing: routerReducer
 })
