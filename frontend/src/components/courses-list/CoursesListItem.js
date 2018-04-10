@@ -9,7 +9,7 @@ class CoursesListItem extends Component {
   render() {
     const courseStaff = this.props.courseStaff.map((item, index) => {
       return (
-        <span className={styles['value']}>{item}</span>
+        <span key={index} className={styles['value']}>{item}</span>
       )
     });
 
@@ -24,11 +24,11 @@ class CoursesListItem extends Component {
               <span className={styles['value']}>This course is self-paced</span>
             </div>
           ) : [
-            <div className={styles['label-value']}>
+            <div key='startData' className={styles['label-value']}>
               <span className={styles['label']}>Start date:</span>
               <span className={styles['value']}>{this.props.startDate}</span>
             </div>,
-            <div className={styles['label-value']}>
+            <div key='endDate' className={styles['label-value']}>
               <span className={styles['label']}>End date:</span>
               <span className={styles['value']}>{this.props.endDate}</span>
             </div>
@@ -89,7 +89,16 @@ CoursesListItem.defaultProps = {
 }
 
 CoursesListItem.propTypes = {
-
+  courseStaff: PropTypes.array,
+  courseId: PropTypes.string,
+  courseName: PropTypes.string,
+  courseIsSelfPaced: PropTypes.bool,
+  startDate: PropTypes.string,
+  endDate: PropTypes.string,
+  learnersEnrolled: PropTypes.number,
+  averageProgress: PropTypes.number,
+  averageCompletionTime: PropTypes.string,
+  numberLearnersCompleted: PropTypes.number,
 };
 
 export default CoursesListItem;

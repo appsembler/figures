@@ -1,0 +1,39 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/stat-cards';
+
+.courses-list {
+  margin: calcRem(20) 0;
+  grid-column-end: span 4;
+
+  .header {
+    display: flex;
+    margin-bottom: calcRem(20);
+  }
+
+  .header-title {
+    font-weight: bold;
+    font-size: calcRem(24);
+    padding-left: calcRem(20);
+    line-height: 100%;
+  }
+
+  .dropdown-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-right: calcRem(10);
+    font-size: calcRem(14);
+
+    &>span {
+      font-size: calcRem(12);
+      color: lighten($base-text-color, 30%);
+      margin: 0 calcRem(10) 0 0;
+    }
+
+    &>div {
+      width: calcRem(160);
+    }
+  }
+}

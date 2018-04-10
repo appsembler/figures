@@ -32,7 +32,7 @@ class BaseStatCard extends Component {
         historyExpanded: true,
         cardWidth: 4
       }, () => {
-        
+
       });
     }
   }
@@ -62,8 +62,10 @@ class BaseStatCard extends Component {
               </div>
             )}
           </div>
-          {(this.props.enableHistory && !this.props.singleValue) && (
+          {(this.props.enableHistory && !this.props.singleValue) ? (
             <button onClick={this.historyToggle} className={styles['history-toggle']}>{this.state.historyExpanded ? 'hide history' : 'see history'}</button>
+          ) : (
+            <span className={styles['history-toggle-faux']}></span>
           )}
         </div>
         {(this.state.historyExpanded && this.props.enableHistory) && (

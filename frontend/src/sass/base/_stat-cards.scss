@@ -1,0 +1,63 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.stat-card {
+  border: calcRem(1) solid #efefef;
+  background-color: #fff;
+  box-shadow: 0 calcRem(2) calcRem(4) 0 rgba(0,0,0,0.25);
+  padding: calcRem(20);
+  transition: all 0.3s ease-in-out;
+  display: flex;
+
+  &.span-2 {
+    grid-column-end: span 2;
+
+    .main-content {
+      width: 50%;
+    }
+  }
+
+  &.span-3 {
+    grid-column-end: span 3;
+
+    .main-content {
+      width: 33%;
+    }
+  }
+
+  &.span-4 {
+    grid-column-end: span 4;
+
+    .main-content {
+      width: 25%;
+    }
+  }
+
+  &:hover {
+    box-shadow: 0 calcRem(6) calcRem(12) 0 rgba(0,0,0,0.25);
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    flex-grow: 0;
+    max-width: 100%;
+
+    .card-title {
+      display: block;
+      font-weight: bold;
+      color: $base-text-color;
+      font-size: calcRem(16);
+      margin: 0 0 calcRem(10);
+    }
+
+    .card-description {
+      display: block;
+      color: lighten($base-text-color, 10%);
+      font-size: calcRem(11);
+      margin: 0 0 calcRem(10);
+    }
+  }
+}

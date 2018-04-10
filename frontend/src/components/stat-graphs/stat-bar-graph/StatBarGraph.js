@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import classNames from 'classnames/bind';
 import styles from './_stat-bar-graph.scss';
 import { ResponsiveContainer, BarChart, Bar, Tooltip, CartesianGrid, YAxis } from 'recharts';
 
-let cx = classNames.bind(styles);
 
 class CustomTooltip extends Component {
 
