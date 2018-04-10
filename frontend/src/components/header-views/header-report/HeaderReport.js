@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { updateReportName } from 'base/redux/actions/Actions';
 import classNames from 'classnames/bind';
 import styles from './_header-report.scss';
 import ContentEditable from 'base/components/inputs/ContentEditable'
@@ -7,41 +9,22 @@ import { faCopy, faTrashAlt, faFilePdf, faPrint, faAngleRight, faEllipsisH } fro
 
 let cx = classNames.bind(styles);
 
-class HeaderContentCourse extends Component {
+class HeaderReport extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      reportData: {},
-      editedDataLabel: '',
+      reportName: this.props.reportName,
       controlsExpanded: false,
     };
 
-    this.getDataFromApi = this.getDataFromApi.bind(this);
     this.editReportData = this.editReportData.bind(this);
-    this.pushNewReportData = this.pushNewReportData.bind(this);
-  }
-
-  getDataFromApi = () => {
-    const retrievedReportData = {
-      reportTitle: 'My report with the ID "' + this.props.reportId + '".',
-    }
-    this.setState({
-      reportData: retrievedReportData,
-    });
   }
 
   editReportData = (evt) => {
-    const newData = this.state.reportData;
-    newData[evt.target.dataLabel] = evt.target.value;
-    console.log(newData);
     this.setState({
-      reportData: newData,
+      reportName: evt.target.value,
     });
-  }
-
-  pushNewReportData = () => {
-    console.log('Pushing new data to the DB: ', this.state.reportData);
   }
 
   expandControls = () => {
@@ -51,7 +34,7 @@ class HeaderContentCourse extends Component {
   }
 
   componentDidMount() {
-    this.getDataFromApi(this.props.reportId);
+
   }
 
   render() {
@@ -62,10 +45,10 @@ class HeaderContentCourse extends Component {
           <div className={styles['content-top']}>
             <ContentEditable
               className={styles['report-title']}
-              html={this.state.reportData.reportTitle}
+              html={this.state.reportName}
               dataLabel={'reportTitle'}
               onChange={this.editReportData}
-              onBlur={this.pushNewReportData}
+              onBlur={() => this.props.updateReportName(this.state.reportName)}
             />
           </div>
           <div className={styles['content-bottom']}>
@@ -103,8 +86,19 @@ class HeaderContentCourse extends Component {
   }
 }
 
-HeaderContentCourse.defaultProps = {
+HeaderReport.defaultProps = {
 
 }
 
-export default HeaderContentCourse;
+const mapStateToProps = (state, ownProps) => ({
+  reportName: state.report.reportName,
+})
+
+const mapDispatchToProps = dispatch => ({
+  updateReportName: newName => dispatch(updateReportName(newName)),
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HeaderReport)
