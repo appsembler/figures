@@ -1,0 +1,89 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/stat-cards';
+
+.course-learners-list {
+  margin: calcRem(20) 0;
+  grid-column-end: span 4;
+
+  .header {
+    display: flex;
+    margin-bottom: calcRem(20);
+  }
+
+  .header-title {
+    font-weight: bold;
+    font-size: calcRem(24);
+    padding-left: calcRem(20);
+    line-height: 100%;
+  }
+
+  .learners-table-container {
+    display: block;
+  }
+
+  .learners-table {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+
+    .header-row, .learner-row {
+      padding: calcRem(20) 0;
+      display: flex;
+      align-items: center;
+
+      span {
+        flex: 1 1 calcRem(100);
+      }
+
+      .date-enrolled, .course-progress, .course-completed, .date-completed {
+        text-align: center;
+      }
+    }
+
+    .header-row {
+      font-size: calcRem(12);
+      color: lighten($base-text-color, 15%);
+    }
+
+    .learner-row {
+      border-bottom: calcRem(1) solid lighten($base-text-color, 75%);
+      font-size: calcRem(14);
+
+      .first-name, .last-name, .course-progress {
+        font-weight: bold;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .completed-icon {
+      color: #7ED321;
+    }
+  }
+
+  .load-more-button {
+    display: block;
+    font-size: calcRem(14);
+    padding: calcRem(10) calcRem(20);
+    font-weight: bold;
+    color: $primary-color;
+    border: calcRem(2) solid $primary-color;
+    background: transparent;
+    cursor: pointer;
+    border-radius: calcRem(30);
+    transition: all 0.3s ease-in-out;
+    text-decoration: none;
+    margin: calcRem(40) auto calcRem(15);
+    min-width: calcRem(200);
+
+    &:hover, &:focus {
+      color: #fff;
+      background: $primary-color;
+      outline: none;
+    }
+  }
+}

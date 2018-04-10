@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import classNames from 'classnames/bind';
-import styles from './_dashboard-content.scss';
+import styles from './_single-course-content.scss';
 import BaseStatCard from 'base/components/stat-cards/BaseStatCard';
-import CoursesList from 'base/components/courses-list/CoursesList';
+import LearnerStatistics from 'base/components/learner-statistics/LearnerStatistics';
+import CourseLearnersList from 'base/components/course-learners-list/CourseLearnersList';
 
 let cx = classNames.bind(styles);
 
@@ -103,7 +104,7 @@ const testCourseData = {
 }
 
 
-class DashboardContent extends Component {
+class SingleCourseContent extends Component {
   constructor(props) {
     super(props);
 
@@ -140,36 +141,38 @@ class DashboardContent extends Component {
     return (
       <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
         <BaseStatCard
-          cardTitle='Card 1'
+          cardTitle='Number of enrolled learners'
+          cardDescription='Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition.'
           getDataFunction={this.apiSimulator}
           dataParameter='number-of-learners'
         />
         <BaseStatCard
-          cardTitle='Card 2'
+          cardTitle='Average course progress'
+          cardDescription='At the end of the day, going forward, a new normal that has evolved from generation X is on the runway heading towards a streamlined cloud solution.'
           getDataFunction={this.apiSimulator}
           dataParameter='average-progress'
           dataType='percentage'
         />
         <BaseStatCard
-          cardTitle='Card 3'
+          cardTitle='Average time to complete'
+          cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.'
           getDataFunction={this.apiSimulator}
           dataParameter='number-of-learners'
           singleValue
           value='41d 36h 22m'
         />
         <BaseStatCard
-          cardTitle='Card 4'
+          cardTitle='User course completions'
+          cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment. Bring to the table win-win survival strategies to ensure proactive domination.'
           getDataFunction={this.apiSimulator}
           dataParameter='average-progress'
           dataType='percentage'
         />
-        <CoursesList
-          getIdListFunction={this.courseIdListApiSimulator}
-          getCourseDataFunction={this.courseDataApiSimulator}
-        />
+        <LearnerStatistics />
+        <CourseLearnersList />
       </div>
     );
   }
 }
 
-export default DashboardContent;
+export default SingleCourseContent;

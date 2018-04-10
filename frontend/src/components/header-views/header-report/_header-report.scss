@@ -1,0 +1,122 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/mixins';
+@import '~base/sass/base/grid';
+
+.header-content-report {
+
+  .main-content {
+    padding-top: calcRem(70);
+    padding-bottom: calcRem(30);
+
+    .content-top {
+      width: 100%;
+      max-width: calcRem(810);
+      display: block;
+    }
+
+    .content-bottom {
+      display: flex;
+      align-items: center;
+      margin-top: calcRem(20);
+    }
+
+    .report-title {
+      font-weight: 900;
+      color: pick-visible-color($primary-color, #fff, $base-text-color);
+      line-height: 125%;
+      font-size: calcRem(48);
+      @include editable-content-tooltip;
+    }
+  }
+
+  .title-underline {
+    display: block;
+    width: calcRem(100);
+    height: calcRem(2);
+    background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+    border-radius: calcRem(2);
+  }
+
+  .controls-container {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+
+    .button-main, .button-secondary, .controls-separator {
+      display: flex;
+      align-items: center;
+      margin: calcRem(8);
+      height: calcRem(32);
+    }
+
+    .controls-separator {
+      width: calcRem(2);
+      background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+      border-radius: calcRem(2);
+    }
+
+    .button-main {
+      font-size: calcRem(14);
+      font-weight: bold;
+      padding: calcRem(5) calcRem(20);
+      display: block;
+      background: transparent;
+      border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
+      color: pick-visible-color($primary-color, #fff, $base-text-color);
+      border-radius: calcRem(30);
+      transition: all 0.3s ease-in-out;
+
+      &:hover {
+        background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+        color: pick-visible-color(pick-visible-color($primary-color, #fff, $base-text-color), #fff, $base-text-color);
+      }
+    }
+
+    .button-secondary {
+      font-size: calcRem(14);
+      min-width: calcRem(32);
+      display: block;
+      background: transparent;
+      border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
+      color: pick-visible-color($primary-color, #fff, $base-text-color);
+      border-radius: calcRem(30);
+      transition: all 0.3s ease-in-out;
+
+      &:hover {
+        background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+        color: pick-visible-color(pick-visible-color($primary-color, #fff, $base-text-color), #fff, $base-text-color);
+      }
+    }
+
+    .button-more {
+      position: relative;
+
+      &:after {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: block;
+        content: '';
+        background: transparent;
+        border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
+        opacity: 0;
+        transition: all 0.2s ease-in-out;
+        border-radius: calcRem(30);
+      }
+
+      &:hover {
+
+        &:after {
+          top: calcRem(-8);
+          bottom: calcRem(-8);
+          left: calcRem(-8);
+          right: calcRem(-8);
+          opacity: 0.4;
+        }
+      }
+    }
+  }
+}

@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './_header-content-course.scss';
-import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, LabelList } from 'recharts';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import { faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/fontawesome-free-solid';
+import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 
 let cx = classNames.bind(styles);
 
@@ -14,7 +11,7 @@ class CustomTooltip extends Component {
     const { active } = this.props;
 
     if (active) {
-      const { payload, label } = this.props;
+      const { payload } = this.props;
       return (
         <div className={styles['bar-tooltip']}>
           <span className={styles['tooltip-value']}>{payload[0].value}</span>
@@ -30,17 +27,6 @@ class CustomTooltip extends Component {
 class HeaderContentCourse extends Component {
 
   render() {
-    let currentPeriodValue = this.props.data[this.props.data.length-1].value;
-    let previousPeriodValue = this.props.data[this.props.data.length-2].value;
-    let comparisonIcon;
-    let comparisonValue;
-    if (currentPeriodValue >= previousPeriodValue) {
-      comparisonIcon = <FontAwesomeIcon icon={faAngleDoubleUp} />;
-      comparisonValue = currentPeriodValue - previousPeriodValue;
-    } else {
-      comparisonIcon = <FontAwesomeIcon icon={faAngleDoubleDown} />;
-      comparisonValue = previousPeriodValue - currentPeriodValue;
-    }
 
     return (
       <section className={styles['header-content-course']}>
@@ -54,9 +40,9 @@ class HeaderContentCourse extends Component {
             {this.props.courseIsSelfPaced ? (
               <span className={styles['course-date']}>This course is self-paced</span>
             ) : [
-              <span className={styles['course-date']}>Starts: {this.props.courseStartDate}</span>,
-              <span className={styles['course-info-separator']}>|</span>,
-              <span className={styles['course-date']}>Ends: {this.props.courseEndDate}</span>,
+              <span key='courseStart' className={styles['course-date']}>Starts: {this.props.courseStartDate}</span>,
+              <span key='separator' className={styles['course-info-separator']}>|</span>,
+              <span key='courseEnd' className={styles['course-date']}>Ends: {this.props.courseEndDate}</span>,
             ]}
           </div>
           <span className={styles['text-separator']} />
@@ -82,7 +68,7 @@ class HeaderContentCourse extends Component {
         </div>
         <div className={styles['graph-labels-wrapper']}>
           <div className={cx({ 'graph-labels-container': true, 'container': true})}>
-            <ResponsiveContainer width="100%" height={155}>
+            <ResponsiveContainer width="100%" height={100}>
               <BarChart
                 data={this.props.data}
                 margin={{top: 0, bottom: 0, left: 0, right: 0}}
@@ -92,7 +78,7 @@ class HeaderContentCourse extends Component {
                   dataKey='lessonTitle'
                   axisLine={false}
                   tickLine={false}
-                  height={155}
+                  height={100}
                   angle={90}
                   textAnchor="start"
                   interval={0}
