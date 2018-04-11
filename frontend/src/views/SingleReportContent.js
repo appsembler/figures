@@ -3,9 +3,11 @@ import { connect } from 'react-redux';
 import {updateReportDescription, updateReportCards } from 'base/redux/actions/Actions';
 import classNames from 'classnames/bind';
 import styles from './_single-report-content.scss';
-import ContentEditable from 'base/components/inputs/ContentEditable'
+import ContentEditable from 'base/components/inputs/ContentEditable';
+import {Responsive, WidthProvider} from 'react-grid-layout';
 
 let cx = classNames.bind(styles);
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 
 class SingleReportContent extends Component {
@@ -29,9 +31,21 @@ class SingleReportContent extends Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props !== nextProps) {
+      this.setState({
+        reportDescription: nextProps.reportDescription,
+        reportCards: nextProps.reportCards,
+        dateCreated: nextProps.dateCreated,
+        reportAuthor: nextProps.reportAuthor,
+        reportCarts: nextProps.reportCarts,
+      })
+    }
+  }
+
   render() {
     return (
-      <div className={cx({ 'container': true, 'base-grid-layout': true, 'report-content': true})}>
+      <div className={cx({ 'container': true, 'report-content': true})}>
         <div className={styles['content-meta']}>
           <div className={styles['meta-description']}>
             <span className={styles['meta-heading']}>
@@ -62,12 +76,19 @@ class SingleReportContent extends Component {
             </span>
           </div>
         </div>
+        <ResponsiveGridLayout className={styles['data-wrapper']} rowHeight={20} breakpoints={{xxs: 0}} cols={{xxs: 4}} margin={[30, 30]} compactType='vertical'>
+          <div key="a" data-grid={{x: 0, y: 0, w: 1, h: 10, isResizable: false}} style={{background: 'red'}}>Kartica a</div>
+          <div key="b" data-grid={{x: 1, y: 0, w: 1, h: 10, isResizable: false}} style={{background: 'blue'}}>Kartica b</div>
+          <div key="c" data-grid={{x: 2, y: 0, w: 2, h: 14, isResizable: false}} style={{background: 'green'}}>Kartica c</div>
+          <div key="d" data-grid={{x: 0, y: 1, w: 4, h: 12, isResizable: false}} style={{background: 'yellow'}}>Kartica d</div>
+        </ResponsiveGridLayout>
       </div>
     );
   }
 }
 
 const mapStateToProps = (state, ownProps) => ({
+  reportDescription: state.report.reportDescription,
   reportName: state.report.reportName,
   dateCreated: state.report.dateCreated,
   reportAuthor: state.report.reportAuthor,

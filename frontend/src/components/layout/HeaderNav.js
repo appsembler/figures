@@ -14,7 +14,7 @@ class HeaderNav extends Component {
           Dashboard
         </NavLink>
         <NavLink
-          to="/figures/test"
+          to="/figures/reports"
           className={styles['header-nav__link']}
         >
           Reports
