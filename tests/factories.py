@@ -22,3 +22,4 @@ class CourseOverviewFactory(DjangoModelFactory):
     display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
     org = 'StarFleetAcademy'
     number = '2161'
+    display_org_with_default = factory.LazyAttribute(lambda o: o.org)
