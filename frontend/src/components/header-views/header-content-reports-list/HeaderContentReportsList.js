@@ -1,6 +1,5 @@
 
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './_header-content-reports-list.scss';
 
@@ -16,7 +15,7 @@ class HeaderContentReportsList extends Component {
           <span className={styles['title-decoration']} />
         </div>
         <div className={styles['options-container']}>
-          <Link to="#" className={styles['header-option-button']}>Create a new report</Link>
+          <button className={styles['header-option-button']}>Create a new report</button>
         </div>
       </section>
     );

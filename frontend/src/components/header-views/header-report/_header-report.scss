@@ -6,13 +6,29 @@
 .header-content-report {
 
   .main-content {
-    padding-top: calcRem(70);
+    padding-top: calcRem(40);
     padding-bottom: calcRem(30);
 
     .content-top {
       width: 100%;
       max-width: calcRem(810);
       display: block;
+    }
+
+    .back-link {
+      color: pick-visible-color($primary-color, #fff, $base-text-color);
+      display: inline-block;
+      padding-bottom: calcRem(5);
+      border-bottom: 1px solid pick-visible-color($primary-color, #fff, $base-text-color);
+      margin-bottom: calcRem(30);
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease-in-out;
+
+      &:hover, &:focus {
+        opacity: 0.6;
+        cursor: pointer;
+      }
     }
 
     .content-bottom {

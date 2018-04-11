@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { updateReportName } from 'base/redux/actions/Actions';
+import { updateReportName, fetchReport } from 'base/redux/actions/Actions';
+import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './_header-report.scss';
 import ContentEditable from 'base/components/inputs/ContentEditable'
@@ -33,8 +34,16 @@ class HeaderReport extends Component {
     });
   }
 
-  componentDidMount() {
+  componentWillReceiveProps(nextProps) {
+    if (this.props !== nextProps) {
+      this.setState({
+        reportName: nextProps.reportName,
+      })
+    }
+  }
 
+  componentDidMount() {
+    this.props.fetchReport(this.props.reportId)
   }
 
   render() {
@@ -43,6 +52,12 @@ class HeaderReport extends Component {
       <section className={styles['header-content-report']}>
         <div className={cx({ 'main-content': true, 'container': true})}>
           <div className={styles['content-top']}>
+            <Link
+              to='/figures/reports'
+              className={styles['back-link']}
+            >
+              Back to reports list
+            </Link>
             <ContentEditable
               className={styles['report-title']}
               html={this.state.reportName}
@@ -96,6 +111,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   updateReportName: newName => dispatch(updateReportName(newName)),
+  fetchReport: reportId => dispatch(fetchReport(reportId)),
 })
 
 export default connect(
