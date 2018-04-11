@@ -14,4 +14,5 @@ urlpatterns = [
     # REST API
     url(r'^api/courses-index/', views.CoursesIndexView.as_view(),
         name='courses-index'),
+    url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
 ]

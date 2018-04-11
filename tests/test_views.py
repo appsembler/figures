@@ -1,20 +1,25 @@
 '''
-Test the views in edX Figures
+
 '''
 
 import pytest
+from django.contrib.auth import get_user_model
+from django.db.models import F
 from django.test import TestCase
 from rest_framework.test import (
     APIRequestFactory,
-    #RequestsClient, Not supported in older rest_framework versions
+    #RequestsClient, Not supported in older  rest_framework versions
     force_authenticate,
     )
 
 from edx_figures.views import (
     CoursesIndexView,
+    UserIndexView,
     )
 
-from .factories import CourseOverviewFactory
+from .factories import CourseOverviewFactory, UserFactory
+from .helpers import make_course_key_str
+
 
 # Course data and generate method are duplicates course data in test_filters.py
 COURSE_DATA = [
@@ -26,10 +31,10 @@ COURSE_DATA = [
 
 
 # Look into renaming 'name' to 'display_name'
+
 def make_course(**kwargs):
     return CourseOverviewFactory(
         id=kwargs['id'], display_name=kwargs['name'], org=kwargs['org'], number=kwargs['number'])
-
 
 class CourseIndexViewTest(TestCase):
     def setUp(self):
@@ -43,6 +48,7 @@ class CourseIndexViewTest(TestCase):
 
         factory = APIRequestFactory()
         request = factory.get('api/courses-index/')
+        force_authenticate(request, user=UserFactory())
         view = CoursesIndexView.as_view()
         response = view(request)
         assert response.status_code == 200
@@ -53,8 +59,8 @@ class CourseIndexViewTest(TestCase):
 
         factory = APIRequestFactory()
         request = factory.get('api/courses-index/?org=AlphaOrg')
+        force_authenticate(request, user=UserFactory())
         view = CoursesIndexView.as_view()
         response = view(request)
         assert response.status_code == 200
         assert response.data == expected_data
-
