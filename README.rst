@@ -1,12 +1,14 @@
 edX Figures 
 ===========
 
-Reporting and data retrieval app for Open edX
+Reporting and data retrieval app for `Open edX <https://open.edx.org/>`_.
 
 Notice
 ------
 
-**This document is a work in progress (WIP) as we develop the initial edx-figures release.**
+**edX Figures is in early stage development**
+
+**This document is a work in progress (WIP) as we work toward the initial production ready edX Figures release.**
 
 Overview
 --------
@@ -20,7 +22,7 @@ To evolve edx-figures to meet community needs, we are keeping in mind as princip
 * Flexible reporting
 * Simpler contributions
 
-Please refer to the edX Figures `design document <https://docs.google.com/document/d/16orj6Ag1R158-J-zSBfiY31RKQ5FuSu1O5F-zpSKOg4/>` for more details on goals and architecture.
+Please refer to the edX Figures `design document <https://docs.google.com/document/d/16orj6Ag1R158-J-zSBfiY31RKQ5FuSu1O5F-zpSKOg4/>`_ for more details on goals and architecture.
 
 Requirements
 ------------
@@ -35,9 +37,9 @@ Installation
 
 **NOTE: These instructions are a WIP and incomplete**
 
-This section describes installing edx-figures in Open edX "Ginkgo" release. This is the `open-release/ginkgo.master` branch of edX's `edx-platform <https://github.com/edx/edx-platform/tree/open-release/ginkgo.master>` LMS.
+This section describes installing edx-figures in Open edX "Ginkgo" release. This is the `open-release/ginkgo.master` branch of edX's `edx-platform <https://github.com/edx/edx-platform/tree/open-release/ginkgo.master>`_ LMS.
 
-For installing on Appsembler's `edx-platform fork <https://github.com/appsembler/edx-platform/tree/appsembler/ginkgo/master>` read `TODO: Insert link to instructions doc`
+For installing on Appsembler's `edx-platform fork <https://github.com/appsembler/edx-platform/tree/appsembler/ginkgo/master>`_ read **<TODO: Insert link to instructions doc>**
 
 Other custom installation options may be added in the future.
 
@@ -52,7 +54,7 @@ Steps
 
 2. Install the edx-figures Python package 
 
-When we add edx-figures to `pypi <https://pypi.python.org/pypi>`, then installers will be able to do ``pip install edx-figures``
+When we add edx-figures to `pypi <https://pypi.python.org/pypi>`_, then installers will be able to do ``pip install edx-figures``
 
 Until then::
 
@@ -84,7 +86,7 @@ If you do not need to conditionally enable edx-figures, then add the following t
 
 	from edx_figures.settings import EDX_FIGURES
 
-If you do need to conditionally enable edx-figures, then we suggest adding a conditional import at the bottom of both the ``lms/envs/aws.py`` and ``lms/envs/devstack.py`` as follows:
+If you do need to conditionally enable edx-figures, then we suggest adding a conditional import at the bottom of both the ``lms/envs/aws.py`` and ``lms/envs/devstack.py`` as follows::
 
 	if FEATURES.get('ENABLE_EDX_FIGURES'):
 		from edx_figures.settings import EDX_FIGURES	
@@ -95,18 +97,16 @@ The above are steps to follow if you don't have your own custom settings files. 
 A key point is to import the ``edx_figures.settings`` module **after** ``WEBPACK_LOADER`` has been defined.
 
 
-5. Update LMS `urls.py`
+5. Update LMS `urls.py`::
 
-::
 	if settings.FEATURES.get('ENABLE_EDX_FIGURES'):
     	urlpatterns += (
     		url(r'^figures/',
     		    include('edx_figures.urls', namespace='edx-figures')),
     	)
 
-6. Production: Restart the app server
+6. Production: Restart the app server::
 
-::
 	sudo /edx/bin/supervisorctl restart edxapp:lms
 
 
@@ -119,7 +119,7 @@ Project Architecture
 Front-end
 ~~~~~~~~~
 
-The edx-figures user interface is a JavaScript Single Page Application (SPA) built with React and uses the `create-react-app <https://github.com/facebook/create-react-app>` build scaffolding generator.
+The edx-figures user interface is a JavaScript Single Page Application (SPA) built with React and uses the `create-react-app <https://github.com/facebook/create-react-app>`_ build scaffolding generator.
 
 Back-end
 ~~~~~~~~~
@@ -130,12 +130,35 @@ The edx-figures back-end is a reusable Django app. It contains a set of REST API
 Testing
 -------
 
-TODO: Fill in this section
+*TODO: Improve the testing instructions*
+
+The unit tests **should** be able to run on any OS that supports Python 2.7.x
+
+Clone the repo:
+::
+ 	git@github.com:appsembler/edx-figures.git
+
+Go to the project directory:
+::
+	cd edx-figures
+
+Create a `virtualenv <https://virtualenv.pypa.io/en/stable/>`_.
+
+Install required Python packages:
+::
+	pip install -r devsite/requirements.txt
+
+From the `edx-figures` repository root directory:
+::
+	pytest
+
+If all goes well, the edx-figures unit tests will all complete succesfully
+
 
 Future
 ------
 
-Open edX "Hawthorn" will provide a plug-in architecture. 
+Open edX "Hawthorn" will provide a plug-in architecture. This will hopefully simplify edX Figures installation.
 
 Contributing
 ------------
