@@ -1,9 +1,13 @@
-'''
-Helpers to generate fixtures for testing.
+'''Helpers to generate model instances for testing.
+
+Defines model factories for edX Figures, edX platform, and other models that we
+need to create for our tests.
 
 Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
 
 '''
+
+import datetime
 
 from django.contrib.auth import get_user_model
 #from django_countries.fields import CountryField
@@ -16,6 +20,8 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 
 from student.models import UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
+
+from edx_figures.models import SiteDailyMetrics
 
 
 class CourseOverviewFactory(DjangoModelFactory):
@@ -60,8 +66,7 @@ class UserFactory(DjangoModelFactory):
     is_active = True
     is_staff = False
 
-    profile = factory.RelatedFactory(UserProfileFactory,
-        'user',)
+    profile = factory.RelatedFactory(UserProfileFactory, 'user')
 
     @factory.post_generation
     def teams(self, create, extracted, **kwargs):
@@ -71,3 +76,18 @@ class UserFactory(DjangoModelFactory):
         if extracted:
             for team in extracted:
                 self.teams.add(team)
+
+
+##
+## edX Figures model factories
+##
+
+class SiteDailyMetricsFactory(DjangoModelFactory):
+    class Meta:
+        model = SiteDailyMetrics
+    date_for = factory.Sequence(lambda n: datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+    cumulative_active_user_count = factory.Sequence(lambda n: n)
+    total_user_count = factory.Sequence(lambda n: n)
+    course_count = factory.Sequence(lambda n: n)
+    total_enrollment_count = factory.Sequence(lambda n: n)
+    #site = factory.RelatedFactory(SiteFactory, 'site')
