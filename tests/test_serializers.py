@@ -87,7 +87,5 @@ class TestSiteDailyMetricsSerializer(object):
         assert dateutil_parse(data['created']) == self.site_daily_metrics.created
         assert dateutil_parse(data['modified']) == self.site_daily_metrics.modified
 
-        field_names = self.expected_results_keys - self.date_fields
-
         for field_name in (self.expected_results_keys - self.date_fields):
             assert data[field_name] == getattr(self.site_daily_metrics,field_name)

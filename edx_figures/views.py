@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import F
 from django.shortcuts import render
 
+from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
@@ -17,10 +18,11 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 from student.models import UserProfile
 
-from .filters import CourseOverviewFilter, UserFilter
-
+from .filters import CourseOverviewFilter, SiteDailyMetricsFilter, UserFilter
+from .models import SiteDailyMetrics
 from .serializers import (
     CourseIndexSerializer,
+    SiteDailyMetricsSerializer,
     UserIndexSerializer,
 )
 
@@ -43,6 +45,10 @@ def edx_figures_home(request):
     }
     return render(request, 'edx_figures/index.html', context)
 
+
+##
+## Views for data in edX platform
+##
 
 # We're going straight to the model so that we ensure we
 # are getting the behavior we want.
@@ -99,3 +105,23 @@ class UserIndexView(ListAPIView):
         queryset = super(UserIndexView, self).get_queryset()
 
         return queryset
+
+##
+## Views for edX Figures models
+##
+
+#class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
+class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
+
+    model = SiteDailyMetrics
+    queryset = SiteDailyMetrics.objects.all()
+    pagination_class = None
+    serializer_class = SiteDailyMetricsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = SiteDailyMetricsFilter
+
+    def get_queryset(self):
+        queryset = super(SiteDailyMetricsViewSet, self).get_queryset()
+        return queryset
+
+        #return SiteDailyMetricsQuery.get_queryset(self.request.query_params)

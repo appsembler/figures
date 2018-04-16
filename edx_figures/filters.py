@@ -64,10 +64,20 @@ class UserFilter(django_filters.FilterSet):
         fields = ['username', 'email', 'country', 'is_active', 'is_staff',
                   'is_superuser', ]
 
+
 class SiteDailyMetricsFilter(django_filters.FilterSet):
     '''Provides filtering for the SiteDailyMetrics model objects
 
+    This is a work in progress. Parameters need improvement, but have to dive
+    into Django Filter more
+
+    Use ``date_for`` for retrieving a specific date
+    Use ``date_0`` and ``date_1`` for retrieving values in a date range, inclusive
+    each of these can be used singly to get:
+    * ``date_0`` to get records greater than or equal
+    * ``date_1`` to get records less than or equal
     '''
+    date = django_filters.DateFromToRangeFilter(name='date_for')
     class Meta:
         model = SiteDailyMetrics
-        fields = ['date_for']
+        fields = ['date_for', 'date']
