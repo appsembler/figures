@@ -1,6 +1,12 @@
 '''
 Unit tests for the edx-figures filter classes
+
+Currently uses Django TestCase style classes instead of pytest style classes
+so that we can use TestCase.assertQuerysetEqual
+
 '''
+
+from dateutil.parser import parse as dateutil_parse
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -10,10 +16,16 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 
 from edx_figures.filters import (
     CourseOverviewFilter,
+    SiteDailyMetricsFilter,
     UserFilter,
 )
+from edx_figures.models import SiteDailyMetrics
 
-from .factories import CourseOverviewFactory, UserFactory
+from .factories import (
+    CourseOverviewFactory,
+    SiteDailyMetricsFactory,
+    UserFactory,
+    )
 from .helpers import make_course_key_str
 
 # Because we are testing filtering on CourseOverviewFields, we want to set
@@ -84,6 +96,30 @@ class CourseOverviewFilterTest(TestCase):
             [o.id for o in self.course_overviews if '001' in o.number],
             lambda o: o.id, 
             ordered=False)
+
+@pytest.mark.django_db
+class SiteDailyMetricsFilterTest(TestCase):
+
+    def setUp(self):
+        self.site_daily_metrics = [
+            SiteDailyMetricsFactory() for i in range(1,10)
+        ]
+
+    def tearDown(self):
+        pass
+
+    def test_get_by_date(self):
+        the_date_str='2018-01-02'
+        the_date = dateutil_parse(the_date_str).date()
+
+        f = SiteDailyMetricsFilter(
+            queryset=SiteDailyMetrics.objects.filter(date_for=the_date))
+
+
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.site_daily_metrics if o.date_for == the_date],
+            lambda o: o.id, ordered=False)
 
 
 @pytest.mark.django_db

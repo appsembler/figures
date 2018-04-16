@@ -9,6 +9,8 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
+from edx_figures.models import SiteDailyMetrics
+
 
 class CourseOverviewFilter(django_filters.FilterSet):
     '''Provides filtering for CourseOverview model objects
@@ -61,3 +63,11 @@ class UserFilter(django_filters.FilterSet):
         model = get_user_model()
         fields = ['username', 'email', 'country', 'is_active', 'is_staff',
                   'is_superuser', ]
+
+class SiteDailyMetricsFilter(django_filters.FilterSet):
+    '''Provides filtering for the SiteDailyMetrics model objects
+
+    '''
+    class Meta:
+        model = SiteDailyMetrics
+        fields = ['date_for']
