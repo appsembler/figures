@@ -21,7 +21,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 from student.models import UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
-from edx_figures.models import SiteDailyMetrics
+from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
 class CourseOverviewFactory(DjangoModelFactory):
@@ -81,6 +81,17 @@ class UserFactory(DjangoModelFactory):
 ##
 ## edX Figures model factories
 ##
+
+class CourseDailyMetricsFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseDailyMetrics
+    date_for = factory.Sequence(lambda n: datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+    enrollment_count = factory.Sequence(lambda n: n)
+    active_learners_today = factory.Sequence(lambda n: n)
+    average_progress = 0.50
+    average_days_to_complete = 10
+    num_learners_completed = 5
+
 
 class SiteDailyMetricsFactory(DjangoModelFactory):
     class Meta:
