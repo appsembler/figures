@@ -17,7 +17,7 @@ from edx_figures.views import (
     UserIndexView,
     )
 
-from ..factories import UserFactory
+from tests.factories import UserFactory
 
 USER_DATA = [
     {'id': 1, 'username': u'alpha', 'fullname': u'Alpha One',

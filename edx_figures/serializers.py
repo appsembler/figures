@@ -23,8 +23,6 @@ class CourseIndexSerializer(serializers.Serializer):
     number = serializers.CharField(source='display_number_with_default')
 
 
-
-
 class UserIndexSerializer(serializers.Serializer):
     '''Provides a limited set of user information for summary display
     '''
