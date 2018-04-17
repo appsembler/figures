@@ -1,7 +1,4 @@
-'''
-Test the serializers in edx-figures
-
-
+'''Test the serializers in edx-figures
 
 '''
 
@@ -9,13 +6,19 @@ from dateutil.parser import parse as dateutil_parse
 import pytest
 
 from django.db import models
-from edx_figures.models import SiteDailyMetrics
+from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
 from edx_figures.serializers import (
-    UserIndexSerializer,
+    CourseDailyMetricsSerializer,
     SiteDailyMetricsSerializer,
+    UserIndexSerializer,
 )
 
-from .factories import SiteDailyMetricsFactory, UserFactory
+from .factories import (
+    CourseDailyMetricsFactory,
+    SiteDailyMetricsFactory,
+    UserFactory,
+    )
+from .helpers import is_close
 
 @pytest.mark.django_db
 class TestUserIndexSerializer(object):
@@ -47,6 +50,53 @@ class TestUserIndexSerializer(object):
         # This is to make sure that the serializer retrieves the correct nested
         # model (UserProfile) data
         assert data['fullname'] == 'Alpha One'
+
+
+@pytest.mark.django_db
+class TestCourseDailyMetricsSerializer(object):
+    '''Basic serializer testing for the CourseDailyMetrics model serializer
+
+    TODO: After we complete the initial PRs for the site and course metrics
+    models/serializers/views and tests, DRY up the test code
+    '''
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.model = CourseDailyMetrics
+        self.date_fields = set(['date_for', 'created', 'modified',])
+        self.expected_results_keys = set([o.name for o in self.model._meta.fields])
+        field_names = (o.name for o in self.model._meta.fields
+            if o.name not in self.date_fields )
+        self.metrics = CourseDailyMetricsFactory()
+        self.serializer = CourseDailyMetricsSerializer(instance=self.metrics)
+
+    @pytest.mark.skip(reason='Test not implemented yet')
+    def test_time_zone(self):
+        pass
+
+    def test_has_fields(self):
+        '''Verify the serialized data has the same keys and values as the model
+
+        Django 2.0 has a convenient method, 'Cast' that will simplify converting
+        values:
+        https://docs.djangoproject.com/en/2.0/ref/models/database-functions/#cast
+
+        This means that we can retrieve the model instance values as a dict
+        and do a simple ``assert self.serializer.data == queryset.values(...)``
+        '''
+
+        data = self.serializer.data
+
+        # Hack: Check date and datetime values explicitly
+        assert data['date_for'] == str(self.metrics.date_for)
+        assert dateutil_parse(data['created']) == self.metrics.created
+        assert dateutil_parse(data['modified']) == self.metrics.modified
+
+        for field_name in (self.expected_results_keys - self.date_fields):
+            db_field = getattr(self.metrics, field_name)
+            if isinstance(data[field_name], float) or isinstance(db_field, float):
+                assert is_close(float(data[field_name]), float(db_field))
+            else:
+                assert data[field_name] == db_field
 
 
 @pytest.mark.django_db
