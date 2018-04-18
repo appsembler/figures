@@ -9,7 +9,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-from edx_figures.models import SiteDailyMetrics
+from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
 class CourseOverviewFilter(django_filters.FilterSet):
@@ -63,6 +63,24 @@ class UserFilter(django_filters.FilterSet):
         model = get_user_model()
         fields = ['username', 'email', 'country', 'is_active', 'is_staff',
                   'is_superuser', ]
+
+
+class CourseDailyMetricsFilter(django_filters.FilterSet):
+    '''Provides filtering for the courseDailyMetrics model objects
+
+    This is a work in progress. Parameters need improvement, but have to dive
+    into Django Filter more
+
+    Use ``date_for`` for retrieving a specific date
+    Use ``date_0`` and ``date_1`` for retrieving values in a date range, inclusive
+    each of these can be used singly to get:
+    * ``date_0`` to get records greater than or equal
+    * ``date_1`` to get records less than or equal
+    '''
+    date = django_filters.DateFromToRangeFilter(name='date_for')
+    class Meta:
+        model = CourseDailyMetrics
+        fields = ['date_for', 'date', 'course_id',]
 
 
 class SiteDailyMetricsFilter(django_filters.FilterSet):

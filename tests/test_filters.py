@@ -15,13 +15,15 @@ from django.test import TestCase
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
 from edx_figures.filters import (
+    CourseDailyMetricsFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
     UserFilter,
 )
-from edx_figures.models import SiteDailyMetrics
+from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 from .factories import (
+    CourseDailyMetricsFactory,
     CourseOverviewFactory,
     SiteDailyMetricsFactory,
     UserFactory,
@@ -96,6 +98,35 @@ class CourseOverviewFilterTest(TestCase):
             [o.id for o in self.course_overviews if '001' in o.number],
             lambda o: o.id, 
             ordered=False)
+
+
+@pytest.mark.django_db
+class CourseDailyMetricsFilterTest(TestCase):
+
+    def setUp(self):
+        self.models = [
+            CourseDailyMetricsFactory() for i in range(1,10)
+        ]
+
+    def tearDown(self):
+        pass
+
+    def test_get_by_date(self):
+        the_date_str='2018-01-02'
+        the_date = dateutil_parse(the_date_str).date()
+
+        f = CourseDailyMetricsFilter(
+            queryset=CourseDailyMetrics.objects.filter(date_for=the_date))
+
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.models if o.date_for == the_date],
+            lambda o: o.id, ordered=False)
+
+    @pytest.mark.skip("Not implemented yet")
+    def test_get_by_course_id(self):
+        pass
+
 
 @pytest.mark.django_db
 class SiteDailyMetricsFilterTest(TestCase):
