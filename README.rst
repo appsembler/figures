@@ -1,5 +1,7 @@
-edX Figures 
+edX Figures
 ===========
+
+|travis-badge|
 
 Reporting and data retrieval app for `Open edX <https://open.edx.org/>`_.
 
@@ -89,7 +91,7 @@ If you do not need to conditionally enable edx-figures, then add the following t
 If you do need to conditionally enable edx-figures, then we suggest adding a conditional import at the bottom of both the ``lms/envs/aws.py`` and ``lms/envs/devstack.py`` as follows::
 
 	if FEATURES.get('ENABLE_EDX_FIGURES'):
-		from edx_figures.settings import EDX_FIGURES	
+		from edx_figures.settings import EDX_FIGURES
 
 
 The above are steps to follow if you don't have your own custom settings files. If you do use custom settings files, then we suggest adding the conditional import of edx_figures.settings in those (custom settings file(s)) instead of ``aws.py`` and ``devstack.py``
@@ -165,5 +167,7 @@ Contributing
 
 TODO: Add details here or separate `CONTRIBUTING` file to the root of the repo
 
-
+.. |travis-badge| image:: https://travis-ci.org/appsembler/edx-figures.svg?branch=master
+    :target: https://travis-ci.org/appsembler/edx-figures/
+    :alt: Travis
 
