@@ -3,6 +3,7 @@
 '''
 
 from dateutil.parser import parse as dateutil_parse
+from decimal import Decimal
 import pytest
 
 from django.db import models
@@ -18,7 +19,6 @@ from .factories import (
     SiteDailyMetricsFactory,
     UserFactory,
     )
-from .helpers import is_close
 
 @pytest.mark.django_db
 class TestUserIndexSerializer(object):
@@ -93,8 +93,8 @@ class TestCourseDailyMetricsSerializer(object):
 
         for field_name in (self.expected_results_keys - self.date_fields):
             db_field = getattr(self.metrics, field_name)
-            if isinstance(data[field_name], float) or isinstance(db_field, float):
-                assert is_close(float(data[field_name]), float(db_field))
+            if type(db_field) in (float, Decimal, ):
+                assert float(data[field_name]) == pytest.approx(db_field)
             else:
                 assert data[field_name] == db_field
 
