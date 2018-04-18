@@ -10,7 +10,7 @@
 ###
 
 python-dateutil==2.1
-
+path.py==11.0
 ##
 ## Django package dependencies
 ##
