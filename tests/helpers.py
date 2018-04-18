@@ -1,6 +1,8 @@
+'''Helper methods for edx-figures testing
 '''
-Helper methods for edx-figures testing
-'''
+
+from dateutil.rrule import rrule, DAILY
+
 
 def make_course_key_str(org, number, run='test-run', **kwargs):
     '''
@@ -8,8 +10,6 @@ def make_course_key_str(org, number, run='test-run', **kwargs):
     '''
     return 'course-v1:{}+{}+{}'.format(org, number, run)
 
-def is_close(a, b, rel_tol=1e-9, abs_tol=0.0):
-    '''Tests relative closeness for floating point values
-    See: https://www.python.org/dev/peps/pep-0485/#proposed-implementation
-    '''
-    return abs(a-b) <= max( rel_tol * max(abs(a), abs(b)), abs_tol )
+def create_metrics_model_timeseries(factory, first_day, last_day):
+    return [factory(date_for=dt) 
+        for dt in rrule(DAILY, dtstart=first_day, until=last_day)]

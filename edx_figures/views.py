@@ -18,9 +18,14 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 from student.models import UserProfile
 
-from .filters import CourseOverviewFilter, SiteDailyMetricsFilter, UserFilter
-from .models import SiteDailyMetrics
+from .filters import (
+    CourseDailyMetricsFilter,
+    CourseOverviewFilter,SiteDailyMetricsFilter,
+    UserFilter,
+)
+from .models import CourseDailyMetrics, SiteDailyMetrics
 from .serializers import (
+    CourseDailyMetricsSerializer,
     CourseIndexSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
@@ -109,6 +114,20 @@ class UserIndexView(ListAPIView):
 ##
 ## Views for edX Figures models
 ##
+
+class CourseDailyMetricsViewSet(viewsets.ModelViewSet):
+
+    model = CourseDailyMetrics
+    queryset = CourseDailyMetrics.objects.all()
+    pagination_class = None
+    serializer_class = CourseDailyMetricsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = CourseDailyMetricsFilter
+
+    def get_queryset(self):
+        queryset = super(CourseDailyMetricsViewSet, self).get_queryset()
+        return queryset
+
 
 #class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
