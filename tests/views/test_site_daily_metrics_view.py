@@ -16,7 +16,7 @@ from rest_framework.test import (
 from edx_figures.models import SiteDailyMetrics
 from edx_figures.views import SiteDailyMetricsViewSet
 
-from ..factories import SiteDailyMetricsFactory, UserFactory
+from tests.factories import SiteDailyMetricsFactory, UserFactory
 
 TEST_DATA = [
     {}
