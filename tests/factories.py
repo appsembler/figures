@@ -86,6 +86,7 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = CourseDailyMetrics
     date_for = factory.Sequence(lambda n: datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+    course_id = factory.Sequence(lambda n: 'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     enrollment_count = factory.Sequence(lambda n: n)
     active_learners_today = factory.Sequence(lambda n: n)
     average_progress = 0.50
