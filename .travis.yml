@@ -7,6 +7,6 @@ install:
   - pip install -r devsite/requirements.txt
 
 # command to run tests
-scripts:
+script:
   - py.test
 
