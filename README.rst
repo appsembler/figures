@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/appsembler/edx-figures.svg?branch=master
+    :target: https://travis-ci.org/appsembler/edx-figures
+
 edX Figures
 ===========
 
