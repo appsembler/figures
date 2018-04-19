@@ -1,7 +1,7 @@
 edX Figures
 ===========
 
-|travis-badge|
+|travis-badge| |codecov-badge|
 
 Reporting and data retrieval app for `Open edX <https://open.edx.org/>`_.
 
@@ -170,4 +170,8 @@ TODO: Add details here or separate `CONTRIBUTING` file to the root of the repo
 .. |travis-badge| image:: https://travis-ci.org/appsembler/edx-figures.svg?branch=master
     :target: https://travis-ci.org/appsembler/edx-figures/
     :alt: Travis
+
+.. |codecov-badge| image:: http://codecov.io/github/appsembler/edx-figures/coverage.svg?branch=master
+    :target: http://codecov.io/github/appsembler/edx-figures?branch=master
+    :alt: Codecov
 
