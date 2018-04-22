@@ -3,19 +3,36 @@
 # for both running the devsite server and for the pytest dependencies
 #
 
+# Versions should match those used in Open edX Ginkgo
+
+##
+## General Python package dependencies
+###
+
+python-dateutil==2.1
+path.py==11.0
+##
+## Django package dependencies
+##
+
 Django==1.8.12
 django-extensions==1.5.9
 djangorestframework==3.2.3
+django-countries==4.0
 django-filter==0.11.0
 django-webpack-loader==0.5.0
-
 django-model-utils==2.3.1
+
+##
+## Open edX package dependencies
+##
+
 edx-opaque-keys==0.4
 #edx-drf-extensions==1.2.2
 
-path.py==11.0
-
-# Pytest dependencies
+##
+## Pytest dependencies
+##
 
 factory-boy==2.5.1
 pylint==1.8.2
