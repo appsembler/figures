@@ -110,3 +110,9 @@ frontend/webpack-stats.json
 # Mac junk
 .DS_Store
 
+# SQLite
+devsite/db.sqlite3
+
+# Vi, Vim, swap
+*.swp
+
