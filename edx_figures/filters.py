@@ -2,6 +2,7 @@
 Provides filtering for objects retrieved in edX Figures
 '''
 
+from django.contrib.auth import get_user_model
 import django_filters
 
 from openedx.core.djangoapps.content.course_overviews.models import (
@@ -10,8 +11,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 
 
 class CourseOverviewFilter(django_filters.FilterSet):
-    '''
-    Provides filtering for CourseOverview model objects
+    '''Provides filtering for CourseOverview model objects
 
     Filters to consider adding:
         description: search/icontains
@@ -40,3 +40,24 @@ class CourseOverviewFilter(django_filters.FilterSet):
     class Meta:
         model = CourseOverview
         fields = ['display_name', 'org', 'number', 'number_contains', ]
+
+
+class UserFilter(django_filters.FilterSet):
+    '''Provides filtering for User model objects
+
+    Note: User has a 1:1 relationship with the edx-platform LMS
+    student.models.UserProfile model
+
+    We're starting with a few fields and will add as we find we want/need them
+
+    '''
+    is_active = django_filters.BooleanFilter(name='is_active',)
+    username = django_filters.CharFilter(lookup_type='icontains')
+    email = django_filters.CharFilter(lookup_type='icontains')
+    country = django_filters.CharFilter(
+        name='profile__country', lookup_type='iexact')
+
+    class Meta:
+        model = get_user_model()
+        fields = ['username', 'email', 'country', 'is_active', 'is_staff',
+                  'is_superuser', ]
