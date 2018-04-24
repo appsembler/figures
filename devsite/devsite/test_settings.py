@@ -52,6 +52,8 @@ ROOT_URLCONF = 'edx_figures.urls'
 
 SECRET_KEY = 'insecure-secret-key'
 
+USE_TZ = True
+
 # https://wsvincent.com/django-rest-framework-serializers-viewsets-routers/
 
 # For initial testing, later we want to enforce authorization

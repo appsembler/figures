@@ -4,6 +4,8 @@
 
 from rest_framework import serializers
 
+from .models import SiteDailyMetrics
+
 ###
 ### Summary serializers for listing
 ###
@@ -30,3 +32,11 @@ class UserIndexSerializer(serializers.Serializer):
     username = serializers.CharField(read_only=True)
     fullname = serializers.CharField(source='profile.name', default=None,
         read_only=True)
+
+
+class SiteDailyMetricsSerializer(serializers.ModelSerializer):
+    '''Proviedes summary data about the LMS site
+    '''
+
+    class Meta:
+        model = SiteDailyMetrics
