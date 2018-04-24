@@ -14,6 +14,10 @@ router.register(
     views.SiteDailyMetricsViewSet,
     base_name='site-daily-metrics')
 
+router.register(
+    r'course-daily-metrics',
+    views.CourseDailyMetricsViewSet,
+    base_name='course-daily-metrics')
 
 urlpatterns = [
 

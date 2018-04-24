@@ -4,7 +4,7 @@
 
 from rest_framework import serializers
 
-from .models import SiteDailyMetrics
+from .models import CourseDailyMetrics, SiteDailyMetrics
 
 ###
 ### Summary serializers for listing
@@ -32,6 +32,14 @@ class UserIndexSerializer(serializers.Serializer):
     username = serializers.CharField(read_only=True)
     fullname = serializers.CharField(source='profile.name', default=None,
         read_only=True)
+
+
+class CourseDailyMetricsSerializer(serializers.ModelSerializer):
+    '''Provides summary data about a specific course
+    '''
+    average_progress = serializers.DecimalField(max_digits=2, decimal_places=2)
+    class Meta:
+        model = CourseDailyMetrics
 
 
 class SiteDailyMetricsSerializer(serializers.ModelSerializer):
