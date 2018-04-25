@@ -20,8 +20,7 @@ class CourseLearnersList extends Component {
   retrieveData = (amountToFetch) => {
     const testData = [
       {
-        firstName: 'Hans',
-        lastName: 'Gruber',
+        name: 'Hans Gruber',
         country: 'Germany',
         dateEnrolled: '10-23-2017',
         courseProgress: '59%',
@@ -29,8 +28,7 @@ class CourseLearnersList extends Component {
         dateCompleted: '',
       },
       {
-        firstName: 'John',
-        lastName: 'McClane',
+        name: 'John McClane',
         country: 'USA',
         dateEnrolled: '08-13-2016',
         courseProgress: '100%',
@@ -38,8 +36,7 @@ class CourseLearnersList extends Component {
         dateCompleted: '12-04-2017',
       },
       {
-        firstName: 'Clane',
-        lastName: 'McJohn',
+        name: 'John McClane',
         country: 'USA',
         dateEnrolled: '08-13-2016',
         courseProgress: '100%',
@@ -65,8 +62,7 @@ class CourseLearnersList extends Component {
     const learnersRender = this.state.displayedData.length ? this.state.displayedData.map((learner, index) => {
       return (
         <li key={index} className={styles['learner-row']}>
-          <span className={styles['first-name']}>{learner.firstName}</span>
-          <span className={styles['last-name']}>{learner.lastName}</span>
+          <span className={styles['name']}>{learner.name}</span>
           <span className={styles['country']}>{learner.country}</span>
           <span className={styles['date-enrolled']}>{learner.dateEnrolled}</span>
           <span className={styles['course-progress']}>{learner.courseProgress}</span>
@@ -86,8 +82,7 @@ class CourseLearnersList extends Component {
         <div className={cx({ 'stat-card': true, 'span-2': false, 'span-3': false, 'span-4': true, 'learners-table-container': true})}>
           <ul className={styles['learners-table']}>
             <li key="header" className={styles['header-row']}>
-              <span className={styles['first-name']}>Name</span>
-              <span className={styles['last-name']}>Surname</span>
+              <span className={styles['name']}>Learner</span>
               <span className={styles['country']}>Country</span>
               <span className={styles['date-enrolled']}>Date enrolled</span>
               <span className={styles['course-progress']}>Course progress</span>

@@ -51,7 +51,7 @@
       border-bottom: calcRem(1) solid lighten($base-text-color, 75%);
       font-size: calcRem(14);
 
-      .first-name, .last-name, .course-progress {
+      .name, .course-progress {
         font-weight: bold;
       }
 
