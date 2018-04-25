@@ -1,0 +1,78 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/stat-cards';
+
+.reports-list {
+  padding-top: calcRem(40);
+  padding-bottom: calcRem(40);
+
+  .report {
+    padding: calcRem(30) 0;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+
+    .report-name {
+      flex-grow: 1;
+      flex-shrink: 1;
+      width: 100%;
+      margin-right: calcRem(30);
+      font-size: $base-font-size * 1.15;
+      font-weight: bold;
+
+      a {
+        color: $base-text-color;
+        text-decoration: none;
+      }
+    }
+
+    .report-description {
+      flex: 0 0 calcRem(420);
+      width: calcRem(420);
+      margin-right: calcRem(30);
+      font-size: $base-font-size;
+    }
+
+    .report-timestamp {
+      flex: 0 0 calcRem(110);
+      width: calcRem(110);
+      margin-right: calcRem(30);
+      font-size: $base-font-size;
+      text-align: center;
+    }
+
+    .report-buttons {
+      flex: 0 0 calcRem(140);
+      width: calcRem(140);
+      justify-content: flex-end;
+
+      .view-report-button {
+        font-size: calcRem(14);
+        padding: calcRem(10) calcRem(20);
+        font-weight: bold;
+        color: $primary-color;
+        border: calcRem(2) solid $primary-color;
+        background: transparent;
+        cursor: pointer;
+        border-radius: calcRem(30);
+        transition: all 0.3s ease-in-out;
+        text-decoration: none;
+
+        &:hover {
+          color: #fff;
+          background: $primary-color;
+        }
+      }
+    }
+
+    &.list-header {
+
+      .report-name, .report-description, .report-timestamp, .report-buttons {
+        font-size: $base-font-size * 0.85;
+        font-weight: normal;
+        color: lighten($base-text-color, 15%);
+      }
+    }
+  }
+}

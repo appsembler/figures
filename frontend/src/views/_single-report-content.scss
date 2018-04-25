@@ -1,0 +1,104 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/mixins';
+@import '~base/sass/base/stat-cards';
+
+:global {
+  .react-grid-layout {
+    position: relative;
+    transition: height 200ms ease;
+  }
+
+  .react-grid-item {
+    transition: all 200ms ease;
+    transition-property: left, top;
+  }
+
+  .react-grid-item.cssTransforms {
+    transition-property: transform;
+  }
+
+  .react-grid-item.resizing {
+    z-index: 1;
+    will-change: width, height;
+  }
+
+  .react-grid-item.react-draggable-dragging {
+    transition: none;
+    z-index: 3;
+    will-change: transform;
+  }
+
+  .react-grid-item.react-grid-placeholder {
+    background: $primary-color;
+    opacity: 0.2;
+    transition-duration: 100ms;
+    z-index: 2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+
+  .react-grid-item > .react-resizable-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
+  }
+
+  .react-grid-item > .react-resizable-handle::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 5px;
+    height: 5px;
+    border-right: 2px solid rgba(0, 0, 0, 0.4);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+  }
+}
+
+.report-content {
+  margin-top: calcRem(40);
+  padding-bottom: calcRem(50);
+}
+
+.content-meta {
+  padding-bottom: calcRem(30);
+  margin-bottom: calcRem(30);
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  grid-column-end: span 4;
+
+  .meta-heading {
+    font-size: $base-font-size;
+    font-weight: bold;
+    display: block;
+    margin: 0 0 calcRem(20);
+  }
+
+  .meta-description {
+    flex-grow: 1;
+    flex-shrink: 1;
+
+    .report-description {
+      outline: none;
+      @include editable-content-tooltip;
+    }
+  }
+
+  .meta-date, .meta-author {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: calcRem(40);
+  }
+}
+
+.data-wrapper {
+  margin: 0 calcRem(-30);
+}

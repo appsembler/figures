@@ -1,0 +1,49 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.horizontal-bar-chart {
+  width: 100%;
+}
+
+.horizontal-bar-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: calcRem(10) 0;
+
+  .label-container {
+    margin-right: calcRem(10);
+    display: flex;
+    align-items: center;
+    width: calcRem(160);
+    flex-shrink: 0;
+    font-size: calcRem(14);
+    color: $base-text-color;
+
+    .label-text {
+      width: calcRem(100);
+      margin-right: calcRem(10);
+      text-align: left;
+    }
+
+    .label-value {
+      width: calcRem(50);
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+
+  .bar-container {
+    display: flex;
+    height: calcRem(6);
+    border-radius: calcRem(6);;
+    width: 100%;
+    background-color: #D8D8D8;
+
+    .bar-line {
+      background-color: $primary-color;
+      border-radius: calcRem(6);
+    }
+  }
+}

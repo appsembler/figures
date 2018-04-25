@@ -53,7 +53,7 @@ class CoursesList extends Component {
     let coursesData = [];
     let tempItem = {};
     let courseIds = this.props.getIdListFunction();
-    courseIds.map((id, index) => {
+    courseIds.forEach((id, index) => {
       tempItem = this.props.getCourseDataFunction(id);
       tempItem.courseId = id;
       coursesData.push(tempItem);
@@ -68,7 +68,6 @@ class CoursesList extends Component {
   }
 
   render() {
-    console.log(this.state.coursesData);
     const courseItems = this.state.coursesData.map((item, index) => {
       return (
         <CoursesListItem
@@ -82,6 +81,7 @@ class CoursesList extends Component {
           averageProgress={item.averageProgress}
           learnersEnrolled={item.learnersEnrolled}
           numberLearnersCompleted={item.numberLearnersCompleted}
+          key={index}
         />
       )
     })

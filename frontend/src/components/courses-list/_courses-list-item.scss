@@ -44,6 +44,7 @@
 
     .label-value {
       display: block;
+      margin-top: calcRem(5);
 
       .label {
         display: inline-block;
@@ -91,7 +92,7 @@
         display: block;
         font-size: calcRem(22);
         color: $primary-color;
-        font-weight: 800;
+        font-weight: 900;
       }
     }
   }
