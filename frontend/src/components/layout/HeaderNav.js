@@ -8,7 +8,7 @@ class HeaderNav extends Component {
     return (
       <div className={styles['header-nav']}>
         <NavLink
-          to="/figures/dashboard"
+          to="/figures"
           className={styles['header-nav__link']}
         >
           Dashboard
