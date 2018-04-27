@@ -1,9 +1,8 @@
 import fetch from 'cross-fetch';
 import * as types from './ActionTypes';
+import apiConfig from 'base/apiConfig';
 
 // course index data related Redux actions
-
-const coursesIndexApiUrl = '/figures/api/courses-index/'
 
 export const requestCoursesIndex = () => ({
   type: types.REQUEST_COURSES_INDEX
@@ -18,7 +17,7 @@ export const loadCoursesIndex = ( coursesData ) => ({
 export function fetchCoursesIndex () {
   return dispatch => {
     dispatch(requestCoursesIndex)
-    return fetch(coursesIndexApiUrl)
+    return fetch(apiConfig.figuresCoursesIndexApi)
       .then(response => response.json())
       .then(json => dispatch(loadCoursesIndex(json)));
   }
@@ -26,8 +25,6 @@ export function fetchCoursesIndex () {
 
 
 // user index data related Redux actions
-
-const userIndexApiUrl = '/figures/api/user-index/'
 
 export const requestUserIndex = () => ({
   type: types.REQUEST_USER_INDEX
@@ -42,7 +39,7 @@ export const loadUserIndex = ( coursesData ) => ({
 export function fetchUserIndex () {
   return dispatch => {
     dispatch(requestUserIndex)
-    return fetch(userIndexApiUrl)
+    return fetch(apiConfig.figuresUsersIndexApi)
       .then(response => response.json())
       .then(json => dispatch(loadUserIndex(json)));
   }
