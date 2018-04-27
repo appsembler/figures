@@ -32,7 +32,7 @@
   }
 }
 
-.header-option-button {
+button.header-option-button {
   font-size: calcRem(14);
   font-weight: 400;
   color: pick-visible-color($primary-color, #fff, $base-text-color);
