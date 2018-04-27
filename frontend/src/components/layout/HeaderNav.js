@@ -1,9 +1,17 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { fetchCoursesIndex, fetchUserIndex } from 'base/redux/actions/Actions';
 import { NavLink } from 'react-router-dom';
 import styles from './_header-nav.scss';
 import AutoCompleteCourseSelect from 'base/components/inputs/AutoCompleteCourseSelect';
 
 class HeaderNav extends Component {
+
+  componentDidMount() {
+    this.props.fetchCoursesIndex();
+    this.props.fetchUserIndex();
+  }
+
   render() {
     return (
       <div className={styles['header-nav']}>
@@ -28,4 +36,16 @@ class HeaderNav extends Component {
   }
 }
 
-export default HeaderNav;
+const mapStateToProps = (state, ownProps) => ({
+
+})
+
+const mapDispatchToProps = dispatch => ({
+  fetchCoursesIndex: () => dispatch(fetchCoursesIndex()),
+  fetchUserIndex: () => dispatch(fetchUserIndex()),
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HeaderNav)
