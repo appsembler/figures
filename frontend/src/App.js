@@ -15,6 +15,7 @@ import 'base/sass/base/_base-overrides.scss';
 import styles from 'base/sass/base/_grid.scss';
 
 class App extends Component {
+
   render() {
     return (
       <main className={styles['layout-root']}>
