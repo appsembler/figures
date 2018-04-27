@@ -31,7 +31,7 @@ class App extends Component {
                   <Switch location={history.location}>
                     <Route exact path="/figures" component={HeaderContentMaus} />
                     <Route exact path="/figures/reports" component={HeaderContentReportsList} />
-                    <Route path="/figures/course/:courseId" render={({ match }) => <HeaderContentCourse courseCode={match.params.courseId} />}/>
+                    <Route path="/figures/course/:courseId" render={({ match }) => <HeaderContentCourse courseId={match.params.courseId} />}/>
                     <Route path="/figures/report/:reportId" render={({ match }) => <HeaderReport reportId={match.params.reportId} />}/>
                   </Switch>
                 </div>
@@ -48,7 +48,7 @@ class App extends Component {
                 <Switch location={history.location}>
                   <Route exact path="/figures" component={DashboardContent} />
                   <Route exact path="/figures/reports" component={ReportsList} />
-                  <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseCode={match.params.courseId} />}/>
+                  <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseId={match.params.courseId} />}/>
                   <Route path="/figures/report/:reportId" render={({ match }) => <SingleReportContent reportId={match.params.reportId} />}/>
                 </Switch>
               </div>
