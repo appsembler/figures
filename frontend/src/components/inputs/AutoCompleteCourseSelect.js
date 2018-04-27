@@ -85,7 +85,7 @@ class AutoCompleteCourseSelect extends Component {
     coursesList = this.props.coursesList;
 
     const renderSuggestion = suggestion => (
-      <Link className={styles['suggestion-link']} to='/figures/course' onClick={this.modalTrigger}><span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
+      <Link className={styles['suggestion-link']} to={'/figures/course/' + suggestion.courseId} onClick={this.modalTrigger}><span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
     );
 
 

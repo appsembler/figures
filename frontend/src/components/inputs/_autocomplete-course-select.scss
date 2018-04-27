@@ -6,7 +6,7 @@
   position: relative;
 }
 
-.selector-trigger-button {
+button.selector-trigger-button {
   @include override-edx-styles;
   border-radius: $elements-border-radius;
   padding: calcRem(12) calcRem(20);
