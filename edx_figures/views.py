@@ -7,28 +7,32 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
-
 from rest_framework.filters import DjangoFilterBackend
+from rest_framework.response import Response
 
 # Directly including edx-platform objects for early development
 # Follow-on, we'll likely consolidate edx-platform model imports to an adapter
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-from student.models import UserProfile
+from student.models import CourseEnrollment, UserProfile
 
 from .filters import (
     CourseDailyMetricsFilter,
-    CourseOverviewFilter,SiteDailyMetricsFilter,
+    CourseEnrollmentFilter,
+    CourseOverviewFilter,
+    SiteDailyMetricsFilter,
     UserFilter,
 )
 from .models import CourseDailyMetrics, SiteDailyMetrics
 from .serializers import (
     CourseDailyMetricsSerializer,
+    CourseEnrollmentSerializer,
     CourseIndexSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
 )
+
 
 ##
 ## UI Template rendering views
@@ -109,6 +113,30 @@ class UserIndexView(ListAPIView):
         queryset = super(UserIndexView, self).get_queryset()
 
         return queryset
+
+# TODO: Change to ReadOnlyModelViewSet
+class CourseEnrollmentViewSet(viewsets.ModelViewSet):
+    model = CourseEnrollment
+    queryset = CourseEnrollment.objects.all()
+    pagination_class = None
+    serializer_class = CourseEnrollmentSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = CourseEnrollmentFilter
+
+    def get_queryset(self):
+        queryset = super(CourseEnrollmentViewSet, self).get_queryset()
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+
+        # request.query_params
+        # <QueryDict: {u'course_id': [u'"course-v1:Appsembler EdX101 2015_Spring"']}>
+
+        #print('insepect me'); import pdb; pdb.set_trace()
+
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 ##
 ## Views for edX Figures models
