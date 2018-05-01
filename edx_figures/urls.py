@@ -19,6 +19,14 @@ router.register(
     views.CourseDailyMetricsViewSet,
     base_name='course-daily-metrics')
 
+
+## Wrappers around edx-platform models
+router.register(
+    r'course-enrollments',
+    views.CourseEnrollmentViewSet,
+    base_name='course-enrollments')
+
+
 urlpatterns = [
 
     # UI Templates
