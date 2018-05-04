@@ -15,6 +15,7 @@ import 'base/sass/base/_base-overrides.scss';
 import styles from 'base/sass/base/_grid.scss';
 
 class App extends Component {
+
   render() {
     return (
       <main className={styles['layout-root']}>
@@ -28,9 +29,9 @@ class App extends Component {
               >
                 <div key={history.location.pathname}>
                   <Switch location={history.location}>
-                    <Route exact path="/figures/dashboard" component={HeaderContentMaus} />
+                    <Route exact path="/figures" component={HeaderContentMaus} />
                     <Route exact path="/figures/reports" component={HeaderContentReportsList} />
-                    <Route path="/figures/course/:courseId" render={({ match }) => <HeaderContentCourse courseCode={match.params.courseId} />}/>
+                    <Route path="/figures/course/:courseId" render={({ match }) => <HeaderContentCourse courseId={match.params.courseId} />}/>
                     <Route path="/figures/report/:reportId" render={({ match }) => <HeaderReport reportId={match.params.reportId} />}/>
                   </Switch>
                 </div>
@@ -45,9 +46,9 @@ class App extends Component {
             >
               <div key={history.location.pathname}>
                 <Switch location={history.location}>
-                  <Route exact path="/figures/dashboard" component={DashboardContent} />
+                  <Route exact path="/figures" component={DashboardContent} />
                   <Route exact path="/figures/reports" component={ReportsList} />
-                  <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseCode={match.params.courseId} />}/>
+                  <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseId={match.params.courseId} />}/>
                   <Route path="/figures/report/:reportId" render={({ match }) => <SingleReportContent reportId={match.params.reportId} />}/>
                 </Switch>
               </div>

@@ -18,10 +18,14 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-from student.models import UserProfile
+from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
+
+from student.models import CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
+
+COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
 
 
 class CourseOverviewFactory(DjangoModelFactory):
@@ -29,7 +33,8 @@ class CourseOverviewFactory(DjangoModelFactory):
         model = CourseOverview
 
     # Only define the fields that we will retrieve
-    id = factory.Sequence(lambda n: 'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    id = factory.Sequence(lambda n:
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
     org = 'StarFleetAcademy'
     number = '2161'
@@ -66,6 +71,7 @@ class UserFactory(DjangoModelFactory):
     is_active = True
     is_staff = False
 
+    # TODO: Figure out if this can be a SubFactory and the advantages
     profile = factory.RelatedFactory(UserProfileFactory, 'user')
 
     @factory.post_generation
@@ -78,6 +84,18 @@ class UserFactory(DjangoModelFactory):
                 self.teams.add(team)
 
 
+class CourseEnrollmentFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseEnrollment
+
+    user = factory.SubFactory(
+        UserFactory,
+    )
+    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    created = factory.Sequence(lambda n:
+        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+
+
 ##
 ## edX Figures model factories
 ##
@@ -85,8 +103,10 @@ class UserFactory(DjangoModelFactory):
 class CourseDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = CourseDailyMetrics
-    date_for = factory.Sequence(lambda n: datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
-    course_id = factory.Sequence(lambda n: 'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    date_for = factory.Sequence(lambda n:
+        datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+    course_id = factory.Sequence(lambda n:
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     enrollment_count = factory.Sequence(lambda n: n)
     active_learners_today = factory.Sequence(lambda n: n)
     average_progress = 0.50
@@ -97,7 +117,8 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
 class SiteDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = SiteDailyMetrics
-    date_for = factory.Sequence(lambda n: datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+    date_for = factory.Sequence(lambda n:
+        datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
     cumulative_active_user_count = factory.Sequence(lambda n: n)
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)

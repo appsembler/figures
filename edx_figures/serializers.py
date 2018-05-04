@@ -4,6 +4,12 @@
 
 from rest_framework import serializers
 
+from openedx.core.djangoapps.content.course_overviews.models import (
+    CourseOverview,
+)
+
+from student.models import CourseEnrollment
+
 from .models import CourseDailyMetrics, SiteDailyMetrics
 
 ###
@@ -33,6 +39,34 @@ class UserIndexSerializer(serializers.Serializer):
     fullname = serializers.CharField(source='profile.name', default=None,
         read_only=True)
 
+
+###
+### Serializers for edx-platform models
+###
+
+class CourseOverviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CourseOverview
+        fields = (
+            'id', 'display_name', 'org',
+        )
+
+
+class CourseEnrollmentSerializer(serializers.ModelSerializer):
+    '''Provides CourseOverview model based serialization
+
+    '''
+    course = CourseOverviewSerializer(read_only=True)
+    user = UserIndexSerializer(read_only=True)
+    class Meta:
+        model = CourseEnrollment
+        editable = False
+
+
+###
+### edX Figures model serializers
+###
 
 class CourseDailyMetricsSerializer(serializers.ModelSerializer):
     '''Provides summary data about a specific course
