@@ -16,7 +16,7 @@ var coursesList = [
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
-  return inputLength === coursesList ? [] : coursesList.filter(course => ((course.courseName.toLowerCase().slice(0, inputLength) === inputValue) || (course.courseNumber.toLowerCase().slice(0, inputLength) === inputValue)) );
+  return inputLength === coursesList ? [] : coursesList.filter(course => ((course.courseName.toLowerCase().slice(0, inputLength) === inputValue) || (course.courseNumber.toLowerCase().slice(0, inputLength) === inputValue))).toArray();
 };
 
 const getSuggestionValue = suggestion => suggestion.courseName;
