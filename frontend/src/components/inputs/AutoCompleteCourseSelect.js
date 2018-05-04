@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { Link } from 'react-router-dom';
@@ -15,7 +16,7 @@ var coursesList = [
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
-  return inputLength === coursesList ? [] : coursesList.filter(course => ((course.courseName.toLowerCase().slice(0, inputLength) === inputValue) || (course.courseId.toLowerCase().slice(0, inputLength) === inputValue)) );
+  return inputLength === coursesList ? [] : coursesList.filter(course => ((course.courseName.toLowerCase().slice(0, inputLength) === inputValue) || (course.courseNumber.toLowerCase().slice(0, inputLength) === inputValue)) );
 };
 
 const getSuggestionValue = suggestion => suggestion.courseName;
@@ -82,10 +83,17 @@ class AutoCompleteCourseSelect extends Component {
       value,
       onChange: this.onChange
     };
-    coursesList = this.props.coursesList;
+
+    coursesList = this.props.coursesIndex.map((item, index) => {
+      return {
+        courseId: item.id,
+        courseName: item.name,
+        courseNumber: item.number,
+      }
+    })
 
     const renderSuggestion = suggestion => (
-      <Link className={styles['suggestion-link']} to='/figures/course' onClick={this.modalTrigger}><span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
+      <Link className={styles['suggestion-link']} to={'/figures/course/' + suggestion.courseId} onClick={this.modalTrigger}><span className={styles['suggestion-link__course-id']}>{suggestion.courseNumber}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
     );
 
 
@@ -164,4 +172,10 @@ AutoCompleteCourseSelect.propTypes = {
   coursesList: PropTypes.array
 };
 
-export default AutoCompleteCourseSelect;
+const mapStateToProps = (state, ownProps) => ({
+  coursesIndex: state.coursesIndex.coursesIndex,
+})
+
+export default connect(
+  mapStateToProps
+)(AutoCompleteCourseSelect)
