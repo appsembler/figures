@@ -44,13 +44,11 @@ class CourseLearnersList extends Component {
         dateCompleted: '12-04-2017',
       },
     ]
-    console.log('Retrieving ', amountToFetch, ' records from the API.');
     let temp = this.state.displayedData;
     this.setState({
       displayedData: temp.concat(testData.slice(temp.length, (temp.length + amountToFetch))),
       allDataDisplayed: (amountToFetch >= testData.slice(temp.length).length),
     })
-    console.log(this.state.displayedData);
   }
 
   componentDidMount() {

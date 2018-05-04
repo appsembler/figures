@@ -43,7 +43,6 @@ class HeaderContentCourse extends Component {
     this.setState({
       apiFetchActive: !this.state.apiFetchActive
     })
-    console.log('Stanje course data: ', this.state.generalCourseData);
   }
 
   getCourseData = () => {
