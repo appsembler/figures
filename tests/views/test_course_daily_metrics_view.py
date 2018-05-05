@@ -1,4 +1,4 @@
-'''Unit tests for the site daily metrics view
+'''Tests edx-figures CourseDailyMetricsViewSet class
 
 '''
 
