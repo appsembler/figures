@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import apiConfig from 'base/apiConfig';
 import styles from './_course-learners-list.scss';
 import classNames from 'classnames/bind';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
@@ -12,63 +13,70 @@ class CourseLearnersList extends Component {
     super(props);
     this.state = {
       displayedData: [],
+      displayedUsers: this.props.paginationMaxRows,
       allDataDisplayed: false,
+      courseUsersEnrollmentData: [],
     };
-    this.retrieveData = this.retrieveData.bind(this);
+    this.fetchCourseUserEnrollmentData = this.fetchCourseUserEnrollmentData.bind(this);
+    this.getUserMeta = this.getUserMeta.bind(this);
+    this.getUserCourseProgress = this.getUserCourseProgress.bind(this);
+    this.paginationLoadMore = this.paginationLoadMore.bind(this);
   }
 
-  retrieveData = (amountToFetch) => {
-    const testData = [
-      {
-        name: 'Hans Gruber',
-        country: 'Germany',
-        dateEnrolled: '10-23-2017',
-        courseProgress: '59%',
-        courseCompleted: false,
-        dateCompleted: '',
-      },
-      {
-        name: 'John McClane',
-        country: 'USA',
-        dateEnrolled: '08-13-2016',
-        courseProgress: '100%',
-        courseCompleted: true,
-        dateCompleted: '12-04-2017',
-      },
-      {
-        name: 'John McClane',
-        country: 'USA',
-        dateEnrolled: '08-13-2016',
-        courseProgress: '100%',
-        courseCompleted: true,
-        dateCompleted: '12-04-2017',
-      },
-    ]
-    let temp = this.state.displayedData;
+  fetchCourseUserEnrollmentData = () => {
+    fetch(apiConfig.courseEnrollmentsApi + '?course_id=' + this.props.courseId)
+      .then(response => response.json())
+      .then(json => this.setState({
+        courseUsersEnrollmentData: json
+      }))
+  }
+
+  getUserMeta = (username) => {
+    // the following api fetch needs to be updated because it currently throws an auth error from the server
+    let userMeta = {};
+    fetch(apiConfig.edxUserInfoApi + username)
+      .then(response => response.json())
+      .then(json => userMeta = json)
+    console.log(userMeta);
+    return userMeta;
+  }
+
+  getUserCourseProgress = (userId) => {
+    // this is faux for now since we still don't have this API endpoint
+    const fauxUserData = {
+      courseProgress: '59%',
+      courseCompleted: false,
+      dateCompleted: '',
+    }
+    return fauxUserData;
+  }
+
+  paginationLoadMore = () => {
     this.setState({
-      displayedData: temp.concat(testData.slice(temp.length, (temp.length + amountToFetch))),
-      allDataDisplayed: (amountToFetch >= testData.slice(temp.length).length),
+      displayedUsers: this.state.displayedUsers + this.props.paginationMaxRows
     })
   }
 
   componentDidMount() {
-    this.retrieveData(this.props.paginationMaxRows);
+    this.fetchCourseUserEnrollmentData();
   }
 
 
   render() {
-    const learnersRender = this.state.displayedData.length ? this.state.displayedData.map((learner, index) => {
+    const learnersRender = this.state.courseUsersEnrollmentData.slice(0, this.state.displayedUsers).map((user, index) => {
+      const userMeta = this.getUserMeta(user.user.username);
+      const userCourseProgress = this.getUserCourseProgress(user.user.id);
       return (
         <li key={index} className={styles['learner-row']}>
-          <span className={styles['name']}>{learner.name}</span>
-          <span className={styles['country']}>{learner.country}</span>
-          <span className={styles['date-enrolled']}>{learner.dateEnrolled}</span>
-          <span className={styles['course-progress']}>{learner.courseProgress}</span>
-          <span className={styles['course-completed']}>{learner.courseCompleted && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
-          <span className={styles['date-completed']}>{learner.courseCompleted ? learner.dateCompleted : '-'}</span>
+          <span className={styles['name']}>{userMeta.name}</span>
+          <span className={styles['country']}>{userMeta.country}</span>
+          <span className={styles['date-enrolled']}>{user.created.dateEnrolled}</span>
+          <span className={styles['course-progress']}>{userCourseProgress.courseProgress}</span>
+          <span className={styles['course-completed']}>{userCourseProgress.courseCompleted && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
+          <span className={styles['date-completed']}>{userCourseProgress.courseCompleted ? userCourseProgress.dateCompleted : '-'}</span>
         </li>
-      );
-    }) : '';
+      )
+    })
 
     return (
       <section className={styles['course-learners-list']}>
@@ -89,7 +97,7 @@ class CourseLearnersList extends Component {
             </li>
             {learnersRender}
           </ul>
-          {!this.state.allDataDisplayed && <button className={styles['load-more-button']} onClick={() => this.retrieveData(this.props.paginationMaxRows)}>Load more</button>}
+          {!this.state.allDataDisplayed && <button className={styles['load-more-button']} onClick={() => this.paginationLoadMore()}>Load more</button>}
         </div>
       </section>
     )
@@ -98,12 +106,13 @@ class CourseLearnersList extends Component {
 
 CourseLearnersList.defaultProps = {
   listTitle: 'Per learner info:',
-  paginationMaxRows: 2,
+  paginationMaxRows: 10,
 }
 
 CourseLearnersList.propTypes = {
   listTitle: PropTypes.string,
   paginationMaxRows: PropTypes.number,
+  courseId: PropTypes.string,
 };
 
 export default CourseLearnersList;
