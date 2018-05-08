@@ -4,6 +4,7 @@ edx-figures URL definitions
 
 from django.conf.urls import include, url
 from rest_framework import routers
+from django.views.generic.base import RedirectView
 
 from . import views
 
@@ -37,4 +38,5 @@ urlpatterns = [
     url(r'^api/courses-index/', views.CoursesIndexView.as_view(),
         name='courses-index'),
     url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
+    url('', RedirectView.as_view(pattern_name='edx-figures-home'), name="catch-all")
 ]
