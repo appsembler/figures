@@ -170,7 +170,7 @@ class SingleCourseContent extends Component {
         />
         <LearnerStatistics />
         <CourseLearnersList
-          paginationMaxRows = {10}
+          paginationMaxRows = {3}
           courseId = {this.props.courseId}
         />
       </div>
