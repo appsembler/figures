@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import {List} from 'immutable';
+import moment from 'moment';
 import apiConfig from 'base/apiConfig';
+import countriesWithCodes from 'base/data/countriesData';
 import styles from './_course-learners-list.scss';
 import classNames from 'classnames/bind';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
@@ -12,33 +15,56 @@ class CourseLearnersList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      displayedData: [],
       displayedUsers: this.props.paginationMaxRows,
       allDataDisplayed: false,
       courseUsersEnrollmentData: [],
+      usersData: List(),
     };
     this.fetchCourseUserEnrollmentData = this.fetchCourseUserEnrollmentData.bind(this);
     this.getUserMeta = this.getUserMeta.bind(this);
     this.getUserCourseProgress = this.getUserCourseProgress.bind(this);
     this.paginationLoadMore = this.paginationLoadMore.bind(this);
+    this.setUserData = this.setUserData.bind(this);
   }
 
   fetchCourseUserEnrollmentData = () => {
     fetch(apiConfig.courseEnrollmentsApi + '?course_id=' + this.props.courseId)
       .then(response => response.json())
-      .then(json => this.setState({
-        courseUsersEnrollmentData: json
-      }))
+      // .then(json => this.setState({
+      //   courseUsersEnrollmentData: json
+      // }))
+      .then(json => this.setUserData(json))
+  }
+
+  setUserData = (json) => {
+    json.map((user, index) => {
+      Promise.all([this.getUserMeta(user.user.username), this.getUserCourseProgress(user.user.id)]).then(result => {
+        const newUser = {
+          username: user.user.username,
+          fullname: user.user.fullname,
+          userId: user.user.id,
+          dateEnrolled: user.created,
+          isActive: user['is_active'],
+          enrollmentMode: user.mode,
+          userMeta: result[0],
+          userCourseProgress: result[1]
+        }
+        this.setState({
+          usersData: this.state.usersData.push(newUser)
+        })
+      })
+    })
+    console.log(json);
+    if (this.props.paginationMaxRows >= json.length) {
+      this.setState({
+        allDataDisplayed: true,
+      })
+    }
   }
 
   getUserMeta = (username) => {
-    // the following api fetch needs to be updated because it currently throws an auth error from the server
-    let userMeta = {};
-    fetch(apiConfig.edxUserInfoApi + username)
-      .then(response => response.json())
-      .then(json => userMeta = json)
-    console.log(userMeta);
-    return userMeta;
+    return fetch(apiConfig.edxUserInfoApi + username, { credentials: "same-origin" })
+      .then((response) => response.json())
   }
 
   getUserCourseProgress = (userId) => {
@@ -48,12 +74,13 @@ class CourseLearnersList extends Component {
       courseCompleted: false,
       dateCompleted: '',
     }
-    return fauxUserData;
+    return Promise.resolve(fauxUserData);
   }
 
   paginationLoadMore = () => {
     this.setState({
-      displayedUsers: this.state.displayedUsers + this.props.paginationMaxRows
+      displayedUsers: this.state.displayedUsers + this.props.paginationMaxRows,
+      allDataDisplayed: ((this.state.displayedUsers + this.props.paginationMaxRows) >= this.state.usersData.size)
     })
   }
 
@@ -63,17 +90,16 @@ class CourseLearnersList extends Component {
 
 
   render() {
-    const learnersRender = this.state.courseUsersEnrollmentData.slice(0, this.state.displayedUsers).map((user, index) => {
-      const userMeta = this.getUserMeta(user.user.username);
-      const userCourseProgress = this.getUserCourseProgress(user.user.id);
+    const learnersRender = this.state.usersData.slice(0, this.state.displayedUsers).map((user, index) => {
+
       return (
         <li key={index} className={styles['learner-row']}>
-          <span className={styles['name']}>{userMeta.name}</span>
-          <span className={styles['country']}>{userMeta.country}</span>
-          <span className={styles['date-enrolled']}>{user.created.dateEnrolled}</span>
-          <span className={styles['course-progress']}>{userCourseProgress.courseProgress}</span>
-          <span className={styles['course-completed']}>{userCourseProgress.courseCompleted && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
-          <span className={styles['date-completed']}>{userCourseProgress.courseCompleted ? userCourseProgress.dateCompleted : '-'}</span>
+          <span className={styles['name']}>{user.fullname}</span>
+          <span className={styles['country']}>{countriesWithCodes[user.userMeta.country]}</span>
+          <span className={styles['date-enrolled']}>{moment(user.dateEnrolled).format('LL')}</span>
+          <span className={styles['course-progress']}>{user.userCourseProgress.courseProgress}</span>
+          <span className={styles['course-completed']}>{user.userCourseProgress.courseCompleted && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
+          <span className={styles['date-completed']}>{user.userCourseProgress.courseCompleted ? user.userCourseProgress.dateCompleted : '-'}</span>
         </li>
       )
     })
