@@ -1,4 +1,4 @@
-'''
+'''Tests edx-figures CourseIndexView class
 
 '''
 
@@ -16,8 +16,8 @@ from edx_figures.views import (
     UserIndexView,
     )
 
-from .factories import CourseOverviewFactory, UserFactory
-from .helpers import make_course_key_str
+from tests.factories import CourseOverviewFactory, UserFactory
+from tests.helpers import make_course_key_str
 
 
 # Course data and generate method are duplicates course data in test_filters.py
@@ -36,6 +36,9 @@ def make_course(**kwargs):
         id=kwargs['id'], display_name=kwargs['name'], org=kwargs['org'], number=kwargs['number'])
 
 class CourseIndexViewTest(TestCase):
+    '''Tests the CourseIndexView view class
+    '''
+
     def setUp(self):
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
 

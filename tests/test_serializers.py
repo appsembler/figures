@@ -1,4 +1,4 @@
-'''Test the serializers in edx-figures
+'''Tests edx-figures serializer classes
 
 '''
 
@@ -22,6 +22,8 @@ from .factories import (
 
 @pytest.mark.django_db
 class TestUserIndexSerializer(object):
+    '''Tests the UserIndexSerializer serializer class
+    '''
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
@@ -54,7 +56,7 @@ class TestUserIndexSerializer(object):
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsSerializer(object):
-    '''Basic serializer testing for the CourseDailyMetrics model serializer
+    '''Tests the CourseDailyMetricsSerializer serializer class
 
     TODO: After we complete the initial PRs for the site and course metrics
     models/serializers/views and tests, DRY up the test code
@@ -101,6 +103,8 @@ class TestCourseDailyMetricsSerializer(object):
 
 @pytest.mark.django_db
 class TestSiteDailyMetricsSerializer(object):
+    '''Ttests the SiteDailyMetricsSerializer serializer class
+    '''
 
     @pytest.fixture(autouse=True)
     def setup(self, db):

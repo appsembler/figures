@@ -1,4 +1,4 @@
-'''Unit tests for the user-index view
+'''Tests edx-figures UserIndexView class
 
 '''
 
@@ -39,6 +39,8 @@ def make_user(**kwargs):
 
 @pytest.mark.django_db
 class TestUserIndexView(object):
+    '''Tests the UserIndexView view class
+    '''
 
     @pytest.fixture(autouse=True)
     def setup(self, db):

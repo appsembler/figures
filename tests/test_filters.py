@@ -1,5 +1,4 @@
-'''
-Unit tests for the edx-figures filter classes
+'''Tests edx-figures filter classes
 
 Currently uses Django TestCase style classes instead of pytest style classes
 so that we can use TestCase.assertQuerysetEqual
@@ -58,6 +57,9 @@ def make_user(**kwargs):
 
 @pytest.mark.django_db
 class CourseOverviewFilterTest(TestCase):
+    '''Tests the CourseOverviewFilter filter class
+    '''
+
     def setUp(self):
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
 
@@ -102,7 +104,8 @@ class CourseOverviewFilterTest(TestCase):
 
 @pytest.mark.django_db
 class CourseDailyMetricsFilterTest(TestCase):
-
+    '''Tests the CourseDailyMetricsFilter filter class
+    '''
     def setUp(self):
         self.models = [
             CourseDailyMetricsFactory() for i in range(1,10)
@@ -130,7 +133,8 @@ class CourseDailyMetricsFilterTest(TestCase):
 
 @pytest.mark.django_db
 class SiteDailyMetricsFilterTest(TestCase):
-
+    '''Tests the SiteDailyMetricsFilter filter class
+    '''
     def setUp(self):
         self.site_daily_metrics = [
             SiteDailyMetricsFactory() for i in range(1,10)
@@ -155,6 +159,8 @@ class SiteDailyMetricsFilterTest(TestCase):
 
 @pytest.mark.django_db
 class UserFilterTest(TestCase):
+    '''Tests the UserFilterFilter filter class
+    '''
     def setUp(self):
         self.User = get_user_model()
         self.users = [make_user(**data) for data in USER_DATA]
