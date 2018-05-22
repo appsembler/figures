@@ -140,25 +140,25 @@ class DashboardContent extends Component {
     return (
       <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
         <BaseStatCard
-          cardTitle='Card 1'
+          cardTitle='Number of enrolled learners'
           getDataFunction={this.apiSimulator}
           dataParameter='number-of-learners'
         />
         <BaseStatCard
-          cardTitle='Card 2'
+          cardTitle='Average course progress'
           getDataFunction={this.apiSimulator}
           dataParameter='average-progress'
           dataType='percentage'
         />
         <BaseStatCard
-          cardTitle='Card 3'
+          cardTitle='Average time to complete'
           getDataFunction={this.apiSimulator}
           dataParameter='number-of-learners'
           singleValue
           value='41d 36h 22m'
         />
         <BaseStatCard
-          cardTitle='Card 4'
+          cardTitle='User course completions'
           getDataFunction={this.apiSimulator}
           dataParameter='average-progress'
           dataType='percentage'
