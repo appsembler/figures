@@ -1,6 +1,6 @@
 '''Helpers to generate model instances for testing.
 
-Defines model factories for edX Figures, edX platform, and other models that we
+Defines model factories for Figures, edX platform, and other models that we
 need to create for our tests.
 
 Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
@@ -23,7 +23,7 @@ from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 from student.models import CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
-from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
 
@@ -97,7 +97,7 @@ class CourseEnrollmentFactory(DjangoModelFactory):
 
 
 ##
-## edX Figures model factories
+## Figures model factories
 ##
 
 class CourseDailyMetricsFactory(DjangoModelFactory):

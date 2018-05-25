@@ -1,4 +1,4 @@
-'''Tests edx-figures CourseDailyMetricsViewSet class
+'''Tests Figures CourseDailyMetricsViewSet class
 
 '''
 
@@ -14,8 +14,8 @@ from rest_framework.test import (
     force_authenticate,
     )
 
-from edx_figures.models import CourseDailyMetrics
-from edx_figures.views import CourseDailyMetricsViewSet
+from figures.models import CourseDailyMetrics
+from figures.views import CourseDailyMetricsViewSet
 
 from tests.factories import CourseDailyMetricsFactory, UserFactory
 from tests.helpers import create_metrics_model_timeseries

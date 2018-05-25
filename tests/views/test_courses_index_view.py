@@ -1,4 +1,4 @@
-'''Tests edx-figures CourseIndexView class
+'''Tests Figures CourseIndexView class
 
 '''
 
@@ -11,10 +11,7 @@ from rest_framework.test import (
     force_authenticate,
     )
 
-from edx_figures.views import (
-    CoursesIndexView,
-    UserIndexView,
-    )
+from figures.views import CoursesIndexView, UserIndexView
 
 from tests.factories import CourseOverviewFactory, UserFactory
 from tests.helpers import make_course_key_str

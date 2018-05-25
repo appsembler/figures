@@ -1,19 +1,19 @@
 {% extends "main_django.html" %}
 
 {% block title %}
-  {% block pagetitle %}{% endblock %} | EdX Figures
+  {% block pagetitle %}{% endblock %} | Figures
 {% endblock %}
 
 {% load render_bundle from webpack_loader %}
 
 {% block body %}
   <div id="view-context-values"
-    data-cms-search-api-url={{ edx_figures_api_url }}
-    data-cms-search-api-url-ssl={{ edx_figures_api_url_ssl }}
+    data-cms-search-api-url={{ figures_api_url }}
+    data-cms-search-api-url-ssl={{ figures_api_url_ssl }}
     data-placeholder=""
     style="display:none">
   </div>
   <div id="edx-figures-app" class="edx-figures-app"></div>
   <script>__REACT_DEVTOOLS_GLOBAL_HOOK__ = parent.__REACT_DEVTOOLS_GLOBAL_HOOK__</script>
-  {% render_bundle 'main' config='EDX_FIGURES_APP' %}
+  {% render_bundle 'main' config='FIGURES_APP' %}
 {% endblock %}
