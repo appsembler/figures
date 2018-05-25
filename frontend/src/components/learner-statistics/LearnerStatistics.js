@@ -68,7 +68,6 @@ class LearnerStatistics extends Component {
         label: 'Other',
       }
     ]
-    console.log('Calling API for: ', parameter);
     if (parameter === 'gender') {
       this.setState({
         graphData: testDataGender,

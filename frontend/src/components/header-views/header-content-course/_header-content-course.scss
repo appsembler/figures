@@ -13,17 +13,19 @@
   .course-title {
     font-size: calcRem(36);
     margin-bottom: calcRem(15);
+    line-height: 130%;
   }
 
   .course-info {
     font-size: calcRem(16);
     margin-bottom: calcRem(5);
+    line-height: 130%;
 
     .course-code {
       font-weight: 900;
     }
 
-    .course-info-separator {
+    .course-info-separator {
       margin-left: calcRem(10);
       margin-right: calcRem(10);
     }

@@ -169,7 +169,10 @@ class SingleCourseContent extends Component {
           dataType='percentage'
         />
         <LearnerStatistics />
-        <CourseLearnersList />
+        <CourseLearnersList
+          paginationMaxRows = {3}
+          courseId = {this.props.courseId}
+        />
       </div>
     );
   }

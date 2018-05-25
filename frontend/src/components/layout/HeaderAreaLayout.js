@@ -3,8 +3,8 @@ import classNames from 'classnames/bind';
 import PropTypes from 'prop-types';
 import styles from './_header-area-layout.scss';
 import HeaderNav from 'base/components/layout/HeaderNav';
+import { NavLink } from 'react-router-dom';
 import figuresLogo from 'base/images/logo/edx-figures--logo--negative.svg';
-import ReactVivus from 'react-vivus';
 
 let cx = classNames.bind(styles);
 
@@ -15,18 +15,12 @@ class HeaderAreaLayout extends Component {
     return (
       <div className={styles['header-area']}>
         <div className={cx({ 'header-top': true, 'container': true })}>
-          <div className={styles['header-logo-container']}>
-            <ReactVivus
-              id="logo"
-              option={{
-                file: figuresLogo,
-                animTimingFunction: 'EASE_OUT_BOUNCE',
-                type: 'delayed',
-                duration: 150
-              }}
-              style={{ height: '60px', width: '134px' }}
-            />
-          </div>
+          <NavLink
+            to="/figures"
+            className={styles['header-logo-container']}
+          >
+            <img src={figuresLogo} alt="EdX Figures" role="presentation" />
+          </NavLink>
           <HeaderNav />
         </div>
         {this.props.children}
