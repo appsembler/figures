@@ -1,5 +1,4 @@
-'''
-Unit tests for the edx-figures filter classes
+'''Tests edx-figures filter classes
 
 Currently uses Django TestCase style classes instead of pytest style classes
 so that we can use TestCase.assertQuerysetEqual
@@ -13,9 +12,11 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from student.models import CourseEnrollment
 
 from edx_figures.filters import (
     CourseDailyMetricsFilter,
+    CourseEnrollmentFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
     UserFilter,
@@ -24,13 +25,14 @@ from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 from .factories import (
     CourseDailyMetricsFactory,
+    CourseEnrollmentFactory,
     CourseOverviewFactory,
     SiteDailyMetricsFactory,
     UserFactory,
     )
 from .helpers import make_course_key_str
 
-# Because we are testing filtering on CourseOverviewFields, we want to set
+# Because we are testing filtering on CourseOverview fields, we want to set
 # specific values to facilitate filtering
 COURSE_DATA = [
     { 'org': 'AlphaOrg', 'number': 'A001' },
@@ -57,7 +59,43 @@ def make_user(**kwargs):
 
 
 @pytest.mark.django_db
+class CourseEnrollmentFilterTest(TestCase):
+    def setUp(self):
+        self.course_enrollments = [CourseEnrollmentFactory() for i in range(1,5)]
+
+    def tearDown(self):
+        pass
+
+    def test_get_all_course_enrollments(self):
+        f = CourseEnrollmentFilter(queryset=CourseEnrollment.objects.all())
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.course_enrollments],
+            lambda o: o.id, 
+            ordered=False)
+
+    def test_filter_course_id(self):
+        '''
+        Each default factory created course enrollment has a unique course id
+        We use this to get the course id for the first CourseEnrollment object
+        Then we filter results on this course id and compare to the results
+        returned by the filter class
+        '''
+        course_id = CourseEnrollment.objects.all()[0].course_id
+        expected_results = CourseEnrollment.objects.filter(course_id=course_id)
+        assert expected_results.count() != len(self.course_enrollments)
+        f = CourseEnrollmentFilter(queryset=expected_results)
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in expected_results],
+            lambda o: o.id,
+            ordered=False)
+
+@pytest.mark.django_db
 class CourseOverviewFilterTest(TestCase):
+    '''Tests the CourseOverviewFilter filter class
+    '''
+
     def setUp(self):
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
 
@@ -102,7 +140,8 @@ class CourseOverviewFilterTest(TestCase):
 
 @pytest.mark.django_db
 class CourseDailyMetricsFilterTest(TestCase):
-
+    '''Tests the CourseDailyMetricsFilter filter class
+    '''
     def setUp(self):
         self.models = [
             CourseDailyMetricsFactory() for i in range(1,10)
@@ -130,7 +169,8 @@ class CourseDailyMetricsFilterTest(TestCase):
 
 @pytest.mark.django_db
 class SiteDailyMetricsFilterTest(TestCase):
-
+    '''Tests the SiteDailyMetricsFilter filter class
+    '''
     def setUp(self):
         self.site_daily_metrics = [
             SiteDailyMetricsFactory() for i in range(1,10)
@@ -155,6 +195,8 @@ class SiteDailyMetricsFilterTest(TestCase):
 
 @pytest.mark.django_db
 class UserFilterTest(TestCase):
+    '''Tests the UserFilterFilter filter class
+    '''
     def setUp(self):
         self.User = get_user_model()
         self.users = [make_user(**data) for data in USER_DATA]

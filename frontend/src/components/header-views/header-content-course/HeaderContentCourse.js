@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames/bind';
+import apiConfig from 'base/apiConfig';
 import styles from './_header-content-course.scss';
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 
@@ -26,23 +27,56 @@ class CustomTooltip extends Component {
 
 class HeaderContentCourse extends Component {
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      apiFetchActive: false,
+      generalCourseData: {},
+    };
+
+    this.triggerApiFetchActive = this.triggerApiFetchActive.bind(this);
+    this.getCourseData = this.getCourseData.bind(this);
+  }
+
+  triggerApiFetchActive = () => {
+    this.setState({
+      apiFetchActive: !this.state.apiFetchActive
+    })
+  }
+
+  getCourseData = () => {
+    this.triggerApiFetchActive();
+    fetch(apiConfig.edxCourseInfoApi + this.props.courseId)
+      .then(response => response.json())
+      .then(json => this.setState({
+        generalCourseData: json
+      }, this.triggerApiFetchActive()))
+  }
+
+  componentDidMount() {
+    this.getCourseData();
+  }
+
   render() {
+    const courseStartDate = new Date(this.state.generalCourseData.start);
+    const courseEndDate = new Date(this.state.generalCourseData.end);
 
     return (
       <section className={styles['header-content-course']}>
         <div className={cx({ 'main-content': true, 'container': true})}>
           <div className={styles['course-title']}>
-            {this.props.courseTitle}
+            {this.state.generalCourseData.name}
           </div>
           <div className={styles['course-info']}>
-            <span className={styles['course-code']}>{this.props.courseCode}</span>
+            <span className={styles['course-code']}>{this.state.generalCourseData.number}</span>
             <span className={styles['course-info-separator']}>|</span>
-            {this.props.courseIsSelfPaced ? (
+            {(this.state.generalCourseData.pacing === 'self-paced') ? (
               <span className={styles['course-date']}>This course is self-paced</span>
             ) : [
-              <span key='courseStart' className={styles['course-date']}>Starts: {this.props.courseStartDate}</span>,
-              <span key='separator' className={styles['course-info-separator']}>|</span>,
-              <span key='courseEnd' className={styles['course-date']}>Ends: {this.props.courseEndDate}</span>,
+              <span key='courseStart' className={styles['course-date']}>Starts: {courseStartDate.toUTCString()}</span>,
+              this.state.generalCourseData.courseEndDate && <span key='separator' className={styles['course-info-separator']}>|</span>,
+              this.state.generalCourseData.courseEndDate && <span key='courseEnd' className={styles['course-date']}>Ends: {courseEndDate.toUTCString()}</span>,
             ]}
           </div>
           <span className={styles['text-separator']} />

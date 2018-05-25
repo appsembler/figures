@@ -73,10 +73,11 @@
     }
 
     .button-main {
+      font: inherit;
+      line-height: 100%;
       font-size: calcRem(14);
       font-weight: bold;
       padding: calcRem(5) calcRem(20);
-      display: block;
       background: transparent;
       border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
       color: pick-visible-color($primary-color, #fff, $base-text-color);
@@ -92,7 +93,6 @@
     .button-secondary {
       font-size: calcRem(14);
       min-width: calcRem(32);
-      display: block;
       background: transparent;
       border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
       color: pick-visible-color($primary-color, #fff, $base-text-color);

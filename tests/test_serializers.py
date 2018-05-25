@@ -1,4 +1,4 @@
-'''Test the serializers in edx-figures
+'''Tests edx-figures serializer classes
 
 '''
 
@@ -7,21 +7,28 @@ from decimal import Decimal
 import pytest
 
 from django.db import models
+
+from student.models import CourseEnrollment
+
 from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
 from edx_figures.serializers import (
     CourseDailyMetricsSerializer,
+    CourseEnrollmentSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
 )
 
 from .factories import (
     CourseDailyMetricsFactory,
+    CourseEnrollmentFactory,
     SiteDailyMetricsFactory,
     UserFactory,
     )
 
 @pytest.mark.django_db
 class TestUserIndexSerializer(object):
+    '''Tests the UserIndexSerializer serializer class
+    '''
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
@@ -52,9 +59,39 @@ class TestUserIndexSerializer(object):
         assert data['fullname'] == 'Alpha One'
 
 
+class TestCourseEnrollmentSerializer(object):
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.model =  CourseEnrollment
+        self.special_fields = set(['course_id', 'created', 'user', ])
+        self.expected_results_keys = set([o.name for o in self.model._meta.fields])
+        field_names = (o.name for o in self.model._meta.fields
+            if o.name not in self.date_fields )
+        self.model_obj = CourseEnrollmentFactory()
+        self.serializer = CourseEnrollmentSerializer(instance=self.model_obj)
+
+    def test_has_fields(self):
+        '''
+        Initially, doing a limited test of fields as figure out how mamu of the
+        CourseEnrollment model fields and relationships we need to capture.
+        '''
+        data = self.serializer.data
+        assert data['course_id'] == str(self.model_obj.course_id)
+        assert dateutil_parse(data['created']) == self.model_obj.created
+        assert data['user']['fullname'] == self.model_obj.user.profile.name
+
+        for field_name in (self.expected_results_keys - self.special_fields):
+            db_field = getattr(self.model_obj, field_name)
+            if type(db_field) in (float, Decimal, ):
+                assert float(data[field_name]) == pytest.approx(db_field)
+            else:
+                assert data[field_name] == db_field
+
+
 @pytest.mark.django_db
 class TestCourseDailyMetricsSerializer(object):
-    '''Basic serializer testing for the CourseDailyMetrics model serializer
+    '''Tests the CourseDailyMetricsSerializer serializer class
 
     TODO: After we complete the initial PRs for the site and course metrics
     models/serializers/views and tests, DRY up the test code
@@ -101,6 +138,8 @@ class TestCourseDailyMetricsSerializer(object):
 
 @pytest.mark.django_db
 class TestSiteDailyMetricsSerializer(object):
+    '''Ttests the SiteDailyMetricsSerializer serializer class
+    '''
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
