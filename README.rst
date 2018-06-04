@@ -167,11 +167,11 @@ Contributing
 
 TODO: Add details here or separate `CONTRIBUTING` file to the root of the repo
 
-.. |travis-badge| image:: https://travis-ci.org/appsembler/edx-figures.svg?branch=master
-    :target: https://travis-ci.org/appsembler/edx-figures/
+.. |travis-badge| image:: https://travis-ci.org/appsembler/figures.svg?branch=master
+    :target: https://travis-ci.org/appsembler/figures/
     :alt: Travis
 
-.. |codecov-badge| image:: http://codecov.io/github/appsembler/edx-figures/coverage.svg?branch=master
-    :target: http://codecov.io/github/appsembler/edx-figures?branch=master
+.. |codecov-badge| image:: http://codecov.io/github/appsembler/figures/coverage.svg?branch=master
+    :target: http://codecov.io/github/appsembler/figures?branch=master
     :alt: Codecov
 
