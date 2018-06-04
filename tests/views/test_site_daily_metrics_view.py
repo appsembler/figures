@@ -1,4 +1,4 @@
-'''Tests edx-figures SiteDailyMetricsViewSet class
+'''Tests Figures SiteDailyMetricsViewSet class
 
 '''
 
@@ -13,8 +13,8 @@ from rest_framework.test import (
     force_authenticate,
     )
 
-from edx_figures.models import SiteDailyMetrics
-from edx_figures.views import SiteDailyMetricsViewSet
+from figures.models import SiteDailyMetrics
+from figures.views import SiteDailyMetricsViewSet
 
 from tests.factories import SiteDailyMetricsFactory, UserFactory
 

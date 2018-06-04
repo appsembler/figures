@@ -1,5 +1,5 @@
 '''
-Provides filtering for objects retrieved in edX Figures
+Provides filtering for objects retrieved in Figures
 '''
 
 from django.contrib.auth import get_user_model
@@ -12,7 +12,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 from student.models import CourseEnrollment
 
-from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
 class CourseOverviewFilter(django_filters.FilterSet):

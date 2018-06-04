@@ -1,5 +1,5 @@
 '''
-Defines edx-figures models
+Defines Figures models
 
 '''
 

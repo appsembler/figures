@@ -1,4 +1,4 @@
-'''Helper methods for edx-figures testing
+'''Helper methods for Figures testing
 '''
 
 from dateutil.rrule import rrule, DAILY

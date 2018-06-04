@@ -1,5 +1,5 @@
 '''
-edx-figures URL definitions
+Figures URL definitions
 '''
 
 from django.conf.urls import include, url
@@ -31,12 +31,12 @@ router.register(
 urlpatterns = [
 
     # UI Templates
-    url(r'^$', views.edx_figures_home, name='edx-figures-home'),
+    url(r'^$', views.figures_home, name='figures-home'),
 
     # REST API
     url(r'^api/', include(router.urls, namespace='api')),
     url(r'^api/courses-index/', views.CoursesIndexView.as_view(),
         name='courses-index'),
     url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
-    url('', RedirectView.as_view(pattern_name='edx-figures-home'), name="catch-all")
+    url('', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
 ]

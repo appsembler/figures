@@ -44,7 +44,7 @@ INSTALLED_APPS = (
     #'rest_framework.authtoken',
     'webpack_loader',
     'devsite',
-    'edx_figures',
+    'figures',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -119,7 +119,7 @@ COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+(/|\+)[^/+]+(/|\+)[^/?]+)'
 
 WEBPACK_LOADER = {}
 
-from edx_figures.settings import EDX_FIGURES
+from figures.settings import FIGURES
 
 
 

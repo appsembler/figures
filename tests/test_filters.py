@@ -1,4 +1,4 @@
-'''Tests edx-figures filter classes
+'''Tests Figures filter classes
 
 Currently uses Django TestCase style classes instead of pytest style classes
 so that we can use TestCase.assertQuerysetEqual
@@ -14,23 +14,23 @@ from django.test import TestCase
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseEnrollment
 
-from edx_figures.filters import (
+from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
     UserFilter,
 )
-from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
-from .factories import (
+from tests.factories import (
     CourseDailyMetricsFactory,
     CourseEnrollmentFactory,
     CourseOverviewFactory,
     SiteDailyMetricsFactory,
     UserFactory,
     )
-from .helpers import make_course_key_str
+from tests.helpers import make_course_key_str
 
 # Because we are testing filtering on CourseOverview fields, we want to set
 # specific values to facilitate filtering
