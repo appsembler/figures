@@ -38,7 +38,7 @@ from .serializers import (
 ## UI Template rendering views
 ##
 
-def edx_figures_home(request):
+def figures_home(request):
     '''Renders the JavaScript SPA dashboard
 
 
@@ -49,9 +49,9 @@ def edx_figures_home(request):
     # Placeholder context vars just to illustrate returning API hosts to the
     # client. This one uses a protocol relative url
     context = {
-        'edx_figures_api_url': '//api.foo.com',
+        'figures_api_url': '//api.example.com',
     }
-    return render(request, 'edx_figures/index.html', context)
+    return render(request, 'figures/index.html', context)
 
 
 ##
@@ -65,7 +65,7 @@ def edx_figures_home(request):
 class CoursesIndexView(ListAPIView):
     '''Provides a list of courses with abbreviated details
 
-    Uses edx_figures.filters.CourseOverviewFilter to select subsets of
+    Uses figures.filters.CourseOverviewFilter to select subsets of
     CourseOverview objects
 
     We want to be able to filter on
@@ -99,7 +99,7 @@ class CoursesIndexView(ListAPIView):
 class UserIndexView(ListAPIView):
     '''Provides a list of users with abbreviated details
 
-    Uses edx_figures.filters.UserFilter to select subsets of User objects
+    Uses figures.filters.UserFilter to select subsets of User objects
     '''
 
     model = get_user_model()
@@ -139,7 +139,7 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 ##
-## Views for edX Figures models
+## Views for Figures models
 ##
 
 class CourseDailyMetricsViewSet(viewsets.ModelViewSet):

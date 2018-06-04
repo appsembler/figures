@@ -9,7 +9,7 @@ import model_utils.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('edx_figures', '0001_initial'),
+        ('figures', '0001_initial'),
     ]
 
     operations = [

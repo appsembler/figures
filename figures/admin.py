@@ -1,4 +1,4 @@
-'''Provides access to edx-figures models in the admin dashboard
+'''Provides access to Figures models in the admin dashboard
 
 '''
 

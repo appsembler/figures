@@ -1,4 +1,4 @@
-'''Serializers used in edX Figures
+'''Serializers used in Figures
 
 '''
 
@@ -65,7 +65,7 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
 
 
 ###
-### edX Figures model serializers
+### Figures model serializers
 ###
 
 class CourseDailyMetricsSerializer(serializers.ModelSerializer):

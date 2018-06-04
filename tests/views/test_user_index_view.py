@@ -1,4 +1,4 @@
-'''Tests edx-figures UserIndexView class
+'''Tests Figures UserIndexView class
 
 '''
 
@@ -13,7 +13,7 @@ from rest_framework.test import (
     force_authenticate,
     )
 
-from edx_figures.views import (
+from figures.views import (
     UserIndexView,
     )
 
@@ -66,7 +66,7 @@ class TestUserIndexView(object):
         '''Tests retrieving a list of users with abbreviated details
 
         The fields in each returned record are identified by
-            `edx_figures.serializers.UserIndexSerializer`
+            `figures.serializers.UserIndexSerializer`
 
         '''
         expected_data = self.get_expected_results(**filter)

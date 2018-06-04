@@ -1,4 +1,4 @@
-'''Tests edx-figures CourseDailyMetrics model
+'''Tests Figures CourseDailyMetrics model
 
 '''
 
@@ -7,7 +7,7 @@ import pytest
 
 from django.db.utils import IntegrityError
 
-from edx_figures.models import CourseDailyMetrics
+from figures.models import CourseDailyMetrics
 
 from tests.factories import CourseDailyMetricsFactory
 

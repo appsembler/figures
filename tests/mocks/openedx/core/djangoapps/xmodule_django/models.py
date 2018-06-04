@@ -1,10 +1,10 @@
-'''Provides edx-platform functionality for edx-figures tests
+'''Provides edx-platform functionality for Figures tests
 
 Provides Opaque key derived classes to support edx-platform mocks that use
 CourseKeyField objects 
 
 This is to make sure that course key related type errors are trapped in 
-edx-figures tests::
+figures tests::
 
     "course-v1:MyOrg EdX101 2015_Spring" is not an instance of 
     <class 'opaque_keys.edx.keys.CourseKey'>

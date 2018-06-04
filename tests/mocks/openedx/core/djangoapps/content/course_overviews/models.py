@@ -5,7 +5,7 @@ Overview
 --------
 
 The purpose of this module is to provide the minimum models in order to mock
-edx-figures access to edx-platform models
+Figures access to edx-platform models
 
 Reference
 ---------

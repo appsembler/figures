@@ -15,7 +15,7 @@ from opaque_keys.edx.keys import CourseKey
 
 from student.models import CourseEnrollment
 
-from edx_figures.views import CourseEnrollmentViewSet
+from figures.views import CourseEnrollmentViewSet
 
 from tests.factories import(
     COURSE_ID_STR_TEMPLATE,

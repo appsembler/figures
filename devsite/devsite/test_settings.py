@@ -34,7 +34,7 @@ INSTALLED_APPS = (
     'django_countries',
     'django_filters',
     'devsite',
-    'edx_figures',
+    'figures',
 
     # edx-platform apps. Mocks are used by default
     # See: edx-figures/tests/mocks/
@@ -45,10 +45,10 @@ INSTALLED_APPS = (
 )
 
 LOCALE_PATHS = [
-    root('edx_figures', 'conf', 'locale'),
+    root('figures', 'conf', 'locale'),
 ]
 
-ROOT_URLCONF = 'edx_figures.urls'
+ROOT_URLCONF = 'figures.urls'
 
 SECRET_KEY = 'insecure-secret-key'
 
@@ -67,4 +67,4 @@ REST_FRAMEWORK = {
 WEBPACK_LOADER = {}
 
 # This is all we need to instantiate edx-figures with default settings
-from edx_figures.settings import EDX_FIGURES
+from figures.settings import FIGURES

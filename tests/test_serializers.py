@@ -1,4 +1,4 @@
-'''Tests edx-figures serializer classes
+'''Tests Figures serializer classes
 
 '''
 
@@ -10,15 +10,15 @@ from django.db import models
 
 from student.models import CourseEnrollment
 
-from edx_figures.models import CourseDailyMetrics, SiteDailyMetrics
-from edx_figures.serializers import (
+from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.serializers import (
     CourseDailyMetricsSerializer,
     CourseEnrollmentSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
 )
 
-from .factories import (
+from tests.factories import (
     CourseDailyMetricsFactory,
     CourseEnrollmentFactory,
     SiteDailyMetricsFactory,
