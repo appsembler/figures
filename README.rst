@@ -12,7 +12,7 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`_.
 Notice and Development Status
 -----------------------------
 
-**Figures is in development. We are targetting our first production ready version for July, 2018**
+**Figures is in development. We are targeting our first production ready version for July, 2018**
 
 This Document
 =============
@@ -386,7 +386,7 @@ TODO: Add details here or separate `CONTRIBUTING` file to the root of the repo
 Reporting Security Issues
 -------------------------
 
-Please do not report security issues in public. Please email security@appsembler.org.
+Please do not report security issues in public. Please email security@appsembler.com.
 
 
 .. |travis-badge| image:: https://travis-ci.org/appsembler/figures.svg?branch=master
