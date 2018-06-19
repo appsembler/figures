@@ -2,13 +2,14 @@
 
 '''
 from django.contrib.auth import get_user_model
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 # Directly including edx-platform objects for early development
 # Follow-on, we'll likely consolidate edx-platform model imports to an adapter
@@ -21,6 +22,7 @@ from .filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
+    GeneralUserDataFilter,
     SiteDailyMetricsFilter,
     UserFilter,
 )
@@ -31,6 +33,7 @@ from .serializers import (
     CourseIndexSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
+    GeneralUserDataSerializer
 )
 
 
@@ -128,12 +131,6 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def list(self, request, *args, **kwargs):
-
-        # request.query_params
-        # <QueryDict: {u'course_id': [u'"course-v1:Appsembler EdX101 2015_Spring"']}>
-
-        #print('insepect me'); import pdb; pdb.set_trace()
-
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -170,4 +167,29 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
         queryset = super(SiteDailyMetricsViewSet, self).get_queryset()
         return queryset
 
-        #return SiteDailyMetricsQuery.get_queryset(self.request.query_params)
+
+##
+## Views for the front end
+##
+
+
+class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
+    '''View class to serve general user data to the Figures UI
+
+    See the serializer class, GeneralUserDataSerializer for the specific fields
+    returned
+
+    Can filter users for a specific course by providing the 'course_id' query
+    parameter
+
+    '''
+    model = get_user_model()
+    queryset =  get_user_model().objects.all()
+    pagination_class = None
+    serializer_class = GeneralUserDataSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = GeneralUserDataFilter
+
+    def get_queryset(self):
+        queryset = super(GeneralUserDataViewSet, self).get_queryset()
+        return queryset

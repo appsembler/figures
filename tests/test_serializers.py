@@ -2,9 +2,11 @@
 
 '''
 
+import datetime
 from dateutil.parser import parse as dateutil_parse
 from decimal import Decimal
 import pytest
+import pytz
 
 from django.db import models
 
@@ -16,6 +18,7 @@ from figures.serializers import (
     CourseEnrollmentSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
+    GeneralUserDataSerializer,
 )
 
 from tests.factories import (
@@ -178,3 +181,55 @@ class TestSiteDailyMetricsSerializer(object):
 
         for field_name in (self.expected_results_keys - self.date_fields):
             assert data[field_name] == getattr(self.site_daily_metrics,field_name)
+
+
+@pytest.mark.django_db
+class TestGeneralUserDataSerializer(object):
+    '''Tests the UserIndexSerializer serializer class
+    '''
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.a_datetime = datetime.datetime(2018, 02, 02, tzinfo=pytz.UTC)
+        self.user_attributes = {
+            'username': 'alpha_one',
+            'profile__name': 'Alpha One',
+            'profile__country': 'CA',
+            'profile__gender': 'o',
+            'date_joined': self.a_datetime,
+            'profile__year_of_birth': 1989,
+            'profile__level_of_education': 'other',
+
+        }
+        self.user = UserFactory(**self.user_attributes)
+        self.serializer = GeneralUserDataSerializer(instance=self.user)
+
+        self.expected_fields = [
+            'id', 'username', 'fullname','country', 'is_active', 'gender',
+            'date_joined', 'year_of_birth', 'level_of_education', 'courses',
+            'language_proficiencies',
+        ]
+
+    def test_has_fields(self):
+        '''Tests that the serialized UserIndex data has specific keys and values
+        
+        We use a set instead of just doing this:
+
+            assert data.keys() == ['id', 'username', 'fullname', ]
+
+        because we can't guarentee order. See:
+            https://docs.python.org/2/library/stdtypes.html#dict.items
+        '''
+        data = self.serializer.data
+
+        #import pdb; pdb.set_trace()
+        assert set(data.keys()) == set(self.expected_fields)
+        
+        # This is to make sure that the serializer retrieves the correct nested
+        # model (UserProfile) data
+        assert data['username'] == 'alpha_one'
+        assert data['fullname'] == 'Alpha One'
+        assert data['country'] == 'CA'
+        assert data['gender'] == 'o'
+        assert data['date_joined'] == str(self.a_datetime.date())
+
