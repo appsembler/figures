@@ -11,9 +11,9 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 
 from student.models import CourseEnrollment
 
-from .models import CourseDailyMetrics, SiteDailyMetrics
+from figures.helpers import as_course_key
+from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
-from .helpers import as_course_key
 
 ##
 ## Serializer Field classes
