@@ -27,6 +27,12 @@ router.register(
     views.CourseEnrollmentViewSet,
     base_name='course-enrollments')
 
+# For the front end UI
+router.register(
+    r'users/general',
+    views.GeneralUserDataViewSet,
+    base_name='general-users')
+
 
 urlpatterns = [
 

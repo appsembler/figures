@@ -2,6 +2,7 @@
 
 '''
 
+from django_countries import Countries
 from rest_framework import serializers
 
 from openedx.core.djangoapps.content.course_overviews.models import (
@@ -10,7 +11,34 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 
 from student.models import CourseEnrollment
 
-from .models import CourseDailyMetrics, SiteDailyMetrics
+from figures.helpers import as_course_key
+from figures.models import CourseDailyMetrics, SiteDailyMetrics
+
+
+##
+## Serializer Field classes
+##
+
+class SerializeableCountryField(serializers.ChoiceField):
+    '''
+    This class addresses an issue with django_countries that does not serialize
+    blank country values. See here:
+
+        https://github.com/SmileyChris/django-countries/issues/106
+    '''
+    def __init__(self, **kwargs):
+        super(SerializeableCountryField, self).__init__(choices=Countries(),
+            **kwargs)
+
+    def to_representation(self, value):
+        if value in ('', None):
+            # normally here it would return value.
+            # which is Country(u'') and not serialiable
+            # See the issue linked in the class docstring
+            return ''
+
+        return super(SerializeableCountryField, self).to_representation(value)
+
 
 ###
 ### Summary serializers for listing
@@ -82,3 +110,70 @@ class SiteDailyMetricsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SiteDailyMetrics
+
+
+##
+## Serializers for serving the front end views
+##
+
+class GeneralUserDataSerializer(serializers.Serializer):
+    '''
+
+    Example from API docs:
+     {
+        "username": "maxi",
+        "country": "UY",
+        "is_active": true,
+        "year_of_birth": 1985,
+        "level_of_education": "b",
+        "gender": "m",
+        "date_joined": "2018-05-06T14:01:58Z",
+        "language_proficiencies": [],
+        "courses": [
+          {
+            "course_name": "Something",
+            "course_id": "A193+2016Q4+something",
+          }
+          ...
+        ]
+      },
+
+    Changes from spec:
+    courses list:
+    - uses 'id' instead of 'course_id'
+    - includes additional fields, org and number, as we are reusing the 
+    CourseIndexSerializer
+    '''
+
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    fullname = serializers.CharField(source='profile.name', default=None,
+        read_only=True)
+
+    country = SerializeableCountryField(source='profile.country',
+        required=False, read_only=True, allow_blank=True)
+    is_active = serializers.BooleanField(read_only=True)
+    year_of_birth = serializers.IntegerField(source='profile.year_of_birth', read_only=True)
+    gender = serializers.CharField(source='profile.gender', read_only=True)
+    date_joined = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    level_of_education = serializers.CharField(source='profile.level_of_education', 
+        allow_blank=True, required=False, read_only=True)
+
+    language_proficiencies = serializers.SerializerMethodField()
+    courses = serializers.SerializerMethodField()
+
+    def get_language_proficiencies(self, user):
+        if hasattr(user,'profiles') and user.profile.language:
+            return [user.profile.language]
+        else:
+            return []
+
+    def get_courses(self, user):
+        course_ids = CourseEnrollment.objects.filter(
+            user=user).values_list('course_id', flat=True).distinct()
+
+        course_overviews = CourseOverview.objects.filter(
+            id__in=[as_course_key(course_id) for course_id in course_ids])
+
+        return [CourseOverviewSerializer(data).data for data in course_overviews]
+
