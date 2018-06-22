@@ -12,6 +12,7 @@ import datetime
 from django.contrib.auth import get_user_model
 #from django_countries.fields import CountryField
 import factory
+from factory import fuzzy
 from factory.django import DjangoModelFactory
 
 from openedx.core.djangoapps.content.course_overviews.models import (
@@ -20,7 +21,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 
-from student.models import CourseEnrollment, UserProfile
+from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
@@ -39,7 +40,11 @@ class CourseOverviewFactory(DjangoModelFactory):
     org = 'StarFleetAcademy'
     number = '2161'
     display_org_with_default = factory.LazyAttribute(lambda o: o.org)
-
+    enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,02, tzinfo=factory.compat.UTC))
+    self_paced = False
+    enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,05,05, tzinfo=factory.compat.UTC))
 
 class CourseTeamFactory(DjangoModelFactory):
     class Meta:
@@ -94,6 +99,17 @@ class CourseEnrollmentFactory(DjangoModelFactory):
     course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
     created = factory.Sequence(lambda n:
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+
+
+class CourseAccessRoleFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseAccessRole
+    user = factory.SubFactory(
+        UserFactory,
+    )
+    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    role = factory.Iterator(['instructor', 'staff'])
+
 
 
 ##

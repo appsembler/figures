@@ -27,6 +27,10 @@ router.register(
     views.CourseEnrollmentViewSet,
     base_name='course-enrollments')
 
+router.register(
+    r'courses/general',
+    views.GeneralCourseDataViewSet,
+    base_name='general-courses')
 
 urlpatterns = [
 

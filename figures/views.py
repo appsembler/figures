@@ -2,13 +2,15 @@
 
 '''
 from django.contrib.auth import get_user_model
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
+
+from opaque_keys.edx.keys import CourseKey
 
 # Directly including edx-platform objects for early development
 # Follow-on, we'll likely consolidate edx-platform model imports to an adapter
@@ -29,6 +31,7 @@ from .serializers import (
     CourseDailyMetricsSerializer,
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
+    GeneralCourseDataSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
 )
@@ -128,12 +131,6 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def list(self, request, *args, **kwargs):
-
-        # request.query_params
-        # <QueryDict: {u'course_id': [u'"course-v1:Appsembler EdX101 2015_Spring"']}>
-
-        #print('insepect me'); import pdb; pdb.set_trace()
-
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -171,3 +168,23 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
         return queryset
 
         #return SiteDailyMetricsQuery.get_queryset(self.request.query_params)
+
+
+##
+## Views for the front end
+##
+
+class GeneralCourseDataViewSet(viewsets.ModelViewSet):
+    '''
+
+    '''
+    model = CourseOverview
+    queryset = CourseOverview.objects.all()
+    pagination_class = None
+    serializer_class = GeneralCourseDataSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        course_id_str = kwargs.get('pk','')
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        course_overview = get_object_or_404(CourseOverview, pk=course_key)
+        return Response(GeneralCourseDataSerializer(course_overview).data)
