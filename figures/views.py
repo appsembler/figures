@@ -9,6 +9,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from opaque_keys.edx.keys import CourseKey
 
@@ -23,6 +24,7 @@ from .filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
+    GeneralUserDataFilter,
     SiteDailyMetricsFilter,
     UserFilter,
 )
@@ -34,6 +36,7 @@ from .serializers import (
     GeneralCourseDataSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
+    GeneralUserDataSerializer
 )
 
 
@@ -167,12 +170,11 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
         queryset = super(SiteDailyMetricsViewSet, self).get_queryset()
         return queryset
 
-        #return SiteDailyMetricsQuery.get_queryset(self.request.query_params)
-
 
 ##
 ## Views for the front end
 ##
+
 
 class GeneralCourseDataViewSet(viewsets.ModelViewSet):
     '''
@@ -188,3 +190,25 @@ class GeneralCourseDataViewSet(viewsets.ModelViewSet):
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
         course_overview = get_object_or_404(CourseOverview, pk=course_key)
         return Response(GeneralCourseDataSerializer(course_overview).data)
+
+
+class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
+    '''View class to serve general user data to the Figures UI
+
+    See the serializer class, GeneralUserDataSerializer for the specific fields
+    returned
+
+    Can filter users for a specific course by providing the 'course_id' query
+    parameter
+
+    '''
+    model = get_user_model()
+    queryset =  get_user_model().objects.all()
+    pagination_class = None
+    serializer_class = GeneralUserDataSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = GeneralUserDataFilter
+
+    def get_queryset(self):
+        queryset = super(GeneralUserDataViewSet, self).get_queryset()
+        return queryset

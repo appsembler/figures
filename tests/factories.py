@@ -65,7 +65,11 @@ class UserProfileFactory(DjangoModelFactory):
     # User full name
     name = factory.Sequence(lambda n: 'User Name{}'.format(n))
     country = 'US'
-
+    gender = 'o'
+    year_of_birth = fuzzy.FuzzyInteger(1950,2000)
+    level_of_education = fuzzy.FuzzyChoice(
+        ['p','m','b','a','hs','jh','el','none', 'other',]
+        )
 
 class UserFactory(DjangoModelFactory):
     class Meta:
@@ -75,6 +79,9 @@ class UserFactory(DjangoModelFactory):
     password = factory.PostGenerationMethodCall('set_password', 'password')
     is_active = True
     is_staff = False
+    is_superuser = False
+    date_joined = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,04,01, tzinfo=factory.compat.UTC))
 
     # TODO: Figure out if this can be a SubFactory and the advantages
     profile = factory.RelatedFactory(UserProfileFactory, 'user')
