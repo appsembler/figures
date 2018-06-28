@@ -5,6 +5,7 @@
 import datetime
 from dateutil.parser import parse as dateutil_parse
 from decimal import Decimal
+from dateutil.parser import parse
 import pytest
 import pytz
 
@@ -16,17 +17,21 @@ from figures.models import CourseDailyMetrics, SiteDailyMetrics
 from figures.serializers import (
     CourseDailyMetricsSerializer,
     CourseEnrollmentSerializer,
+    GeneralCourseDataSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer,
 )
 
 from tests.factories import (
+    CourseAccessRoleFactory,
     CourseDailyMetricsFactory,
     CourseEnrollmentFactory,
+    CourseOverviewFactory,
     SiteDailyMetricsFactory,
     UserFactory,
     )
+
 
 @pytest.mark.django_db
 class TestUserIndexSerializer(object):
@@ -184,6 +189,66 @@ class TestSiteDailyMetricsSerializer(object):
 
 
 @pytest.mark.django_db
+class TestGeneralCourseDataSerializer(object):
+    '''
+    TODO: Verify that learner roles are NOT in CourseAccessRole
+    If learner roles can be in this model, then we need to add test for verifying
+    that learner roles are not in the staff list of the general course data
+    '''
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        #self.course_id = 'course-v1:AlphaOrg+A001+RUN'
+
+        #self.enrollment_datetime = datetime.datetime(2018, 02, 02, tzinfo=pytz.UTC)
+        # self.course_overview_attributes = dict(
+        #     id=self.course_id,
+
+        # )
+        
+        #self.course_overview = CourseOverviewFactory(**self.course_overview_attributes)
+        self.course_overview = CourseOverviewFactory()
+        self.users = [ UserFactory(), UserFactory()]
+
+        self.course_access_roles = [
+            CourseAccessRoleFactory(
+                user=self.users[0],
+                course_id=self.course_overview.id,
+                role='staff'),
+            CourseAccessRoleFactory(
+                user=self.users[1],
+                course_id=self.course_overview.id,
+                role='administrator'),
+        ]
+
+        self.serializer = GeneralCourseDataSerializer(instance=self.course_overview)
+
+
+        self.expected_fields = [
+            'course_id', 'course_name', 'course_code','org', 'start_date',
+            'end_date', 'self_paced', 'staff', 'metrics',
+        ]
+
+    def test_has_fields(self):
+        '''Tests that the serialized general course  data has specific keys and values
+        '''
+        data = self.serializer.data
+        assert set(data.keys()) == set(self.expected_fields)
+
+        # This is to make sure that the serializer retrieves the correct nested
+        # model (UserProfile) data
+        assert data['course_id'] == str(self.course_overview.id)
+        assert data['course_name'] == self.course_overview.display_name
+        assert data['course_code'] == self.course_overview.number
+        assert data['org'] == self.course_overview.org
+        assert parse(data['start_date']) == self.course_overview.enrollment_start
+        assert parse(data['end_date']) == self.course_overview.enrollment_end
+        assert data['self_paced'] == self.course_overview.self_paced
+
+        #assert data[''] == self.course_overview.
+        
+
+        #assert data['date_joined'] == str(self.a_datetime.date())
+
 class TestGeneralUserDataSerializer(object):
     '''Tests the UserIndexSerializer serializer class
     '''
@@ -222,7 +287,6 @@ class TestGeneralUserDataSerializer(object):
         '''
         data = self.serializer.data
 
-        #import pdb; pdb.set_trace()
         assert set(data.keys()) == set(self.expected_fields)
         
         # This is to make sure that the serializer retrieves the correct nested
@@ -232,4 +296,3 @@ class TestGeneralUserDataSerializer(object):
         assert data['country'] == 'CA'
         assert data['gender'] == 'o'
         assert data['date_joined'] == str(self.a_datetime.date())
-

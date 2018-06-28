@@ -27,6 +27,9 @@ removing these mocks
 
 from django.db import models
 
+#from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
+
 class CourseOverview(models.Model):
     '''
     Provides a mock model for the edx-platform 'CourseOverview' model
@@ -41,7 +44,8 @@ class CourseOverview(models.Model):
     '''
     # Faking id, picking arbitrary length
     # Actual field is of type opaque_keys.edx.keys.CourseKey
-    id = models.CharField(db_index=True, primary_key=True, max_length=255)
+    #id = models.CharField(db_index=True, primary_key=True, max_length=255)
+    id = CourseKeyField(db_index=True, primary_key=True, max_length=255)
     display_name = models.TextField(null=True)
     org = models.TextField(max_length=255, default='outdated_entry')
     # For the tests, the CourseOverviewFactory does a LazyAttribute on
@@ -49,6 +53,9 @@ class CourseOverview(models.Model):
     display_org_with_default = models.TextField()
     number = models.TextField()
 
+    enrollment_start = models.DateTimeField(null=True)
+    enrollment_end = models.DateTimeField(null=True)
+    self_paced = models.BooleanField(default=False)
     @property
     def display_name_with_default_escaped(self):
         return self.display_name

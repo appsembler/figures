@@ -11,6 +11,8 @@ from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from opaque_keys.edx.keys import CourseKey
+
 # Directly including edx-platform objects for early development
 # Follow-on, we'll likely consolidate edx-platform model imports to an adapter
 from openedx.core.djangoapps.content.course_overviews.models import (
@@ -31,6 +33,7 @@ from .serializers import (
     CourseDailyMetricsSerializer,
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
+    GeneralCourseDataSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer
@@ -171,6 +174,22 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 ##
 ## Views for the front end
 ##
+
+
+class GeneralCourseDataViewSet(viewsets.ModelViewSet):
+    '''
+
+    '''
+    model = CourseOverview
+    queryset = CourseOverview.objects.all()
+    pagination_class = None
+    serializer_class = GeneralCourseDataSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        course_id_str = kwargs.get('pk','')
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        course_overview = get_object_or_404(CourseOverview, pk=course_key)
+        return Response(GeneralCourseDataSerializer(course_overview).data)
 
 
 class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):

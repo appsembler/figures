@@ -27,12 +27,19 @@ router.register(
     views.CourseEnrollmentViewSet,
     base_name='course-enrollments')
 
-# For the front end UI
+##
+## For the front end UI
+##
+
+router.register(
+    r'courses/general',
+    views.GeneralCourseDataViewSet,
+    base_name='general-courses')
+
 router.register(
     r'users/general',
     views.GeneralUserDataViewSet,
     base_name='general-users')
-
 
 urlpatterns = [
 
