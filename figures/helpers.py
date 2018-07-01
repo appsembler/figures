@@ -85,7 +85,7 @@ def yesterday():
     return days_from(datetime.datetime.now().date())
 
 
-def previous_months_iterator(month_for, months_back):
+def previous_months_iterator(month_for, months_back, include_month_for=False):
     '''Iterator returns a year,month tulbe for n months including the month_for
 
     month_for is either a date, datetime, or tuple with year and month
@@ -102,7 +102,9 @@ def previous_months_iterator(month_for, months_back):
         start_month = month_for - relativedelta(months=months_back)
 
     for dt in rrule(freq=MONTHLY, dtstart=start_month, until=month_for):
-        yield (dt.year, dt.month,)
+        last_day_of_month= calendar.monthrange(dt.year, dt.month)[1]
+        yield (dt.year, dt.month, last_day_of_month)
+        #yield (dt.year, dt.month, calendar.monthrange(dt.year, dt.month)[1])
 
 
 # class TimeFrame(object):
