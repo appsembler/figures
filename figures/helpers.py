@@ -85,6 +85,8 @@ def yesterday():
     return days_from(datetime.datetime.now().date())
 
 
+# TODO: change name to 'months_back_iterator'
+# TODO: implement or removed include_month_for
 def previous_months_iterator(month_for, months_back, include_month_for=False):
     '''Iterator returns a year,month tulbe for n months including the month_for
 
@@ -105,38 +107,4 @@ def previous_months_iterator(month_for, months_back, include_month_for=False):
         last_day_of_month= calendar.monthrange(dt.year, dt.month)[1]
         yield (dt.year, dt.month, last_day_of_month)
         #yield (dt.year, dt.month, calendar.monthrange(dt.year, dt.month)[1])
-
-
-# class TimeFrame(object):
-
-#     def __init__(self, **kwargs):
-#         '''
-
-#         combination we need
-#         * start and end datetime
-#         * start
-#         '''
-#         self.start = kwargs.get('start')
-#         self.end = kwargs.get('end')
-#         self.duration = kwargs.get('duration')
-
-
-#     @classmethod
-#     def make_series(from_datetime, duration, reverse=False):
-#         '''
-#         Returns a list of
-#         TODO: Create a class from this
-#         '''
-#         timeframes = []
-#         if not reverse:
-#             rrule_kwargs = dict(
-#                 dtstart=as_datetime(from_datetime),
-#             )
-#             for dt in rrule(**rrule_kwargs):
-#                 timeframes.append(TimeFrame(
-#                     start=))
-    #for dt in rrule(DAILY, dtstart=start_date, until=end_date):
-
-
-
 
