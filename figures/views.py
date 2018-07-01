@@ -34,11 +34,12 @@ from .serializers import (
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
+    GeneralSiteMetricsSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer
 )
-
+from figures import metrics
 
 ##
 ## UI Template rendering views
@@ -174,6 +175,55 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 ##
 ## Views for the front end
 ##
+
+class GeneralSiteMetricsView(APIView):
+    '''
+    Initial version assumes a single site.
+    Multi-tenancy will add a Site foreign key to the SiteDailyMetrics model
+    and list the most recent data for all sites (or filtered sites)
+    '''
+
+    # queryset = SiteDailyMetrics.objects.all()
+    # pagination_class = None
+    # serializer_class = GeneralSiteMetricsSerializer
+    #TODO add filters
+
+    def get(self, request, format=None):
+        '''
+        Does not yet support multi-tenancy
+        '''
+
+        date_for = request.query_params.get('date_for')
+        data = metrics.get_monthly_site_metrics(date_for=date_for)
+
+        if not data:
+            data = {
+                'error': 'no metrics data available',
+            }
+        return Response(data)
+
+
+    # def list(self, request):
+
+    #     #queryset = self.filter_queryset(self.get_queryset())
+    #     queryset = 
+    #     serializer = self.get_serializer(queryset, many=True)
+
+    #     return Response(serializer.data)
+
+    # def retrieve(self, request, thread_id=None):
+    #     """
+    #     Implements the GET method for thread ID
+    #     """
+    #     requested_fields = request.GET.get('requested_fields')
+    #     return Response(get_thread(request, thread_id, requested_fields))
+
+    # def retrieve(self, request, site_id=None):
+    #     """
+    #     Implements the GET method for thread ID
+    #     """
+    #     requested_fields = request.GET.get('requested_fields')
+    #     return Response(get_thread(request, thread_id, requested_fields))
 
 
 class GeneralCourseDataViewSet(viewsets.ModelViewSet):
