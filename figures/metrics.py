@@ -87,10 +87,10 @@ def get_monthly_active_users(today, months_back=6):
             'today cannot be of type {}. It must be a datetime.datetime or datetime.date'.format(
                 type(today))
         )
-    current_month = StudentModule.objects.filter(
-        created__gt=prev_day(datetime.date(year=today.year, month=today.month, day=1)),
-        modified__lt=today,
-        ).values('student__id').distinct().count()
+    # current_month = StudentModule.objects.filter(
+    #     created__gt=prev_day(datetime.date(year=today.year, month=today.month, day=1)),
+    #     modified__lt=today,
+    #     ).values('student__id').distinct().count()
 
     history=[]
 
@@ -104,9 +104,9 @@ def get_monthly_active_users(today, months_back=6):
             value=value,
             )
         )
-
+    current_month = history.pop()
     return dict(
-        current_month=current_month,
+        current_month=current_month['value'],
         history=history,
     )
 
@@ -179,7 +179,8 @@ def get_monthly_site_metrics(today=None):
 
 
     '''
-    today = datetime.datetime.now()
+    if not today:
+        today = datetime.datetime.now()
     yesterday = prev_day(today)
 
     months_back=6
