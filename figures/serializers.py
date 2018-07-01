@@ -116,6 +116,100 @@ class SiteDailyMetricsSerializer(serializers.ModelSerializer):
 ## Serializers for serving the front end views
 ##
 
+class GeneralSiteMetricsSerializer(serializers.Serializer):
+    '''
+
+    If this serializer is given the site info as the data, then it can
+    query 
+
+    Example from the API spec doc:
+    {
+      "monthly_active_users": {
+        "current_month": 1323,
+        "history": [
+          {
+            "period": "April 2018 (best to be some standardised Date format that I can parse)",
+            "value": 1022,
+          },
+          {
+            "period": "March 2018",
+            "value": 1022,
+          },
+          ...
+        ]
+      },
+      "total_site_users": {
+        // represents total number of registered users for org/site
+        "current": 4931,
+        "history": [
+          {
+            "period": "April 2018",
+            "value": 4899,
+          },
+          ...
+        ]
+      },
+      "total_site_courses": {
+        "current": 19,
+        "history": [
+          {
+            "period": "April 2018",
+            "value": 17,
+          },
+          ...
+        ]
+      },
+      "total_course_enrollments": {
+        // sum of number of users enrolled in all courses
+        "current": 7911,
+        "history": [
+          {
+            "period": "April 2018",
+            "value": 5911,
+          },
+          ...
+        ]
+      },
+      "total_course_completions": {
+        // number of times user has completed a course in this month
+        "current": 129,
+        "history": [
+          {
+            "period": "April 2018",
+            "value": 101,
+          },
+          ...
+        ]
+      }
+    }
+
+    '''
+    monthly_active_users = serializers.SerializerMethodField()
+    total_site_users = serializers.SerializerMethodField()
+    total_site_courses = serializers.SerializerMethodField()
+    total_course_enrollments = serializers.SerializerMethodField()
+    total_course_completions = serializers.SerializerMethodField()
+
+    def get_monthly_active_users(self, obj):
+        return dict(
+        )
+
+    def get_total_site_users(self, obj):
+        return dict(
+        )
+
+    def get_total_site_courses(self, obj):
+        return dict(
+        )
+
+    def get_total_course_enrollments(self, obj):
+        return dict(
+        )
+
+    def get_total_course_completions(self, obj):
+        return dict(
+        )
+
 class GeneralUserDataSerializer(serializers.Serializer):
     '''
 

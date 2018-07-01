@@ -28,6 +28,11 @@ router.register(
     base_name='course-enrollments')
 
 # For the front end UI
+# router.register(
+#     r'sites/general-metrics',
+#     views.GeneralSiteMetricsViewSet,
+#     base_name='general-site-metrics')
+
 router.register(
     r'users/general',
     views.GeneralUserDataViewSet,
@@ -44,5 +49,7 @@ urlpatterns = [
     url(r'^api/courses-index/', views.CoursesIndexView.as_view(),
         name='courses-index'),
     url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
+    url(r'^api/general-site-metrics', views.GeneralSiteMetrics.as_view(),
+        name='general-site-metrics'),
     url('', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
 ]
