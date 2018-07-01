@@ -1,11 +1,16 @@
 '''
 Helper functions to make data handling and conversions easier
 
-
+Todo: add 'timelord' datetime/date helpers module
 '''
 
+import calendar
 import datetime
+
 from dateutil.parser import parse as dateutil_parse
+from dateutil.relativedelta import relativedelta
+from dateutil.rrule import rrule, MONTHLY
+
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import CourseLocator
 
@@ -72,3 +77,66 @@ def next_day(val):
 
 def prev_day(val):
     return days_from(val, -1)
+
+def yesterday():
+    '''
+    return yesteday as a datetime.date object
+    '''
+    return days_from(datetime.datetime.now().date())
+
+
+def previous_months_iterator(month_for, months_back, include_month_for=False):
+    '''Iterator returns a year,month tulbe for n months including the month_for
+
+    month_for is either a date, datetime, or tuple with year and month
+    months back is the number of months to iterate
+
+    
+    includes the month_for
+    '''
+
+    if isinstance(month_for, tuple):
+        # TODO make sure we've got just two values in the tuple
+        month_for = datetime.date(year=month_for[0], month=month_for[1], day=1)
+    if isinstance(month_for,(datetime.datetime, datetime.date)):
+        start_month = month_for - relativedelta(months=months_back)
+
+    for dt in rrule(freq=MONTHLY, dtstart=start_month, until=month_for):
+        last_day_of_month= calendar.monthrange(dt.year, dt.month)[1]
+        yield (dt.year, dt.month, last_day_of_month)
+        #yield (dt.year, dt.month, calendar.monthrange(dt.year, dt.month)[1])
+
+
+# class TimeFrame(object):
+
+#     def __init__(self, **kwargs):
+#         '''
+
+#         combination we need
+#         * start and end datetime
+#         * start
+#         '''
+#         self.start = kwargs.get('start')
+#         self.end = kwargs.get('end')
+#         self.duration = kwargs.get('duration')
+
+
+#     @classmethod
+#     def make_series(from_datetime, duration, reverse=False):
+#         '''
+#         Returns a list of
+#         TODO: Create a class from this
+#         '''
+#         timeframes = []
+#         if not reverse:
+#             rrule_kwargs = dict(
+#                 dtstart=as_datetime(from_datetime),
+#             )
+#             for dt in rrule(**rrule_kwargs):
+#                 timeframes.append(TimeFrame(
+#                     start=))
+    #for dt in rrule(DAILY, dtstart=start_date, until=end_date):
+
+
+
+
