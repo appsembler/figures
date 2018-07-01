@@ -1,10 +1,21 @@
 
+from collections import namedtuple
+
 import datetime
 from dateutil.rrule import rrule
-from dateutil.relativedata import relativedata
+from dateutil.relativedelta import relativedelta
 
-from figures.helpers import prev_day
+from courseware.models import StudentModule
+
+from figures.helpers import (
+    next_day,
+    prev_day,
+    previous_months_iterator,
+    )
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
+
+
+
 
 '''
 
@@ -17,10 +28,7 @@ def current_month_time_frame():
     
     '''
     today = datetime.datetime.now()
-    start_of_month = datetime.date(today.year, today.month, 1)
-    end_of_month = None
-
-
+    return datetime.date(today.year, today.month, 1), today
 
 # def make_time_series():
 #     '''
@@ -49,11 +57,64 @@ def daily_metrics_for_month(date_for, metrics_model, include_today=False):
 
 
 
+def active_users_for_time_period(start_date, end_date, site=None, course_ids=None):
+
+    filter_args = dict(
+        created__gt=prev_day(start_date),
+        modified__lt=next_day(end_date)
+        )
+    if course_ids:
+        filter_args['course_ids__in']=course_ids
+
+    # TODO: In test
+    return StudentModule.objects.filter(**filter_args).values('student__id').distinct().count()
 
 
+def period_str(month_tuple):
+    #import pdb; pdb.set_trace()
+    return datetime.date(*month_tuple).strftime('%B, %Y')
 
-def get_monthly_site_metrics():
+def get_monthly_active_users(today, months_back=6):
+
+    # current_monthly_active_users = active_users_for_time_period(
+    #     start_date=this_month.start_of_month,
+    #     end_date=yesterday)
+
+    if isinstance(today, datetime.datetime):
+        today=today.date()
+
+    assert isinstance(today, datetime.date), (
+            'today cannot be of type {}. It must be a datetime.datetime or datetime.date'.format(
+                type(today))
+        )
+    current_month = StudentModule.objects.filter(
+        created__gt=prev_day(datetime.date(year=today.year, month=today.month, day=1)),
+        modified__lt=today,
+        ).values('student__id').distinct().count()
+
+    history=[]
+
+    for month in previous_months_iterator(month_for=today, months_back=months_back,):
+        period=period_str(month)
+        value=active_users_for_time_period(
+                start_date=datetime.date(month[0], month[1],1),
+                end_date=datetime.date(month[0],month[1], month[2]))
+        history.append(dict(
+            period=period,
+            value=value,
+            )
+        )
+
+    return dict(
+        current_month=current_month,
+        history=history,
+    )
+
+def get_monthly_site_metrics(today=None):
     '''Gets current metrics with history
+
+    Arg: today - if specified, uses that date as the 'current' date
+    Useful for testing and for looking at past days as 'today'
     TODO: Add site filter for multi-tenancy
 
     {
@@ -118,43 +179,43 @@ def get_monthly_site_metrics():
 
 
     '''
-    last_day = prev_day(datetime.datetime)
+    today = datetime.datetime.now()
+    yesterday = prev_day(today)
+
+    months_back=6
+
+    ##
+    ## Brute force this.
+    ##
+
+    monthly_active_users = get_monthly_active_users(
+        today=today, months_back=months_back)
 
 
-    # get the start and end dates for the periods
+    total_site_users = None
+    total_site_coures = None
+    total_course_enrollments = None
+    total_course_completions = None
 
-    current_monthly_active_users = 400
-    active_user_history = [
-    ]
+    ## Then, we can put the method calls into a dict, load the dict from
+    ## settings
+
     total_site_user_history = [
     ]
     
     return dict(
-        monthly_active_users=dict(
-            current=current_monthly_active_users,
-            history=active_user_history,
-            ),
-        total_site_users=dict(
-            current=current_total_site_users,
-            history=total_site_user_history,
-            )
-
+        monthly_active_users=monthly_active_users,
+        total_site_users=total_site_users,
+        total_site_coures=total_site_coures,
+        total_course_enrollments=total_course_enrollments,
+        total_course_completions=total_course_completions,
     )
 
-    '''
-      "monthly_active_users": {
-        "current_month": 1323,
-        "history": [
-          {
-            "period": "April 2018 (best to be some standardised Date format that I can parse)",
-            "value": 1022,
-          },
-          {
-            "period": "March 2018",
-            "value": 1022,
-          },
-          ...
-        ]
-      },
-    '''
 
+def test(today=None):
+    if not today:
+        today = datetime.datetime.now().date()
+    print('testing with date: {}'.format(today))
+    vals = get_monthly_site_metrics(today)
+    from pprint import pprint
+    pprint(vals)
