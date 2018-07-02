@@ -18,6 +18,7 @@ from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
+    LearnerFilter,
     SiteDailyMetricsFilter,
     UserFilter,
 )
@@ -164,6 +165,30 @@ class CourseDailyMetricsFilterTest(TestCase):
 
     @pytest.mark.skip("Not implemented yet")
     def test_get_by_course_id(self):
+        pass
+
+
+@pytest.mark.django_db
+class LearnerFilterTest(TestCase):
+    '''Tests the UserFilterFilter filter class
+    '''
+    def setUp(self):
+        self.User = get_user_model()
+        self.users = [make_user(**data) for data in USER_DATA]
+
+    def tearDown(self):
+        pass
+
+    def test_get_all_users(self):
+        f = LearnerFilter(queryset=self.User.objects.all())
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.users],
+            lambda o: o.id, 
+            ordered=False)
+
+    @pytest.mark.skip('Need to implement mocks for user-course relationships')
+    def test_get_users_for_course(self):
         pass
 
 

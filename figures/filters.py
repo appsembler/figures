@@ -131,8 +131,10 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
         fields = ['date_for', 'date']
 
 
-class GeneralUserDataFilter(django_filters.FilterSet):
+class LearnerFilter(django_filters.FilterSet):
+    '''Provides filtering for Learner based views
 
+    '''
     course_id = django_filters.MethodFilter(action='filter_course_id')
 
     class Meta:
