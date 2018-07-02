@@ -173,7 +173,7 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 ## Views for the front end
 ##
 
-class GeneralSiteMetricsViewSet(APIView):
+class GeneralSiteMetricsView(APIView):
     '''
     Initial version assumes a single site.
     Multi-tenancy will add a Site foreign key to the SiteDailyMetrics model
@@ -189,14 +189,16 @@ class GeneralSiteMetricsViewSet(APIView):
         '''
         Does not yet support multi-tenancy
         '''
-        site_metrics = metrics.get_monthly_site_metrics()
-        if site_metrics:
-            data = GeneralSiteMetricsSerializer(site_metrics).data
-        else:
+
+        date_for = request.query_params.get('date_for')
+        data = metrics.get_monthly_site_metrics(date_for=date_for)
+
+        if not data:
             data = {
                 'error': 'no metrics data available',
             }
         return Response(data)
+
 
     # def list(self, request):
 
