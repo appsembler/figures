@@ -21,6 +21,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 
+from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
@@ -56,6 +57,11 @@ class CourseTeamFactory(DjangoModelFactory):
 class CourseTeamMembershipFactory(DjangoModelFactory):
     class Meta:
         model = CourseTeamMembership
+
+
+class StudentModuleFactory(DjangoModelFactory):
+    class Meta:
+        model = StudentModule
 
 
 class UserProfileFactory(DjangoModelFactory):
