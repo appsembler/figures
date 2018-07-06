@@ -18,7 +18,7 @@ from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
-    LearnerFilter,
+    LearnerFilterSet,
     SiteDailyMetricsFilter,
     UserFilter,
 )
@@ -169,7 +169,7 @@ class CourseDailyMetricsFilterTest(TestCase):
 
 
 @pytest.mark.django_db
-class LearnerFilterTest(TestCase):
+class LearnerFilterSetTest(TestCase):
     '''Tests the UserFilterFilter filter class
     '''
     def setUp(self):
@@ -180,7 +180,7 @@ class LearnerFilterTest(TestCase):
         pass
 
     def test_get_all_users(self):
-        f = LearnerFilter(queryset=self.User.objects.all())
+        f = LearnerFilterSet(queryset=self.User.objects.all())
         self.assertQuerysetEqual(
             f.qs,
             [o.id for o in self.users],

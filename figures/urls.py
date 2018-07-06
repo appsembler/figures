@@ -37,11 +37,17 @@ router.register(
     views.GeneralCourseDataViewSet,
     base_name='general-courses')
 
+# TODO: Consider changing the endpoint to 'learners'
+# and then have a separate endpoint for staff
 router.register(
     r'users/general',
     views.GeneralUserDataViewSet,
     base_name='general-users')
 
+router.register(
+    r'learners/detail',
+    views.LearnerDetailsViewSet,
+    base_name='learner-details')
 
 urlpatterns = [
 

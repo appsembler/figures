@@ -116,6 +116,8 @@ class TestGeneralUserViewSet(object):
             'language_proficiencies',
         ]
 
+
+
     def get_expected_results(self, **filter):
         '''returns a list of dicts of the filtered user data
 

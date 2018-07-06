@@ -2,12 +2,16 @@
 
 '''
 
+from django.contrib.auth import get_user_model
+
 from django_countries import Countries
 from rest_framework import serializers
 from rest_framework.fields import empty
 
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
+)
+from openedx.core.djangoapps.user_api.accounts.serializers import (AccountLegacyProfileSerializer,
 )
 
 from student.models import CourseAccessRole, CourseEnrollment
@@ -238,6 +242,8 @@ class GeneralSiteMetricsSerializer(serializers.Serializer):
         )
 
 
+# The purpose of this serialzer is to provide summary info for a learner
+# so we're
 class GeneralUserDataSerializer(serializers.Serializer):
     '''
 
@@ -298,3 +304,139 @@ class GeneralUserDataSerializer(serializers.Serializer):
             id__in=[as_course_key(course_id) for course_id in course_ids])
 
         return [CourseOverviewSerializer(data).data for data in course_overviews]
+
+
+class UserIndexSerializer(serializers.Serializer):
+    '''Provides a limited set of user information for summary display
+    '''
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    fullname = serializers.CharField(source='profile.name', default=None,
+        read_only=True)
+
+
+class UserDemographicSerializer(serializers.Serializer):
+    country = SerializeableCountryField(source='profile.country',
+        required=False, read_only=True, allow_blank=True)
+    year_of_birth = serializers.IntegerField(source='profile.year_of_birth',
+        read_only=True)
+    gender = serializers.CharField(source='profile.gender', read_only=True)
+    level_of_education = serializers.CharField(source='profile.level_of_education', 
+        allow_blank=True, required=False, read_only=True)
+
+class LearnersCoursesSerializer(serializers.Serializer):
+
+    courses = serializers.SerializerMethodField()
+
+    def get_courses(self, user):
+        print('get_courses for user "{}"'.format(user))
+        course_ids = CourseEnrollment.objects.filter(
+            user=user).values_list('course_id', flat=True).distinct()
+
+        course_overviews = CourseOverview.objects.filter(
+            id__in=[as_course_key(course_id) for course_id in course_ids])
+
+        return [CourseOverviewSerializer(data).data for data in course_overviews]
+
+
+#class LearnerDetailsSerializer(UserDemographicSerializer, UserIndexSerializer):
+class LearnerDetailsSerializer(serializers.ModelSerializer):
+
+    '''
+    {
+      "username": "maxi",
+      "name": "Maxi Fernandez",
+      "country": "UY",
+      "is_active": true,
+      "year_of_birth": 1985,
+      "level_of_education": "b",
+      "gender": "m",
+      "date_joined": "2018-05-06T14:01:58Z",
+      "bio": null,
+      "profile_image": {
+            "image_url_full": "http://localhost:8000/static/images/profiles/default_500.png",
+            "image_url_large": "http://localhost:8000/static/images/profiles/default_120.png",
+            "image_url_medium": "http://localhost:8000/static/images/profiles/default_50.png",
+            "image_url_small": "http://localhost:8000/static/images/profiles/default_30.png",
+            "has_image": false
+        },
+      "level_of_education": "b",
+      "language_proficiencies": [],
+      "email": "maxi+localtest@appsembler.com",
+      "courses": [
+        {
+          "course_name": "Something",
+          "course_code": "A193",
+          "course_id": "A193+2016Q4+something",
+          "date_enrolled": "2018-05-06T14:01:58Z",
+          "progress_data": {
+            "course_completed": "2018-05-06T14:01:58Z", // empty if not completed
+            "course_progress": 0.59, // percentage
+            "course_progress_history": [
+              {
+                "period": "April 2018",
+                "value": 0.28,
+              },
+              ...
+            ]
+          }
+        }
+        ...
+      ]
+    }
+
+    '''
+
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    name = serializers.CharField(source='profile.name', default=None,
+        read_only=True)
+
+    country = SerializeableCountryField(source='profile.country',
+        required=False, read_only=True, allow_blank=True)
+    year_of_birth = serializers.IntegerField(source='profile.year_of_birth',
+        read_only=True)
+    gender = serializers.CharField(source='profile.gender', read_only=True)
+    level_of_education = serializers.CharField(source='profile.level_of_education', 
+        allow_blank=True, required=False, read_only=True)
+    bio = serializers.CharField(source='profile.bio',required=False)
+
+    # We may want to exclude this unless we want to show
+    # profile images in Figures
+    profile_image = serializers.SerializerMethodField()
+
+    language_proficiencies = serializers.SerializerMethodField()
+    courses = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        editable = False
+        fields = ('id', 'username', 'name', 'country', 'is_active', 'year_of_birth', 
+            'level_of_education', 'gender', 'date_joined', 'bio', 'courses', 'language_proficiencies',
+            'profile_image',
+        )
+        read_only_fields = fields
+    ## Would like to make either of these work:
+    ## courses = LearnersCoursesSerializer(read_only=True, many=True)
+    ## courses = LearnersCoursesSerializer(read_only=True)
+
+
+    def get_language_proficiencies(self, user):
+        if hasattr(user,'profiles') and user.profile.language:
+            return [user.profile.language]
+        else:
+            return []
+
+    def get_courses(self, user):
+        print('get_courses for user "{}"'.format(user))
+        course_ids = CourseEnrollment.objects.filter(
+            user=user).values_list('course_id', flat=True).distinct()
+
+        course_overviews = CourseOverview.objects.filter(
+            id__in=[as_course_key(course_id) for course_id in course_ids])
+
+        return [CourseOverviewSerializer(data).data for data in course_overviews]
+
+    def get_profile_image(self, user):
+        return AccountLegacyProfileSerializer.get_profile_image(
+                        user.profile, user, None)

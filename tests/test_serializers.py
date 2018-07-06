@@ -18,6 +18,7 @@ from figures.serializers import (
     CourseDailyMetricsSerializer,
     CourseEnrollmentSerializer,
     GeneralCourseDataSerializer,
+    LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer,
@@ -249,6 +250,7 @@ class TestGeneralCourseDataSerializer(object):
 
         #assert data['date_joined'] == str(self.a_datetime.date())
 
+
 class TestGeneralUserDataSerializer(object):
     '''Tests the UserIndexSerializer serializer class
     '''
@@ -296,3 +298,74 @@ class TestGeneralUserDataSerializer(object):
         assert data['country'] == 'CA'
         assert data['gender'] == 'o'
         assert data['date_joined'] == str(self.a_datetime.date())
+
+
+@pytest.mark.django_db
+class TestLearnerDetailsSerializer(object):
+    '''Tests the LearnerDetailSerializer serializer class
+    '''
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.user_attributes = {
+            'username': 'alpha_one',
+            'profile__name': 'Alpha One',
+            'profile__country': 'CA',
+        }
+        self.user = UserFactory(**self.user_attributes)
+        self.serializer = LearnerDetailsSerializer(instance=self.user)
+
+    def test_has_fields(self):
+        '''Tests that the serialized UserIndex data has specific keys and values
+        
+        We use a set instead of just doing this:
+
+            assert data.keys() == ['id', 'username', 'fullname', ]
+
+        because we can't guarentee order. See:
+            https://docs.python.org/2/library/stdtypes.html#dict.items
+        '''
+        expected_fields = set(['id', 'username', 'name', 'country', 'is_active',
+            'profile_image', 'courses', 'year_of_birth', 'gender',
+            'level_of_education', 'language_proficiencies', 'date_joined',])
+        data = self.serializer.data
+
+        assert set(data.keys()) == expected_fields
+        
+        # This is to make sure that the serializer retrieves the correct nested
+        # model (UserProfile) data
+        assert data['name'] == 'Alpha One'
+
+
+@pytest.mark.django_db
+class TestUserIndexSerializer(object):
+    '''Tests the UserIndexSerializer serializer class
+    '''
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.user_attributes = {
+            'username': 'alpha_one',
+            'profile__name': 'Alpha One',
+            'profile__country': 'CA',
+        }
+        self.user = UserFactory(**self.user_attributes)
+        self.serializer = UserIndexSerializer(instance=self.user)
+
+    def test_has_fields(self):
+        '''Tests that the serialized UserIndex data has specific keys and values
+        
+        We use a set instead of just doing this:
+
+            assert data.keys() == ['id', 'username', 'fullname', ]
+
+        because we can't guarentee order. See:
+            https://docs.python.org/2/library/stdtypes.html#dict.items
+        '''
+        data = self.serializer.data
+
+        assert set(data.keys()) == set(['id', 'username', 'fullname', ])
+        
+        # This is to make sure that the serializer retrieves the correct nested
+        # model (UserProfile) data
+        assert data['fullname'] == 'Alpha One'
