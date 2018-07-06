@@ -55,6 +55,16 @@ class UserProfile(models.Model):
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
 
+    profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def has_profile_image(self):
+        """
+        Convenience method that returns a boolean indicating whether or not
+        this user has uploaded a profile image.
+        """
+        return self.profile_image_uploaded_at is not None
+
 
 class CourseEnrollment(models.Model):
     '''

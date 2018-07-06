@@ -76,6 +76,9 @@ class UserProfileFactory(DjangoModelFactory):
     level_of_education = fuzzy.FuzzyChoice(
         ['p','m','b','a','hs','jh','el','none', 'other',]
         )
+    profile_image_uploaded_at = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,04,01, tzinfo=factory.compat.UTC))
+
 
 class UserFactory(DjangoModelFactory):
     class Meta:
