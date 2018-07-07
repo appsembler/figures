@@ -317,7 +317,7 @@ class TestLearnerDetailsSerializer(object):
 
     def test_has_fields(self):
         '''Tests that the serialized UserIndex data has specific keys and values
-        
+
         We use a set instead of just doing this:
 
             assert data.keys() == ['id', 'username', 'fullname', ]
@@ -326,7 +326,7 @@ class TestLearnerDetailsSerializer(object):
             https://docs.python.org/2/library/stdtypes.html#dict.items
         '''
         expected_fields = set(['id', 'username', 'name', 'country', 'is_active',
-            'profile_image', 'courses', 'year_of_birth', 'gender',
+            'profile_image', 'courses', 'year_of_birth', 'gender', 'email',
             'level_of_education', 'language_proficiencies', 'date_joined',])
         data = self.serializer.data
 

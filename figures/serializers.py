@@ -32,8 +32,7 @@ class SerializeableCountryField(serializers.ChoiceField):
         https://github.com/SmileyChris/django-countries/issues/106
     '''
     def __init__(self, **kwargs):
-        super(SerializeableCountryField, self).__init__(choices=Countries(),
-            **kwargs)
+        super(SerializeableCountryField, self).__init__(choices=Countries(),**kwargs)
 
     def to_representation(self, value):
         if value in ('', None):
@@ -338,6 +337,52 @@ class LearnersCoursesSerializer(serializers.Serializer):
 
         return [CourseOverviewSerializer(data).data for data in course_overviews]
 
+class LearnerCourseDetailsSerializezr(serializers.ModelSerializer):
+    '''
+            {
+              "course_name": "Something",
+              "course_code": "A193",
+              "course_id": "A193+2016Q4+something",
+              "date_enrolled": "2018-05-06T14:01:58Z",
+              "progress_data": {
+                "course_completed": "2018-05-06T14:01:58Z", // empty if not completed
+                "course_progress": 0.59, // percentage
+                "course_progress_history": [
+                  {
+                    "period": "April 2018",
+                    "value": 0.28,
+                  },
+                  ...
+                ]
+              }
+            }
+    '''
+
+    course_name = serializers.CharField(source='course.display_name',)
+    course_code = serializers.CharField(source='course.number',)
+    course_id = serializers.CharField(source='course.id')
+    date_enrolled = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    progress_data = serializers.SerializerMethodField()
+    enrollment_id = serializers.IntegerField(source='id')
+
+    class Meta:
+        model = CourseEnrollment
+        fields = ('course_name', 'course_code', 'course_id', 'date_enrolled',
+            'progress_data', 'enrollment_id',
+            )
+        read_only_fields = fields
+
+    def get_progress_data(self, obj):
+        '''
+        TODO: Add this to metrics, then we'll need to store per-user progress data
+
+        '''
+
+        course_completed = None
+        data  = dict(
+            course_completed=course_completed,
+            )
+        return data
 
 #class LearnerDetailsSerializer(UserDemographicSerializer, UserIndexSerializer):
 class LearnerDetailsSerializer(serializers.ModelSerializer):
@@ -386,19 +431,13 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
     }
 
     '''
-
-    id = serializers.IntegerField(read_only=True)
-    username = serializers.CharField(read_only=True)
-    name = serializers.CharField(source='profile.name', default=None,
-        read_only=True)
-
+    name = serializers.CharField(source='profile.name', default=None,)
     country = SerializeableCountryField(source='profile.country',
-        required=False, read_only=True, allow_blank=True)
-    year_of_birth = serializers.IntegerField(source='profile.year_of_birth',
-        read_only=True)
-    gender = serializers.CharField(source='profile.gender', read_only=True)
+        required=False, allow_blank=True)
+    year_of_birth = serializers.IntegerField(source='profile.year_of_birth',)
+    gender = serializers.CharField(source='profile.gender',)
     level_of_education = serializers.CharField(source='profile.level_of_education', 
-        allow_blank=True, required=False, read_only=True)
+        allow_blank=True, required=False,)
     bio = serializers.CharField(source='profile.bio',required=False)
 
     # We may want to exclude this unless we want to show
@@ -406,20 +445,19 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
     profile_image = serializers.SerializerMethodField()
 
     language_proficiencies = serializers.SerializerMethodField()
+
+    ## Would like to make this work without using the SerializerMethodField
+    ## courses = LearnerCourseDetailsSerializezr(many=True)
     courses = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
         editable = False
-        fields = ('id', 'username', 'name', 'country', 'is_active', 'year_of_birth', 
-            'level_of_education', 'gender', 'date_joined', 'bio', 'courses', 'language_proficiencies',
-            'profile_image',
-        )
+        fields = ('id', 'username', 'name', 'email', 'country', 'is_active',
+                  'year_of_birth', 'level_of_education', 'gender', 'date_joined',
+                  'bio', 'courses', 'language_proficiencies', 'profile_image',
+                 )
         read_only_fields = fields
-    ## Would like to make either of these work:
-    ## courses = LearnersCoursesSerializer(read_only=True, many=True)
-    ## courses = LearnersCoursesSerializer(read_only=True)
-
 
     def get_language_proficiencies(self, user):
         if hasattr(user,'profiles') and user.profile.language:
@@ -428,14 +466,11 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
             return []
 
     def get_courses(self, user):
-        print('get_courses for user "{}"'.format(user))
-        course_ids = CourseEnrollment.objects.filter(
-            user=user).values_list('course_id', flat=True).distinct()
-
-        course_overviews = CourseOverview.objects.filter(
-            id__in=[as_course_key(course_id) for course_id in course_ids])
-
-        return [CourseOverviewSerializer(data).data for data in course_overviews]
+        '''
+        This method is a hack until I figure out customizing DRF
+        '''
+        return LearnerCourseDetailsSerializezr(
+            CourseEnrollment.objects.filter(user=user), many=True).data 
 
     def get_profile_image(self, user):
         return AccountLegacyProfileSerializer.get_profile_image(
