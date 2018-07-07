@@ -337,7 +337,7 @@ class LearnersCoursesSerializer(serializers.Serializer):
 
         return [CourseOverviewSerializer(data).data for data in course_overviews]
 
-class LearnerCourseDetailsSerializezr(serializers.ModelSerializer):
+class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
     '''
             {
               "course_name": "Something",
@@ -469,7 +469,7 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
         '''
         This method is a hack until I figure out customizing DRF
         '''
-        return LearnerCourseDetailsSerializezr(
+        return LearnerCourseDetailsSerializer(
             CourseEnrollment.objects.filter(user=user), many=True).data 
 
     def get_profile_image(self, user):
