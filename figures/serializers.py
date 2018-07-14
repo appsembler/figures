@@ -400,18 +400,18 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
             course_id=course_enrollment.course_id,
             )
 
-        course_progress = lcg.progress()
+        course_progress_details = lcg.progress()
+        course_progress = lcg.progress_percent(course_progress_details)
         #course_progress_history = lcp.get_past_n_months(3)
 
         # Empty list initially, then will fill after we implement capturing
         # learner specific progress
         course_progress_history = []
-        print('inspect me 2')
-        import pdb; pdb.set_trace()
 
         data  = dict(
             course_completed=course_completed,
             course_progress=course_progress,
+            course_progress_details=course_progress_details,
             course_progress_history=course_progress_history,
             )
         return data
@@ -506,5 +506,8 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
             CourseEnrollment.objects.filter(user=user), many=True).data 
 
     def get_profile_image(self, user):
-        return AccountLegacyProfileSerializer.get_profile_image(
-                        user.profile, user, None)
+        if hasattr(user,'profile'):
+            return AccountLegacyProfileSerializer.get_profile_image(
+                            user.profile, user, None)
+        else:
+            return None

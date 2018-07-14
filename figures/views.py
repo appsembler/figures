@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, render
 
 from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
@@ -41,6 +42,7 @@ from .serializers import (
     GeneralUserDataSerializer
 )
 from figures import metrics
+from figures.pagination import FiguresLimitOffsetPagination
 
 ##
 ## UI Template rendering views
@@ -269,7 +271,7 @@ class LearnerDetailsViewSet(viewsets.ReadOnlyModelViewSet):
 
     model = get_user_model()
     queryset =  get_user_model().objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = LearnerDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = LearnerFilterSet

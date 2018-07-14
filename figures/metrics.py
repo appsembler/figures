@@ -186,13 +186,14 @@ class LearnerCourseGrades(object):
             earned=earned,
             count=count)
 
-    def progress_percent(self):
+    def progress_percent(self, progress_details=None):
         '''
         TODO: This func needs work
         '''
-        progress = self.progress()
-        if progress['possible']:
-            return float(progress['earned'])/float(progress['possible'])
+        if not progress_details:
+            progress_details = self.progress()
+        if progress_details.get('possible'):
+            return float(progress_details['earned'])/float(progress_details['possible'])
         else:
             return 0.0
 
@@ -247,8 +248,11 @@ class LearnerCourseProgress(object):
 ## The metrics model may not be populated in devstack, but we want to exercize 
 ## the code. 
 ## Retrieving from the Figures metrics models should be much faster
+##
+## We may refactor these into a base class with the contructor params of
+## start_date, end_date, site
 
-def active_users_for_time_period(start_date, end_date, site=None, course_ids=None):
+def get_active_users_for_time_period(start_date, end_date, site=None, course_ids=None):
 
     filter_args = dict(
         created__gt=prev_day(start_date),
@@ -390,7 +394,7 @@ def get_monthly_active_users(date_for, months_back):
 
     for month in previous_months_iterator(month_for=date_for, months_back=months_back,):
         period=period_str(month)
-        value=active_users_for_time_period(
+        value=get_active_users_for_time_period(
                 start_date=datetime.date(month[0], month[1],1),
                 end_date=datetime.date(month[0],month[1], month[2]))
         history.append(dict(
