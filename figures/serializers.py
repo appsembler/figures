@@ -14,9 +14,11 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 from openedx.core.djangoapps.user_api.accounts.serializers import (AccountLegacyProfileSerializer,
 )
 
+from certificates.models import GeneratedCertificate
 from student.models import CourseAccessRole, CourseEnrollment
 
 from figures.helpers import as_course_key
+from figures.metrics import LearnerCourseGrades, LearnerCourseProgress
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
@@ -358,29 +360,59 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
             }
     '''
 
-    course_name = serializers.CharField(source='course.display_name',)
-    course_code = serializers.CharField(source='course.number',)
+    course_name = serializers.CharField(source='course.display_name')
+    course_code = serializers.CharField(source='course.number')
     course_id = serializers.CharField(source='course.id')
-    date_enrolled = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    date_enrolled = serializers.DateTimeField(source='created', format="%Y-%m-%d")
     progress_data = serializers.SerializerMethodField()
     enrollment_id = serializers.IntegerField(source='id')
 
     class Meta:
         model = CourseEnrollment
         fields = ('course_name', 'course_code', 'course_id', 'date_enrolled',
-            'progress_data', 'enrollment_id',
-            )
+                  'progress_data', 'enrollment_id',
+                 )
         read_only_fields = fields
 
-    def get_progress_data(self, obj):
+    def get_progress_data(self, course_enrollment):
         '''
         TODO: Add this to metrics, then we'll need to store per-user progress data
-
+        For initial implementation, we get the
         '''
+        cert = GeneratedCertificate.objects.filter(
+            user=course_enrollment.user,
+            course_id=course_enrollment.course_id,
+            )
 
-        course_completed = None
+        if cert:
+            course_completed = cert[0].created_date
+        else:
+            course_completed = False
+
+        # Initially, we calculate dynamically, then after we know it is working,
+        # we store in cache or metrics model
+        # lcp = LearnerCourseProgress(
+        #     user_id=course_enrollment.user.id,
+        #     course_id=course_enrollment.course_id,
+        #     )
+        lcg = LearnerCourseGrades(
+            user_id=course_enrollment.user.id,
+            course_id=course_enrollment.course_id,
+            )
+
+        course_progress = lcg.progress()
+        #course_progress_history = lcp.get_past_n_months(3)
+
+        # Empty list initially, then will fill after we implement capturing
+        # learner specific progress
+        course_progress_history = []
+        print('inspect me 2')
+        import pdb; pdb.set_trace()
+
         data  = dict(
             course_completed=course_completed,
+            course_progress=course_progress,
+            course_progress_history=course_progress_history,
             )
         return data
 
@@ -467,7 +499,8 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
 
     def get_courses(self, user):
         '''
-        This method is a hack until I figure out customizing DRF
+        This method is a hack until I figure out customizing DRF fields and/or
+        related serializers to explicitly link models not linked via FK
         '''
         return LearnerCourseDetailsSerializer(
             CourseEnrollment.objects.filter(user=user), many=True).data 
