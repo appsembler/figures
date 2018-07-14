@@ -20,7 +20,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-
+from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
@@ -28,40 +28,6 @@ from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
-
-
-class CourseOverviewFactory(DjangoModelFactory):
-    class Meta:
-        model = CourseOverview
-
-    # Only define the fields that we will retrieve
-    id = factory.Sequence(lambda n:
-        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
-    display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
-    org = 'StarFleetAcademy'
-    number = '2161'
-    display_org_with_default = factory.LazyAttribute(lambda o: o.org)
-    enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,02,02, tzinfo=factory.compat.UTC))
-    self_paced = False
-    enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,05,05, tzinfo=factory.compat.UTC))
-
-class CourseTeamFactory(DjangoModelFactory):
-    class Meta:
-        model = CourseTeam
-
-    name = factory.Sequence(lambda n: "CourseTeam #%s" % n)
-
-
-class CourseTeamMembershipFactory(DjangoModelFactory):
-    class Meta:
-        model = CourseTeamMembership
-
-
-class StudentModuleFactory(DjangoModelFactory):
-    class Meta:
-        model = StudentModule
 
 
 class UserProfileFactory(DjangoModelFactory):
@@ -103,6 +69,53 @@ class UserFactory(DjangoModelFactory):
         if extracted:
             for team in extracted:
                 self.teams.add(team)
+
+
+class CourseOverviewFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseOverview
+
+    # Only define the fields that we will retrieve
+    id = factory.Sequence(lambda n:
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
+    org = 'StarFleetAcademy'
+    number = '2161'
+    display_org_with_default = factory.LazyAttribute(lambda o: o.org)
+    enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,02, tzinfo=factory.compat.UTC))
+    self_paced = False
+    enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,05,05, tzinfo=factory.compat.UTC))
+
+
+class CourseTeamFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseTeam
+
+    name = factory.Sequence(lambda n: "CourseTeam #%s" % n)
+
+
+class CourseTeamMembershipFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseTeamMembership
+
+
+class GeneratedCertificateFactory(DjangoModelFactory):
+    class Meta:
+        model = GeneratedCertificate
+
+    user = factory.SubFactory(
+        UserFactory,
+    )
+    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    created = factory.Sequence(lambda n:
+        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+
+
+class StudentModuleFactory(DjangoModelFactory):
+    class Meta:
+        model = StudentModule
 
 
 class CourseEnrollmentFactory(DjangoModelFactory):
