@@ -79,8 +79,6 @@ Please see the [UserFilter](https://github.com/appsembler/figures/blob/master/fi
 
 ### Course Enrollments
 
-_course enrollments is currently in PR_
-
 ```
 /figures/api/course-enrollments/
 ```
@@ -282,6 +280,8 @@ To get a list of all courses with general (summary) metrics for each:
 ```
 
 ### General (Summary) User Data
+
+To get a list of users (learners) with summary data:
 
 ```
 /figures/api/users/general/
