@@ -257,7 +257,7 @@ class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
     '''
     model = get_user_model()
     queryset =  get_user_model().objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralUserDataSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = LearnerFilterSet
