@@ -43,7 +43,7 @@ from rest_framework.test import (
 from student.models import CourseEnrollment
 
 from figures.views import (
-    GeneralUserDataViewSet,
+    LearnerDetailsViewSet,
     )
 
 from tests.factories import (
@@ -101,7 +101,7 @@ def make_course_enrollments(user, courses, **kwargs):
             )
 
 @pytest.mark.django_db
-class TestGeneralUserViewSet(object):
+class TestUserViewSet(object):
     '''Tests the UserIndexView view class
     '''
 
@@ -130,7 +130,7 @@ class TestGeneralUserViewSet(object):
     @pytest.mark.parametrize('endpoint, filter', [
         ('api/users/general', {}),
         ])
-    def test_get_general_user_list(self, endpoint, filter):
+    def test_get_learner_details_list(self, endpoint, filter):
         '''Tests retrieving a list of users with abbreviated details
 
         The fields in each returned record are identified by
@@ -146,7 +146,7 @@ class TestGeneralUserViewSet(object):
         factory = APIRequestFactory()
         request = factory.get(endpoint)
         force_authenticate(request, user=self.users[0])
-        view = GeneralUserDataViewSet.as_view({'get': 'list'})
+        view = LearnerDetailsViewSet.as_view({'get': 'list'})
         response = view(request)
 
         # Later, we'll elaborate on the tests. For now, some basic checks
@@ -156,7 +156,18 @@ class TestGeneralUserViewSet(object):
         User = get_user_model()
         assert len(self.users) == User.objects.count()
 
-        for rec in response.data:
+        # Expect the following format for pagination
+        # {
+        #     "count": 2,
+        #     "next": null, # or a url
+        #     "previous": null, # or a url
+        #     "results": [
+        #     ...           # list of the results
+        #     ]
+        # }
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+        for rec in response.data['results']:
             # fail if we cannot find the user in the models
             user_model = User.objects.get(username=rec['username'])
 

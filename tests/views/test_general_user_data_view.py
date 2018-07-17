@@ -154,7 +154,18 @@ class TestGeneralUserViewSet(object):
         User = get_user_model()
         assert len(self.users) == User.objects.count()
 
-        for rec in response.data:
+        # Expect the following format for pagination
+        # {
+        #     "count": 2,
+        #     "next": null, # or a url
+        #     "previous": null, # or a url
+        #     "results": [
+        #     ...           # list of the results
+        #     ]
+        # }
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+        for rec in response.data['results']:
             # fail if we cannot find the user in the models
             user_model = User.objects.get(username=rec['username'])
 
