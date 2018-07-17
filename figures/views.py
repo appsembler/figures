@@ -32,6 +32,7 @@ from .filters import (
 from .models import CourseDailyMetrics, SiteDailyMetrics
 from .serializers import (
     CourseDailyMetricsSerializer,
+    CourseDetailsSerializer,
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
@@ -245,6 +246,26 @@ class GeneralCourseDataViewSet(viewsets.ModelViewSet):
         return Response(GeneralCourseDataSerializer(course_overview).data)
 
 
+class CourseDetailsViewSet(viewsets.ReadOnlyModelViewSet):
+    '''
+
+    '''
+    model = CourseOverview
+    queryset = CourseOverview.objects.all()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = CourseDetailsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = CourseOverviewFilter
+
+    def retrieve(self, request, *args, **kwargs):
+
+        # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
+        course_id_str = kwargs.get('pk','')
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        course_overview = get_object_or_404(CourseOverview, pk=course_key)
+        return Response(CourseDetailsSerializer(course_overview).data)
+
+
 class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
     '''View class to serve general user data to the Figures UI
 
@@ -287,6 +308,4 @@ class LearnerDetailsViewSet(viewsets.ReadOnlyModelViewSet):
         '''
         queryset = super(LearnerDetailsViewSet, self).get_queryset()
 
-        # print('inspect LearnerDetailsViewSet.get_query_set')
-        # import pdb; pdb.set_trace()
         return queryset

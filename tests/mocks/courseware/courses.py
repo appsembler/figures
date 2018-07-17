@@ -18,8 +18,6 @@ def get_course_by_id(course_key, depth=0):
     with modulestore().bulk_operations(course_key):
         course = modulestore().get_course(course_key, depth=depth)
 
-    print('inspect me')
-    import pdb; pdb.set_trace()
     if course:
         return course
     else:

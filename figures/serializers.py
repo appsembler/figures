@@ -1,5 +1,23 @@
 '''Serializers used in Figures
 
+
+Incomplete
+----------
+
+The 'history' sections of the returned data is not yet implemented.
+
+For learner details, dates are not stored for when sections and/or subsections
+are completed
+
+For course details, same issue for average progress, average completion time
+
+Other history sections can get data by iterating over start and end dates as
+time series data. However, this can generate many queries. Therefore, we are
+looking at adding additional Figures models to capture:
+* aggregate data
+* data that cannot be queries as part of a time series
+* data that are time consuming, like dynamic grade retrieval
+
 '''
 
 from django.contrib.auth import get_user_model
@@ -210,6 +228,120 @@ class GeneralCourseDataSerializer(serializers.Serializer):
             return []
 
 
+
+class CourseDetailsSerializer(serializers.ModelSerializer):
+    '''
+
+    Initial implementation uses serializer emthods to retrieve some data
+
+    Need to ask edX team why CourseOverview doesn't have a
+    '''
+    course_id = serializers.CharField(source='id', read_only=True)
+    course_name = serializers.CharField(source='display_name_with_default_escaped',
+        read_only=True)
+    course_code = serializers.CharField(source='display_number_with_default',
+        read_only=True)
+    org = serializers.CharField(source='display_org_with_default',
+        read_only=True)
+    start_date = serializers.DateTimeField(source='enrollment_start',
+        read_only=True, default=None)
+    end_date = serializers.DateTimeField(source='enrollment_end',
+        read_only=True, default=None)
+    self_paced = serializers.BooleanField(read_only=True)
+
+    staff = serializers.SerializerMethodField()
+
+    learners_enrolled = serializers.SerializerMethodField()
+    average_progress = serializers.SerializerMethodField()
+    average_days_to_complete = serializers.SerializerMethodField()
+    users_completed = serializers.SerializerMethodField()
+
+    # TODO: Consider if we want to add a hyperlink field to the learner details endpoint
+
+    class Meta:
+        model = CourseOverview
+        fields = ['course_id', 'course_name', 'course_code', 'org', 'start_date',
+                  'end_date', 'self_paced', 'staff', 'learners_enrolled',
+                  'average_progress', 'average_days_to_complete', 'users_completed',]
+        read_only_fields = fields
+
+    def get_staff(self, course_overview):
+        qs = CourseAccessRole.objects.filter(course_id=course_overview.id)
+        if qs:
+            return [CourseAccessRoleForGCDSerializer(data).data for data in qs]
+        else:
+            return []
+
+    def get_learners_enrolled(self, course_overview):
+        '''
+        Would be nice to have the course_enrollment and course_overview models
+        linked
+        '''
+        data = CourseEnrollment.objects.enrollment_counts(course_overview.id)
+        # data is of the form:
+        # defaultdict(<type 'int'>, {'total': 2, u'honor': 2})
+
+        # TODO: Get history. See this module's docstring for more details
+        # Form:
+        #  "history": [
+        #    {
+        #      "period": "April 2018",
+        #      "value": 123,
+        #    },
+        #    ...
+        #  ]
+        history = []
+
+        return dict(
+            current=data['total'],
+            history=history,
+            )
+
+    def get_average_progress(self, course_overview):
+        '''
+
+        '''
+
+        #print('inspect me'); import pdb; pdb.set_trace()
+
+        rec = CourseDailyMetrics.objects.filter(
+            course_id=course_overview.id).order_by('date_for').last()
+        average_progress = rec.average_progress if rec else 0.0
+        history = []
+        return dict(
+            current=average_progress,
+            history=history
+            )
+
+    def get_average_days_to_complete(self, course_overview):
+        '''
+
+        '''
+        rec = CourseDailyMetrics.objects.filter(
+            course_id=course_overview.id).order_by('date_for').last()
+
+        days = rec.average_days_to_complete if rec else None
+        history = []
+        return dict(
+            current=days,
+            history=history
+            )
+
+    def get_users_completed(self, course_overview):
+        '''
+        
+        '''
+        rec = CourseDailyMetrics.objects.filter(
+            course_id=course_overview.id).order_by('date_for').last()
+
+        counts = rec.num_learners_completed if rec else 0
+        history = []
+        return dict(
+            current=0,
+            history=history
+            )
+
+
 class GeneralSiteMetricsSerializer(serializers.Serializer):
     '''
     Because of the way figures.metrics.get_monthly_site_metrics *currently* 
@@ -325,6 +457,7 @@ class UserDemographicSerializer(serializers.Serializer):
     level_of_education = serializers.CharField(source='profile.level_of_education', 
         allow_blank=True, required=False, read_only=True)
 
+
 class LearnersCoursesSerializer(serializers.Serializer):
 
     courses = serializers.SerializerMethodField()
@@ -338,6 +471,7 @@ class LearnersCoursesSerializer(serializers.Serializer):
             id__in=[as_course_key(course_id) for course_id in course_ids])
 
         return [CourseOverviewSerializer(data).data for data in course_overviews]
+
 
 class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
     '''

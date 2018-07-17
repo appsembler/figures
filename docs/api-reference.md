@@ -263,6 +263,8 @@ There are a set REST API endpoints implemented to meet the specific needs of the
 
 These are subject to change, in particular the endpoint URLS as 
 
+_NOTE: The trailing slash is important for these endpoints. If the trailing slash is left out, then at least some of these will redirect to the Figures UI page_
+
 ### General Site Metrics
 
 To get the set of general site metrics:
@@ -278,6 +280,33 @@ To get a list of all courses with general (summary) metrics for each:
 ```
 /figures/api/courses/general/
 ```
+
+### Course Details
+
+This endpoint provides a combination of course information and learner activity
+
+```
+/figures/api/courses/detail/
+```
+
+To get the data for a specific course:
+
+```
+/figures/api/course/details/<course_id>/
+```
+
+Example:
+
+```
+/figures/api/courses/detail/course-v1:edX+DemoX+Demo_Course/
+```
+
+You can also filter on org:
+
+```
+/figures/api/courses/detail/?org=edX
+```
+
 
 ### General (Summary) User Data
 

@@ -37,6 +37,11 @@ router.register(
     views.GeneralCourseDataViewSet,
     base_name='general-courses')
 
+router.register(
+    r'courses/detail',
+    views.CourseDetailsViewSet,
+    base_name='course-details')
+
 # TODO: Consider changing the endpoint to 'learners'
 # and then have a separate endpoint for staff
 router.register(
