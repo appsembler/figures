@@ -11,13 +11,11 @@ class CoursesList extends Component {
     super(props);
 
     this.state = {
-      sortListBy: '',
-      coursesData: [],
+      sortListBy: ''
     };
 
     this.changeSorting = this.changeSorting.bind(this);
     this.sortByParameter = this.sortByParameter.bind(this);
-    this.populateCourseData = this.populateCourseData.bind(this);
   }
 
   changeSorting = (parameter) => {
@@ -49,38 +47,21 @@ class CoursesList extends Component {
     return data;
   }
 
-  populateCourseData = () => {
-    let coursesData = [];
-    let tempItem = {};
-    let courseIds = this.props.getIdListFunction();
-    courseIds.forEach((id, index) => {
-      tempItem = this.props.getCourseDataFunction(id);
-      tempItem.courseId = id;
-      coursesData.push(tempItem);
-    });
-    this.setState({
-      coursesData: coursesData,
-    });
-  }
-
-  componentDidMount() {
-    this.populateCourseData();
-  }
-
   render() {
-    const courseItems = this.state.coursesData.map((item, index) => {
+    const courseItems = this.props.coursesList.map((item, index) => {
       return (
         <CoursesListItem
-          courseName={item.courseTitle}
-          courseId={item.courseId}
-          courseIsSelfPaced={item.isSelfPaced}
-          startDate={item.startDate}
-          endDate={item.endDate}
-          courseStaff={item.courseStaff}
-          averageCompletionTime={item.averageCompletionTime}
-          averageProgress={item.averageProgress}
-          learnersEnrolled={item.learnersEnrolled}
-          numberLearnersCompleted={item.numberLearnersCompleted}
+          courseName={item['course_name']}
+          courseId={item['course_id']}
+          courseCode={item['course_code']}
+          courseIsSelfPaced={item['self_paced']}
+          startDate={item['start_date']}
+          endDate={item['end_date']}
+          courseStaff={item['staff']}
+          averageCompletionTime={item['average_days_to_complete'].current}
+          averageProgress={item['average_progress'].current}
+          learnersEnrolled={item['learners_enrolled'].current}
+          numberLearnersCompleted={item['users_completed'].current}
           key={index}
         />
       )
@@ -112,13 +93,13 @@ class CoursesList extends Component {
 }
 
 CoursesList.defaultProps = {
-  listTitle: 'Course data:'
+  listTitle: 'Course data:',
+  CoursesList: []
 }
 
 CoursesList.propTypes = {
   listTitle: PropTypes.string,
-  getIdListFunction: PropTypes.func,
-  getCourseDataFunction: PropTypes.func,
+  coursesList: PropTypes.array
 };
 
 export default CoursesList;

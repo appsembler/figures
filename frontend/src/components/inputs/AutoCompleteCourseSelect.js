@@ -86,9 +86,9 @@ class AutoCompleteCourseSelect extends Component {
 
     coursesList = this.props.coursesIndex.map((item, index) => {
       return {
-        courseId: item.id,
-        courseName: item.name,
-        courseNumber: item.number,
+        courseId: item['course_id'],
+        courseName: item['course_name'],
+        courseNumber: item['course_code']
       }
     })
 
