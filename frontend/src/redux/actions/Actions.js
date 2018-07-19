@@ -17,7 +17,7 @@ export const loadCoursesIndex = ( coursesData ) => ({
 export function fetchCoursesIndex () {
   return dispatch => {
     dispatch(requestCoursesIndex)
-    return fetch(apiConfig.figuresCoursesIndexApi)
+    return fetch(apiConfig.coursesGeneral, { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => dispatch(loadCoursesIndex(json)));
   }
@@ -39,7 +39,7 @@ export const loadUserIndex = ( coursesData ) => ({
 export function fetchUserIndex () {
   return dispatch => {
     dispatch(requestUserIndex)
-    return fetch(apiConfig.figuresUsersIndexApi)
+    return fetch(apiConfig.figuresUsersIndexApi, { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => dispatch(loadUserIndex(json)));
   }
@@ -86,7 +86,7 @@ export const loadReport = ( reportId, reportData ) => ({
 export function fetchReport(reportId) {
   return dispatch => {
     dispatch(requestReport(reportId))
-    return fetch(testSingleReportApiURL)
+    return fetch(testSingleReportApiURL, { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => dispatch(loadReport(reportId, json)))
   }
@@ -105,8 +105,27 @@ export const loadReportsList = ( reportsData ) => ({
 export function fetchReportsList(userId) {
   return dispatch => {
     dispatch(requestReportsList())
-    return fetch(testReportsListApiURL)
+    return fetch(testReportsListApiURL, { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => dispatch(loadReportsList(json)))
+  }
+}
+
+export const requestGeneralData = () => ({
+  type: types.REQUEST_GENERAL_DATA,
+})
+
+export const loadGeneralData = ( generalData ) => ({
+  type: types.LOAD_GENERAL_DATA,
+  generalData,
+  receivedAt: Date.now()
+})
+
+export function fetchGeneralData() {
+  return dispatch => {
+    dispatch(requestGeneralData())
+    return fetch(apiConfig.generalSiteMetrics, { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => dispatch(loadGeneralData(json)))
   }
 }
