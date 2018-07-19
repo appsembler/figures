@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchReportsList } from 'base/redux/actions/Actions';
 import styles from './_reports-list-content.scss';
+import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
+import HeaderContentReportsList from 'base/components/header-views/header-content-reports-list/HeaderContentReportsList';
 
 import classNames from 'classnames/bind';
 let cx = classNames.bind(styles);
@@ -60,22 +62,27 @@ class ReportsList extends Component {
     })
 
     return (
-      <ul className={cx({ 'container': true, 'reports-list': true})}>
-        <li key='list-header' className={cx(styles['report'], styles['list-header'])}>
-          <div className={styles['report-name']}>
-            Report name:
-          </div>
-          <div className={styles['report-description']}>
-            Report description:
-          </div>
-          <div className={styles['report-timestamp']}>
-            Time created:
-          </div>
-          <div className={styles['report-buttons']}>
-          </div>
-        </li>
-        {listItems}
-      </ul>
+      <div className="ef--layout-root">
+        <HeaderAreaLayout>
+          <HeaderContentReportsList />
+        </HeaderAreaLayout>
+        <ul className={cx({ 'container': true, 'reports-list': true})}>
+          <li key='list-header' className={cx(styles['report'], styles['list-header'])}>
+            <div className={styles['report-name']}>
+              Report name:
+            </div>
+            <div className={styles['report-description']}>
+              Report description:
+            </div>
+            <div className={styles['report-timestamp']}>
+              Time created:
+            </div>
+            <div className={styles['report-buttons']}>
+            </div>
+          </li>
+          {listItems}
+        </ul>
+      </div>
     );
   }
 }
