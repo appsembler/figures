@@ -38,7 +38,6 @@ class BaseStatCard extends Component {
   }
 
   render() {
-    let mainData = this.props.getDataFunction(this.props.dataParameter, 2);
 
     return (
       <div className={cx({ 'stat-card': true, 'span-2': (this.state.cardWidth === 2), 'span-3': (this.state.cardWidth === 3), 'span-4': (this.state.cardWidth === 4)})}>
@@ -51,13 +50,13 @@ class BaseStatCard extends Component {
           )}
           <div className={styles['main-data-container']}>
             {this.props.singleValue ? (
-              <span className={styles['current-data']}>{this.props.value}</span>
+              <span className={styles['current-data']}>{this.props.mainValue}</span>
             ) : (
-              <span className={styles['current-data']}>{(this.props.dataType === 'percentage') ? (mainData[1].value)*100 : (mainData[1].value)}{(this.props.dataType === 'percentage') && '%'}</span>
+              <span className={styles['current-data']}>{(this.props.dataType === 'percentage') ? (this.props.mainValue)*100 : (this.props.mainValue)}{(this.props.dataType === 'percentage') && '%'}</span>
             )}
             {(this.props.compareToPrevious && !this.props.singleValue) && (
               <div className={styles['previous-comparison']}>
-                <span className={styles['comparison-value']}>{(this.props.dataType === 'percentage') ? (((mainData[1].value - mainData[0].value)*100).toFixed(2)) : (mainData[1].value - mainData[0].value)}{(this.props.dataType === 'percentage') && '%'}</span>
+                <span className={styles['comparison-value']}>{(this.props.dataType === 'percentage') ? (((this.props.mainValue - this.props.valueHistory[this.props.valueHistory.length-2]['value'])*100).toFixed(2)) : (this.props.mainValue - this.props.valueHistory[this.props.valueHistory.length-2]['value'])}{(this.props.dataType === 'percentage') && '%'}</span>
                 <span className={styles['comparison-text']}>since last month</span>
               </div>
             )}
@@ -71,7 +70,7 @@ class BaseStatCard extends Component {
         {(this.state.historyExpanded && this.props.enableHistory) && (
           <div className={styles['history-content']}>
             <StatBarGraph
-              data={this.props.getDataFunction(this.props.dataParameter, 12)}
+              data={this.props.valueHistory}
               graphHeight='100%'
               dataType={this.props.dataType}
             />
@@ -90,7 +89,8 @@ BaseStatCard.defaultProps = {
   dataType: 'number',
   enableHistory: true,
   singleValue: false,
-  value: '',
+  mainValue: 0,
+  valueHistory: []
 }
 
 BaseStatCard.propTypes = {
@@ -98,12 +98,11 @@ BaseStatCard.propTypes = {
   cardDescription: PropTypes.string,
   cardWidth: PropTypes.number,
   dataType: PropTypes.string,
-  getDataFunction: PropTypes.func,
-  dataParameter: PropTypes.string,
+  mainValue: PropTypes.number,
   compareToPrevious: PropTypes.bool,
   enableHistory: PropTypes.bool,
   singleValue: PropTypes.bool,
-  value: PropTypes.string,
+  valueHistory: PropTypes.array
 };
 
 export default BaseStatCard;
