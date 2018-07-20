@@ -75,7 +75,7 @@ As of this time, the query is case sensitive.
 
 More filters will be added.
 
-Please see the [UserFilter](https://github.com/appsembler/figures/blob/master/figures/filters.py#L47) class which defines filters available.
+Please see the [UserFilterSet](https://github.com/appsembler/figures/blob/master/figures/filters.py#L47) class which defines available filter options.
 
 ### Course Enrollments
 
@@ -308,34 +308,45 @@ You can also filter on org:
 ```
 
 
+### Overview of user data endpoints
+
+Open edX has different roles, such as, but not limited to learner (or student), course instructor, and courses staff. Figures provides a single base endpoint, `/figures/api/users` to retrieve filterable user based data data on all users.
+
+
 ### General (Summary) User Data
 
-To get a list of users (learners) with summary data:
+To get a list of users with summary data:
 
 ```
 /figures/api/users/general/
 ```
 
-_NOTE: We will likely either change the above to replace `users` with `learners` or will change the learner details to use `users` instead of `learners` for consistency_
+### User Details
 
-### Learner Details
 
-To get details for all learners:
 
-```
-/figures/api/learners/detail/
-```
-
-To get details for a specific learner, provide the user id:
+To get details for all users:
 
 ```
-/figures/learners/detail/10
+/figures/api/users/detail/
 ```
 
-To select a set of learners, add the `user_ids` query parameter followed by a list of ids:
+To get details for a specific user, provide the user id:
 
 ```
-/figures/api/learners/detail/?user_ids=1,2,3
+/figures/users/detail/10
+```
+
+To select a set of users, add the `user_ids` query parameter followed by a list of ids:
+
+```
+/figures/api/users/detail/?user_ids=1,2,3
+```
+
+To get all the users (learner) enrolled in a course, provide the course id in the `enrolled_in_course_id` query param:
+
+```
+/fgures/api/users/detail/?enrolled_in_course_id=course-v1:edX+DemoX+Demo_Course
 ```
 
 
