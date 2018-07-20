@@ -125,7 +125,8 @@ class CourseEnrollmentFactory(DjangoModelFactory):
     user = factory.SubFactory(
         UserFactory,
     )
-    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    course_id = factory.SelfAttribute('course_overview.id')
+    course_overview = factory.SubFactory(CourseOverviewFactory)
     created = factory.Sequence(lambda n:
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
 
@@ -138,7 +139,6 @@ class CourseAccessRoleFactory(DjangoModelFactory):
     )
     course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
     role = factory.Iterator(['instructor', 'staff'])
-
 
 
 ##

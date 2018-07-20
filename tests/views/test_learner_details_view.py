@@ -128,7 +128,7 @@ class TestUserViewSet(object):
                 ).values(*self.expected_result_keys))
 
     @pytest.mark.parametrize('endpoint, filter', [
-        ('api/users/general', {}),
+        ('api/users/detail/', {}),
         ])
     def test_get_learner_details_list(self, endpoint, filter):
         '''Tests retrieving a list of users with abbreviated details

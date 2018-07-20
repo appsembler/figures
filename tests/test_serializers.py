@@ -16,6 +16,7 @@ from student.models import CourseEnrollment
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 from figures.serializers import (
     CourseDailyMetricsSerializer,
+    CourseDetailsSerializer,
     CourseEnrollmentSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
@@ -68,12 +69,56 @@ class TestUserIndexSerializer(object):
         assert data['fullname'] == 'Alpha One'
 
 
+class TestCourseDetailsSerializer(object):
+    '''
+    Needs more work
+    '''
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.course_overview = CourseOverviewFactory()
+        self.users = [UserFactory(), UserFactory()]
+
+        self.course_access_roles  = [
+            CourseAccessRoleFactory(
+                user=self.users[0],
+                course_id=self.course_overview.id,
+                role='staff'),
+            CourseAccessRoleFactory(
+                user=self.users[1],
+                course_id=self.course_overview.id,
+                role='administrator'),
+        ]
+        self.serializer = CourseDetailsSerializer(instance=self.course_overview)
+
+        self.expected_fields = [
+            'course_id', 'course_name', 'course_code','org', 'start_date',
+            'end_date', 'self_paced', 'staff', 'average_progress',
+            'learners_enrolled', 'average_days_to_complete', 'users_completed',
+
+        ]
+
+    def test_has_fields(self):
+        data = self.serializer.data
+        assert set(data.keys()) == set(self.expected_fields)
+
+        # This is to make sure that the serializer retrieves the correct nested
+        # model (UserProfile) data
+        assert data['course_id'] == str(self.course_overview.id)
+        assert data['course_name'] == self.course_overview.display_name
+        assert data['course_code'] == self.course_overview.number
+        assert data['org'] == self.course_overview.org
+        assert parse(data['start_date']) == self.course_overview.enrollment_start
+        assert parse(data['end_date']) == self.course_overview.enrollment_end
+        assert data['self_paced'] == self.course_overview.self_paced
+
+
+
 class TestCourseEnrollmentSerializer(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.model =  CourseEnrollment
-        self.special_fields = set(['course_id', 'created', 'user', ])
+        self.special_fields = set(['course_id', 'created', 'user', 'course_overview' ])
         self.expected_results_keys = set([o.name for o in self.model._meta.fields])
         field_names = (o.name for o in self.model._meta.fields
             if o.name not in self.date_fields )
