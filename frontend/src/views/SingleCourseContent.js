@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import classNames from 'classnames/bind';
 import styles from './_single-course-content.scss';
+import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
+import HeaderContentCourse from 'base/components/header-views/header-content-course/HeaderContentCourse';
 import BaseStatCard from 'base/components/stat-cards/BaseStatCard';
 import LearnerStatistics from 'base/components/learner-statistics/LearnerStatistics';
 import CourseLearnersList from 'base/components/course-learners-list/CourseLearnersList';
@@ -139,40 +141,47 @@ class SingleCourseContent extends Component {
 
   render() {
     return (
-      <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
-        <BaseStatCard
-          cardTitle='Number of enrolled learners'
-          cardDescription='Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='number-of-learners'
-        />
-        <BaseStatCard
-          cardTitle='Average course progress'
-          cardDescription='At the end of the day, going forward, a new normal that has evolved from generation X is on the runway heading towards a streamlined cloud solution.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='average-progress'
-          dataType='percentage'
-        />
-        <BaseStatCard
-          cardTitle='Average time to complete'
-          cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='number-of-learners'
-          singleValue
-          value='41d 36h 22m'
-        />
-        <BaseStatCard
-          cardTitle='User course completions'
-          cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment. Bring to the table win-win survival strategies to ensure proactive domination.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='average-progress'
-          dataType='percentage'
-        />
-        <LearnerStatistics />
-        <CourseLearnersList
-          paginationMaxRows = {3}
-          courseId = {this.props.courseId}
-        />
+      <div className="ef--layout-root">
+        <HeaderAreaLayout>
+          <HeaderContentCourse
+            courseId = {this.props.courseId}
+          />
+        </HeaderAreaLayout>
+        <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
+          <BaseStatCard
+            cardTitle='Number of enrolled learners'
+            cardDescription='Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition.'
+            getDataFunction={this.apiSimulator}
+            dataParameter='number-of-learners'
+          />
+          <BaseStatCard
+            cardTitle='Average course progress'
+            cardDescription='At the end of the day, going forward, a new normal that has evolved from generation X is on the runway heading towards a streamlined cloud solution.'
+            getDataFunction={this.apiSimulator}
+            dataParameter='average-progress'
+            dataType='percentage'
+          />
+          <BaseStatCard
+            cardTitle='Average time to complete'
+            cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.'
+            getDataFunction={this.apiSimulator}
+            dataParameter='number-of-learners'
+            singleValue
+            value='41d 36h 22m'
+          />
+          <BaseStatCard
+            cardTitle='User course completions'
+            cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment. Bring to the table win-win survival strategies to ensure proactive domination.'
+            getDataFunction={this.apiSimulator}
+            dataParameter='average-progress'
+            dataType='percentage'
+          />
+          <LearnerStatistics />
+          <CourseLearnersList
+            paginationMaxRows = {3}
+            courseId = {this.props.courseId}
+          />
+        </div>
       </div>
     );
   }
