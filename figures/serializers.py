@@ -277,6 +277,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         Would be nice to have the course_enrollment and course_overview models
         linked
         '''
+
         data = CourseEnrollment.objects.enrollment_counts(course_overview.id)
         # data is of the form:
         # defaultdict(<type 'int'>, {'total': 2, u'honor': 2})
@@ -301,8 +302,6 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         '''
 
         '''
-
-        #print('inspect me'); import pdb; pdb.set_trace()
 
         rec = CourseDailyMetrics.objects.filter(
             course_id=course_overview.id).order_by('date_for').last()
@@ -494,9 +493,9 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
             }
     '''
 
-    course_name = serializers.CharField(source='course.display_name')
-    course_code = serializers.CharField(source='course.number')
-    course_id = serializers.CharField(source='course.id')
+    course_name = serializers.CharField(source='course_overview.display_name')
+    course_code = serializers.CharField(source='course_overview.number')
+    course_id = serializers.CharField(source='course_overview.id')
     date_enrolled = serializers.DateTimeField(source='created', format="%Y-%m-%d")
     progress_data = serializers.SerializerMethodField()
     enrollment_id = serializers.IntegerField(source='id')

@@ -27,7 +27,7 @@ from .filters import (
     CourseOverviewFilter,
     LearnerFilterSet,
     SiteDailyMetricsFilter,
-    UserFilter,
+    UserFilterSet,
 )
 from .models import CourseDailyMetrics, SiteDailyMetrics
 from .serializers import (
@@ -118,7 +118,7 @@ class UserIndexView(ListAPIView):
     pagination_class = None
     serializer_class = UserIndexSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_class = UserFilter
+    filter_class = UserFilterSet
 
     def get_queryset(self):
         queryset = super(UserIndexView, self).get_queryset()
@@ -281,7 +281,8 @@ class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralUserDataSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_class = LearnerFilterSet
+    #filter_class = LearnerFilterSet
+    filter_class = UserFilterSet
 
     def get_queryset(self):
         queryset = super(GeneralUserDataViewSet, self).get_queryset()
@@ -290,12 +291,11 @@ class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
 
 class LearnerDetailsViewSet(viewsets.ReadOnlyModelViewSet):
 
-    model = get_user_model()
     queryset =  get_user_model().objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = LearnerDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_class = LearnerFilterSet
+    filter_class = UserFilterSet
 
     def get_queryset(self):
         '''
