@@ -37,7 +37,9 @@ class DashboardContent extends Component {
     return (
       <div className="ef--layout-root">
         <HeaderAreaLayout>
-          <HeaderContentMaus />
+          <HeaderContentMaus
+            showHistoryButton
+          />
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
