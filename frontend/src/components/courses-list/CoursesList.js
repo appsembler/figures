@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { List } from 'immutable';
 import PropTypes from 'prop-types';
 import styles from './_courses-list.scss';
 import classNames from 'classnames/bind';
@@ -11,44 +12,43 @@ class CoursesList extends Component {
     super(props);
 
     this.state = {
-      sortListBy: ''
+      sortListBy: '',
+      coursesList: List()
     };
 
     this.changeSorting = this.changeSorting.bind(this);
-    this.sortByParameter = this.sortByParameter.bind(this);
   }
 
   changeSorting = (parameter) => {
-    let dataParameter;
+    let coursesList = this.state.coursesList;
     if (parameter === 'alphabetically') {
-      dataParameter = 'courseTitle';
+      coursesList = coursesList.sortBy(item => item['course_name']).reverse()
     } else if (parameter === 'learners-enrolled') {
-      dataParameter = 'learnersEnrolled';
+      coursesList = coursesList.sortBy(item => item['learners_enrolled']['current']).reverse()
     } else if (parameter === 'average-progress') {
-      dataParameter = 'averageProgress';
+      coursesList = coursesList.sortBy(item => item['average_progress']['current']).reverse()
     } else if (parameter === 'completion-time') {
-      dataParameter = 'averageCompletionTime';
+      coursesList = coursesList.sortBy(item => item['average_days_to_complete']['current']).reverse()
     } else if (parameter === 'completed-learners') {
-      dataParameter = 'numberLearnersCompleted';
+      coursesList = coursesList.sortBy(item => item['users_completed']['current']).reverse()
     }
-    let sortedData = this.sortByParameter(this.state.coursesData, dataParameter);
     this.setState({
-      coursesData: sortedData,
+      coursesList: coursesList,
       sortListBy: parameter,
     })
   }
 
-  sortByParameter = (data, parameter) => {
-    data.sort(function(a, b) {
-      if(a[parameter] < b[parameter]) return -1;
-      if(a[parameter] > b[parameter]) return 1;
-      return 0;
-    });
-    return data;
+  componentWillReceiveProps = (nextProps) => {
+    if (nextProps !== this.props) {
+      this.setState({
+        coursesList: List(nextProps.coursesList)
+      })
+    }
   }
 
   render() {
-    const courseItems = this.props.coursesList.map((item, index) => {
+    console.log(this.state.coursesList)
+    const courseItems = this.state.coursesList.toArray().map((item, index) => {
       return (
         <CoursesListItem
           courseName={item['course_name']}
