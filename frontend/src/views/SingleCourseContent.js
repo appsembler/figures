@@ -39,7 +39,7 @@ class SingleCourseContent extends Component {
 
   fetchLearnersData = () => {
     this.props.addActiveApiFetch();
-    fetch((apiConfig.learnersDetailed + '?course_id=' + this.props.courseId), { credentials: "same-origin" })
+    fetch((apiConfig.learnersDetailed + '?enrolled_in_course_id=' + this.props.courseId), { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({
         learnersData: {
@@ -93,7 +93,7 @@ class SingleCourseContent extends Component {
             learnersData = {this.state.learnersData}
           />
           <CourseLearnersList
-            paginationMaxRows = {2}
+            paginationMaxRows = {30}
             courseId = {this.props.courseId}
             learnersCount = {this.state.learnersData['count']}
             learnersData = {this.state.learnersData['learners']}
