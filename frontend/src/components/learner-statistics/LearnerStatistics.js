@@ -95,7 +95,6 @@ class LearnerStatistics extends Component {
   }
 
   onChangeBreakdownType = (payload) => {
-    console.log(payload.value);
     this.setState({
       breakdownType: payload.value,
     }, () => {
