@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styles from './_loading-spinner.scss';
-import { PacmanLoader } from 'react-spinners';
+import { HashLoader } from 'react-spinners';
 import classNames from 'classnames/bind';
 
 let cx = classNames.bind(styles);
@@ -14,7 +14,7 @@ class LoadingSpinner extends Component {
         {this.props.displaySpinner && (
           <div className={styles['spinner-container']}>
             <div className={styles['spinner-container__content']}>
-              <PacmanLoader
+              <HashLoader
                 color={'#0090c1'}
               />
               <span>Loading your data...</span>
