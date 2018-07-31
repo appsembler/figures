@@ -15,10 +15,10 @@ class HeaderNav extends Component {
           Dashboard
         </NavLink>
         <NavLink
-          to="/figures/reports"
+          to="/figures/mau-history"
           className={styles['header-nav__link']}
         >
-          Reports
+          MAU History
         </NavLink>
         <AutoCompleteCourseSelect
           negativeStyleButton

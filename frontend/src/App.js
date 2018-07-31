@@ -5,6 +5,7 @@ import { fetchCoursesIndex, fetchUserIndex, fetchGeneralData } from 'base/redux/
 import ReactCSSTransitionReplace from 'react-css-transition-replace';
 import LoadingSpinner from 'base/containers/loading-spinner/LoadingSpinner';
 import DashboardContent from 'base/views/DashboardContent';
+import MauDetailsContent from 'base/views/MauDetailsContent';
 import SingleCourseContent from 'base/views/SingleCourseContent';
 import ReportsList from 'base/views/ReportsList';
 import SingleReportContent from 'base/views/SingleReportContent';
@@ -34,6 +35,7 @@ class App extends Component {
               <div key={this.props.location.pathname}>
                 <Switch location={this.props.location}>
                   <Route exact path="/figures" component={DashboardContent} />
+                  <Route exact path="/figures/mau-history" component={MauDetailsContent} />
                   <Route exact path="/figures/reports" component={ReportsList} />
                   <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseId={match.params.courseId} />}/>
                   <Route path="/figures/report/:reportId" render={({ match }) => <SingleReportContent reportId={match.params.reportId} />}/>
