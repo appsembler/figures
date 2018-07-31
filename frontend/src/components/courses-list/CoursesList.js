@@ -47,7 +47,6 @@ class CoursesList extends Component {
   }
 
   render() {
-    console.log(this.state.coursesList)
     const courseItems = this.state.coursesList.toArray().map((item, index) => {
       return (
         <CoursesListItem
