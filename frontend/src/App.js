@@ -7,6 +7,7 @@ import LoadingSpinner from 'base/containers/loading-spinner/LoadingSpinner';
 import DashboardContent from 'base/views/DashboardContent';
 import MauDetailsContent from 'base/views/MauDetailsContent';
 import SingleCourseContent from 'base/views/SingleCourseContent';
+import SingleUserContent from 'base/views/SingleUserContent';
 import ReportsList from 'base/views/ReportsList';
 import SingleReportContent from 'base/views/SingleReportContent';
 import 'base/sass/base/_base-overrides.scss';
@@ -38,6 +39,7 @@ class App extends Component {
                   <Route exact path="/figures/mau-history" component={MauDetailsContent} />
                   <Route exact path="/figures/reports" component={ReportsList} />
                   <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseId={match.params.courseId} />}/>
+                  <Route path="/figures/user/:userId" render={({ match }) => <SingleUserContent userId={match.params.userId} />}/>
                   <Route path="/figures/report/:reportId" render={({ match }) => <SingleReportContent reportId={match.params.reportId} />}/>
                 </Switch>
               </div>
