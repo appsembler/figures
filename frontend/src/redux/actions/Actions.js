@@ -2,11 +2,17 @@ import fetch from 'cross-fetch';
 import * as types from './ActionTypes';
 import apiConfig from 'base/apiConfig';
 
-// course index data related Redux actions
+// set number of active API data fetching processes in Redux
 
-export const requestCoursesIndex = () => ({
-  type: types.REQUEST_COURSES_INDEX
+export const addActiveApiFetch = () => ({
+  type: types.ADD_ACTIVE_API_FETCH
 })
+
+export const removeActiveApiFetch = () => ({
+  type: types.REMOVE_ACTIVE_API_FETCH
+})
+
+// course index data related Redux actions
 
 export const loadCoursesIndex = ( coursesData ) => ({
   type: types.LOAD_COURSES_INDEX,
@@ -16,19 +22,16 @@ export const loadCoursesIndex = ( coursesData ) => ({
 
 export function fetchCoursesIndex () {
   return dispatch => {
-    dispatch(requestCoursesIndex)
+    dispatch(addActiveApiFetch())
     return fetch(apiConfig.coursesGeneral, { credentials: "same-origin" })
       .then(response => response.json())
-      .then(json => dispatch(loadCoursesIndex(json)));
+      .then(json => dispatch(loadCoursesIndex(json)))
+      .then(dispatch(removeActiveApiFetch()));
   }
 }
 
 
 // user index data related Redux actions
-
-export const requestUserIndex = () => ({
-  type: types.REQUEST_USER_INDEX
-})
 
 export const loadUserIndex = ( coursesData ) => ({
   type: types.LOAD_USER_INDEX,
@@ -38,10 +41,11 @@ export const loadUserIndex = ( coursesData ) => ({
 
 export function fetchUserIndex () {
   return dispatch => {
-    dispatch(requestUserIndex)
-    return fetch(apiConfig.figuresUsersIndexApi, { credentials: "same-origin" })
+    dispatch(addActiveApiFetch())
+    return fetch(apiConfig.learnersGeneral, { credentials: "same-origin" })
       .then(response => response.json())
-      .then(json => dispatch(loadUserIndex(json)));
+      .then(json => dispatch(loadUserIndex(json.results)))
+      .then(dispatch(removeActiveApiFetch()));
   }
 }
 
@@ -111,10 +115,6 @@ export function fetchReportsList(userId) {
   }
 }
 
-export const requestGeneralData = () => ({
-  type: types.REQUEST_GENERAL_DATA,
-})
-
 export const loadGeneralData = ( generalData ) => ({
   type: types.LOAD_GENERAL_DATA,
   generalData,
@@ -123,9 +123,10 @@ export const loadGeneralData = ( generalData ) => ({
 
 export function fetchGeneralData() {
   return dispatch => {
-    dispatch(requestGeneralData())
+    dispatch(addActiveApiFetch())
     return fetch(apiConfig.generalSiteMetrics, { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => dispatch(loadGeneralData(json)))
+      .then(dispatch(removeActiveApiFetch()))
   }
 }

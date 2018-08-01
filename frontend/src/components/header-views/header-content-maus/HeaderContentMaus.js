@@ -36,7 +36,9 @@ class HeaderContentMaus extends Component {
             <span className={styles['comparison-box__text']}>
               {(currentPeriodValue >= previousPeriodValue) ? 'up' : 'down'} {comparisonValue} compared to last month
             </span>
-            <Link to='test' className={styles['mau-history-link']}>See history</Link>
+            {this.props.showHistoryButton ? (
+              <Link to='/figures/mau-history' className={styles['mau-history-link']}>See details</Link>
+            ) : ''}
           </div>
         </div>
         <div className={styles['graph-container']}>
@@ -52,6 +54,10 @@ class HeaderContentMaus extends Component {
       </section>
     );
   }
+}
+
+HeaderContentMaus.defaultProps = {
+  showHistoryButton: false
 }
 
 const mapStateToProps = (state, ownProps) => ({

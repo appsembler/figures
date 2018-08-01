@@ -2,7 +2,7 @@
 @import '~base/sass/base/functions';
 @import '~base/sass/base/mixins';
 
-.ac-course-selector {
+.ac-user-selector {
   position: relative;
 }
 
@@ -111,7 +111,7 @@ textarea, input[type="text"], input[type="url"], input[type="email"], input[type
     align-items: baseline;
     text-decoration: none;
 
-    &__course-id {
+    &__user-username {
       flex-grow: 1;
       flex-shrink: 0;
       font-weight: bold;
@@ -121,7 +121,7 @@ textarea, input[type="text"], input[type="url"], input[type="email"], input[type
       margin-right: calcRem(10);
     }
 
-    &__course-name {
+    &__user-name {
       color: $base-text-color;
       font-size: $base-font-size;
       flex-grow: 1;

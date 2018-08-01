@@ -64,5 +64,6 @@ urlpatterns = [
     url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
     url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
         name='general-site-metrics'),
-    url('', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
+    url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')
+    # url(r'^.*/', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
 ]

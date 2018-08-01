@@ -1,4 +1,4 @@
-import { LOAD_GENERAL_DATA } from '../actions/ActionTypes';
+import { LOAD_GENERAL_DATA, ADD_ACTIVE_API_FETCH, REMOVE_ACTIVE_API_FETCH } from '../actions/ActionTypes';
 
 const initialState = {
   data: {
@@ -57,15 +57,23 @@ const initialState = {
         {"period":"June, 2018","value":0}
       ]
     }
-  }
+  },
+  activeApiFetches: 0
 }
 
 const generalData = (state = initialState, action) => {
   switch (action.type) {
     case LOAD_GENERAL_DATA:
       return Object.assign({}, state, {
-        data: action.generalData,
-        receivedAt: action.receivedAt
+        data: action.generalData
+      })
+    case ADD_ACTIVE_API_FETCH:
+      return Object.assign({}, state, {
+        activeApiFetches: state.activeApiFetches + 1
+      })
+    case REMOVE_ACTIVE_API_FETCH:
+      return Object.assign({}, state, {
+        activeApiFetches: state.activeApiFetches - 1
       })
     default:
       return state

@@ -1,0 +1,41 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+
+.loading-spinner-root-container {
+
+  .spinner-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(#fff, 0.7);
+    z-index: 100;
+
+    &__content {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+
+      span {
+        display: block;
+        margin-top: calcRem(50);
+        font-size: calcRem(14);
+        text-align: center;
+        width: 100%;
+      }
+    }
+  }
+
+  .main-content {
+
+    &.blurred {
+      overflow: hidden;
+      filter: blur(5px);
+    }
+  }
+}

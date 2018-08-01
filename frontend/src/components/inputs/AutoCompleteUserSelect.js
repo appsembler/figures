@@ -3,25 +3,25 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { Link } from 'react-router-dom';
-import styles from './_autocomplete-course-select.scss';
+import styles from './_autocomplete-user-select.scss';
 import classNames from 'classnames/bind';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/fontawesome-free-solid';
 
 let cx = classNames.bind(styles);
 
-var coursesList = [
+var usersList = [
 ];
 
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
-  return inputLength === coursesList ? [] : coursesList.filter(course => ((course.courseName.toLowerCase().slice(0, inputLength) === inputValue) || (course.courseNumber.toLowerCase().slice(0, inputLength) === inputValue))).toArray();
+  return inputLength === usersList ? [] : usersList.filter(user => ((user.userName.toLowerCase().slice(0, inputLength) === inputValue) || (user.userUsername.toLowerCase().slice(0, inputLength) === inputValue))).toArray();
 };
 
-const getSuggestionValue = suggestion => suggestion.courseName;
+const getSuggestionValue = suggestion => suggestion.userName;
 
-class AutoCompleteCourseSelect extends Component {
+class AutoCompleteUserSelect extends Component {
   constructor(props) {
     super(props);
 
@@ -84,21 +84,23 @@ class AutoCompleteCourseSelect extends Component {
       onChange: this.onChange
     };
 
-    coursesList = this.props.coursesIndex.map((item, index) => {
+    usersList = this.props.usersIndex.map((item, index) => {
       return {
-        courseId: item['course_id'],
-        courseName: item['course_name'],
-        courseNumber: item['course_code']
+        userId: item['id'],
+        userName: item['fullname'] ? item['fullname'] : item['username'],
+        userUsername: item['username']
       }
     })
 
+    console.log(usersList);
+
     const renderSuggestion = suggestion => (
-      <Link className={styles['suggestion-link']} to={'/figures/course/' + suggestion.courseId} onClick={this.modalTrigger}><span className={styles['suggestion-link__course-id']}>{suggestion.courseNumber}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
+      <Link className={styles['suggestion-link']} to={'/figures/user/' + suggestion.userId} onClick={this.modalTrigger}><span className={styles['suggestion-link__user-username']}>{suggestion.userUsername}</span><span className={styles['suggestion-link__user-name']}>{suggestion.userName}</span></Link>
     );
 
 
     return (
-      <div className={styles['ac-course-selector']}>
+      <div className={styles['ac-user-selector']}>
         <button onClick={this.modalTrigger} className={cx({ 'selector-trigger-button': true, 'positive': !this.props.negativeStyleButton, 'negative': this.props.negativeStyleButton })}>{this.props.buttonText}</button>
         {this.state.modalActive && (
           <div className={styles['selector-modal']}>
@@ -122,61 +124,22 @@ class AutoCompleteCourseSelect extends Component {
   }
 }
 
-AutoCompleteCourseSelect.defaultProps = {
+AutoCompleteUserSelect.defaultProps = {
   negativeStyleButton: false,
-  buttonText: 'Select a course',
+  buttonText: 'Select a user',
   inputPlaceholder: 'Select or start typing',
-  coursesList: [
-    {
-      courseId: 'A101',
-      courseName: 'This is the name of the course'
-    },
-    {
-      courseId: 'A102',
-      courseName: 'This is another name of the course'
-    },
-    {
-      courseId: 'A103',
-      courseName: 'My introduction to EdX Figures'
-    },
-    {
-      courseId: 'A101',
-      courseName: 'This is the name of the course'
-    },
-    {
-      courseId: 'A102',
-      courseName: 'This is another name of the course'
-    },
-    {
-      courseId: 'A103',
-      courseName: 'My introduction to EdX Figures'
-    },
-    {
-      courseId: 'A101',
-      courseName: 'This is the name of the course'
-    },
-    {
-      courseId: 'A102',
-      courseName: 'This is another name of the course'
-    },
-    {
-      courseId: 'A103',
-      courseName: 'My introduction to EdX Figures'
-    }
-  ]
 }
 
-AutoCompleteCourseSelect.propTypes = {
+AutoCompleteUserSelect.propTypes = {
   negativeStyleButton: PropTypes.bool,
   buttonText: PropTypes.string,
-  inputPlaceholder: PropTypes.string,
-  coursesList: PropTypes.array
+  inputPlaceholder: PropTypes.string
 };
 
 const mapStateToProps = (state, ownProps) => ({
-  coursesIndex: state.coursesIndex.coursesIndex,
+  usersIndex: state.usersIndex.usersIndex,
 })
 
 export default connect(
   mapStateToProps
-)(AutoCompleteCourseSelect)
+)(AutoCompleteUserSelect)

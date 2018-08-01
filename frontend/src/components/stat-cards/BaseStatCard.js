@@ -38,6 +38,7 @@ class BaseStatCard extends Component {
   }
 
   render() {
+    const valueHistory = this.props.valueHistory.length ? this.props.valueHistory : [ { period: '', value: 0 }, { period: '', value: 0 } ]
 
     return (
       <div className={cx({ 'stat-card': true, 'span-2': (this.state.cardWidth === 2), 'span-3': (this.state.cardWidth === 3), 'span-4': (this.state.cardWidth === 4)})}>
@@ -56,7 +57,7 @@ class BaseStatCard extends Component {
             )}
             {(this.props.compareToPrevious && !this.props.singleValue) && (
               <div className={styles['previous-comparison']}>
-                <span className={styles['comparison-value']}>{(this.props.dataType === 'percentage') ? (((this.props.mainValue - this.props.valueHistory[this.props.valueHistory.length-2]['value'])*100).toFixed(2)) : (this.props.mainValue - this.props.valueHistory[this.props.valueHistory.length-2]['value'])}{(this.props.dataType === 'percentage') && '%'}</span>
+                <span className={styles['comparison-value']}>{(this.props.dataType === 'percentage') ? (((this.props.mainValue - valueHistory[valueHistory.length-2]['value'])*100).toFixed(2)) : (this.props.mainValue - valueHistory[valueHistory.length-2]['value'])}{(this.props.dataType === 'percentage') && '%'}</span>
                 <span className={styles['comparison-text']}>since last month</span>
               </div>
             )}

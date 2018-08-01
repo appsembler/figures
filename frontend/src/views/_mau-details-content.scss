@@ -3,7 +3,12 @@
 @import '~base/sass/base/grid';
 @import '~base/sass/base/stat-cards';
 
-.course-learners-list {
+.mau-details-content {
+  margin-top: calcRem(40);
+  padding-bottom: calcRem(50);
+}
+
+.mau-history-list {
   margin: calcRem(20) 0;
   grid-column-end: span 4;
 
@@ -19,16 +24,16 @@
     line-height: 100%;
   }
 
-  .learners-table-container {
+  .mau-table-container {
     display: block;
   }
 
-  .learners-table {
+  .mau-table {
     width: 100%;
     padding: 0;
     margin: 0;
 
-    .header-row, .learner-row {
+    .header-row, .content-row {
       padding: calcRem(20) 0;
       display: flex;
       align-items: center;
@@ -37,8 +42,21 @@
         flex: 1 1 calcRem(100);
       }
 
-      .date-enrolled, .course-progress, .course-completed, .date-completed {
+      .period {
+        flex-grow: 2;
+      }
+
+      .mau-count, .difference {
+        flex-grow: 1;
         text-align: center;
+
+        &.positive {
+          color: $positive-color;
+        }
+
+        &.negative {
+          color: $negative-color;
+        }
       }
     }
 
@@ -47,43 +65,17 @@
       color: lighten($base-text-color, 15%);
     }
 
-    .learner-row {
+    .content-row {
       border-bottom: calcRem(1) solid lighten($base-text-color, 75%);
       font-size: calcRem(14);
 
-      .name, .course-progress {
+      .mau-count {
         font-weight: bold;
       }
 
       &:last-child {
         border-bottom: none;
       }
-    }
-
-    .completed-icon {
-      color: #7ED321;
-    }
-  }
-
-  .load-more-button {
-    display: block;
-    font-size: calcRem(14);
-    padding: calcRem(10) calcRem(20);
-    font-weight: bold;
-    color: $primary-color;
-    border: calcRem(2) solid $primary-color;
-    background: transparent;
-    cursor: pointer;
-    border-radius: calcRem(30);
-    transition: all 0.3s ease-in-out;
-    text-decoration: none;
-    margin: calcRem(40) auto calcRem(15);
-    min-width: calcRem(200);
-
-    &:hover {
-      color: #fff;
-      background: $primary-color;
-      outline: none;
     }
   }
 }
