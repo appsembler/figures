@@ -77,5 +77,17 @@ class TestUserIndexView(object):
         view = UserIndexView.as_view()
         response = view(request)
         assert response.status_code == 200
-        assert len(response.data) == len(expected_data)
-        assert response.data == expected_data
+
+        # Expect the following format for pagination
+        # {
+        #     "count": 2,
+        #     "next": null, # or a url
+        #     "previous": null, # or a url
+        #     "results": [
+        #     ...           # list of the results
+        #     ]
+        # }
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+        assert len(response.data['results']) == len(expected_data)
+        assert response.data['results'] == expected_data

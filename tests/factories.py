@@ -109,7 +109,7 @@ class GeneratedCertificateFactory(DjangoModelFactory):
         UserFactory,
     )
     course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
-    created = factory.Sequence(lambda n:
+    created_date = factory.Sequence(lambda n:
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
 
 

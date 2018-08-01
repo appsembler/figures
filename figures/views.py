@@ -91,7 +91,7 @@ class CoursesIndexView(ListAPIView):
     '''
     model = CourseOverview
     queryset = CourseOverview.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseIndexSerializer
 
     filter_backends = (DjangoFilterBackend, )
@@ -115,7 +115,7 @@ class UserIndexView(ListAPIView):
 
     model = get_user_model()
     queryset = get_user_model().objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = UserIndexSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = UserFilterSet
@@ -125,11 +125,11 @@ class UserIndexView(ListAPIView):
 
         return queryset
 
-# TODO: Change to ReadOnlyModelViewSet
-class CourseEnrollmentViewSet(viewsets.ModelViewSet):
+
+class CourseEnrollmentViewSet(viewsets.ReadOnlyModelViewSet):
     model = CourseEnrollment
     queryset = CourseEnrollment.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseEnrollmentSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseEnrollmentFilter
@@ -138,10 +138,6 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
         queryset = super(CourseEnrollmentViewSet, self).get_queryset()
         return queryset
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
 ##
 ## Views for Figures models
@@ -151,7 +147,7 @@ class CourseDailyMetricsViewSet(viewsets.ModelViewSet):
 
     model = CourseDailyMetrics
     queryset = CourseDailyMetrics.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseDailyMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseDailyMetricsFilter
@@ -166,7 +162,7 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 
     model = SiteDailyMetrics
     queryset = SiteDailyMetrics.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = SiteDailyMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = SiteDailyMetricsFilter
@@ -191,6 +187,7 @@ class GeneralSiteMetricsView(APIView):
     # pagination_class = None
     # serializer_class = GeneralSiteMetricsSerializer
     #TODO add filters
+    pagination_class = FiguresLimitOffsetPagination
 
     def get(self, request, format=None):
         '''
@@ -236,7 +233,7 @@ class GeneralCourseDataViewSet(viewsets.ModelViewSet):
     '''
     model = CourseOverview
     queryset = CourseOverview.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralCourseDataSerializer
 
     def retrieve(self, request, *args, **kwargs):

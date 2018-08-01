@@ -15,6 +15,7 @@ from rest_framework.test import (
     )
 
 from figures.models import CourseDailyMetrics
+from figures.pagination import FiguresLimitOffsetPagination
 from figures.views import CourseDailyMetricsViewSet
 
 from tests.factories import CourseDailyMetricsFactory, UserFactory
@@ -91,10 +92,25 @@ class TestCourseDailyMetricsView(object):
         view = CourseDailyMetricsViewSet.as_view({'get':'list'})
         response = view(request)
         assert response.status_code == 200
-        assert len(response.data) == expected_data.count()
+
+        # Expect the following format for pagination
+        # {
+        #     "count": 2,
+        #     "next": null, # or a url
+        #     "previous": null, # or a url
+        #     "results": [
+        #     ...           # list of the results
+        #     ]
+        # }
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+
+
+        assert len(response.data['results']) == FiguresLimitOffsetPagination.default_limit
 
         # Hack: Check date and datetime values explicitly
-        for data in response.data:
+        for data in response.data['results']:
+            # Note: This only tests the data in the first response page
             db_rec = expected_data.get(id=data['id'])
             self.assert_response_equal(data, db_rec)
 

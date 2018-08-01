@@ -109,9 +109,11 @@ class TestGeneralCourseDataViewSet(object):
 
         # Later, we'll elaborate on the tests. For now, some basic checks
         assert response.status_code == 200
-        assert len(response.data) == len(self.course_overviews)
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+        assert len(response.data['results']) == len(self.course_overviews)
 
-        for rec in response.data:
+        for rec in response.data['results']:
 
             course_overview = CourseOverview.objects.get(id=as_course_key(rec['course_id']))
 

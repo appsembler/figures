@@ -63,10 +63,14 @@ class TestCourseEnrollment(object):
         force_authenticate(request, user=UserFactory())
         view = CourseEnrollmentViewSet.as_view({'get': 'list'})
         response = view(request)
-        assert response.status_code == 200
-        assert len(response.data) == len(expected_data)
 
-        for data in response.data:
+        assert response.status_code == 200
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+
+        assert len(response.data['results']) == len(expected_data)
+
+        for data in response.data['results']:
             db_rec = expected_data.get(id=data['id'])
             assert parse(data['created']) == db_rec.created
 

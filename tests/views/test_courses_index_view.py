@@ -51,7 +51,9 @@ class CourseIndexViewTest(TestCase):
         view = CoursesIndexView.as_view()
         response = view(request)
         assert response.status_code == 200
-        assert response.data == expected_data
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+        assert response.data['results'] == expected_data
 
     def test_get_org_filtered(self):
         expected_data = [rec for rec in COURSE_DATA if rec['org'] == 'AlphaOrg']
@@ -62,4 +64,6 @@ class CourseIndexViewTest(TestCase):
         view = CoursesIndexView.as_view()
         response = view(request)
         assert response.status_code == 200
-        assert response.data == expected_data
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+        assert response.data['results'] == expected_data

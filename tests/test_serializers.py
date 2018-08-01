@@ -20,6 +20,7 @@ from figures.serializers import (
     CourseEnrollmentSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
+    LearnerCourseDetailsSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer,
@@ -30,6 +31,7 @@ from tests.factories import (
     CourseDailyMetricsFactory,
     CourseEnrollmentFactory,
     CourseOverviewFactory,
+    GeneratedCertificateFactory,
     SiteDailyMetricsFactory,
     UserFactory,
     )
@@ -343,6 +345,42 @@ class TestGeneralUserDataSerializer(object):
         assert data['country'] == 'CA'
         assert data['gender'] == 'o'
         assert data['date_joined'] == str(self.a_datetime.date())
+
+
+@pytest.mark.django_db
+class TestLearnerCourseDetailsSerializer(object):
+    '''
+
+    '''
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        # self.model = CourseEnrollment
+        # self.user_attributes = {
+        #     'username': 'alpha_one',
+        #     'profile__name': 'Alpha One',
+        #     'profile__country': 'CA',
+        # }
+        #self.user = UserFactory(**self.user_attributes)
+        self.certificate_date = datetime.datetime(2018,04,01)
+        self.course_enrollment = CourseEnrollmentFactory(
+            )
+        self.generated_certificate = GeneratedCertificateFactory(
+            user=self.course_enrollment.user,
+            course_id=self.course_enrollment.course_id,
+            created_date=self.certificate_date,
+            )
+        self.serializer = LearnerCourseDetailsSerializer(
+            instance=self.course_enrollment)
+
+    def test_has_fields(self):
+
+        expected_fields = set([
+            'couse_name', 'course_code', 'course_id', 'date_enrolled',
+            'progress_data', 'enrollment_id',
+            ])
+
+        data = self.serializer.data
+        assert set(data.keys()) == expected_fields
 
 
 @pytest.mark.django_db
