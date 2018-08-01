@@ -116,6 +116,7 @@ class AutoCompleteCourseSelect extends Component {
             <button onClick={this.modalTrigger} className={styles['modal-dismiss']}><FontAwesomeIcon icon={faTimes}/></button>
           </div>
         )}
+        {this.state.modalActive && <div className={styles['selector-backdrop']} onClick={this.modalTrigger}></div>}
       </div>
     )
   }
