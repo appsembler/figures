@@ -154,11 +154,11 @@ class LearnerStatistics extends Component {
   }
 
   render() {
-    const dropdownOptions = [
+    const dropdownOptions = List([
       { value: 'gender', label: 'By gender' },
       { value: 'country', label: 'By country' },
       { value: 'education', label: 'By education level' },
-    ]
+    ])
 
     return (
       <section className={styles['courses-list']}>
@@ -169,9 +169,9 @@ class LearnerStatistics extends Component {
           <div className={styles['dropdown-container']}>
             <span>Course learners breakdown type:</span>
             <Select
-              options={dropdownOptions}
+              options={dropdownOptions.toArray()}
               onChange = {this.onChangeBreakdownType}
-              value={dropdownOptions[0]}
+              value={dropdownOptions.get(dropdownOptions.findIndex(item => (item.value === this.state.breakdownType)))}
             />
           </div>
         </div>
