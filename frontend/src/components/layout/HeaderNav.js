@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './_header-nav.scss';
 import AutoCompleteCourseSelect from 'base/components/inputs/AutoCompleteCourseSelect';
+import AutoCompleteUserSelect from 'base/components/inputs/AutoCompleteUserSelect';
 
 class HeaderNav extends Component {
 
@@ -23,6 +24,10 @@ class HeaderNav extends Component {
         <AutoCompleteCourseSelect
           negativeStyleButton
           buttonText='Jump to a course'
+        />
+        <AutoCompleteUserSelect
+          negativeStyleButton
+          buttonText='Select a user'
         />
       </div>
     );
