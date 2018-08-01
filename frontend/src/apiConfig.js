@@ -6,6 +6,7 @@ const apiConfig = {
   courseEnrollmentsApi: '/figures/api/course-enrollments/',
   generalSiteMetrics: '/figures/api/general-site-metrics/',
   coursesDetailed: '/figures/api/courses/detail/',
+  learnersGeneral: '/figures/api/users/general/',
   learnersDetailed: '/figures/api/users/detail/',
 }
 
