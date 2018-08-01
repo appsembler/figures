@@ -42,9 +42,9 @@ export const loadUserIndex = ( coursesData ) => ({
 export function fetchUserIndex () {
   return dispatch => {
     dispatch(addActiveApiFetch())
-    return fetch(apiConfig.figuresUsersIndexApi, { credentials: "same-origin" })
+    return fetch(apiConfig.learnersGeneral, { credentials: "same-origin" })
       .then(response => response.json())
-      .then(json => dispatch(loadUserIndex(json)))
+      .then(json => dispatch(loadUserIndex(json.results)))
       .then(dispatch(removeActiveApiFetch()));
   }
 }
