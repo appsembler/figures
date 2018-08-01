@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import moment from 'moment';
 import countriesWithCodes from 'base/data/countriesData';
 import styles from './_course-learners-list.scss';
@@ -50,7 +51,7 @@ class CourseLearnersList extends Component {
 
       return (
         <li key={index} className={styles['learner-row']}>
-          <span className={styles['name']}>{user['name']}</span>
+          <span className={styles['name']}><Link to={'/figures/user/' + user['id']}>{user['name']}</Link></span>
           <span className={styles['country']}>{countriesWithCodes[user['country']]}</span>
           <span className={styles['date-enrolled']}>{moment(courseSpecificData['date_enrolled']).format('LL')}</span>
           <span className={styles['course-progress']}>{(courseSpecificData['progress_data']['course_progress']*100).toFixed(2)}%</span>
