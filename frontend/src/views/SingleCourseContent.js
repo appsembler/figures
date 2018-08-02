@@ -18,14 +18,14 @@ class SingleCourseContent extends Component {
 
     this.state = {
       courseData: {},
-      learnersData: {
-        count: 0,
-        learners: []
-      }
+      allLearnersLoaded: true,
+      learnersList: [],
+      apiFetchMoreLearnersUrl: null
     };
 
     this.fetchCourseData = this.fetchCourseData.bind(this);
     this.fetchLearnersData = this.fetchLearnersData.bind(this);
+    this.setLearnersData = this.setLearnersData.bind(this);
   }
 
   fetchCourseData = () => {
@@ -39,14 +39,18 @@ class SingleCourseContent extends Component {
 
   fetchLearnersData = () => {
     this.props.addActiveApiFetch();
-    fetch((apiConfig.learnersDetailed + '?enrolled_in_course_id=' + this.props.courseId), { credentials: "same-origin" })
+    fetch((this.state.apiFetchMoreLearnersUrl === null) ? (apiConfig.learnersDetailed + '?enrolled_in_course_id=' + this.props.courseId) : this.state.apiFetchMoreLearnersUrl, { credentials: "same-origin" })
       .then(response => response.json())
-      .then(json => this.setState({
-        learnersData: {
-          count: json['count'],
-          learners: json['results']
-        }
-      }, () => this.props.removeActiveApiFetch()))
+      .then(json => this.setLearnersData(json['results'], json['next']))
+  }
+
+  setLearnersData = (results, paginationNext) => {
+    const tempLearners = this.state.learnersList.concat(results);
+    this.setState ({
+      allLearnersLoaded: paginationNext === null,
+      learnersList: tempLearners,
+      apiFetchMoreLearnersUrl: paginationNext
+    }, () => this.props.removeActiveApiFetch())
   }
 
   componentDidMount() {
@@ -89,14 +93,13 @@ class SingleCourseContent extends Component {
             valueHistory={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['history'] : []}
           />
           <LearnerStatistics
-            learnersCount = {this.state.learnersCount}
-            learnersData = {this.state.learnersData}
+            learnersData = {this.state.learnersList}
           />
           <CourseLearnersList
-            paginationMaxRows = {30}
             courseId = {this.props.courseId}
-            learnersCount = {this.state.learnersData['count']}
-            learnersData = {this.state.learnersData['learners']}
+            allLearnersLoaded = {this.state.allLearnersLoaded}
+            apiFetchMoreLearnersFunction = {this.fetchLearnersData}
+            learnersData = {this.state.learnersList}
           />
         </div>
       </div>

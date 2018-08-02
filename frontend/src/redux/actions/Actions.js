@@ -25,7 +25,7 @@ export function fetchCoursesIndex () {
     dispatch(addActiveApiFetch())
     return fetch(apiConfig.coursesGeneral, { credentials: "same-origin" })
       .then(response => response.json())
-      .then(json => dispatch(loadCoursesIndex(json)))
+      .then(json => dispatch(loadCoursesIndex(json['results'])))
       .then(dispatch(removeActiveApiFetch()));
   }
 }
