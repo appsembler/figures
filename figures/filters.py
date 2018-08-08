@@ -103,14 +103,6 @@ class UserFilterSet(django_filters.FilterSet):
         user_ids = [id for id in user_ids_str.split(',') if id.isdigit()]
         return queryset.filter(id__in=user_ids)
 
-
-    # def filter_enrolled_in_course_id(self, queryset, course_id_str):
-    #     course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-    #     print('inspect me'); import pdb; pdb.set_trace()
-
-    #     #return queryset.filter(course_id=course_key)
-    #     return queryset
-
     def filter_enrolled_in_course_id(self, queryset, course_id_str):
         '''
 
@@ -127,8 +119,6 @@ class UserFilterSet(django_filters.FilterSet):
         user_ids = CourseEnrollment.objects.filter(
             course_id=course_key).values_list('user__id', flat=True).distinct()
         return queryset.filter(id__in=user_ids)
-
-
 
 
 class CourseDailyMetricsFilter(django_filters.FilterSet):

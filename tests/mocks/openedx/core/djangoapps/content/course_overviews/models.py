@@ -27,7 +27,6 @@ removing these mocks
 
 from django.db import models
 
-#from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 
 class CourseOverview(models.Model):

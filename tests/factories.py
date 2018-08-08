@@ -25,6 +25,7 @@ from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
+from figures.helpers import as_course_key
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
@@ -76,8 +77,8 @@ class CourseOverviewFactory(DjangoModelFactory):
         model = CourseOverview
 
     # Only define the fields that we will retrieve
-    id = factory.Sequence(lambda n:
-        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
     display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
     org = 'StarFleetAcademy'
     number = '2161'
@@ -137,7 +138,8 @@ class CourseAccessRoleFactory(DjangoModelFactory):
     user = factory.SubFactory(
         UserFactory,
     )
-    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
     role = factory.Iterator(['instructor', 'staff'])
 
 

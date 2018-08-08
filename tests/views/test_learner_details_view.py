@@ -42,17 +42,15 @@ from rest_framework.test import (
 
 from student.models import CourseEnrollment
 
-from figures.views import (
-    LearnerDetailsViewSet,
-    )
+from figures.helpers import as_course_key
+from figures.serializers import LearnerCourseDetailsSerializer
+from figures.views import LearnerDetailsViewSet
 
 from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,
     UserFactory,
     )
-
-COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
 
 USER_DATA = [
     {'id': 1, 'username': u'alpha', 'fullname': u'Alpha One',
@@ -85,9 +83,13 @@ def make_user(**kwargs):
 
 def make_course(**kwargs):
     return CourseOverviewFactory(
-        id=kwargs['id'], display_name=kwargs['name'], org=kwargs['org'], number=kwargs['number'])
+        id=as_course_key(kwargs['id']),
+        display_name=kwargs['name'],
+        org=kwargs['org'],
+        number=kwargs['number'],
+    )
 
-def make_course_enrollments(user, courses, **kwargs):
+def make_course_enrollments_for_user(user, courses, **kwargs):
     '''
         creates course enrollments for every course in COURSE_DATA for the given user
     '''
@@ -96,9 +98,12 @@ def make_course_enrollments(user, courses, **kwargs):
         course_enrollments.append(
             CourseEnrollmentFactory(
                 course_id=course.id,
+                course_overview=course,
                 user=user,
                 )
             )
+    return course_enrollments
+
 
 @pytest.mark.django_db
 class TestUserViewSet(object):
@@ -109,14 +114,16 @@ class TestUserViewSet(object):
     def setup(self, db):
         self.users = [make_user(**data) for data in USER_DATA]
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
-        self.course_enrollments = [make_course_enrollments(user, self.course_overviews) for user in self.users]
+        self.course_enrollments = []
+        for user in self.users:
+            self.course_enrollments += make_course_enrollments_for_user(
+                user, self.course_overviews)
+
         self.expected_result_keys = [
-            'id', 'username', 'fullname','country', 'is_active', 'gender',
+            'id', 'username', 'name', 'country', 'is_active', 'gender', 'email',
             'date_joined', 'year_of_birth', 'level_of_education', 'courses',
-            'language_proficiencies',
+            'language_proficiencies', 'profile_image',
         ]
-
-
 
     def get_expected_results(self, **filter):
         '''returns a list of dicts of the filtered user data
@@ -126,6 +133,17 @@ class TestUserViewSet(object):
             get_user_model().objects.filter(**filter).annotate(
                 fullname=F('profile__name'), country=F('profile__country')
                 ).values(*self.expected_result_keys))
+
+    def test_serializer(self):
+        '''
+        This test makes sure the serializer works with the test data provided
+        in this Test class
+        '''
+
+        # Spot test with the first CourseEnrollment for the first user
+        queryset = CourseEnrollment.objects.filter(user=self.users[0])
+        serializer = LearnerCourseDetailsSerializer(queryset[0])
+        assert serializer.data
 
     @pytest.mark.parametrize('endpoint, filter', [
         ('api/users/detail/', {}),
@@ -137,9 +155,8 @@ class TestUserViewSet(object):
             `figures.serializers.UserIndexSerializer`
 
         '''
-        #expected_data = self.get_expected_results(**filter)
         def get_course_rec(course_id, course_list):
-            recs = [rec for rec in course_list if rec['id'] == str(course_id)]
+            recs = [rec for rec in course_list if rec['course_id'] == str(course_id)]
             assert len(recs) == 1
             return recs[0]
 
@@ -167,6 +184,7 @@ class TestUserViewSet(object):
         # }
         assert set(response.data.keys()) == set(
             ['count', 'next', 'previous', 'results',])
+
         for rec in response.data['results']:
             # fail if we cannot find the user in the models
             user_model = User.objects.get(username=rec['username'])

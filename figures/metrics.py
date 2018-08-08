@@ -84,6 +84,8 @@ class LearnerCourseGrades(object):
     keys:
         BlockUsageLocator(CourseLocator(u'edX', u'DemoX', u'Demo_Course', None, None)
     values:
+
+    TODO: Make convenience method to instantiate from a GeneratedCertificate
     '''
     def __init__(self, user_id, course_id):
         '''

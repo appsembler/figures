@@ -375,7 +375,7 @@ class TestLearnerCourseDetailsSerializer(object):
     def test_has_fields(self):
 
         expected_fields = set([
-            'couse_name', 'course_code', 'course_id', 'date_enrolled',
+            'course_name', 'course_code', 'course_id', 'date_enrolled',
             'progress_data', 'enrollment_id',
             ])
 
