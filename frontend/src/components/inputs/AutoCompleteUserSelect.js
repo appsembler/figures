@@ -92,8 +92,6 @@ class AutoCompleteUserSelect extends Component {
       }
     })
 
-    console.log(usersList);
-
     const renderSuggestion = suggestion => (
       <Link className={styles['suggestion-link']} to={'/figures/user/' + suggestion.userId} onClick={this.modalTrigger}><span className={styles['suggestion-link__user-username']}>{suggestion.userUsername}</span><span className={styles['suggestion-link__user-name']}>{suggestion.userName}</span></Link>
     );

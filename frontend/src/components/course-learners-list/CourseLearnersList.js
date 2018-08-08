@@ -14,8 +14,7 @@ class CourseLearnersList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      displayedUsers: this.props.paginationMaxRows,
-      allDataDisplayed: true
+      allLearnersLoaded: this.props.allLearnersLoaded
     };
     this.paginationLoadMore = this.paginationLoadMore.bind(this);
     this.isCurrentCourse = this.isCurrentCourse.bind(this);
@@ -26,10 +25,7 @@ class CourseLearnersList extends Component {
   }
 
   paginationLoadMore = () => {
-    this.setState({
-      displayedUsers: this.state.displayedUsers + this.props.paginationMaxRows,
-      allDataDisplayed: ((this.state.displayedUsers + this.props.paginationMaxRows) >= this.props.learnersCount)
-    })
+    this.props.apiFetchMoreLearnersFunction()
   }
 
   componentDidMount() {
@@ -38,15 +34,14 @@ class CourseLearnersList extends Component {
   componentWillReceiveProps = (nextProps) => {
     if (this.props !== nextProps) {
       this.setState({
-        displayedUsers: nextProps.paginationMaxRows,
-        allDataDisplayed: nextProps.learnersCount <= nextProps.paginationMaxRows
+        allLearnersLoaded: nextProps.allLearnersLoaded
       })
     }
   }
 
 
   render() {
-    const learnersRender = this.props.learnersData.slice(0, this.state.displayedUsers).map((user, index) => {
+    const learnersRender = this.props.learnersData.map((user, index) => {
       const courseSpecificData = user['courses'].find(this.isCurrentCourse);
 
       return (
@@ -80,7 +75,7 @@ class CourseLearnersList extends Component {
             </li>
             {learnersRender}
           </ul>
-          {!this.state.allDataDisplayed && <button className={styles['load-more-button']} onClick={() => this.paginationLoadMore()}>Load more</button>}
+          {!this.state.allLearnersLoaded && <button className={styles['load-more-button']} onClick={() => this.paginationLoadMore()}>Load more</button>}
         </div>
       </section>
     )
@@ -89,12 +84,10 @@ class CourseLearnersList extends Component {
 
 CourseLearnersList.defaultProps = {
   listTitle: 'Per learner info:',
-  paginationMaxRows: 10,
 }
 
 CourseLearnersList.propTypes = {
   listTitle: PropTypes.string,
-  paginationMaxRows: PropTypes.number,
   courseId: PropTypes.string,
 };
 

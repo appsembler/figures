@@ -148,8 +148,8 @@ class LearnerStatistics extends Component {
   }
 
   componentWillReceiveProps = (nextProps) => {
-    if (nextProps.learnersData.count) {
-      this.analyzeData(nextProps.learnersData.learners);
+    if (nextProps.learnersData.length) {
+      this.analyzeData(nextProps.learnersData);
     }
   }
 
