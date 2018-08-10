@@ -114,11 +114,6 @@ class GeneratedCertificateFactory(DjangoModelFactory):
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
 
 
-class StudentModuleFactory(DjangoModelFactory):
-    class Meta:
-        model = StudentModule
-
-
 class CourseEnrollmentFactory(DjangoModelFactory):
     class Meta:
         model = CourseEnrollment
@@ -141,6 +136,16 @@ class CourseAccessRoleFactory(DjangoModelFactory):
     course_id = factory.Sequence(lambda n: as_course_key(
         COURSE_ID_STR_TEMPLATE.format(n)))
     role = factory.Iterator(['instructor', 'staff'])
+
+
+class StudentModuleFactory(DjangoModelFactory):
+    class Meta:
+        model = StudentModule
+    student = factory.SubFactory(
+        UserFactory,
+    )
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
 
 
 ##
