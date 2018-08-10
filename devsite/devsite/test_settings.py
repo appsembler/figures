@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     # edx-platform apps. Mocks are used by default
     # See: edx-figures/tests/mocks/
     # Also note the paths set in edx-figures/pytest.ini
+    'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'student',
     'certificates',
