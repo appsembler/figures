@@ -3,6 +3,7 @@
 '''
 from collections import OrderedDict
 
+
 class MockAggregatedScore(object):
     '''
 
@@ -13,6 +14,7 @@ class MockAggregatedScore(object):
         self.earned = float(tw_earned) if tw_earned is not None else None
         self.possible = float(tw_possible) if tw_possible is not None else None
 
+
 class MockSubsectionGrade(object):
     '''
 
@@ -22,13 +24,15 @@ class MockSubsectionGrade(object):
         self.all_total = MockAggregatedScore(tw_earned=0.0, tw_possible=0.0)
 
 
-
 class CourseGrade(object):
-
-    def __init__(self, user, course_data, *args, **kwargs):
+    '''
+    Production class inherits from CourseGradeBase
+    '''
+    def __init__(self, user, course_data, percent=0, letter_grade=None, passed=False, *args, **kwargs):
         self.user = user
         self.course_data = course_data,
-
+        self.percent = percent
+        self.passed = passed
 
     @property
     def chapter_grades(self):
