@@ -34,6 +34,9 @@ class CourseGrade(object):
         self.percent = percent
         self.passed = passed
 
+        # Convert empty strings to None when reading from the table
+        self.letter_grade = letter_grade or None
+
     @property
     def chapter_grades(self):
         '''
