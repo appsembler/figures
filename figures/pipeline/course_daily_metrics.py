@@ -239,16 +239,6 @@ class CourseDailyMetricsExtractor(object):
         return data
 
 
-# class CourseDailyMetricsTransformer(object):
-#     '''
-#     Extracts
-#     '''
-#     def __init__(self, course_id):
-#         self.course_id = course_id
-
-#     def transform(self):
-
-
 class CourseDailyMetricsLoader(object):
 
     def __init__(self, course_id):
@@ -275,7 +265,7 @@ class CourseDailyMetricsLoader(object):
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
                 )
 
-        #data = kwargs.get('data') or self.get_data(date_for=date_for)
+        #
         data = self.get_data(date_for=date_for)
 
         print('inspect me')
