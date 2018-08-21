@@ -13,6 +13,7 @@ Then pull out the steps so we can have a formal, flexible, and scalable pipeline
 
 # These are needed for the extractors
 import datetime
+from django.utils.timezone import utc
 
 from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
@@ -39,6 +40,29 @@ def get_course_enrollments(course_id, date_for):
         course_id=as_course_key(course_id),
         created__lt=next_day(date_for),
     )
+
+
+def get_num_enrolled_in_exclude_admins(course_id, date_for):
+    '''
+    Copied over from CourseEnrollmentManager.num_enrolled_in_exclude_admins method
+    and modified to filter on date LT
+
+    '''
+    from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
+    course_locator = course_id
+
+    if getattr(course_id, 'ccx', None):
+        course_locator = course_id.to_course_locator()
+
+    staff = CourseStaffRole(course_locator).users_with_role()
+    admins = CourseInstructorRole(course_locator).users_with_role()
+    coaches = CourseCcxCoachRole(course_locator).users_with_role()
+
+    return CourseEnrollment.objects.filter(
+        course_id=course_id,
+        is_active=1,
+        created__lt=next_day(date_for),
+    ).exclude(user__in=staff).exclude(user__in=admins).exclude(user__in=coaches).count()
 
 def get_active_learners_today(course_id, date_for):
     '''Get StudentModules given a course id and date
@@ -169,7 +193,10 @@ class CourseDailyMetricsExtractor(object):
 
         # Update args if not assigned
         if not date_for:
-            date_for = prev_day(datetime.datetime.now().date())
+            #date_for = prev_day(datetime.datetime.now().date())
+            date_for = prev_day(
+                datetime.datetime.utcnow().replace(tzinfo=utc).date()
+                )
 
         # We can turn this series of calls into a parallel
         # set of calls defined in a ruleset instead of hardcoded here
@@ -181,7 +208,7 @@ class CourseDailyMetricsExtractor(object):
 
 
         
-        data = dict()
+        data = dict(date_for=date_for, course_id=course_id)
 
         # This is the transform step
         # After we get this working, we can then define them declaratively
@@ -192,9 +219,16 @@ class CourseDailyMetricsExtractor(object):
         #     active_learners_today=get_active_learners_today
         #     )
 
-        data['course_enrollments'] = course_enrollments.count()
-        data['active_learners_today'] = get_active_learners_today(
+        data['enrollment_count'] = course_enrollments.count()
+
+        active_learners_today = get_active_learners_today(
             course_id, date_for,)
+        if active_learners_today:
+            active_learners_today = active_learners_today.count()
+        else:
+            active_learners_today = 0
+
+        data['active_learners_today'] = active_learners_today
         data['average_progress'] = get_average_progress(
             course_id, date_for, course_enrollments,)
         data['average_days_to_complete'] = get_average_days_to_complete(
@@ -219,17 +253,33 @@ class CourseDailyMetricsLoader(object):
 
     def __init__(self, course_id):
         self.course_id = course_id
-        self.extractor = CdmProtoExtractor()
+        self.extractor = CourseDailyMetricsExtractor()
+
+    def get_data(self, date_for):
+        return self.extractor.extract(
+            course_id=self.course_id,
+            data_for=date_for)
 
     def load(self, date_for=None, **kwargs):
-
+        '''
+        TODO: clean up how we do this. We want to be able to call the loader
+        with an existing data set (not having to call the extractor) but we
+        need to make sure that the metrics row 'date_for' is the same as
+        provided in the data. So before hacking something together, I want to
+        think this over some more.
+        
+        '''
         if not date_for:
-            date_for = prev_day(datetime.datetime.now().date())
+            #date_for = prev_day(datetime.datetime.now().date())
+            date_for = prev_day(
+                datetime.datetime.utcnow().replace(tzinfo=utc).date()
+                )
 
-        data = self.extractor.extract(
-            course_id=self.course_id,
-            date_for = date_for,
-        )
+        #data = kwargs.get('data') or self.get_data(date_for=date_for)
+        data = self.get_data(date_for=date_for)
+
+        print('inspect me')
+        import pdb; pdb.set_trace()
 
         course_metrics, created = CourseDailyMetrics.objects.update_or_create(
             course_id=self.course_id,
@@ -237,8 +287,8 @@ class CourseDailyMetricsLoader(object):
             defaults = dict(
                 enrollment_count=data['enrollment_count'],
                 active_learners_today=data['active_learners_today'],
-                average_progress=data.get('average_progress', None),
-                average_days_to_complete=data.get('average_days_to_complete, None'),
+                average_progress=data['average_progress'],
+                average_days_to_complete=data['average_days_to_complete'],
                 num_learners_completed=data['num_learners_completed'],
             )
         )
@@ -264,3 +314,11 @@ def test_extract(course_id=None):
     print('course_id={}'.format(course_id))
     extractor = CourseDailyMetricsExtractor()
     return extractor.extract(course_id)
+
+
+def test_load(course_id=None):
+    if not course_id:
+        course_id = CourseOverview.objects.first().id
+
+    print('course_id={}'.format(course_id))
+    return CourseDailyMetricsLoader(course_id).load()

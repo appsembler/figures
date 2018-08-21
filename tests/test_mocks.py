@@ -10,6 +10,7 @@ from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,
     GeneratedCertificateFactory,
+    StudentModuleFactory,
     )
 
 
@@ -46,5 +47,14 @@ class TestGeneratedCertificate(object):
         cert =  GeneratedCertificateFactory()
         assert cert
 
+@pytest.mark.django_db
+class TestFactories(object):
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        pass
+
+    def test_create_student_module_factory(self):
+        obj = StudentModuleFactory()
+        assert obj
 
 # TODO: Add test for UserProfile
