@@ -52,12 +52,14 @@ from tests.factories import (
     UserFactory,
     )
 
+from tests.views.base import BaseViewTest
+
 USER_DATA = [
-    {'id': 1, 'username': u'alpha', 'fullname': u'Alpha One',
+    {'id': 101, 'username': u'alpha', 'fullname': u'Alpha One',
      'is_active': True, 'country': 'CA'},
-    {'id': 2, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
-    {'id': 3, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
-    {'id': 4, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
+    {'id': 102, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
+    {'id': 103, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
+    {'id': 104, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
 ]
 
 COURSE_DATA = [
@@ -106,13 +108,17 @@ def make_course_enrollments_for_user(user, courses, **kwargs):
 
 
 @pytest.mark.django_db
-class TestUserViewSet(object):
+class TestLearnerDetailsViewSet(BaseViewTest):
     '''Tests the UserIndexView view class
     '''
 
+    request_path = 'api/users/detail/'
+    view_class = LearnerDetailsViewSet
     @pytest.fixture(autouse=True)
     def setup(self, db):
+        super(TestLearnerDetailsViewSet, self).setup(db)
         self.users = [make_user(**data) for data in USER_DATA]
+        self.usernames = [data['username'] for data in USER_DATA]
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
         self.course_enrollments = []
         for user in self.users:
@@ -125,14 +131,14 @@ class TestUserViewSet(object):
             'language_proficiencies', 'profile_image',
         ]
 
-    def get_expected_results(self, **filter):
-        '''returns a list of dicts of the filtered user data
+    # def get_expected_results(self, **filter_args):
+    #     '''returns a list of dicts of the filtered user data
 
-        '''
-        return list(
-            get_user_model().objects.filter(**filter).annotate(
-                fullname=F('profile__name'), country=F('profile__country')
-                ).values(*self.expected_result_keys))
+    #     '''
+    #     return list(
+    #         get_user_model().objects.filter(**filter_args).annotate(
+    #             fullname=F('profile__name'), country=F('profile__country')
+    #             ).values(*self.expected_result_keys))
 
     def test_serializer(self):
         '''
@@ -145,10 +151,7 @@ class TestUserViewSet(object):
         serializer = LearnerCourseDetailsSerializer(queryset[0])
         assert serializer.data
 
-    @pytest.mark.parametrize('endpoint, filter', [
-        ('api/users/detail/', {}),
-        ])
-    def test_get_learner_details_list(self, endpoint, filter):
+    def test_get_learner_details_list(self):
         '''Tests retrieving a list of users with abbreviated details
 
         The fields in each returned record are identified by
@@ -160,10 +163,9 @@ class TestUserViewSet(object):
             assert len(recs) == 1
             return recs[0]
 
-        factory = APIRequestFactory()
-        request = factory.get(endpoint)
-        force_authenticate(request, user=self.users[0])
-        view = LearnerDetailsViewSet.as_view({'get': 'list'})
+        request = APIRequestFactory().get(self.request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get': 'list'})
         response = view(request)
 
         # Later, we'll elaborate on the tests. For now, some basic checks
@@ -171,7 +173,8 @@ class TestUserViewSet(object):
         assert len(response.data) == len(self.users)
 
         User = get_user_model()
-        assert len(self.users) == User.objects.count()
+        qs = User.objects.filter(username__in=self.usernames)
+        assert len(self.users) == qs.count()
 
         # Expect the following format for pagination
         # {

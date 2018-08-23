@@ -5,6 +5,10 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, render
 
 from rest_framework import viewsets
+from rest_framework.authentication import (
+    BasicAuthentication,
+    SessionAuthentication,
+)
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
@@ -44,6 +48,7 @@ from .serializers import (
 )
 from figures import metrics
 from figures.pagination import FiguresLimitOffsetPagination
+from figures.permissions import IsStaffUser
 
 ##
 ## UI Template rendering views
@@ -66,6 +71,18 @@ def figures_home(request):
 
 
 ##
+## Mixins for API views
+##
+
+class CommonAuthMixin(object):
+    '''Provides a common authorization base for the Figures API views
+
+    '''
+    authentication_classes = (BasicAuthentication, SessionAuthentication, )
+    permission_classes = (IsAuthenticated, IsStaffUser, )
+
+
+##
 ## Views for data in edX platform
 ##
 
@@ -73,7 +90,7 @@ def figures_home(request):
 # are getting the behavior we want.
 
 #@view_auth_classes(is_authenticated=True)
-class CoursesIndexView(ListAPIView):
+class CoursesIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     '''Provides a list of courses with abbreviated details
 
     Uses figures.filters.CourseOverviewFilter to select subsets of
@@ -101,13 +118,11 @@ class CoursesIndexView(ListAPIView):
         '''
 
         '''
-        queryset = super(CoursesIndexView, self).get_queryset()
-
+        queryset = super(CoursesIndexViewSet, self).get_queryset()
         return queryset
 
 
-# TODO: Add authorization
-class UserIndexView(ListAPIView):
+class UserIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     '''Provides a list of users with abbreviated details
 
     Uses figures.filters.UserFilter to select subsets of User objects
@@ -121,12 +136,11 @@ class UserIndexView(ListAPIView):
     filter_class = UserFilterSet
 
     def get_queryset(self):
-        queryset = super(UserIndexView, self).get_queryset()
-
+        queryset = super(UserIndexViewSet, self).get_queryset()
         return queryset
 
 
-class CourseEnrollmentViewSet(viewsets.ReadOnlyModelViewSet):
+class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     model = CourseEnrollment
     queryset = CourseEnrollment.objects.all()
     pagination_class = FiguresLimitOffsetPagination
@@ -143,7 +157,7 @@ class CourseEnrollmentViewSet(viewsets.ReadOnlyModelViewSet):
 ## Views for Figures models
 ##
 
-class CourseDailyMetricsViewSet(viewsets.ModelViewSet):
+class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
     model = CourseDailyMetrics
     queryset = CourseDailyMetrics.objects.all()
@@ -158,7 +172,7 @@ class CourseDailyMetricsViewSet(viewsets.ModelViewSet):
 
 
 #class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
-class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
+class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
     model = SiteDailyMetrics
     queryset = SiteDailyMetrics.objects.all()
@@ -176,7 +190,7 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 ## Views for the front end
 ##
 
-class GeneralSiteMetricsView(APIView):
+class GeneralSiteMetricsView(CommonAuthMixin, APIView):
     '''
     Initial version assumes a single site.
     Multi-tenancy will add a Site foreign key to the SiteDailyMetrics model
@@ -189,20 +203,29 @@ class GeneralSiteMetricsView(APIView):
     #TODO add filters
     pagination_class = FiguresLimitOffsetPagination
 
+    @property
+    def metrics_method(self):
+        '''
+            A bit of a hack until we refactor the metrics methods into classes.
+            This lets us override this functionality, in particular to simplify
+            testing
+        '''
+        return metrics.get_monthly_site_metrics
+
     def get(self, request, format=None):
         '''
         Does not yet support multi-tenancy
         '''
 
         date_for = request.query_params.get('date_for')
-        data = metrics.get_monthly_site_metrics(date_for=date_for)
+
+        data = self.metrics_method(date_for=date_for)
 
         if not data:
             data = {
                 'error': 'no metrics data available',
             }
         return Response(data)
-
 
     # def list(self, request):
 
@@ -227,7 +250,7 @@ class GeneralSiteMetricsView(APIView):
     #     return Response(get_thread(request, thread_id, requested_fields))
 
 
-class GeneralCourseDataViewSet(viewsets.ModelViewSet):
+class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     '''
 
     '''
@@ -243,7 +266,7 @@ class GeneralCourseDataViewSet(viewsets.ModelViewSet):
         return Response(GeneralCourseDataSerializer(course_overview).data)
 
 
-class CourseDetailsViewSet(viewsets.ReadOnlyModelViewSet):
+class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     '''
 
     '''
@@ -263,7 +286,7 @@ class CourseDetailsViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(CourseDetailsSerializer(course_overview).data)
 
 
-class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
+class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     '''View class to serve general user data to the Figures UI
 
     See the serializer class, GeneralUserDataSerializer for the specific fields
@@ -286,7 +309,7 @@ class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-class LearnerDetailsViewSet(viewsets.ReadOnlyModelViewSet):
+class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     queryset =  get_user_model().objects.all()
     pagination_class = FiguresLimitOffsetPagination
@@ -304,5 +327,4 @@ class LearnerDetailsViewSet(viewsets.ReadOnlyModelViewSet):
         <QueryDict: {u'zub': [u'[5,10,20]'], u'grue': [u'11', u'2', u'3'], u'foo': [u'bar'], u'ids': [u'1,2,3']}>
         '''
         queryset = super(LearnerDetailsViewSet, self).get_queryset()
-
         return queryset

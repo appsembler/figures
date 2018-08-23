@@ -4,18 +4,17 @@
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from rest_framework.test import (
     APIRequestFactory,
     #RequestsClient, Not supported in older  rest_framework versions
     force_authenticate,
     )
 
-from figures.views import CoursesIndexView, UserIndexView
+from figures.views import CoursesIndexViewSet
 
-from tests.factories import CourseOverviewFactory, UserFactory
+from tests.factories import CourseOverviewFactory
 from tests.helpers import make_course_key_str
-
+from tests.views.base import BaseViewTest
 
 # Course data and generate method are duplicates course data in test_filters.py
 COURSE_DATA = [
@@ -32,36 +31,38 @@ def make_course(**kwargs):
     return CourseOverviewFactory(
         id=kwargs['id'], display_name=kwargs['name'], org=kwargs['org'], number=kwargs['number'])
 
-class CourseIndexViewTest(TestCase):
+
+@pytest.mark.django_db
+class TestCoursesIndexViewSet(BaseViewTest):
     '''Tests the CourseIndexView view class
     '''
+    request_path = 'api/courses-index/'
+    view_class = CoursesIndexViewSet
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        super(TestCoursesIndexViewSet, self).setup(db)
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
-
-    def tearDown(self):
-        pass
 
     def test_get_all(self):
         expected_data = COURSE_DATA
-
-        factory = APIRequestFactory()
-        request = factory.get('api/courses-index/')
-        force_authenticate(request, user=UserFactory())
-        view = CoursesIndexView.as_view()
+        request = APIRequestFactory().get(self.request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get':'list'})
         response = view(request)
         assert response.status_code == 200
         assert set(response.data.keys()) == set(
             ['count', 'next', 'previous', 'results',])
         assert response.data['results'] == expected_data
 
-    def test_get_org_filtered(self):
-        expected_data = [rec for rec in COURSE_DATA if rec['org'] == 'AlphaOrg']
-
-        factory = APIRequestFactory()
-        request = factory.get('api/courses-index/?org=AlphaOrg')
-        force_authenticate(request, user=UserFactory())
-        view = CoursesIndexView.as_view()
+    @pytest.mark.parametrize('query_params, filter_args', [
+        ('?org=AlphaOrg', 'AlphaOrg'),
+    ])
+    def test_get_org_filtered(self, query_params, filter_args):
+        expected_data = [rec for rec in COURSE_DATA if rec['org'] == filter_args]
+        request = APIRequestFactory().get(self.request_path + query_params)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get':'list'})
         response = view(request)
         assert response.status_code == 200
         assert set(response.data.keys()) == set(
