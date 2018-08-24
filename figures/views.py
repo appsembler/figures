@@ -2,7 +2,10 @@
 
 '''
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework import viewsets
 from rest_framework.authentication import (
@@ -50,10 +53,16 @@ from figures import metrics
 from figures.pagination import FiguresLimitOffsetPagination
 from figures.permissions import IsStaffUser
 
+UNAUTHORIZED_USER_REDIRECT_URL = '/'
 ##
 ## UI Template rendering views
 ##
 
+@ensure_csrf_cookie
+@login_required
+@user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser),
+    login_url=UNAUTHORIZED_USER_REDIRECT_URL,
+    redirect_field_name=None)
 def figures_home(request):
     '''Renders the JavaScript SPA dashboard
 
