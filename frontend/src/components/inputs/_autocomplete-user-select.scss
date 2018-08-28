@@ -1,0 +1,142 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/mixins';
+
+.ac-user-selector {
+  position: relative;
+}
+
+button.selector-trigger-button {
+  @include override-edx-styles;
+  border-radius: $elements-border-radius;
+  padding: calcRem(12) calcRem(20);
+  font-size: $base-font-size;
+  font-family: $font-family;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  margin-left: calcRem(20);
+
+  &.positive {
+    border: calcRem(2) solid $primary-color;
+    color: $primary-color;
+  }
+
+  &.negative {
+    border: calcRem(2) solid pick-visible-color($primary-color, #fff, $base-text-color);
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+  }
+
+  &:hover, &:hover:not(:disabled) {
+    cursor: pointer;
+    background: #FFFFFF;
+    box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.15);
+    color: $primary-color;
+  }
+}
+
+.selector-modal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calcRem(360);
+  padding: calcRem(17) 0 calcRem(7);
+  background: #FFFFFF;
+  box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.15);
+  border-radius: $elements-border-radius;
+  z-index: 50;
+}
+
+.modal-dismiss {
+  @include override-edx-styles;
+  font-size: calcRem(14);
+  padding: calcRem(12);
+  color: rgba($base-text-color, 0.5);
+  transition: all 0.3s ease-in-out;
+  position: absolute;
+  top: calcRem(7);
+  right: calcRem(8);
+  border-radius: $elements-border-radius;
+
+  &:hover, &:hover:not(:disabled) {
+    color: $primary-color;
+    background: none;
+    cursor: pointer;
+  }
+}
+
+// we have to style inputs like this since the default Open edX stylesheet has these selectors and (sigh) has them target globally in the entire document. Essentially, that renders targeting purely by class name basically futile.
+
+textarea, input[type="text"], input[type="url"], input[type="email"], input[type="password"], input[type="tel"] {
+
+  &.input {
+    @include override-edx-styles;
+    font-size: $base-font-size;
+    padding-bottom: calcRem(12);
+    margin: 0 calcRem(20);
+    color: lighten($base-text-color, 20%);
+    width: 100%;
+
+    &::placeholder {
+      color: rgba($base-text-color, 0.3);
+    }
+  }
+}
+
+.suggestions-container {
+
+}
+
+.suggestionsList {
+  padding: 0;
+  margin: 0;
+  max-height: calcRem(300);
+  overflow-y: auto;
+}
+
+.suggestion {
+  list-style-type: none;
+  border-top: calcRem(1) solid rgba(#D8D8D8, 0.5);
+  padding: calcRem(15) 0;
+  margin: 0 calcRem(20);
+  color: $base-text-color;
+  font-size: $base-font-size;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 0.5;
+  }
+
+  .suggestion-link {
+    display: flex;
+    align-items: baseline;
+    text-decoration: none;
+
+    &__user-username {
+      flex-grow: 1;
+      flex-shrink: 0;
+      font-weight: bold;
+      color: $primary-color;
+      font-size: calcRem(12);
+      min-width: calcRem(5);
+      margin-right: calcRem(10);
+    }
+
+    &__user-name {
+      color: $base-text-color;
+      font-size: $base-font-size;
+      flex-grow: 1;
+      flex-shrink: 1;
+      width: 100%;
+
+    }
+  }
+}
+
+.selector-backdrop {
+  position: fixed;
+  z-index: 5;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}

@@ -80,7 +80,7 @@
     margin: calcRem(40) auto calcRem(15);
     min-width: calcRem(200);
 
-    &:hover, &:focus {
+    &:hover {
       color: #fff;
       background: $primary-color;
       outline: none;

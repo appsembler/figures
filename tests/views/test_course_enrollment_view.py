@@ -42,9 +42,6 @@ class TestCourseEnrollment(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-
-        #self.expected_result_keys = ['id', 'username', 'fullname']
-
         self.special_fields = ('create', 'user',)
         self.course_enrollments = [
             CourseEnrollmentFactory() for i in range(1,5)
@@ -59,19 +56,21 @@ class TestCourseEnrollment(object):
             { 'course_id': sample_course_id(1)}),
         ])
     def test_get_course_enrollments(self, endpoint, filter_args):
-        #expected_data = self.get_expected_results(**filter)
         expected_data = CourseEnrollment.objects.filter(**filter_args)
 
         factory = APIRequestFactory()
         request = factory.get(endpoint)
         force_authenticate(request, user=UserFactory())
         view = CourseEnrollmentViewSet.as_view({'get': 'list'})
-        #import pdb; pdb.set_trace()
         response = view(request)
-        assert response.status_code == 200
-        assert len(response.data) == len(expected_data)
 
-        for data in response.data:
+        assert response.status_code == 200
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+
+        assert len(response.data['results']) == len(expected_data)
+
+        for data in response.data['results']:
             db_rec = expected_data.get(id=data['id'])
             assert parse(data['created']) == db_rec.created
 

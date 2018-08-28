@@ -9,14 +9,14 @@ class CoursesListItem extends Component {
   render() {
     const courseStaff = this.props.courseStaff.map((item, index) => {
       return (
-        <span key={index} className={styles['value']}>{item}</span>
+        <span key={index} className={styles['value']}>{item['fullname']}</span>
       )
     });
 
     return (
       <div className={styles['course-list-item']} key={this.props.courseId}>
         <div className={styles['general-info-section']}>
-          <span className={styles['course-id']}>{this.props.courseId}</span>
+          <span className={styles['course-id']}>{this.props.courseCode}</span>
           <span className={styles['course-name']}>{this.props.courseName}</span>
           {this.props.courseIsSelfPaced ? (
             <div className={styles['label-value']}>
@@ -62,7 +62,7 @@ class CoursesListItem extends Component {
                 Average time to completion:
               </span>
               <span className={styles['stat-value']}>
-                {this.props.averageCompletionTime}
+                {this.props.averageCompletionTime ? this.props.averageCompletionTime : 'n/a'}
               </span>
             </div>
             <div className={styles['single-stat']}>
@@ -77,7 +77,7 @@ class CoursesListItem extends Component {
         </div>
         <span className={styles['sections-separator']} />
         <div className={styles['button-section']}>
-          <Link to="#" className={styles['course-button']}>Course details</Link>
+          <Link to={'/figures/course/' + this.props.courseId} className={styles['course-button']}>Course details</Link>
         </div>
       </div>
     )

@@ -27,6 +27,7 @@ router.register(
     views.CourseEnrollmentViewSet,
     base_name='course-enrollments')
 
+
 ##
 ## For the front end UI
 ##
@@ -34,12 +35,22 @@ router.register(
 router.register(
     r'courses/general',
     views.GeneralCourseDataViewSet,
-    base_name='general-courses')
+    base_name='courses-general')
+
+router.register(
+    r'courses/detail',
+    views.CourseDetailsViewSet,
+    base_name='courses-detail')
 
 router.register(
     r'users/general',
     views.GeneralUserDataViewSet,
-    base_name='general-users')
+    base_name='users-general')
+
+router.register(
+    r'users/detail',
+    views.LearnerDetailsViewSet,
+    base_name='users-detail')
 
 urlpatterns = [
 
@@ -51,5 +62,8 @@ urlpatterns = [
     url(r'^api/courses-index/', views.CoursesIndexView.as_view(),
         name='courses-index'),
     url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
-    url('', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
+    url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
+        name='general-site-metrics'),
+    url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')
+    # url(r'^.*/', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
 ]

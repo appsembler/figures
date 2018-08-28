@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 import classNames from 'classnames/bind';
 import styles from './_header-content-maus.scss';
 import { ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -10,8 +11,8 @@ let cx = classNames.bind(styles);
 
 class HeaderContentMaus extends Component {
   render() {
-    let currentPeriodValue = this.props.data[this.props.data.length-1].value;
-    let previousPeriodValue = this.props.data[this.props.data.length-2].value;
+    let currentPeriodValue = this.props.mauDataCurrent;
+    let previousPeriodValue = this.props.mauDataHistory[this.props.mauDataHistory.length-2]['value'];
     let comparisonIcon;
     let comparisonValue;
     if (currentPeriodValue >= previousPeriodValue) {
@@ -35,13 +36,15 @@ class HeaderContentMaus extends Component {
             <span className={styles['comparison-box__text']}>
               {(currentPeriodValue >= previousPeriodValue) ? 'up' : 'down'} {comparisonValue} compared to last month
             </span>
-            <Link to='test' className={styles['mau-history-link']}>See history</Link>
+            {this.props.showHistoryButton ? (
+              <Link to='/figures/mau-history' className={styles['mau-history-link']}>See details</Link>
+            ) : ''}
           </div>
         </div>
         <div className={styles['graph-container']}>
           <ResponsiveContainer width="100%" height={110}>
             <AreaChart
-              data={this.props.data}
+              data={this.props.mauDataHistory}
               margin={{top: 0, bottom: 0, left: 0, right: 0}}
             >
               <Area type='linear' dataKey='value' stroke='none' fill='#ffffff' fillOpacity={0.8} />
@@ -54,28 +57,14 @@ class HeaderContentMaus extends Component {
 }
 
 HeaderContentMaus.defaultProps = {
-  data: [
-    {
-      timePeriodName: 'January',
-      value: 1420
-    },
-    {
-      timePeriodName: 'February',
-      value: 2900
-    },
-    {
-      timePeriodName: 'March',
-      value: 401
-    },
-    {
-      timePeriodName: 'April',
-      value: 1180
-    },
-    {
-      timePeriodName: 'May',
-      value: 1910
-    }
-  ]
+  showHistoryButton: false
 }
 
-export default HeaderContentMaus;
+const mapStateToProps = (state, ownProps) => ({
+  mauDataCurrent: state.generalData.data['monthly_active_users']['current_month'],
+  mauDataHistory: state.generalData.data['monthly_active_users']['history']
+})
+
+export default connect(
+  mapStateToProps,
+)(HeaderContentMaus)

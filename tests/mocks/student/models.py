@@ -1,5 +1,7 @@
 
+from collections import defaultdict
 from datetime import datetime
+
 from pytz import UTC
 
 from django.db import models
@@ -8,6 +10,11 @@ from django.utils.translation import ugettext_noop
 
 from django_countries.fields import CountryField
 
+from course_modes.models import CourseMode
+
+from openedx.core.djangoapps.content.course_overviews.models import (
+    CourseOverview,
+)
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 
 class UserProfile(models.Model):
@@ -55,6 +62,31 @@ class UserProfile(models.Model):
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
 
+    profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def has_profile_image(self):
+        """
+        Convenience method that returns a boolean indicating whether or not
+        this user has uploaded a profile image.
+        """
+        return self.profile_image_uploaded_at is not None
+
+
+class CourseEnrollmentManager(models.Manager):
+    def enrollment_counts(self, course_id):
+
+        query = super(CourseEnrollmentManager, self).get_queryset().filter(
+                      course_id=course_id, is_active=True).values(
+                      'mode').order_by().annotate(models.Count('mode'))
+        total = 0
+        enroll_dict = defaultdict(int)
+        for item in query:
+            enroll_dict[item['mode']] = item['mode__count']
+            total += item['mode__count']
+        enroll_dict['total'] = total
+        return enroll_dict
+
 
 class CourseEnrollment(models.Model):
     '''
@@ -75,9 +107,15 @@ class CourseEnrollment(models.Model):
     # in the course (is_enrolled() will return False)
     is_active = models.BooleanField(default=True)
 
+    mode = models.CharField(default=CourseMode.DEFAULT_MODE_SLUG, max_length=100)
+
+    objects = CourseEnrollmentManager()
+
     class Meta(object):
         unique_together = (('user', 'course_id'),)
         ordering = ('user', 'course_id')
+
+    course_overview = models.ForeignKey(CourseOverview)
 
 
 class CourseAccessRole(models.Model):

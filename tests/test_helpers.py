@@ -1,9 +1,11 @@
 
+import calendar
 import datetime
 
 import pytest
 
 from dateutil.parser import parse as dateutil_parse
+from dateutil.relativedelta import relativedelta
 
 from figures.helpers import (
     as_course_key,
@@ -12,6 +14,7 @@ from figures.helpers import (
     days_from,
     next_day,
     prev_day,
+    previous_months_iterator,
     )
 
 
@@ -92,3 +95,26 @@ class TestDeltaDays(object):
         expected = self.now + datetime.timedelta(days=1)
         assert next_day(self.now) == expected
         assert next_day(self.now.date()) == expected.date()
+
+
+class TestMonthIterator(object):
+
+    @pytest.mark.parametrize('month_for, months_back, first_month', [
+        ((2018,1,31), 0, datetime.date(2018,1,1)),
+        ((2018,1,31), 6, datetime.date(2017,7,1)),
+        ])
+    def test_previous_months_iterator(self, month_for, months_back, first_month):
+
+        def as_month_tuple(month):
+            return (month.year, month.month)
+        expected_vals = []
+        for i in range(months_back):
+            a_month = first_month+relativedelta(months=i)
+            last_day_in_month = calendar.monthrange(a_month.year, a_month.month)[1]
+            expected_vals.append(
+                (a_month.year, a_month.month, last_day_in_month)
+                )
+        expected_vals.append(month_for)
+
+        vals = list(previous_months_iterator(month_for, months_back))
+        assert vals == expected_vals

@@ -20,42 +20,15 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-
+from certificates.models import GeneratedCertificate
+from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
+from figures.helpers import as_course_key
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
-
-
-class CourseOverviewFactory(DjangoModelFactory):
-    class Meta:
-        model = CourseOverview
-
-    # Only define the fields that we will retrieve
-    id = factory.Sequence(lambda n:
-        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
-    display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
-    org = 'StarFleetAcademy'
-    number = '2161'
-    display_org_with_default = factory.LazyAttribute(lambda o: o.org)
-    enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,02,02, tzinfo=factory.compat.UTC))
-    self_paced = False
-    enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,05,05, tzinfo=factory.compat.UTC))
-
-class CourseTeamFactory(DjangoModelFactory):
-    class Meta:
-        model = CourseTeam
-
-    name = factory.Sequence(lambda n: "CourseTeam #%s" % n)
-
-
-class CourseTeamMembershipFactory(DjangoModelFactory):
-    class Meta:
-        model = CourseTeamMembership
 
 
 class UserProfileFactory(DjangoModelFactory):
@@ -70,6 +43,9 @@ class UserProfileFactory(DjangoModelFactory):
     level_of_education = fuzzy.FuzzyChoice(
         ['p','m','b','a','hs','jh','el','none', 'other',]
         )
+    profile_image_uploaded_at = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,04,01, tzinfo=factory.compat.UTC))
+
 
 class UserFactory(DjangoModelFactory):
     class Meta:
@@ -96,6 +72,53 @@ class UserFactory(DjangoModelFactory):
                 self.teams.add(team)
 
 
+class CourseOverviewFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseOverview
+
+    # Only define the fields that we will retrieve
+    id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
+    display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
+    org = 'StarFleetAcademy'
+    number = '2161'
+    display_org_with_default = factory.LazyAttribute(lambda o: o.org)
+    enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,02, tzinfo=factory.compat.UTC))
+    self_paced = False
+    enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,05,05, tzinfo=factory.compat.UTC))
+
+
+class CourseTeamFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseTeam
+
+    name = factory.Sequence(lambda n: "CourseTeam #%s" % n)
+
+
+class CourseTeamMembershipFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseTeamMembership
+
+
+class GeneratedCertificateFactory(DjangoModelFactory):
+    class Meta:
+        model = GeneratedCertificate
+
+    user = factory.SubFactory(
+        UserFactory,
+    )
+    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    created_date = factory.Sequence(lambda n:
+        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+
+
+class StudentModuleFactory(DjangoModelFactory):
+    class Meta:
+        model = StudentModule
+
+
 class CourseEnrollmentFactory(DjangoModelFactory):
     class Meta:
         model = CourseEnrollment
@@ -103,7 +126,8 @@ class CourseEnrollmentFactory(DjangoModelFactory):
     user = factory.SubFactory(
         UserFactory,
     )
-    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    course_id = factory.SelfAttribute('course_overview.id')
+    course_overview = factory.SubFactory(CourseOverviewFactory)
     created = factory.Sequence(lambda n:
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
 
@@ -114,9 +138,9 @@ class CourseAccessRoleFactory(DjangoModelFactory):
     user = factory.SubFactory(
         UserFactory,
     )
-    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
     role = factory.Iterator(['instructor', 'staff'])
-
 
 
 ##

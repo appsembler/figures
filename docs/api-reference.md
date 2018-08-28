@@ -1,18 +1,20 @@
 
-# edX Figures API Refernce
+# Figures API Refernce
 
-*NOTE: The API is in early development and subject to change*
+*NOTE: The API is in pre-production development and subject to change*
 
 ## Overview
 
-This doc is a starting point to provide infomration on the REST APIs either defined in edx-figures or used by edx-figures.
+This doc is a starting point to provide infomration on the REST APIs either defined in Figures or used by Figures.
 
 The initial goal is to provide a reference for front end development.
 
 
-## edx-figures REST API
+## Figures REST API
 
-These are endpoints provided by edx-figures
+These are endpoints provided by Figures
+
+We will add a version number in the path
 
 ### Courses Index
 
@@ -45,7 +47,7 @@ To find all courses that contain 'Introduction':
 /figures/api/courses-index/?display_name='Introduction'
 ```
 
-Please see the [CourseOverviewFilter](https://github.com/appsembler/edx-figures/blob/master/edx_figures/filters.py#L15) class which defines filters available.
+Please see the [CourseOverviewFilter](https://github.com/appsembler/figures/blob/master/figures/filters.py#L15) class which defines filters available.
 
 ### Users Index
 
@@ -73,11 +75,9 @@ As of this time, the query is case sensitive.
 
 More filters will be added.
 
-Please see the [UserFilter](https://github.com/appsembler/edx-figures/blob/master/edx_figures/filters.py#L47) class which defines filters available.
+Please see the [UserFilterSet](https://github.com/appsembler/figures/blob/master/figures/filters.py#L47) class which defines available filter options.
 
 ### Course Enrollments
-
-_course enrollments is currently in PR_
 
 ```
 /figures/api/course-enrollments/
@@ -199,7 +199,7 @@ More filters will be added to make data retrieval easier:
 
 * `month_for=2018-05` to retrieve all course daily metrics records for May, 2018
 
-Please see the [CourseDailyMetricsFilter](https://github.com/appsembler/edx-figures/blob/master/edx_figures/filters.py#L68) class which defines filters available.
+Please see the [CourseDailyMetricsFilter](https://github.com/appsembler/figures/blob/master/figures/filters.py#L68) class which defines filters available.
 
 #### Site Daily Metrics
 
@@ -254,7 +254,101 @@ More filters will be added to make data retrieval easier:
 
 * `month_for=2018-05` to retrieve all site daily metrics records for May, 2018
 
-Please see the [SiteDailyMetricsFilter](https://github.com/appsembler/edx-figures/blob/master/edx_figures/filters.py#L86) class which defines filters available.
+Please see the [SiteDailyMetricsFilter](https://github.com/appsembler/figures/blob/master/figures/filters.py#L86) class which defines filters available.
+
+
+## Figures REST API endpoints used for Figures UI
+
+There are a set REST API endpoints implemented to meet the specific needs of the Figures user interface.
+
+These are subject to change, in particular the endpoint URLS as 
+
+_NOTE: The trailing slash is important for these endpoints. If the trailing slash is left out, then at least some of these will redirect to the Figures UI page_
+
+### General Site Metrics
+
+To get the set of general site metrics:
+
+```
+/figures/api/general-site-metrics/
+```
+
+### General (Summary) Course Metrics
+
+To get a list of all courses with general (summary) metrics for each:
+
+```
+/figures/api/courses/general/
+```
+
+### Course Details
+
+This endpoint provides a combination of course information and learner activity
+
+```
+/figures/api/courses/detail/
+```
+
+To get the data for a specific course:
+
+```
+/figures/api/course/details/<course_id>/
+```
+
+Example:
+
+```
+/figures/api/courses/detail/course-v1:edX+DemoX+Demo_Course/
+```
+
+You can also filter on org:
+
+```
+/figures/api/courses/detail/?org=edX
+```
+
+
+### Overview of user data endpoints
+
+Open edX has different roles, such as, but not limited to learner (or student), course instructor, and courses staff. Figures provides a single base endpoint, `/figures/api/users` to retrieve filterable user based data data on all users.
+
+
+### General (Summary) User Data
+
+To get a list of users with summary data:
+
+```
+/figures/api/users/general/
+```
+
+### User Details
+
+
+
+To get details for all users:
+
+```
+/figures/api/users/detail/
+```
+
+To get details for a specific user, provide the user id:
+
+```
+/figures/users/detail/10
+```
+
+To select a set of users, add the `user_ids` query parameter followed by a list of ids:
+
+```
+/figures/api/users/detail/?user_ids=1,2,3
+```
+
+To get all the users (learner) enrolled in a course, provide the course id in the `enrolled_in_course_id` query param:
+
+```
+/fgures/api/users/detail/?enrolled_in_course_id=course-v1:edX+DemoX+Demo_Course
+```
+
 
 ## edx-platform REST API endpoints
 

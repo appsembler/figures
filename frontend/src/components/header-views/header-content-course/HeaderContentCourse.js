@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import classNames from 'classnames/bind';
-import apiConfig from 'base/apiConfig';
 import styles from './_header-content-course.scss';
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 
@@ -27,61 +26,30 @@ class CustomTooltip extends Component {
 
 class HeaderContentCourse extends Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      apiFetchActive: false,
-      generalCourseData: {},
-    };
-
-    this.triggerApiFetchActive = this.triggerApiFetchActive.bind(this);
-    this.getCourseData = this.getCourseData.bind(this);
-  }
-
-  triggerApiFetchActive = () => {
-    this.setState({
-      apiFetchActive: !this.state.apiFetchActive
-    })
-  }
-
-  getCourseData = () => {
-    this.triggerApiFetchActive();
-    fetch(apiConfig.edxCourseInfoApi + this.props.courseId)
-      .then(response => response.json())
-      .then(json => this.setState({
-        generalCourseData: json
-      }, this.triggerApiFetchActive()))
-  }
-
-  componentDidMount() {
-    this.getCourseData();
-  }
-
   render() {
-    const courseStartDate = new Date(this.state.generalCourseData.start);
-    const courseEndDate = new Date(this.state.generalCourseData.end);
+    const courseStartDate = new Date(this.props.startDate);
+    const courseEndDate = new Date(this.props.endDate);
 
     return (
       <section className={styles['header-content-course']}>
         <div className={cx({ 'main-content': true, 'container': true})}>
           <div className={styles['course-title']}>
-            {this.state.generalCourseData.name}
+            {this.props.courseName}
           </div>
           <div className={styles['course-info']}>
-            <span className={styles['course-code']}>{this.state.generalCourseData.number}</span>
+            <span className={styles['course-code']}>{this.props.courseCode}</span>
             <span className={styles['course-info-separator']}>|</span>
-            {(this.state.generalCourseData.pacing === 'self-paced') ? (
+            {this.props.isSelfPaced ? (
               <span className={styles['course-date']}>This course is self-paced</span>
             ) : [
               <span key='courseStart' className={styles['course-date']}>Starts: {courseStartDate.toUTCString()}</span>,
-              this.state.generalCourseData.courseEndDate && <span key='separator' className={styles['course-info-separator']}>|</span>,
-              this.state.generalCourseData.courseEndDate && <span key='courseEnd' className={styles['course-date']}>Ends: {courseEndDate.toUTCString()}</span>,
+              this.props.endDate && <span key='separator' className={styles['course-info-separator']}>|</span>,
+              this.props.endDate && <span key='courseEnd' className={styles['course-date']}>Ends: {courseEndDate.toUTCString()}</span>,
             ]}
           </div>
           <span className={styles['text-separator']} />
           <div className={styles['learners-info']}>
-            <strong>{this.props.courseLearnersCount}</strong> learners currently enrolled, progressing through sections as displayed below:
+            <strong>{this.props.learnersEnrolled && this.props.learnersEnrolled['current']}</strong> learners currently enrolled, progressing through sections as displayed below:
           </div>
         </div>
         <div className={cx({ 'graph-bars-container': true, 'container': true})}>
@@ -128,12 +96,6 @@ class HeaderContentCourse extends Component {
 }
 
 HeaderContentCourse.defaultProps = {
-  courseTitle: 'This is a course name, and oh my it is just sooo long',
-  courseCode: 'A193 - 2016Q4',
-  courseIsSelfPaced: false,
-  courseStartDate: 'October 27th, 2017',
-  courseEndDate: 'December 15th, 2018',
-  courseLearnersCount: 561,
   data: [
     {
       lessonTitle: 'Lesson 1',

@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     # Also note the paths set in edx-figures/pytest.ini
     'openedx.core.djangoapps.content.course_overviews',
     'student',
-
+    'certificates',
 )
 
 LOCALE_PATHS = [

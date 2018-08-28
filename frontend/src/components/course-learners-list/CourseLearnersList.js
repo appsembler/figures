@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {List} from 'immutable';
+import { Link } from 'react-router-dom';
 import moment from 'moment';
-import apiConfig from 'base/apiConfig';
 import countriesWithCodes from 'base/data/countriesData';
 import styles from './_course-learners-list.scss';
 import classNames from 'classnames/bind';
@@ -15,91 +14,44 @@ class CourseLearnersList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      displayedUsers: this.props.paginationMaxRows,
-      allDataDisplayed: false,
-      courseUsersEnrollmentData: [],
-      usersData: List(),
+      allLearnersLoaded: this.props.allLearnersLoaded
     };
-    this.fetchCourseUserEnrollmentData = this.fetchCourseUserEnrollmentData.bind(this);
-    this.getUserMeta = this.getUserMeta.bind(this);
-    this.getUserCourseProgress = this.getUserCourseProgress.bind(this);
     this.paginationLoadMore = this.paginationLoadMore.bind(this);
-    this.setUserData = this.setUserData.bind(this);
+    this.isCurrentCourse = this.isCurrentCourse.bind(this);
   }
 
-  fetchCourseUserEnrollmentData = () => {
-    fetch(apiConfig.courseEnrollmentsApi + '?course_id=' + this.props.courseId)
-      .then(response => response.json())
-      // .then(json => this.setState({
-      //   courseUsersEnrollmentData: json
-      // }))
-      .then(json => this.setUserData(json))
-  }
-
-  setUserData = (json) => {
-    json.map((user, index) => {
-      Promise.all([this.getUserMeta(user.user.username), this.getUserCourseProgress(user.user.id)]).then(result => {
-        const newUser = {
-          username: user.user.username,
-          fullname: user.user.fullname,
-          userId: user.user.id,
-          dateEnrolled: user.created,
-          isActive: user['is_active'],
-          enrollmentMode: user.mode,
-          userMeta: result[0],
-          userCourseProgress: result[1]
-        }
-        this.setState({
-          usersData: this.state.usersData.push(newUser)
-        })
-      })
-    })
-    console.log(json);
-    if (this.props.paginationMaxRows >= json.length) {
-      this.setState({
-        allDataDisplayed: true,
-      })
-    }
-  }
-
-  getUserMeta = (username) => {
-    return fetch(apiConfig.edxUserInfoApi + username, { credentials: "same-origin" })
-      .then((response) => response.json())
-  }
-
-  getUserCourseProgress = (userId) => {
-    // this is faux for now since we still don't have this API endpoint
-    const fauxUserData = {
-      courseProgress: '59%',
-      courseCompleted: false,
-      dateCompleted: '',
-    }
-    return Promise.resolve(fauxUserData);
+  isCurrentCourse = (course) => {
+    return course['course_id'] === this.props.courseId
   }
 
   paginationLoadMore = () => {
-    this.setState({
-      displayedUsers: this.state.displayedUsers + this.props.paginationMaxRows,
-      allDataDisplayed: ((this.state.displayedUsers + this.props.paginationMaxRows) >= this.state.usersData.size)
-    })
+    this.props.apiFetchMoreLearnersFunction()
   }
 
   componentDidMount() {
-    this.fetchCourseUserEnrollmentData();
+  }
+
+  componentWillReceiveProps = (nextProps) => {
+    if (this.props !== nextProps) {
+      this.setState({
+        allLearnersLoaded: nextProps.allLearnersLoaded
+      })
+    }
   }
 
 
   render() {
-    const learnersRender = this.state.usersData.slice(0, this.state.displayedUsers).map((user, index) => {
+    const learnersRender = this.props.learnersData.map((user, index) => {
+      const courseSpecificData = user['courses'].find(this.isCurrentCourse);
 
       return (
         <li key={index} className={styles['learner-row']}>
-          <span className={styles['name']}>{user.fullname}</span>
-          <span className={styles['country']}>{countriesWithCodes[user.userMeta.country]}</span>
-          <span className={styles['date-enrolled']}>{moment(user.dateEnrolled).format('LL')}</span>
-          <span className={styles['course-progress']}>{user.userCourseProgress.courseProgress}</span>
-          <span className={styles['course-completed']}>{user.userCourseProgress.courseCompleted && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
-          <span className={styles['date-completed']}>{user.userCourseProgress.courseCompleted ? user.userCourseProgress.dateCompleted : '-'}</span>
+          <span className={styles['name']}><Link to={'/figures/user/' + user['id']}>{user['name']}</Link></span>
+          <span className={styles['country']}>{countriesWithCodes[user['country']]}</span>
+          <span className={styles['date-enrolled']}>{moment(courseSpecificData['date_enrolled']).format('LL')}</span>
+          <span className={styles['course-progress']}>{(courseSpecificData['progress_data']['course_progress']*100).toFixed(2)}%</span>
+          <span className={styles['course-completed']}>{courseSpecificData['progress_data']['course_completed'] && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
+          <span className={styles['date-completed']}>{courseSpecificData['progress_data']['course_completed'] ? courseSpecificData['progress_data']['date_completed'] : '-'}</span>
         </li>
       )
     })
@@ -123,7 +75,7 @@ class CourseLearnersList extends Component {
             </li>
             {learnersRender}
           </ul>
-          {!this.state.allDataDisplayed && <button className={styles['load-more-button']} onClick={() => this.paginationLoadMore()}>Load more</button>}
+          {!this.state.allLearnersLoaded && <button className={styles['load-more-button']} onClick={() => this.paginationLoadMore()}>Load more</button>}
         </div>
       </section>
     )
@@ -132,12 +84,10 @@ class CourseLearnersList extends Component {
 
 CourseLearnersList.defaultProps = {
   listTitle: 'Per learner info:',
-  paginationMaxRows: 10,
 }
 
 CourseLearnersList.propTypes = {
   listTitle: PropTypes.string,
-  paginationMaxRows: PropTypes.number,
   courseId: PropTypes.string,
 };
 

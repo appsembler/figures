@@ -1,0 +1,21 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+
+.header-content-user {
+  margin-bottom: calcRem(60);
+  position: relative;
+  height: calcRem(80);
+
+  .user-image {
+    width: calcRem(120);
+    height: calcRem(120);
+    display: block;
+    border-radius: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: calcRem(10);
+    left: 50%;
+    margin-left: calcRem(-60);
+    border: calcRem(8) solid rgba($base-text-color, 0.1);
+  }
+}

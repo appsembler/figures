@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, render
 
 from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
@@ -24,21 +25,25 @@ from .filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
-    GeneralUserDataFilter,
+    LearnerFilterSet,
     SiteDailyMetricsFilter,
-    UserFilter,
+    UserFilterSet,
 )
 from .models import CourseDailyMetrics, SiteDailyMetrics
 from .serializers import (
     CourseDailyMetricsSerializer,
+    CourseDetailsSerializer,
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
+    GeneralSiteMetricsSerializer,
+    LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer
 )
-
+from figures import metrics
+from figures.pagination import FiguresLimitOffsetPagination
 
 ##
 ## UI Template rendering views
@@ -86,7 +91,7 @@ class CoursesIndexView(ListAPIView):
     '''
     model = CourseOverview
     queryset = CourseOverview.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseIndexSerializer
 
     filter_backends = (DjangoFilterBackend, )
@@ -110,21 +115,21 @@ class UserIndexView(ListAPIView):
 
     model = get_user_model()
     queryset = get_user_model().objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = UserIndexSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_class = UserFilter
+    filter_class = UserFilterSet
 
     def get_queryset(self):
         queryset = super(UserIndexView, self).get_queryset()
 
         return queryset
 
-# TODO: Change to ReadOnlyModelViewSet
-class CourseEnrollmentViewSet(viewsets.ModelViewSet):
+
+class CourseEnrollmentViewSet(viewsets.ReadOnlyModelViewSet):
     model = CourseEnrollment
     queryset = CourseEnrollment.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseEnrollmentSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseEnrollmentFilter
@@ -133,10 +138,6 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
         queryset = super(CourseEnrollmentViewSet, self).get_queryset()
         return queryset
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
 ##
 ## Views for Figures models
@@ -146,7 +147,7 @@ class CourseDailyMetricsViewSet(viewsets.ModelViewSet):
 
     model = CourseDailyMetrics
     queryset = CourseDailyMetrics.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseDailyMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseDailyMetricsFilter
@@ -161,7 +162,7 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 
     model = SiteDailyMetrics
     queryset = SiteDailyMetrics.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = SiteDailyMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = SiteDailyMetricsFilter
@@ -175,6 +176,56 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 ## Views for the front end
 ##
 
+class GeneralSiteMetricsView(APIView):
+    '''
+    Initial version assumes a single site.
+    Multi-tenancy will add a Site foreign key to the SiteDailyMetrics model
+    and list the most recent data for all sites (or filtered sites)
+    '''
+
+    # queryset = SiteDailyMetrics.objects.all()
+    # pagination_class = None
+    # serializer_class = GeneralSiteMetricsSerializer
+    #TODO add filters
+    pagination_class = FiguresLimitOffsetPagination
+
+    def get(self, request, format=None):
+        '''
+        Does not yet support multi-tenancy
+        '''
+
+        date_for = request.query_params.get('date_for')
+        data = metrics.get_monthly_site_metrics(date_for=date_for)
+
+        if not data:
+            data = {
+                'error': 'no metrics data available',
+            }
+        return Response(data)
+
+
+    # def list(self, request):
+
+    #     #queryset = self.filter_queryset(self.get_queryset())
+    #     queryset = 
+    #     serializer = self.get_serializer(queryset, many=True)
+
+    #     return Response(serializer.data)
+
+    # def retrieve(self, request, thread_id=None):
+    #     """
+    #     Implements the GET method for thread ID
+    #     """
+    #     requested_fields = request.GET.get('requested_fields')
+    #     return Response(get_thread(request, thread_id, requested_fields))
+
+    # def retrieve(self, request, site_id=None):
+    #     """
+    #     Implements the GET method for thread ID
+    #     """
+    #     requested_fields = request.GET.get('requested_fields')
+    #     return Response(get_thread(request, thread_id, requested_fields))
+
 
 class GeneralCourseDataViewSet(viewsets.ModelViewSet):
     '''
@@ -182,7 +233,7 @@ class GeneralCourseDataViewSet(viewsets.ModelViewSet):
     '''
     model = CourseOverview
     queryset = CourseOverview.objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralCourseDataSerializer
 
     def retrieve(self, request, *args, **kwargs):
@@ -190,6 +241,26 @@ class GeneralCourseDataViewSet(viewsets.ModelViewSet):
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
         course_overview = get_object_or_404(CourseOverview, pk=course_key)
         return Response(GeneralCourseDataSerializer(course_overview).data)
+
+
+class CourseDetailsViewSet(viewsets.ReadOnlyModelViewSet):
+    '''
+
+    '''
+    model = CourseOverview
+    queryset = CourseOverview.objects.all()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = CourseDetailsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = CourseOverviewFilter
+
+    def retrieve(self, request, *args, **kwargs):
+
+        # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
+        course_id_str = kwargs.get('pk','')
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        course_overview = get_object_or_404(CourseOverview, pk=course_key)
+        return Response(CourseDetailsSerializer(course_overview).data)
 
 
 class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
@@ -204,11 +275,34 @@ class GeneralUserDataViewSet(viewsets.ReadOnlyModelViewSet):
     '''
     model = get_user_model()
     queryset =  get_user_model().objects.all()
-    pagination_class = None
+    pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralUserDataSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_class = GeneralUserDataFilter
+    #filter_class = LearnerFilterSet
+    filter_class = UserFilterSet
 
     def get_queryset(self):
         queryset = super(GeneralUserDataViewSet, self).get_queryset()
+        return queryset
+
+
+class LearnerDetailsViewSet(viewsets.ReadOnlyModelViewSet):
+
+    queryset =  get_user_model().objects.all()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = LearnerDetailsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = UserFilterSet
+
+    def get_queryset(self):
+        '''
+        <QueryDict: {u'foo': [u'bar'], u'ids': [u'1,2,3']}>
+
+        http://localhost:8000/figures/api/learners/detail/?ids=1,2,3&foo=bar&grue=11&grue=2&grue=3&zub=[5,10,20]
+        self.request.query_params
+
+        <QueryDict: {u'zub': [u'[5,10,20]'], u'grue': [u'11', u'2', u'3'], u'foo': [u'bar'], u'ids': [u'1,2,3']}>
+        '''
+        queryset = super(LearnerDetailsViewSet, self).get_queryset()
+
         return queryset

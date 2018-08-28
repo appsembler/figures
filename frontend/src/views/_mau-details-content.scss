@@ -1,0 +1,81 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/stat-cards';
+
+.mau-details-content {
+  margin-top: calcRem(40);
+  padding-bottom: calcRem(50);
+}
+
+.mau-history-list {
+  margin: calcRem(20) 0;
+  grid-column-end: span 4;
+
+  .header {
+    display: flex;
+    margin-bottom: calcRem(20);
+  }
+
+  .header-title {
+    font-weight: bold;
+    font-size: calcRem(24);
+    padding-left: calcRem(20);
+    line-height: 100%;
+  }
+
+  .mau-table-container {
+    display: block;
+  }
+
+  .mau-table {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+
+    .header-row, .content-row {
+      padding: calcRem(20) 0;
+      display: flex;
+      align-items: center;
+
+      span {
+        flex: 1 1 calcRem(100);
+      }
+
+      .period {
+        flex-grow: 2;
+      }
+
+      .mau-count, .difference {
+        flex-grow: 1;
+        text-align: center;
+
+        &.positive {
+          color: $positive-color;
+        }
+
+        &.negative {
+          color: $negative-color;
+        }
+      }
+    }
+
+    .header-row {
+      font-size: calcRem(12);
+      color: lighten($base-text-color, 15%);
+    }
+
+    .content-row {
+      border-bottom: calcRem(1) solid lighten($base-text-color, 75%);
+      font-size: calcRem(14);
+
+      .mau-count {
+        font-weight: bold;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
