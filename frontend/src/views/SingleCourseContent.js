@@ -74,22 +74,22 @@ class SingleCourseContent extends Component {
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
             cardTitle='Number of enrolled learners'
-            mainValue={this.state.courseData['learners_enrolled'] ? this.state.courseData['learners_enrolled']['current'] : 0}
+            mainValue={this.state.courseData['learners_enrolled'] ? this.state.courseData['learners_enrolled']['current_month'] : 0}
             valueHistory={this.state.courseData['learners_enrolled'] ? this.state.courseData['learners_enrolled']['history'] : []}
           />
           <BaseStatCard
             cardTitle='Average course progress'
-            mainValue={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['current'] : 0}
+            mainValue={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['current_month'] : 0}
             valueHistory={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['history'] : []}
           />
           <BaseStatCard
             cardTitle='Average time to complete'
-            mainValue={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['current'] : 0}
+            mainValue={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['current_month'] : 0}
             valueHistory={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['history'] : []}
           />
           <BaseStatCard
             cardTitle='User course completions'
-            mainValue={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['current'] : 0}
+            mainValue={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['current_month'] : 0}
             valueHistory={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['history'] : []}
           />
           <LearnerStatistics

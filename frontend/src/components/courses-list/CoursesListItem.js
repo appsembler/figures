@@ -97,7 +97,7 @@ CoursesListItem.propTypes = {
   endDate: PropTypes.string,
   learnersEnrolled: PropTypes.number,
   averageProgress: PropTypes.number,
-  averageCompletionTime: PropTypes.string,
+  averageCompletionTime: PropTypes.number,
   numberLearnersCompleted: PropTypes.number,
 };
 
