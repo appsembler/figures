@@ -56,17 +56,6 @@ def period_str(month_tuple):
     '''
     return datetime.date(*month_tuple).strftime('%B, %Y')
 
-def cast_to_date(val):
-    if isinstance(val, datetime.date):
-        return val
-    elif isinstance(val, datetime.datetime):
-        return val.date()
-    elif isinstance(val, basestring):
-        return dateutil_parse(val).date()
-    else:
-        raise Exception('date cannot be of type {}. It must be able to be cast to a datetime.date'.format(
-            val))
-
 
 ##
 ## Learner specific data/metrics
@@ -367,7 +356,7 @@ def get_total_course_completions_for_time_period(start_date, end_date, site=None
 
 
 def get_monthly_history_metric(func,date_for, months_back):
-    date_for = cast_to_date(date_for)
+    date_for = as_date(date_for)
     history = []
 
     for month in previous_months_iterator(month_for=date_for, months_back=months_back,):
@@ -383,14 +372,14 @@ def get_monthly_history_metric(func,date_for, months_back):
         history=history,)
 
 
-# TODO make 'cast_to_date' a decorator on the 'date_for' param
+# TODO make 'as_date' a decorator on the 'date_for' param
 # - Do the same for all these get methods
 # TODO: Generalize the 'get_some_metric_x' methods below,
 # the only significant different is the value called for each time period (month)
 
 def get_monthly_active_users(date_for, months_back):
 
-    date_for = cast_to_date(date_for)
+    date_for = as_date(date_for)
 
     history=[]
 
@@ -480,7 +469,7 @@ def get_monthly_site_metrics(date_for=None, **kwargs):
     '''
 
     if date_for:
-        date_for = cast_to_date(date_for)
+        date_for = as_date(date_for)
     else:
         date_for = datetime.datetime.now().date()
 
