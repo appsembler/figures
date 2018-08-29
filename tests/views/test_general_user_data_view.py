@@ -42,24 +42,23 @@ from rest_framework.test import (
 
 from student.models import CourseEnrollment
 
-from figures.views import (
-    GeneralUserDataViewSet,
-    )
+from figures.views import GeneralUserDataViewSet
 
 from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,
     UserFactory,
     )
+from tests.views.base import BaseViewTest
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
 
 USER_DATA = [
-    {'id': 1, 'username': u'alpha', 'fullname': u'Alpha One',
+    {'id': 101, 'username': u'alpha', 'fullname': u'Alpha One',
      'is_active': True, 'country': 'CA'},
-    {'id': 2, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
-    {'id': 3, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
-    {'id': 4, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
+    {'id': 102, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
+    {'id': 103, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
+    {'id': 104, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
 ]
 
 COURSE_DATA = [
@@ -101,13 +100,18 @@ def make_course_enrollments(user, courses, **kwargs):
             )
 
 @pytest.mark.django_db
-class TestGeneralUserViewSet(object):
+class TestGeneralUserViewSet(BaseViewTest):
     '''Tests the UserIndexView view class
     '''
 
+    request_path = 'api/users/general'
+    view_class = GeneralUserDataViewSet
     @pytest.fixture(autouse=True)
     def setup(self, db):
+
+        super(TestGeneralUserViewSet, self).setup(db)
         self.users = [make_user(**data) for data in USER_DATA]
+        self.usernames = [data['username'] for data in USER_DATA]
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
         self.course_enrollments = [make_course_enrollments(user, self.course_overviews) for user in self.users]
         self.expected_result_keys = [
@@ -125,10 +129,11 @@ class TestGeneralUserViewSet(object):
                 fullname=F('profile__name'), country=F('profile__country')
                 ).values(*self.expected_result_keys))
 
-    @pytest.mark.parametrize('endpoint, filter', [
-        ('api/users/general', {}),
-        ])
-    def test_get_general_user_list(self, endpoint, filter):
+    # @pytest.mark.parametrize('endpoint, filter', [
+    #     ('api/users/general', {}),
+    #     ])
+    #def test_get_general_user_list(self, endpoint, filter):
+    def test_get_general_user_list(self):
         '''Tests retrieving a list of users with abbreviated details
 
         The fields in each returned record are identified by
@@ -141,10 +146,9 @@ class TestGeneralUserViewSet(object):
             assert len(recs) == 1
             return recs[0]
 
-        factory = APIRequestFactory()
-        request = factory.get(endpoint)
-        force_authenticate(request, user=self.users[0])
-        view = GeneralUserDataViewSet.as_view({'get': 'list'})
+        request = APIRequestFactory().get(self.request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get': 'list'})
         response = view(request)
 
         # Later, we'll elaborate on the tests. For now, some basic checks
@@ -152,7 +156,8 @@ class TestGeneralUserViewSet(object):
         assert len(response.data) == len(self.users)
 
         User = get_user_model()
-        assert len(self.users) == User.objects.count()
+        qs = User.objects.filter(username__in=self.usernames)
+        assert len(self.users) == qs.count()
 
         # Expect the following format for pagination
         # {

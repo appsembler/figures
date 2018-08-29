@@ -16,9 +16,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key
-from figures.views import (
-    GeneralCourseDataViewSet,
-    )
+from figures.views import GeneralCourseDataViewSet
 
 from tests.factories import (
     CourseDailyMetricsFactory,
@@ -27,14 +25,16 @@ from tests.factories import (
     UserFactory,
     )
 
+from tests.views.base import BaseViewTest
+
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
 
 USER_DATA = [
-    {'id': 1, 'username': u'alpha', 'fullname': u'Alpha One',
+    {'id': 100, 'username': u'alpha', 'fullname': u'Alpha One',
      'is_active': True, 'country': 'CA'},
-    {'id': 2, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
-    {'id': 3, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
-    {'id': 4, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
+    {'id': 101, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
+    {'id': 102, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
+    {'id': 103, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
 ]
 
 COURSE_DATA = [
@@ -76,12 +76,15 @@ def make_course_enrollments(user, courses, **kwargs):
             )
 
 @pytest.mark.django_db
-class TestGeneralCourseDataViewSet(object):
+class TestGeneralCourseDataViewSet(BaseViewTest):
     '''Tests the UserIndexView view class
     '''
 
+    request_path = 'api/courses/general'
+    view_class = GeneralCourseDataViewSet
     @pytest.fixture(autouse=True)
     def setup(self, db):
+        super(TestGeneralCourseDataViewSet, self).setup(db)
         self.users = [make_user(**data) for data in USER_DATA]
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
         #self.course_enrollments = [make_course_enrollments(user, self.course_overviews) for user in self.users]
@@ -91,20 +94,19 @@ class TestGeneralCourseDataViewSet(object):
             'end_date', 'self_paced', 'staff', 'metrics',
         ]
 
-    @pytest.mark.parametrize('endpoint, filter', [
-        ('api/courses/general', {}),
-        ])
-    def test_get_list(self, endpoint, filter):
+    # @pytest.mark.parametrize('endpoint, filter', [
+    #     ('api/courses/general', {}),
+    #     ])
+    #def test_get_list(self, endpoint, filter):
+    def test_get_list(self):
         '''Tests retrieving a list of users with abbreviated details
 
         The fields in each returned record are identified by
             `figures.serializers.UserIndexSerializer`
         '''
-
-        factory = APIRequestFactory()
-        request = factory.get(endpoint)
-        force_authenticate(request, user=self.users[0])
-        view = GeneralCourseDataViewSet.as_view({'get': 'list'})
+        request = APIRequestFactory().get(self.request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get': 'list'})
         response = view(request)
 
         # Later, we'll elaborate on the tests. For now, some basic checks
@@ -114,7 +116,6 @@ class TestGeneralCourseDataViewSet(object):
         assert len(response.data['results']) == len(self.course_overviews)
 
         for rec in response.data['results']:
-
             course_overview = CourseOverview.objects.get(id=as_course_key(rec['course_id']))
 
             # Test top level vars
