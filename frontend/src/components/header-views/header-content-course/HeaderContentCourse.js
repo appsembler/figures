@@ -49,7 +49,7 @@ class HeaderContentCourse extends Component {
           </div>
           <span className={styles['text-separator']} />
           <div className={styles['learners-info']}>
-            <strong>{this.props.learnersEnrolled && this.props.learnersEnrolled['current']}</strong> learners currently enrolled, progressing through sections as displayed below:
+            <strong>{this.props.learnersEnrolled && this.props.learnersEnrolled['current_month']}</strong> learners currently enrolled, progressing through sections as displayed below:
           </div>
         </div>
         <div className={cx({ 'graph-bars-container': true, 'container': true})}>

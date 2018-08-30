@@ -20,8 +20,9 @@ looking at adding additional Figures models to capture:
 
 '''
 
-from django.contrib.auth import get_user_model
+import datetime
 
+from django.contrib.auth import get_user_model
 from django_countries import Countries
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -36,9 +37,21 @@ from certificates.models import GeneratedCertificate
 from student.models import CourseAccessRole, CourseEnrollment
 
 from figures.helpers import as_course_key
-from figures.metrics import LearnerCourseGrades, LearnerCourseProgress
+from figures.metrics import (
+    get_course_enrolled_users_for_time_period,
+    get_course_average_progress_for_time_period,
+    get_course_average_days_to_complete_for_time_period,
+    get_course_num_learners_completed_for_time_period,
+    get_monthly_history_metric,
+    LearnerCourseGrades,
+    LearnerCourseProgress,
+    )
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
+
+# Temporarily hardcoding here
+# TODO: put into figures.settings
+HISTORY_MONTHS_BACK = 6
 
 ##
 ## Serializer Field classes
@@ -228,6 +241,31 @@ class GeneralCourseDataSerializer(serializers.Serializer):
             return []
 
 
+def get_course_history_metric(course_id, func, date_for, months_back):
+    '''Retieves current_month and history metric data for a course and time
+    period
+
+    This is a convenience function to reduce duplicate code
+
+    :param course_id: The course identifier for the course we want data
+    :param func: The metric function to retrieve a metric for the specified 
+    course and date range
+    :param date_for: The date to determine the current month
+    :param months_back: How many months back to retrieve data
+    :returns: a dict with the current month metric and list of metrics for
+    previous months
+    '''
+    wrapper_func = lambda start_date, end_date: func(
+            start_date=start_date,
+            end_date=end_date,
+            course_id=course_id)
+
+    return get_monthly_history_metric(
+        func=wrapper_func,
+        date_for=date_for,
+        months_back=months_back,
+        )
+
 
 class CourseDetailsSerializer(serializers.ModelSerializer):
     '''
@@ -277,69 +315,42 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         Would be nice to have the course_enrollment and course_overview models
         linked
         '''
-
-        data = CourseEnrollment.objects.enrollment_counts(course_overview.id)
-        # data is of the form:
-        # defaultdict(<type 'int'>, {'total': 2, u'honor': 2})
-
-        # TODO: Get history. See this module's docstring for more details
-        # Form:
-        #  "history": [
-        #    {
-        #      "period": "April 2018",
-        #      "value": 123,
-        #    },
-        #    ...
-        #  ]
-        history = []
-
-        return dict(
-            current=data['total'],
-            history=history,
+        return get_course_history_metric(
+            course_id=course_overview.id,
+            func=get_course_enrolled_users_for_time_period,
+            date_for=datetime.datetime.now(),
+            months_back=HISTORY_MONTHS_BACK,
             )
 
     def get_average_progress(self, course_overview):
         '''
-
         '''
-
-        rec = CourseDailyMetrics.objects.filter(
-            course_id=course_overview.id).order_by('date_for').last()
-        average_progress = rec.average_progress if rec else 0.0
-        history = []
-        return dict(
-            current=average_progress,
-            history=history
+        return get_course_history_metric(
+            course_id=course_overview.id,
+            func=get_course_average_progress_for_time_period,
+            date_for=datetime.datetime.now(),
+            months_back=HISTORY_MONTHS_BACK,
             )
 
     def get_average_days_to_complete(self, course_overview):
         '''
-
         '''
-        rec = CourseDailyMetrics.objects.filter(
-            course_id=course_overview.id).order_by('date_for').last()
-
-        days = rec.average_days_to_complete if rec else None
-        history = []
-        return dict(
-            current=days,
-            history=history
+        return get_course_history_metric(
+            course_id=course_overview.id,
+            func=get_course_average_days_to_complete_for_time_period,
+            date_for=datetime.datetime.now(),
+            months_back=HISTORY_MONTHS_BACK,
             )
 
     def get_users_completed(self, course_overview):
         '''
-        
         '''
-        rec = CourseDailyMetrics.objects.filter(
-            course_id=course_overview.id).order_by('date_for').last()
-
-        counts = rec.num_learners_completed if rec else 0
-        history = []
-        return dict(
-            current=0,
-            history=history
+        return get_course_history_metric(
+            course_id=course_overview.id,
+            func=get_course_num_learners_completed_for_time_period,
+            date_for=datetime.datetime.now(),
+            months_back=HISTORY_MONTHS_BACK,
             )
-
 
 class GeneralSiteMetricsSerializer(serializers.Serializer):
     '''
