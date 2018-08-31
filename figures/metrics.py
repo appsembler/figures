@@ -472,33 +472,6 @@ def get_monthly_history_metric(func,date_for, months_back,
         history=history,)
 
 
-# TODO make 'as_date' a decorator on the 'date_for' param
-# - Do the same for all these get methods
-# TODO: Generalize the 'get_some_metric_x' methods below,
-# the only significant different is the value called for each time period (month)
-
-def get_monthly_active_users(date_for, months_back):
-
-    date_for = as_date(date_for)
-
-    history=[]
-
-    for month in previous_months_iterator(month_for=date_for, months_back=months_back,):
-        period=period_str(month)
-        value=get_active_users_for_time_period(
-                start_date=datetime.date(month[0], month[1],1),
-                end_date=datetime.date(month[0],month[1], month[2]))
-        history.append(dict(
-            period=period,
-            value=value,
-            )
-        )
-    current_month = history.pop()
-    return dict(
-        current_month=current_month['value'],
-        history=history,
-    )
-
 def get_monthly_site_metrics(date_for=None, **kwargs):
     '''Gets current metrics with history
 
