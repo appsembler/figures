@@ -5,7 +5,6 @@ python:
 node_js:
   - "node"
 
-
 # command to install dependencies
 install:
   - pip install -r devsite/requirements.txt
@@ -14,5 +13,7 @@ install:
 
 # command to run tests
 script:
+  - cd frontend && npm run-script build && cd ..
   - py.test --cov=./
   - bash <(curl -s https://codecov.io/bash)
+  
