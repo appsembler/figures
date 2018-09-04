@@ -1,5 +1,7 @@
 '''Test the Figures UI view
 
+The ``TestFiguresHomeView`` test class requires that ``webpack-stats.json`` exists in order for Django Webpack Loader to find the front end assets. This file is created when ``npm run-script build`` is executed
+
 '''
 
 from django.contrib.auth.models import AnonymousUser
@@ -14,14 +16,7 @@ from figures.views import figures_home, UNAUTHORIZED_USER_REDIRECT_URL
 
 from tests.factories import UserFactory
 from tests.views.helpers import create_test_users
-
-# NOTE: we can run `npm run-script build` to compile production assets
-# However, the styling is not working and the figures/static has a symlink
-# to `frontend/build/static`
-# This symlink is a temporary workaround as we figure out how we want to 
-# include production assets or do multi-language TravisCI support
 #
-@pytest.mark.skip('skippign until we have a working webpack-stats.json file')
 @pytest.mark.django_db
 class TestFiguresHomeView(object):
 
@@ -72,3 +67,4 @@ class TestFiguresHomeView(object):
         assert response.status_code == status_code
         if status_code == 302:
             assert response['location'] == UNAUTHORIZED_USER_REDIRECT_URL
+
