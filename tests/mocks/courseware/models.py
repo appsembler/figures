@@ -54,5 +54,6 @@ class StudentModule(models.Model):
     #!  )
     #! done = models.CharField(max_length=8, choices=DONE_TYPES, default='na', db_index=True)
 
-    created = models.DateTimeField(auto_now_add=True, db_index=True)
-    modified = models.DateTimeField(auto_now=True, db_index=True)
+    # the production model sets 'auto_now_add=True' andn 'db_index=True'
+    created = models.DateTimeField()
+    modified = models.DateTimeField()
