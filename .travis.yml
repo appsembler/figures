@@ -10,7 +10,7 @@ node_js:
 install:
   - pip install -r devsite/requirements.txt
   - pip install pytest-cov
-  - cd frontend && npm install
+  - cd frontend && npm install && cd ..
 
 # command to run tests
 script:
