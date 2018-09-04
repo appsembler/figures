@@ -2,10 +2,15 @@ language: python
 python:
   - "2.7"
 
+node_js:
+  - "node"
+
+
 # command to install dependencies
 install:
   - pip install -r devsite/requirements.txt
   - pip install pytest-cov
+  - cd frontend && npm install
 
 # command to run tests
 script:
