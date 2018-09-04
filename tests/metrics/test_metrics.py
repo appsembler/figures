@@ -21,20 +21,31 @@ Initially:
 
 '''
 import datetime
+
+from dateutil.rrule import rrule, DAILY
+
+from django.utils import timezone
 import pytest
 
 
-#from django.db import models
-
 from figures import metrics
 
-from tests.factories import SiteDailyMetricsFactory
+from courseware.models import StudentModule
+from tests.factories import (
+    CourseOverviewFactory,
+    SiteDailyMetricsFactory,
+    StudentModuleFactory,
+    UserFactory,
+    )
 
 
 # TODO:
 
 # - build set of User, StudentModule, CourseOverview objects to test the
 # StudentModule based methods and classes
+
+DEFAULT_START_DATE = datetime.datetime(2018,01,01, 0, 0, tzinfo=timezone.get_current_timezone())
+DEFAULT_END_DATE = datetime.datetime(2018,06,01, 0, 0, tzinfo=timezone.get_current_timezone())
 
 
 @pytest.mark.django_db
@@ -78,19 +89,69 @@ class TestGetMonthlyActiveUsers(object):
         pass
 
 
+
+def create_student_module_test_data(start_date, end_date):
+    '''
+
+    NOTE: There are many combinations of unique students, courses, and student
+    state. We're going to start with a relatively simple set
+
+    1. A single course
+    2. A single set per student (learner)
+    3. a small number of students to reduce test run time
+
+    If we create a record per day then we can work off of a unique datapoint
+    per day
+    '''
+    student_modules = []
+    user = UserFactory()
+    course_overview = CourseOverviewFactory()
+
+    for dt in rrule(DAILY, dtstart=start_date, until=end_date):
+        student_modules.append(StudentModuleFactory(
+            student=user,
+            course_id=course_overview.id,
+            created=dt,
+            modified=dt,
+            ))
+
+    # we'll return everything we create
+    return dict(
+        user=user,
+        course_overview=course_overview,
+        student_modules=student_modules,
+    )
+
 @pytest.mark.django_db
 class TestTimePeriodGetters(object):
     '''The purpose of this class is to test the individual time period getter
     functions
 
+    TODO: Pull out the start/end date setup into a 'TimeSeriesTest' base class
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        pass
+        #self.tzinfo = timezone.get_current_timezone()
 
-    @pytest.mark.skip(reason='Test not implemented yet')
+        self.data_start_date = DEFAULT_START_DATE
+        self.data_end_date = DEFAULT_END_DATE
+        self.student_module_data = create_student_module_test_data(
+            start_date=self.data_start_date,
+            end_date=self.data_end_date)
+
+    @pytest.mark.skip(reason='Test fails. Need to investigate')
     def test_get_active_users_for_time_period(self):
-        pass
+        '''
+
+        '''
+
+        count = metrics.get_active_users_for_time_period(
+            start_date=self.data_start_date,
+            end_date=self.data_end_date,
+            )
+
+        assert count == StudentModule.objects.all().count()
+
 
     @pytest.mark.skip(reason='Test not implemented yet')
     def test_get_total_course_completions_for_time_period(self):
