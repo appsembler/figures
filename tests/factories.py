@@ -121,12 +121,12 @@ class StudentModuleFactory(DjangoModelFactory):
     student = factory.SubFactory(
         UserFactory,
     )
-    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
-    created = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
-
-    modified = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
+    created = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,02, tzinfo=factory.compat.UTC))
+    modified = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,02, tzinfo=factory.compat.UTC))
 
 
 class CourseEnrollmentFactory(DjangoModelFactory):
@@ -151,16 +151,6 @@ class CourseAccessRoleFactory(DjangoModelFactory):
     course_id = factory.Sequence(lambda n: as_course_key(
         COURSE_ID_STR_TEMPLATE.format(n)))
     role = factory.Iterator(['instructor', 'staff'])
-
-
-class StudentModuleFactory(DjangoModelFactory):
-    class Meta:
-        model = StudentModule
-    student = factory.SubFactory(
-        UserFactory,
-    )
-    course_id = factory.Sequence(lambda n: as_course_key(
-        COURSE_ID_STR_TEMPLATE.format(n)))
 
 
 ##
