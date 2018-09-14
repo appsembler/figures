@@ -2,7 +2,9 @@
 This module tests the mocks and test factories
 '''
 
+import datetime
 import pytest
+import pytz
 
 from certificates.models import GeneratedCertificate
 
@@ -47,9 +49,9 @@ class TestGeneratedCertificate(object):
         cert =  GeneratedCertificateFactory()
         assert cert
 
-@pytest.mark.skip('failing')
+
 @pytest.mark.django_db
-class TestFactories(object):
+class TestStudentModule(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         pass
