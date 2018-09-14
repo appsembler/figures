@@ -271,7 +271,11 @@ def get_active_users_for_time_period(start_date, end_date, site=None, course_ids
 
 
 def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwargs):
+    '''
+    TODO: Move this and the other multi-row SiteDailyMetrics query functions to
+    SiteDailyMetricsManager
 
+    '''
     def calc_from_user_model():
         filter_args = dict(
             date_joined__lt=next_day(end_date),
@@ -418,6 +422,9 @@ def get_course_average_days_to_complete_for_time_period(start_date, end_date, co
         return 0
 
 def get_course_num_learners_completed_for_time_period(start_date, end_date, course_id):
+    '''
+    We're duplicating some code.
+    '''
     filter_args = dict(
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
@@ -431,7 +438,7 @@ def get_course_num_learners_completed_for_time_period(start_date, end_date, cour
         return 0
 
 
-def get_monthly_history_metric(func,date_for, months_back,
+def get_monthly_history_metric(func, date_for, months_back,
     include_current_in_history=True):
     '''Convenience method to retrieve current and historic data
 
@@ -543,7 +550,7 @@ def get_monthly_site_metrics(date_for=None, **kwargs):
     if date_for:
         date_for = as_date(date_for)
     else:
-        date_for = datetime.datetime.now().date()
+        date_for = datetime.datetime.utcnow().date()
 
     months_back=kwargs.get('months_back', 6) # Warning: magic number
 
@@ -595,7 +602,7 @@ def get_monthly_site_metrics(date_for=None, **kwargs):
 
 def test(date_for=None):
     if not date_for:
-        date_for = datetime.datetime.now().date()
+        date_for = datetime.datetime.utcnow().date()
     print('testing with date: {}'.format(date_for))
     vals = get_monthly_site_metrics(date_for)
     from pprint import pprint

@@ -77,12 +77,16 @@ class TestLearnerCourseGrades(object):
         Because course grades are mocked, we are not interested in inspecting
         the contents of 'chapter_grades'
 
-        This test was written when the chapter_grades were defined in the mocks. Since then we define them here to better control the values/structure for these tests and provide immediate (Same source file) context for the data used in these tests
+        This test was written when the chapter_grades were defined in the mocks.
+        Since then we define them here to better control the values/structure
+        for these tests and provide immediate (Same source file) context for
+        the data used in these tests
         '''
         assert isinstance(self.lcg.chapter_grades, dict)
         # get the sub-dict of the first key
         keys = self.lcg.chapter_grades.keys()
-        assert set(self.lcg.chapter_grades[keys[0]].keys()) == set(['sections', 'url_name', 'display_name'])
+        assert set(self.lcg.chapter_grades[keys[0]].keys()) == set([
+            'sections', 'url_name', 'display_name'])
 
     def test_certificate_and_completion(self):
         '''
@@ -97,7 +101,7 @@ class TestLearnerCourseGrades(object):
         expected_cert = GeneratedCertificateFactory(
             user=self.lcg.learner,
             course_id=self.lcg.course.id,
-            created_date=datetime.datetime.now())
+            created_date=datetime.datetime.utcnow())
         assert expected_cert
         check_certs = self.lcg.certificates()
         assert check_certs.count() == 1
@@ -124,13 +128,15 @@ class TestLearnerCourseGrades(object):
     ##
     ## The following two tests test retrieving sections from chapter grades
     ##
-    ## We have two methods instead of parametrizing for simplicity and that decorators can't accept class instance variables for the class method for which the decorator is applied. We would have to build our test data outside of the class
+    ## We have two methods instead of parametrizing for simplicity and that
+    ## decorators can't accept class instance variables for the class method
+    ## for which the decorator is applied. We would have to build our test
+    ## data outside of the class
 
     def test_sections_all(self):
         '''
-        LearnerCourseGrade.sections_list uses the 'sections' iterator method so we can test both
-        with the '
-        sections_list' method
+        LearnerCourseGrade.sections_list uses the 'sections' iterator method so
+        we can test both with the 'sections_list' method
         '''
 
         sections = self.lcg.sections_list()
@@ -163,7 +169,8 @@ class TestLearnerCourseGrades(object):
 
     def test_progress_percent_no_count(self):
         '''
-        This test makes sure that we don't get a divide by zero error in the progress percent
+        This test makes sure that we don't get a divide by zero error in the
+        progress percent
         '''
         progress_details = dict(
             count=0,

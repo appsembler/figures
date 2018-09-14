@@ -318,7 +318,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         return get_course_history_metric(
             course_id=course_overview.id,
             func=get_course_enrolled_users_for_time_period,
-            date_for=datetime.datetime.now(),
+            date_for=datetime.datetime.utcnow(),
             months_back=HISTORY_MONTHS_BACK,
             )
 
@@ -328,7 +328,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         return get_course_history_metric(
             course_id=course_overview.id,
             func=get_course_average_progress_for_time_period,
-            date_for=datetime.datetime.now(),
+            date_for=datetime.datetime.utcnow(),
             months_back=HISTORY_MONTHS_BACK,
             )
 
@@ -338,7 +338,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         return get_course_history_metric(
             course_id=course_overview.id,
             func=get_course_average_days_to_complete_for_time_period,
-            date_for=datetime.datetime.now(),
+            date_for=datetime.datetime.utcnow(),
             months_back=HISTORY_MONTHS_BACK,
             )
 
@@ -348,7 +348,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         return get_course_history_metric(
             course_id=course_overview.id,
             func=get_course_num_learners_completed_for_time_period,
-            date_for=datetime.datetime.now(),
+            date_for=datetime.datetime.utcnow(),
             months_back=HISTORY_MONTHS_BACK,
             )
 

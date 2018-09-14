@@ -95,7 +95,7 @@ class SiteDailyMetricsExtractor(object):
 
     def extract(self, date_for=None, **kwargs):
         if not date_for:
-            date_for = prev_day(datetime.datetime.now().date())
+            date_for = prev_day(datetime.datetime.utcnow().date())
 
         data = dict()
 
@@ -129,7 +129,7 @@ class SiteDailyMetricsLoader(object):
         * Course acess groups
         '''
         if not date_for:
-            date_for = prev_day(datetime.datetime.now().date())
+            date_for = prev_day(datetime.datetime.utcnow().date())
 
         data = self.extractor.extract(date_for=date_for)
 
