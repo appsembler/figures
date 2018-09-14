@@ -14,14 +14,68 @@ class MockAggregatedScore(object):
         self.earned = float(tw_earned) if tw_earned is not None else None
         self.possible = float(tw_possible) if tw_possible is not None else None
 
+    def __str__(self):
+        return 'earned={}, possible={}, graded={}, first_attempted={}'.format(
+            self.earned, self.possible, self.graded, self.first_attempted)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class MockSubsectionGrade(object):
     '''
 
     '''
-    def __init__(self, ):
+    def __init__(self, **kwargs):
         self.problem_scores = OrderedDict()
-        self.all_total = MockAggregatedScore(tw_earned=0.0, tw_possible=0.0)
+        self.all_total = MockAggregatedScore(
+            tw_earned=kwargs.get('tw_earned', 0.0),
+            tw_possible=kwargs.get('tw_possible', 0.0)
+        )
+
+    def __str__(self):
+        return 'all_total={}'.format(self.all_total)
+
+    def __repr__(self):
+        return self.__str__()
+
+def create_chapter_grades():
+    '''
+    Mock for course_grades.CourseGradeBase.chapter_grades
+    (which uses the @lazy decorator)
+
+    for chapter_grade in self.course_grade.chapter_grades.values():
+        for section in chapter_grade['sections']:
+
+    we don't need the BlockUsageLocator key for our initial testing
+    So we're just going to use the phonetic alphabet
+
+    Use the following to generate additional url names
+        ``binascii.b2a_hex(os.urandom(16))``
+
+    Chapter grade keys are 'sections', 'url_name', and 'display_name'
+    '''
+
+    return OrderedDict(
+        alpha=dict(
+            sections=[
+                MockSubsectionGrade(),
+                MockSubsectionGrade(),
+                MockSubsectionGrade(),
+            ],
+            url_name=u'ec7e84694fca2d073731a462a5916a7a',
+            display_name=u'Module 1 - Overview',
+        ),
+        bravo=dict(
+            sections=[
+                MockSubsectionGrade(),
+                MockSubsectionGrade(),
+                MockSubsectionGrade(),
+            ],
+            url_name=u'2f43c0b7da59ed40156155f9a8ca4d40',
+            display_name=u'Module 2 - First Principles',
+        ),
+    )
 
 
 class CourseGrade(object):
@@ -36,42 +90,5 @@ class CourseGrade(object):
 
         # Convert empty strings to None when reading from the table
         self.letter_grade = letter_grade or None
-
-    @property
-    def chapter_grades(self):
-        '''
-        Mock for course_grades.CourseGradeBase.chapter_grades
-        (which uses the @lazy decorator)
-
-        for chapter_grade in self.course_grade.chapter_grades.values():
-            for section in chapter_grade['sections']:
-
-        we don't need the BlockUsageLocator key for our initial testing
-        So we're just going to use the phonetic alphabet
-
-        Use the following to generate additional url names
-            ``binascii.b2a_hex(os.urandom(16))``
-
-        Chapter grade keys are 'sections', 'url_name', and 'display_name'
-        '''
-
-        return OrderedDict(
-            alpha=dict(
-                sections=[
-                    MockSubsectionGrade(),
-                    MockSubsectionGrade(),
-                    MockSubsectionGrade(),
-                ],
-                url_name=u'ec7e84694fca2d073731a462a5916a7a',
-                display_name=u'Module 1 - Overview',
-            ),
-            bravo=dict(
-                sections=[
-                    MockSubsectionGrade(),
-                    MockSubsectionGrade(),
-                    MockSubsectionGrade(),
-                ],
-                url_name=u'2f43c0b7da59ed40156155f9a8ca4d40',
-                display_name=u'Module 2 - First Principles',
-            ),
-        )
+        self.chapter_grades = kwargs.get('chapter_grades',
+            create_chapter_grades())

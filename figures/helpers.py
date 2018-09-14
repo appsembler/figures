@@ -57,11 +57,29 @@ def as_datetime(val):
             'value of type "{}" cannot be converted to a datetime object'.format(
                 type(val)))
 
+# def as_date(val):
+#     if isinstance(val, datetime.date):
+#         return val
+#     else:
+#         return as_datetime(val).date()
+
 def as_date(val):
-    if isinstance(val, datetime.date):
+    '''Casts the value to a ``datetime.date`` object if possible
+
+    Else raises ``TypeError``
+    '''
+    # Important to check if datetime first because datetime.date objects
+    # pass the isinstance(obj, datetime.date) test
+    if isinstance(val, datetime.datetime):
+        return val.date()
+    elif isinstance(val, datetime.date):
         return val
+    elif isinstance(val, basestring):
+        return dateutil_parse(val).date()
     else:
-        return as_datetime(val).date()
+        raise TypeError(
+            'date cannot be of type "{}".'.format(type(val)) +
+            ' It must be able to be cast to a datetime.date')
 
 def days_from(val, days):
     if isinstance(val, datetime.datetime):
@@ -77,12 +95,6 @@ def next_day(val):
 
 def prev_day(val):
     return days_from(val, -1)
-
-def yesterday():
-    '''
-    return yesteday as a datetime.date object
-    '''
-    return days_from(datetime.datetime.now().date())
 
 
 # TODO: change name to 'months_back_iterator'

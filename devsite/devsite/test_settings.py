@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     'django_countries',
     'django_filters',
     'devsite',
+    'webpack_loader',
     'figures',
 
     # edx-platform apps. Mocks are used by default
@@ -54,6 +55,7 @@ ROOT_URLCONF = 'figures.urls'
 SECRET_KEY = 'insecure-secret-key'
 
 USE_TZ = True
+TIME_ZONE = 'UTC'
 
 # https://wsvincent.com/django-rest-framework-serializers-viewsets-routers/
 

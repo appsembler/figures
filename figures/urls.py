@@ -33,6 +33,11 @@ router.register(
 ##
 
 router.register(
+    r'courses-index',
+    views.CoursesIndexViewSet,
+    base_name='courses-index')
+
+router.register(
     r'courses/general',
     views.GeneralCourseDataViewSet,
     base_name='courses-general')
@@ -52,6 +57,14 @@ router.register(
     views.LearnerDetailsViewSet,
     base_name='users-detail')
 
+# TODO: Consider changing this path to be 'users' or 'users/summary'
+# So that all user data fall under the same root path
+router.register(
+    r'user-index',
+    views.UserIndexViewSet,
+    base_name='user-index')
+
+
 urlpatterns = [
 
     # UI Templates
@@ -59,9 +72,6 @@ urlpatterns = [
 
     # REST API
     url(r'^api/', include(router.urls, namespace='api')),
-    url(r'^api/courses-index/', views.CoursesIndexView.as_view(),
-        name='courses-index'),
-    url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
     url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
         name='general-site-metrics'),
     url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')

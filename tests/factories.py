@@ -114,6 +114,21 @@ class GeneratedCertificateFactory(DjangoModelFactory):
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
 
 
+class StudentModuleFactory(DjangoModelFactory):
+    class Meta:
+        model = StudentModule
+
+    student = factory.SubFactory(
+        UserFactory,
+    )
+    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    created = factory.Sequence(lambda n:
+        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+
+    modified = factory.Sequence(lambda n:
+        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+
+
 class CourseEnrollmentFactory(DjangoModelFactory):
     class Meta:
         model = CourseEnrollment
