@@ -4,8 +4,6 @@ First cut - ETL all in one for each data sink
 Then pull out the steps so we can have a formal, flexible, and scalable pipeline system
 
 
-
-
 '''
 
 #from figures.pipeline import Job
@@ -193,7 +191,6 @@ class CourseDailyMetricsExtractor(object):
 
         # Update args if not assigned
         if not date_for:
-            #date_for = prev_day(datetime.datetime.now().date())
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
                 )
@@ -260,18 +257,13 @@ class CourseDailyMetricsLoader(object):
         
         '''
         if not date_for:
-            #date_for = prev_day(datetime.datetime.now().date())
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
                 )
-
         #
         data = self.get_data(date_for=date_for)
 
-        print('inspect me')
-        import pdb; pdb.set_trace()
-
-        course_metrics, created = CourseDailyMetrics.objects.update_or_create(
+        cdm, created = CourseDailyMetrics.objects.update_or_create(
             course_id=self.course_id,
             date_for=date_for,
             defaults = dict(
@@ -282,19 +274,24 @@ class CourseDailyMetricsLoader(object):
                 num_learners_completed=data['num_learners_completed'],
             )
         )
-        return (course_metrics, created,)
+        return (cdm, created,)
 
 
-#class CourseDailyMetricsJob(Job):
 class CourseDailyMetricsJob(object):
-    def __init__(self):
-        pass
 
+    @classmethod
     def run(self, *args, **kwargs):
         '''
-
+        TODO: add try block and log failures
         '''
-        pass
+        filter_args = kwargs.get('filter_args', {})
+        results = []
+        courses = kwargs.get('courses', CourseOverview.objects.filter(**filter_args))
+        for course in courses:
+            cdm, created = CourseDailyMetricsLoader(course_id=course.id).load()
+            results.append(dict(obj=cdm, created=created))
+
+        return results
 
 
 def test_extract(course_id=None):

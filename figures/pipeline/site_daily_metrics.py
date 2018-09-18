@@ -147,9 +147,9 @@ class SiteDailyMetricsLoader(object):
         return site_metrics, created
 
 
-def test_extract():
-    extractor = SiteDailyMetricsExtractor()
-    return extractor.extract()
+class SiteDailyMetricsJob(object):
 
-def test_load():
-    return SiteDailyMetricsLoader().load()
+    @classmethod
+    def run(self, *args, **kwargs):
+        results = SiteDailyMetricsLoader().load()
+        return results
