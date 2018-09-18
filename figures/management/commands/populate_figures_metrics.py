@@ -12,11 +12,8 @@ from dateutil.parser import parse as dateutil_parse
 
 from django.core.management.base import BaseCommand, CommandError
 
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
 
-from figures.pipeline.jobs import AllDailyMetricsJob
+from figures.tasks import populate_daily_metrics
 
 
 class Command(BaseCommand):
@@ -34,6 +31,10 @@ class Command(BaseCommand):
 
         parser.add_argument('--date',
                             help='date for which we are retrieving data in yyyy-mm-dd format')
+        parser.add_argument('--no-delay',
+                            action='store_true',
+                            default=False,
+                            help='Disable the celery "delay" directive')
 
     def handle(self, *args, **options):
         print('populating Figures metrics')
@@ -44,9 +45,9 @@ class Command(BaseCommand):
 
         # TODO: Enable running as celery task
 
-        job = AllDailyMetricsJob(date_for=date_for)
-        results = job.run()
-        print('Done populating course metrics for day {}'.format(date_for))
-        
-        #print('inspect me')
-        #import pdb; pdb.set_trace()
+        if options['no_delay']:
+            results = populate_daily_metrics(date_for=date_for)
+        else:
+            results = populate_daily_metrics.delay(date_for=date_for)
+        print('Management command populate_figures_metrics complete. date_for: {}'.format(
+            date_for))
