@@ -10,7 +10,7 @@ from django.conf import settings as django_settings
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Define our webpack asset bundling constants
-WEBPACK_BUNDLE_DIR_NAME = 'figures_bundles/'
+WEBPACK_BUNDLE_DIR_NAME = 'figures/'
 WEBPACK_STATS_FILE = os.path.abspath(
     os.path.join(APP_DIR, '../frontend/webpack-stats.json'))
 

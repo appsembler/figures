@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import styles from './_header-area-layout.scss';
 import HeaderNav from 'base/components/layout/HeaderNav';
 import { NavLink } from 'react-router-dom';
-import figuresLogo from 'base/images/logo/edx-figures--logo--negative.svg';
+import figuresLogo from 'base/images/logo/figures--logo--negative.svg';
 
 let cx = classNames.bind(styles);
 
@@ -19,7 +19,7 @@ class HeaderAreaLayout extends Component {
             to="/figures"
             className={styles['header-logo-container']}
           >
-            <img src={figuresLogo} alt="EdX Figures" role="presentation" />
+            <img src={figuresLogo} alt="Figures" role="presentation" />
           </NavLink>
           <HeaderNav />
         </div>

@@ -16,7 +16,15 @@ const getClientEnvironment = require('./env');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
-const publicPath = paths.servedPath;
+
+// This assigns '/' by default and breaks Django Webpack Loader
+//const publicPath = paths.servedPath;
+
+// setting it to '/static/{BUNDLE_DIR_NAME}/', where `BUNDLE_DIR_NAME` is the
+// same as defined figures/settings.py
+// We follow the standard folder naming scheme used for Django reusable apps
+const publicPath = '/static/figures/';
+
 // Some apps do not use client-side routing with pushState.
 // For these, "homepage" can be set to "." to enable relative asset paths.
 const shouldUseRelativeAssetPaths = publicPath === './';
@@ -28,6 +36,7 @@ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 const publicUrl = publicPath.slice(0, -1);
 // Get environment variables to inject into our app.
 const env = getClientEnvironment(publicUrl);
+
 
 // Assert this just to be safe.
 // Development builds of React are slow and not intended for production.
