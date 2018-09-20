@@ -325,7 +325,9 @@ module.exports = {
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new BundleTracker({filename: 'webpack-stats.json'}),
+    // Make sure the webpack stats file can be read by Django Webpack Loader
+    // when Figures is packaged for release on PyPI
+    new BundleTracker({filename: '../figures/webpack-stats.json'}),
     new ExtractTextPlugin({ filename: 'styles.css', allChunks: true }),
   ],
   // Some libraries import Node modules but don't use them in the browser.

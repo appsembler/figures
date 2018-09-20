@@ -12,7 +12,7 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 # Define our webpack asset bundling constants
 WEBPACK_BUNDLE_DIR_NAME = 'figures/'
 WEBPACK_STATS_FILE = os.path.abspath(
-    os.path.join(APP_DIR, '../frontend/webpack-stats.json'))
+    os.path.join(APP_DIR, 'webpack-stats.json'))
 
 # This will raise an AttributeError if WEBPACK_LOADER is not defined in settings
 # We'll just let it fail
