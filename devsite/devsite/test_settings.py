@@ -66,8 +66,17 @@ REST_FRAMEWORK = {
     ]
 }
 
-# edx-figures requires the WEBPACK_LOADER dict to be declared
+# It expects them from the project's settings (django.conf.settings)
 WEBPACK_LOADER = {}
+CELERYBEAT_SCHEDULE = {}
+
+# Declare values we need from server vars (e.g. lms.env.json)
+ENV_TOKENS = {
+    'FIGURES': {
+        'WEBPACK_STATS_FILE': '../tests/test-webpack-stats.json',
+    }
+}
+
 
 # This is all we need to instantiate edx-figures with default settings
 from figures.settings import FIGURES
