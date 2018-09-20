@@ -122,17 +122,29 @@ class SiteDailyMetricsLoader(object):
     def __init__(self):
         self.extractor = SiteDailyMetricsExtractor()
 
-    def load(self, date_for=None, **kwargs):
+    def load(self, date_for=None, force_update=False, **kwargs):
         '''
         TODO: Add filtering for
         * Multi-tenancy
         * Course acess groups
         '''
         if not date_for:
-            date_for = prev_day(datetime.datetime.utcnow().date())
+            date_for = prev_day(
+                datetime.datetime.utcnow().replace(tzinfo=utc).date()
+                )
+
+        # if we already have a record for the date_for and force_update is False
+        # then skip getting data
+        if not force_update:
+            try:
+                sdm = SiteDailyMetrics.objects.get(date_for=date_for)
+                return (sdm, False,)
+
+            except SiteDailyMetrics.DoesNotExist:
+                # proceed normally
+                pass
 
         data = self.extractor.extract(date_for=date_for)
-
         site_metrics, created = SiteDailyMetrics.objects.update_or_create(
             date_for=date_for,
             defaults=dict(
@@ -143,7 +155,6 @@ class SiteDailyMetricsLoader(object):
                 total_enrollment_count=data['total_enrollment_count'],
             )
         )
-
         return site_metrics, created
 
 
@@ -151,5 +162,8 @@ class SiteDailyMetricsJob(object):
 
     @classmethod
     def run(self, *args, **kwargs):
-        results = SiteDailyMetricsLoader().load()
+        results = SiteDailyMetricsLoader().load(
+            date_for=kwargs.get('date_for', None),
+            force_update=kwargs.get('force_update'),
+            )
         return results

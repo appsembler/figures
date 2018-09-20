@@ -247,7 +247,7 @@ class CourseDailyMetricsLoader(object):
             course_id=self.course_id,
             data_for=date_for)
 
-    def load(self, date_for=None, **kwargs):
+    def load(self, date_for=None, force_update=False, **kwargs):
         '''
         TODO: clean up how we do this. We want to be able to call the loader
         with an existing data set (not having to call the extractor) but we
@@ -260,9 +260,21 @@ class CourseDailyMetricsLoader(object):
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
                 )
-        #
-        data = self.get_data(date_for=date_for)
 
+        # if we already have a record for the date_for and force_update is False
+        # then skip getting data
+        if not force_update:
+            try:
+                cdm = CourseDailyMetrics.objects.get(
+                    course_id=self.course_id,
+                    date_for=date_for)
+                return (cdm, False,)
+
+            except CourseDailyMetrics.DoesNotExist:
+                # proceed normally
+                pass
+
+        data = self.get_data(date_for=date_for)
         cdm, created = CourseDailyMetrics.objects.update_or_create(
             course_id=self.course_id,
             date_for=date_for,
@@ -285,10 +297,15 @@ class CourseDailyMetricsJob(object):
         TODO: add try block and log failures
         '''
         filter_args = kwargs.get('filter_args', {})
+        force_update = kwargs.get('force_update', False)
+        date_for = kwargs.get('date_for',)
         results = []
         courses = kwargs.get('courses', CourseOverview.objects.filter(**filter_args))
         for course in courses:
-            cdm, created = CourseDailyMetricsLoader(course_id=course.id).load()
+            cdm, created = CourseDailyMetricsLoader(course.id).load(
+                date_for=date_for,
+                force_update=force_update,
+                )
             results.append(dict(obj=cdm, created=created))
 
         return results

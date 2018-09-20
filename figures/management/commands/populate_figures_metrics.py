@@ -35,19 +35,24 @@ class Command(BaseCommand):
                             action='store_true',
                             default=False,
                             help='Disable the celery "delay" directive')
+        parser.add_argument('--force-update',
+                            action='store_true',
+                            default=False,
+                            help='Overwrite metrics records if they exist for the given date')
 
     def handle(self, *args, **options):
-        print('populating Figures metrics')
-        if options['date']:
-            date_for = dateutil_parse(options['date'])
-        else:
-            date_for = None
+        print('populating Figures metrics...')
 
-        # TODO: Enable running as celery task
-
+        kwargs = dict(
+            date_for=options['date'],
+            force_update=options['force_update'],
+            )
         if options['no_delay']:
-            results = populate_daily_metrics(date_for=date_for)
+            results = populate_daily_metrics(**kwargs)
         else:
-            results = populate_daily_metrics.delay(date_for=date_for)
+            results = populate_daily_metrics.delay(**kwargs)
+
+        # TODO: improve this message to say 'today' when options['date'] is None
         print('Management command populate_figures_metrics complete. date_for: {}'.format(
-            date_for))
+            options['date']))
+        print('Done.')
