@@ -1,6 +1,7 @@
 
 import calendar
 import datetime
+from django.utils.timezone import utc
 
 import pytest
 
@@ -99,7 +100,7 @@ class TestDateTimeHelper(object):
             minute=0,
             second=0,
             microsecond=0,
-            )
+            ).replace(tzinfo=utc)
         assert as_datetime(a_date) == expected
 
     def test_get_now_from_invalid_type(self):
