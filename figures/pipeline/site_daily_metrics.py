@@ -3,6 +3,7 @@
 '''
 
 import datetime
+from django.utils.timezone import utc
 
 from django.contrib.auth import get_user_model
 #from django.db.models import Avg, Count, F, Max, Sum
@@ -95,7 +96,9 @@ class SiteDailyMetricsExtractor(object):
 
     def extract(self, date_for=None, **kwargs):
         if not date_for:
-            date_for = prev_day(datetime.datetime.utcnow().date())
+            date_for = prev_day(
+                datetime.datetime.utcnow().replace(tzinfo=utc).date()
+                )
 
         data = dict()
 
