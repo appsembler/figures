@@ -8,6 +8,7 @@ Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
 '''
 
 import datetime
+from django.utils.timezone import utc
 
 from django.contrib.auth import get_user_model
 #from django_countries.fields import CountryField
@@ -111,7 +112,7 @@ class GeneratedCertificateFactory(DjangoModelFactory):
     )
     course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
     created_date = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
 
 
 class StudentModuleFactory(DjangoModelFactory):
@@ -139,8 +140,7 @@ class CourseEnrollmentFactory(DjangoModelFactory):
     course_id = factory.SelfAttribute('course_overview.id')
     course_overview = factory.SubFactory(CourseOverviewFactory)
     created = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
-
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
 
 class CourseAccessRoleFactory(DjangoModelFactory):
     class Meta:
@@ -161,7 +161,7 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = CourseDailyMetrics
     date_for = factory.Sequence(lambda n:
-        datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
     course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     enrollment_count = factory.Sequence(lambda n: n)
@@ -175,7 +175,7 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = SiteDailyMetrics
     date_for = factory.Sequence(lambda n:
-        datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
     cumulative_active_user_count = factory.Sequence(lambda n: n)
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)

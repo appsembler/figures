@@ -2,10 +2,13 @@
 Helper functions to make data handling and conversions easier
 
 Todo: add 'timelord' datetime/date helpers module
+
+
 '''
 
 import calendar
 import datetime
+from django.utils.timezone import utc
 
 from dateutil.parser import parse as dateutil_parse
 from dateutil.relativedelta import relativedelta
@@ -40,7 +43,7 @@ def as_datetime(val):
     if isinstance(val, datetime.datetime):
         return val
     elif isinstance(val, datetime.date):
-        # Return the end of the day
+        # Return the end of the day, set timezone to be UTC
         return datetime.datetime(
             year=val.year,
             month=val.month,
@@ -48,7 +51,7 @@ def as_datetime(val):
             # hour=0,
             # minute=59,
             # second=59
-            )
+            ).replace(tzinfo=utc)
 
     elif isinstance(val, basestring):
         return dateutil_parse(val)
