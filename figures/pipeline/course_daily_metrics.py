@@ -34,6 +34,9 @@ from figures.serializers import CourseIndexSerializer
 
 
 def get_course_enrollments(course_id, date_for):
+    '''Convenience method to get a filterd queryset of CourseEnrollment objects
+
+    '''
     return CourseEnrollment.objects.filter(
         course_id=as_course_key(course_id),
         created__lt=next_day(date_for),
