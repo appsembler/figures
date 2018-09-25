@@ -59,9 +59,9 @@ def create_chapter_grades():
     return OrderedDict(
         alpha=dict(
             sections=[
-                MockSubsectionGrade(),
-                MockSubsectionGrade(),
-                MockSubsectionGrade(),
+                MockSubsectionGrade(tw_earned=0.0, tw_possible=0.0),
+                MockSubsectionGrade(tw_earned=0.0,tw_possible=0.5),
+                MockSubsectionGrade(tw_earned=0.5,tw_possible=1.0),
             ],
             url_name=u'ec7e84694fca2d073731a462a5916a7a',
             display_name=u'Module 1 - Overview',

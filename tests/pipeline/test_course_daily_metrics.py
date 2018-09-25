@@ -7,8 +7,9 @@ import pytest
 
 from django.utils.timezone import utc
 
+from courseware.models import StudentModule
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from student.models import CourseEnrollment
+from student.models import CourseEnrollment, CourseAccessRole
 
 # from figures.pipeline.course_daily_metrics import (
 #     CourseDailyMetricsExtractor,
@@ -19,8 +20,10 @@ from figures.helpers import next_day
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 
 from tests.factories import (
+    CourseAccessRoleFactory,
     CourseEnrollmentFactory,
     CourseOverviewFactory,
+    GeneratedCertificateFactory,
     StudentModuleFactory,
     UserFactory,
 )
@@ -51,7 +54,8 @@ class TestGetCourseEnrollments(object):
 
 
     def test_get_course_enrollments_for_course(self):
-
+        '''
+        '''
 
         course_id = self.course_overviews[0].id
         expected_ce = CourseEnrollment.objects.filter(
@@ -66,34 +70,149 @@ class TestGetCourseEnrollments(object):
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsPipelineFunctions(object):
+    '''
+    Initial implementation is focused on setting a baseline and providing code
+    coverage. It also only tests with the date_for of 'now' and creates test
+    data with dates in the past.
+
+    We're also setting up a bunch of data and strictly only some are needed for
+    each method, so it would be more efficient to break this out into seperate
+    test classes
+
+    TODO: Update test data for a series of dates and test 'date_for' for a date
+    in the past where test data will contain data before on and after the
+    date we'll pass as the 'date_for' parameter
+    '''
+    COURSE_ROLES = ['ccx_coach', 'instructor', 'staff']
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.course_enrollments = [CourseEnrollmentFactory() for i in range(1,5)]
-        self.student_module = StudentModuleFactory()
+        self.today = datetime.datetime(2018,6,1).replace(tzinfo=utc).date()
+        self.course_overview = CourseOverviewFactory()
+        self.course_enrollments = [CourseEnrollmentFactory(
+            course_id=self.course_overview.id) for i in range(1,8)]
+        self.course_access_roles = [CourseAccessRoleFactory(
+            user=self.course_enrollments[i].user,
+            course_id=self.course_enrollments[i].course_id,
+            role=role,
+            ) for i, role in enumerate(self.COURSE_ROLES)]
 
+        # create student modules mod
+        self.student_modules = [StudentModuleFactory(
+            course_id=ce.course_id,
+            student=ce.user,
+            created=ce.created,
+            modified=self.today
+            ) for ce in self.course_enrollments]
+
+        self.cert_days_to_complete = [10,20,30]
+        self.expected_avg_cert_days_to_complete = 20
+        self.generated_certificates = [
+            GeneratedCertificateFactory(
+                user=self.course_enrollments[i].user,
+                course_id=self.course_enrollments[i].course_id,
+                created_date=(
+                    self.course_enrollments[i].created + datetime.timedelta(
+                        days=days)
+                    ),
+            ) for i, days in enumerate(self.cert_days_to_complete)]
 
     def test_get_num_enrolled_in_exclude_admins(self):
-        pass
+        '''
+
+        '''
+
+        # Get the number of course enrollments
+        ce_count = CourseEnrollment.objects.filter(
+            course_id=self.course_overview.id).count()
+        # Get course admins (non-students)
+        ce_non_students = CourseAccessRole.objects.filter(
+            course_id=self.course_overview.id).count()
+
+        expected_count = ce_count - ce_non_students
+        assert ce_count > 0 and ce_non_students > 0 and expected_count > 0, 'say something'
+
+        actual_count = pipeline_cdm.get_num_enrolled_in_exclude_admins(
+            course_id=self.course_overview.id, date_for=self.today)
+
+        assert actual_count == expected_count
+
+        actual_count = pipeline_cdm.get_num_enrolled_in_exclude_admins(
+            course_id=str(self.course_overview.id), date_for=self.today)
+        assert actual_count == expected_count
 
     def test_get_active_learners_today(self):
-        pass
+        '''
+
+        TODO: in the setup, add student module records modified in the past and
+        add filtering to the expected_count here
+        '''
+        expected_recs = StudentModule.objects.filter(
+            course_id=self.course_overview.id, modified=self.today)
+        actual_recs = pipeline_cdm.get_active_learners_today(
+            course_id=self.course_overview.id, date_for=self.today)
+        assert actual_recs.count() == expected_recs.count()
 
     def test_get_average_progress(self):
-        pass
+        '''
+        [John] This test needs work. The function it is testing needs work too
+        for testability. We don't want to reproduce the function's behavior, we
+        just want to be able to set up the source data with expected output and
+        go.
+        '''
+        course_enrollments = CourseEnrollment.objects.filter(
+            course_id=self.course_overview.id)
+
+        actual = pipeline_cdm.get_average_progress(
+            course_id=self.course_overview.id,
+            date_for=self.today,
+            course_enrollments=course_enrollments
+            )
+
+        # See tests/mocks/lms/djangoapps/grades/new/course_grade.py for
+        # the source subsection grades that
+
+        # TODO: make the mock data more configurable so we don't have to
+        # hardcode the expected value
+        assert actual == 0.5
 
     def test_get_days_to_complete(self):
-        pass
+        '''
+
+        '''
+        expected = dict(
+            days=self.cert_days_to_complete,
+            errors=[])
+
+        actual = pipeline_cdm.get_days_to_complete(
+            course_id=self.course_overview.id,
+            date_for=self.today)
+
+        assert actual == expected
 
     def test_calc_average_days_to_complete(self):
-        pass
+        '''
+        '''
+        actual = pipeline_cdm.calc_average_days_to_complete(
+            self.cert_days_to_complete)
+
+        assert actual == self.expected_avg_cert_days_to_complete
 
     def test_get_average_days_to_complete(self):
-        pass
+        '''
+        '''
+        actual = pipeline_cdm.get_average_days_to_complete(
+            course_id=self.course_overview.id,
+            date_for=self.today)
+        assert actual == self.expected_avg_cert_days_to_complete
 
     def test_get_num_learners_completed(self):
-        pass
+        
+        actual = pipeline_cdm.get_num_learners_completed(
+            course_id=self.course_overview.id,
+            date_for=self.today)
 
+        assert actual == len(self.generated_certificates)
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsExtractor(object):
