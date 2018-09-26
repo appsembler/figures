@@ -216,15 +216,34 @@ class TestCourseDailyMetricsPipelineFunctions(object):
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsExtractor(object):
+    '''
+    Provides minimal checking that CourseDailyMetricsExtractor works
 
+    * Verifies that we can create an instance of the class
+    * Verifies that we can call the extract method
+    '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.course_enrollments = [CourseEnrollmentFactory() for i in range(1,5)]
         self.student_module = StudentModuleFactory()
 
     def test_extract(self):
-
         course_id = self.course_enrollments[0].course_id
         results = pipeline_cdm.CourseDailyMetricsExtractor().extract(course_id)
+        assert results
+
+@pytest.mark.django_db
+class TestCourseDailyMetricsExtractor(object):
+    '''Provides minimal checking that CourseDailyMetricsLoader works
+
+    '''
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.course_enrollments = [CourseEnrollmentFactory() for i in range(1,5)]
+        self.student_module = StudentModuleFactory()
+
+    def test_load(self):
+        course_id = self.course_enrollments[0].course_id
+        results = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
         assert results
 
