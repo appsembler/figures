@@ -204,46 +204,6 @@ class LearnerCourseGrades(object):
                 progress_details['count'])
 
 
-class LearnerCourseProgress(object):
-    '''
-    TODO:
-    * Need to add tests
-    * This is not currently used. Figure out if we still need it for
-    upcoming functionality
-    * If we are using it, we need to include the current period in the
-    history list
-    '''
-    def __init__(self, user_id, course_id):
-        self.user_id = user_id
-        self.course_id = course_id
-        self.student_modules = StudentModule.objects.filter(
-            student_id=user_id,
-            course_id=as_course_key(course_id))
-
-    def get_progress_for_time_period(start_date, end_date):
-        filter_args = dict(
-            created__gt=prev_day(start_date),
-            modified__lt=next_day(end_date)
-            )
-        sm = self.student_modules.filter(**filter_args)
-
-        progress = 0.0
-        return progress
-
-    def get_previous_progress(months_back=3):
-        date_for = datetime.datetime.today().date()
-        history = []
-        for month in previous_months_iterator(
-            month_for=date_for,
-            months_back=months_back,):
-            period=period_str(month)
-            value=self.get_progress_for_time_period(
-                start_date=datetime.date(month[0], month[1],1),
-                end_date=datetime.date(month[0],month[1], month[2]))
-            history.append(dict(period=period,value=value))
-        return history
-
-
 ##
 ## Support methods for Course and Sitewide aggregate metrics
 ##

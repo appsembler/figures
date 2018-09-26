@@ -44,7 +44,6 @@ from figures.metrics import (
     get_course_num_learners_completed_for_time_period,
     get_monthly_history_metric,
     LearnerCourseGrades,
-    LearnerCourseProgress,
     )
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
@@ -533,12 +532,6 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
         else:
             course_completed = False
 
-        # Initially, we calculate dynamically, then after we know it is working,
-        # we store in cache or metrics model
-        # lcp = LearnerCourseProgress(
-        #     user_id=course_enrollment.user.id,
-        #     course_id=course_enrollment.course_id,
-        #     )
         lcg = LearnerCourseGrades(
             user_id=course_enrollment.user.id,
             course_id=course_enrollment.course_id,
@@ -546,7 +539,6 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
 
         course_progress_details = lcg.progress()
         course_progress = lcg.progress_percent(course_progress_details)
-        #course_progress_history = lcp.get_past_n_months(3)
 
         # Empty list initially, then will fill after we implement capturing
         # learner specific progress
@@ -560,7 +552,7 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
             )
         return data
 
-#class LearnerDetailsSerializer(UserDemographicSerializer, UserIndexSerializer):
+
 class LearnerDetailsSerializer(serializers.ModelSerializer):
 
     '''
