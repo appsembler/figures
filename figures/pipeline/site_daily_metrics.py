@@ -1,13 +1,16 @@
-'''
+'''This module populates the figures.models.SiteDailyMetrics model
+
+
+Most of the data are from CourseDailyMetrics. Some data are not captured in 
+course metrics. These data are extracted directly from edx-platform models
 
 '''
 
 import datetime
-from django.utils.timezone import utc
 
+from django.utils.timezone import utc
 from django.contrib.auth import get_user_model
-#from django.db.models import Avg, Count, F, Max, Sum
-from django.db.models import Sum
+from django.db.models import Sum, Value
 
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
@@ -19,82 +22,65 @@ from figures.pipeline.course_daily_metrics import (
     get_num_enrolled_in_exclude_admins,
     )
 
+
 def get_active_user_count_for_date(date_for, course_daily_metrics=None):
     '''
 
     Do we have course daily metrics for the date_for?
     If so, we can use the data there,
-    else, we need to calculate it
+    else, we need to calculate it or raise that we don't have data we need
     '''
     aggregates = CourseDailyMetrics.objects.filter(date_for=date_for).aggregate(
         Sum('active_learners_today'))
     if aggregates and 'active_learners_today__sum' in aggregates:
-
         todays_active_user_count = aggregates['active_learners_today__sum'] or 0
-
-        #import pdb; pdb.set_trace()
     else:
         todays_active_user_count = 0
     return todays_active_user_count
 
-def get_previous_cumulative_active_user_count(date_for, site_daily_metrics=None):
+
+def get_previous_cumulative_active_user_count(date_for):
+        ''' Returns the cumulative site-wide active user count for the previous day
+
+        This is a simple helper function that returns the cumulative active user
+        count for the day before the given date. Returns 0 if there is no
+        record for the previous day
         '''
-        Collect from previous site daily metrics + today's course daily metrics
-
-        This metric needs work. If the same user is active for 3 consecutive days
-        is that a count of 1 or 3?
-
-        So we're just going to be quick-n-dirty just to get something and sort
-        it out later
-
-        TODO: When adding 'site' to the SiteDailyMetrics model, change this to
-        filter on the date_for instead of using a get
-        '''
-
-        if not site_daily_metrics:
-            site_daily_metrics = SiteDailyMetrics.objects.all()
-        aggregates = site_daily_metrics.filter(date_for=prev_day(date_for)).aggregate(
-            Sum('cumulative_active_user_count'))
-
-        return aggregates.get('cumulative_active_user_count',0)
+        try:
+            return SiteDailyMetrics.objects.get(
+                date_for=prev_day(date_for)).cumulative_active_user_count or 0
+        except SiteDailyMetrics.DoesNotExist:
+            return 0
 
 
+def get_total_enrollment_count(date_for, course_ids=None):
+    '''
 
-def get_total_enrollment_count(date_for, course_overviews=None):
-        '''
-        Not including staff, admin, coaches, so using CourseEnrollmentManager's
-        ``num_enrolled_in_exclude_admins`` method
+    '''
+    aggregates = CourseDailyMetrics.objects.filter(date_for=date_for).aggregate(
+        Sum('enrollment_count'))
+    if aggregates and 'enrollment_count__sum' in aggregates:
+        enrollment_count = aggregates['enrollment_count__sum'] or 0
+    else:
+        enrollment_count = 0
+    return enrollment_count
 
-        We could be a bit more elegant about this, doing a list comprehension 
-        '''
-        #qs = self.course_enrollments.filter(created__lt=next_day(date_for)).count()
-        if not course_overviews:
-            course_overviews = CourseOverview.objects.all()
-        check_count = 0
-        for co in course_overviews:
-            check_count += get_num_enrolled_in_exclude_admins(
-                course_id=co.id,
-                date_for=date_for,
-                )
-
-        count = sum(get_num_enrolled_in_exclude_admins(
-            as_course_key(id),
-            date_for=date_for,
-            ) for id in CourseOverview.objects.filter().values_list('id', flat=True))
-
-        assert count == check_count, (
-            'get_total_enrollment_count: mismatched numbers. count={}, check_count={}'.format(count, check_count)
-            )
-        return count
 
 class SiteDailyMetricsExtractor(object):
     '''
-
+    Currently a bag of "function". We can change this to a function if we
+    decide we don't need state
     '''
     def __init__(self):
         pass
 
     def extract(self, date_for=None, **kwargs):
+        '''
+        We get the count from the User model since there can be registered users
+        who have not enrolled.
+
+        TODO: Exclude non-students from the user count
+        '''
         if not date_for:
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
@@ -109,9 +95,6 @@ class SiteDailyMetricsExtractor(object):
 
         todays_active_user_count = get_active_user_count_for_date(date_for)
         data['todays_active_user_count'] = todays_active_user_count
-
-        #import pdb; pdb.set_trace()
-
         data['cumulative_active_user_count'] = get_previous_cumulative_active_user_count(
             date_for) + todays_active_user_count
         data['total_user_count'] = user_count
@@ -122,8 +105,8 @@ class SiteDailyMetricsExtractor(object):
 
 class SiteDailyMetricsLoader(object):
 
-    def __init__(self):
-        self.extractor = SiteDailyMetricsExtractor()
+    def __init__(self, extractor=None):
+        self.extractor = extractor or SiteDailyMetricsExtractor()
 
     def load(self, date_for=None, force_update=False, **kwargs):
         '''
