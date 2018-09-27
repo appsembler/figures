@@ -94,7 +94,9 @@ def create_student_module_test_data(start_date, end_date):
 def create_site_daily_metrics_data(start_date, end_date):
     '''
     NOTE: We can generalize this and the `create_course_daily_metrics_data`
-    function
+    function with considering that the course mertrics creation method can
+    assign a course id. When we become site-aware, then the site metrics will
+    also need to be able to assign a site identifier
     '''
     def incr_func(key):
         return dict(
@@ -123,16 +125,15 @@ def create_site_daily_metrics_data(start_date, end_date):
             { key : val + incr_func(key) for key, val in data.iteritems()})
     return metrics
 
-def create_course_daily_metrics_data(start_date, end_date):
-    def incr_func(key):
-        return dict(
-            enrollment_count=3,
-            active_learners_today=2,
-            average_progress=0,
-            average_days_to_complete=0,
-            num_learners_completed=1
-        ).get(key,0)
+def create_course_daily_metrics_data(start_date, end_date, course_id=None):
+    '''
+    Creates a daily sequence of CourseDailyMetrics objects
 
+    If course_id is provided as a parameter, then all CourseDailyMetrics objects
+    will have that course_id. This is useful for testing time series for a
+    specific course. Otherwise FactoryBoy assigns the course id in the 
+    ``tests.factories`` module
+    '''
     # Initial values
     data = dict(
         enrollment_count=2,
@@ -141,11 +142,24 @@ def create_course_daily_metrics_data(start_date, end_date):
         average_days_to_complete=10,
         num_learners_completed=3
     )
+    # keys and the values to increment by
+    incr_data = dict(
+        enrollment_count=3,
+        active_learners_today=2,
+        average_progress=0,
+        average_days_to_complete=0,
+        num_learners_completed=1
+    )
+
+    if course_id:
+        data['course_id'] = course_id
     metrics = []
     for dt in rrule(DAILY, dtstart=start_date, until=end_date):
-        metrics.append(CourseDailyMetricsFactory(date_for=dt, **data))
+        metrics.append(CourseDailyMetricsFactory(
+            date_for=dt, **data))
+        # This only updates the keys that are present in the incr_data dict
         data.update(
-            { key : val + incr_func(key) for key, val in data.iteritems()})
+            { key : data[key] + incr_data[key] for key in incr_data.keys()})
     return metrics
 
 def create_users_joined_over_time(start_date, end_date):
@@ -200,7 +214,7 @@ class TestGetMonthlyActiveUsers(object):
         pass
 
 @pytest.mark.django_db
-class TestTimePeriodGetters(object):
+class TestSiteMetricsTimePeriodGetters(object):
     '''The purpose of this class is to test the individual time period getter
     functions
 
@@ -300,3 +314,73 @@ class TestTimePeriodGetters(object):
             start_date=self.data_start_date,
             end_date=self.data_end_date)
         assert count == cdm[-1].num_learners_completed
+
+@pytest.mark.django_db
+class TestCourseMetricsTimePeriodGetters(object):
+    '''
+    Test the metrics functions that retrieve metrics for a specific course over
+    a time series
+
+    Refactoring: Given the similarity of the tests in this class, we may be able
+    to parametrize based on the statistic (Max, Avg, Sum):
+        * method under test
+        * model attribute for which we are comparing
+        * statistic type
+
+    If we do that, then we can also create a generalized/abstract test class and
+    inherit from it for our concrete tests. This will be especially useful when
+    we eventually refactor Figures to generalize metrics models to allow storage
+    of data provided externally (like plug-ins or remote APIs).
+
+    An assumption for validating against expected values is that the test data
+    increments values over time so that the last record in
+    self.course_daily_metrics contains the maximum value. This of course won't
+    work for averaged metrics
+    '''
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.data_start_date = DEFAULT_START_DATE
+        self.data_end_date = DEFAULT_END_DATE
+        self.course_overview = CourseOverviewFactory()
+        self.course_daily_metrics = create_course_daily_metrics_data(
+            self.data_start_date, self.data_end_date,
+            course_id = self.course_overview.id)
+
+    def get_average(self, attribute, val_type):
+        data = [getattr(rec, attribute) for rec in self.course_daily_metrics]
+        return sum(data)/val_type(len(data))
+
+
+    def test_get_course_enrolled_users_for_time_period(self):
+        '''
+        Validates results against the max value for the metrics model attribute
+        '''
+        expected = self.course_daily_metrics[-1].enrollment_count
+        actual = metrics.get_course_enrolled_users_for_time_period(
+            start_date=self.data_start_date,
+            end_date=self.data_end_date,
+            course_id=self.course_overview.id)
+        assert actual == expected
+
+    def test_get_course_average_progress_for_time_period(self):
+        actual = metrics.get_course_average_progress_for_time_period(
+            start_date=self.data_start_date,
+            end_date=self.data_end_date,
+            course_id=self.course_overview.id)
+        assert actual == self.get_average('average_progress', float)
+
+    def test_get_course_average_days_to_complete_for_time_period(self):
+        actual = metrics.get_course_average_days_to_complete_for_time_period(
+            start_date=self.data_start_date,
+            end_date=self.data_end_date,
+            course_id=self.course_overview.id)
+        assert actual == self.get_average('average_days_to_complete', int)
+
+    def test_get_course_num_learners_completed_for_time_period(self):
+        expected = sum([rec.num_learners_completed 
+            for rec in self.course_daily_metrics])
+        actual = metrics.get_course_num_learners_completed_for_time_period(
+            start_date=self.data_start_date,
+            end_date=self.data_end_date,
+            course_id=self.course_overview.id)
+        assert actual == expected
