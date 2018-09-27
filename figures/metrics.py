@@ -219,11 +219,15 @@ class LearnerCourseGrades(object):
 ## start_date, end_date, site
 
 def get_active_users_for_time_period(start_date, end_date, site=None, course_ids=None):
+    '''
+    Returns the number of users active in the time period.
 
+    This is determined by finding the unique user ids for StudentModule records
+    modified in a time period
+    '''
     filter_args = dict(
         created__gt=prev_day(start_date),
-        modified__lt=next_day(end_date)
-        )
+        modified__lt=next_day(end_date))
     if course_ids:
         filter_args['course_ids__in']=course_ids
 
@@ -232,9 +236,14 @@ def get_active_users_for_time_period(start_date, end_date, site=None, course_ids
 
 def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwargs):
     '''
-    TODO: Move this and the other multi-row SiteDailyMetrics query functions to
-    SiteDailyMetricsManager
+    Returns the maximum number of users who joined before or on the end date
 
+    Even though we don't need the start_date, we follow the method signature
+    for the other metrics functions so we can use the same handler method,
+    ``get_monthly_history_metric``
+
+    TODO: Consider first trying to get the data from the SiteDailyMetrics
+    model. If there are no records, then get the data from the User model
     '''
     def calc_from_user_model():
         filter_args = dict(
@@ -245,15 +254,17 @@ def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwar
     def calc_from_site_daily_metrics():
         filter_args = dict(
             date_for__gt=prev_day(start_date),
-            date_for__lt=next_day(end_date),
-        )
+            date_for__lt=next_day(end_date))
         qs = SiteDailyMetrics.objects.filter(**filter_args)
         if qs:
             return qs.aggregate(maxval=Max('total_user_count'))['maxval']
         else:
             return 0
 
-    return calc_from_site_daily_metrics()
+    if kwargs.get('calc_raw'):
+        return calc_from_user_model()
+    else:
+        return calc_from_site_daily_metrics()
 
 
 def get_total_site_users_joined_for_time_period(start_date, end_date, site=None, course_ids=None):
@@ -269,11 +280,19 @@ def get_total_site_users_joined_for_time_period(start_date, end_date, site=None,
             )
         return get_user_model().objects.filter(**filter_args).values('id').distinct().count()
 
+    # We don't yet have this info directly in SiteDailyMetrics
+    # We can calculate this for days after the initial day
+    # So we're going to defer implementing it for now
+
     return calc_from_user_model()
 
 
-def get_total_enrolled_users_for_time_period(start_date, end_date, site=None, course_ids=None):
-    '''
+
+def get_total_enrollments_for_time_period(start_date, end_date, site=None, course_ids=None):
+    '''Returns the maximum number of enrollments
+
+    This returns the count of unique enrollments, not unique learners
+
     
     '''
     filter_args = dict(
@@ -288,7 +307,8 @@ def get_total_enrolled_users_for_time_period(start_date, end_date, site=None, co
         return 0
 
 
-def get_total_site_courses_for_time_period(start_date, end_date, site=None, course_ids=None):
+def get_total_site_courses_for_time_period(start_date, end_date, site=None,
+    course_ids=None, **kwargs):
     '''
     Potential fix:
     get unique course ids from CourseEnrollment
@@ -312,7 +332,10 @@ def get_total_site_courses_for_time_period(start_date, end_date, site=None, cour
         return CourseEnrollment.objects.filter(
             **filter_args).values('course_id').distinct().count()
 
-    return calc_from_course_enrollments()
+    if kwargs.get('calc_raw'):
+        return calc_from_course_enrollments()
+    else:
+        return calc_from_site_daily_metrics()
 
 
 def get_total_course_completions_for_time_period(start_date, end_date, site=None, course_ids=None):
@@ -539,7 +562,7 @@ def get_monthly_site_metrics(date_for=None, **kwargs):
         months_back=months_back,
         )
     total_course_enrollments = get_monthly_history_metric(
-        func=get_total_enrolled_users_for_time_period,
+        func=get_total_enrollments_for_time_period,
         date_for=date_for,
         months_back=months_back,
         )

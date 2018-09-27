@@ -54,8 +54,8 @@ def get_previous_cumulative_active_user_count(date_for):
 
 
 def get_total_enrollment_count(date_for, course_ids=None):
-    '''
-
+    '''Returns the total enrollments across all courses for the site
+    It does not return unique learners
     '''
     aggregates = CourseDailyMetrics.objects.filter(date_for=date_for).aggregate(
         Sum('enrollment_count'))

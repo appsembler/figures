@@ -45,6 +45,7 @@ SDM_PREV_DAY = [
     dict(
         cumulative_active_user_count=50,
         todays_active_user_count=10,
+        total_user_count=200,
         course_count=len(CDM_INPUT_TEST_DATA),
         total_enrollment_count=100,
     )
@@ -54,6 +55,7 @@ SDM_PREV_DAY = [
 SDM_EXPECTED_RESULTS = dict(
     cumulative_active_user_count=65,
     todays_active_user_count=15,
+    total_user_count=200,
     course_count=len(CDM_INPUT_TEST_DATA),
     total_enrollment_count=150,
     )
@@ -115,8 +117,16 @@ class TestSiteDailyMetricsExtractor(object):
             **SDM_PREV_DAY[1])
 
     def test_extract(self):
+        # only 3 users because we don't want to create a large number of users
+        expected_results = dict(
+            cumulative_active_user_count=65,
+            todays_active_user_count=15,
+            total_user_count=3,  
+            course_count=len(CDM_INPUT_TEST_DATA),
+            total_enrollment_count=150,
+        )
         actual = pipeline_sdm.SiteDailyMetricsExtractor().extract()
-        for key, value in SDM_EXPECTED_RESULTS.iteritems():
+        for key, value in expected_results.iteritems():
             assert actual[key] == value, 'failed on key: "{}"'.format(key)
 
 
