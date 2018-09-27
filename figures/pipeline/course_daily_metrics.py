@@ -312,20 +312,3 @@ class CourseDailyMetricsJob(object):
             results.append(dict(obj=cdm, created=created))
 
         return results
-
-
-def test_extract(course_id=None):
-    if not course_id:
-        course_id = CourseOverview.objects.first().id
-
-    print('course_id={}'.format(course_id))
-    extractor = CourseDailyMetricsExtractor()
-    return extractor.extract(course_id)
-
-
-def test_load(course_id=None):
-    if not course_id:
-        course_id = CourseOverview.objects.first().id
-
-    print('course_id={}'.format(course_id))
-    return CourseDailyMetricsLoader(course_id).load()
