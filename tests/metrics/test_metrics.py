@@ -214,7 +214,7 @@ class TestGetMonthlyActiveUsers(object):
         pass
 
 @pytest.mark.django_db
-class TestSiteMetricsTimePeriodGetters(object):
+class TestSiteMetricsGetters(object):
     '''The purpose of this class is to test the individual time period getter
     functions
 
@@ -315,8 +315,31 @@ class TestSiteMetricsTimePeriodGetters(object):
             end_date=self.data_end_date)
         assert count == cdm[-1].num_learners_completed
 
+    def test_get_monthly_site_metrics(self):
+        '''
+        Since we are testing results for individual getters in other test
+        methods in this class, our prime goal is to ensure proper structure
+        '''
+        expected_top_lvl_keys = [
+            'total_site_users',
+            'total_course_completions',
+            'total_course_enrollments',
+            'total_site_coures',
+            'monthly_active_users'
+        ]
+        expected_2nd_lvl_keys = ['current_month', 'history']
+        expected_history_elem_keys = ['period', 'value']
+        actual = metrics.get_monthly_site_metrics()
+
+        assert set(actual.keys()) == set(expected_top_lvl_keys)
+        for key, val in actual.iteritems():
+            assert set(val.keys()) == set(expected_2nd_lvl_keys)
+            assert len(val['history']) > 0
+            assert set(val['history'][0].keys()) == set(expected_history_elem_keys)
+
+
 @pytest.mark.django_db
-class TestCourseMetricsTimePeriodGetters(object):
+class TestCourseMetricsGetters(object):
     '''
     Test the metrics functions that retrieve metrics for a specific course over
     a time series
