@@ -579,15 +579,3 @@ def get_monthly_site_metrics(date_for=None, **kwargs):
         total_course_enrollments=total_course_enrollments,
         total_course_completions=total_course_completions,
     )
-
-
-# Convenience for the REPL
-
-def test(date_for=None):
-    if not date_for:
-        date_for = datetime.datetime.utcnow().date()
-    print('testing with date: {}'.format(date_for))
-    vals = get_monthly_site_metrics(date_for)
-    from pprint import pprint
-    pprint(vals)
-    return vals
