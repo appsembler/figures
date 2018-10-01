@@ -108,9 +108,10 @@ class CourseDailyMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     '''
     date = django_filters.DateFromToRangeFilter(name='date_for')
+
     class Meta:
         model = CourseDailyMetrics
-        fields = ['date_for', 'date', 'course_id',]
+        fields = ['date_for', 'date', 'course_id', ]
 
 
 class SiteDailyMetricsFilter(django_filters.FilterSet):
@@ -126,6 +127,7 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     '''
     date = django_filters.DateFromToRangeFilter(name='date_for')
+
     class Meta:
         model = SiteDailyMetrics
         fields = ['date_for', 'date']

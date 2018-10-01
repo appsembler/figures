@@ -40,6 +40,7 @@ class CourseDailyMetrics(TimeStampedModel):
         return "id:{}, date_for:{}, course_id:{}".format(
             self.id, self.date_for, self.course_id)
 
+
 @python_2_unicode_compatible
 class SiteDailyMetrics(TimeStampedModel):
     '''
@@ -56,7 +57,7 @@ class SiteDailyMetrics(TimeStampedModel):
     total_enrollment_count = models.IntegerField()
 
     # Foreign key relationships
-    # site = 
+    # site =
 
     class Meta:
         ordering = ['-date_for']

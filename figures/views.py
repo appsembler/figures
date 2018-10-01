@@ -6,7 +6,6 @@ from django.shortcuts import render
 
 from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
 
@@ -15,7 +14,7 @@ from rest_framework.response import Response
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-from student.models import CourseEnrollment, UserProfile
+from student.models import CourseEnrollment
 
 from .filters import (
     CourseDailyMetricsFilter,
@@ -34,9 +33,9 @@ from .serializers import (
 )
 
 
-##
-## UI Template rendering views
-##
+#
+# UI Template rendering views
+#
 
 def figures_home(request):
     '''Renders the JavaScript SPA dashboard
@@ -54,14 +53,14 @@ def figures_home(request):
     return render(request, 'figures/index.html', context)
 
 
-##
-## Views for data in edX platform
-##
+#
+# Views for data in edX platform
+#
 
 # We're going straight to the model so that we ensure we
 # are getting the behavior we want.
 
-#@view_auth_classes(is_authenticated=True)
+# @view_auth_classes(is_authenticated=True)
 class CoursesIndexView(ListAPIView):
     '''Provides a list of courses with abbreviated details
 
@@ -114,6 +113,7 @@ class UserIndexView(ListAPIView):
 
         return queryset
 
+
 # TODO: Change to ReadOnlyModelViewSet
 class CourseEnrollmentViewSet(viewsets.ModelViewSet):
     model = CourseEnrollment
@@ -132,15 +132,16 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
         # request.query_params
         # <QueryDict: {u'course_id': [u'"course-v1:Appsembler EdX101 2015_Spring"']}>
 
-        #print('insepect me'); import pdb; pdb.set_trace()
+        # print('insepect me'); import pdb; pdb.set_trace()
 
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-##
-## Views for Figures models
-##
+
+#
+# Views for Figures models
+#
 
 class CourseDailyMetricsViewSet(viewsets.ModelViewSet):
 
@@ -156,7 +157,6 @@ class CourseDailyMetricsViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-#class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
 
     model = SiteDailyMetrics
@@ -169,5 +169,3 @@ class SiteDailyMetricsViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super(SiteDailyMetricsViewSet, self).get_queryset()
         return queryset
-
-        #return SiteDailyMetricsQuery.get_queryset(self.request.query_params)
