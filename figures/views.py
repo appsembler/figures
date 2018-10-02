@@ -12,8 +12,6 @@ from rest_framework.authentication import (
     BasicAuthentication,
     SessionAuthentication,
 )
-from rest_framework.generics import ListAPIView
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
@@ -26,13 +24,12 @@ from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-from student.models import CourseEnrollment, UserProfile
+from student.models import CourseEnrollment
 
 from .filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
-    LearnerFilterSet,
     SiteDailyMetricsFilter,
     UserFilterSet,
 )
@@ -43,7 +40,7 @@ from .serializers import (
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
-    GeneralSiteMetricsSerializer,
+
     LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
@@ -53,16 +50,19 @@ from figures import metrics
 from figures.pagination import FiguresLimitOffsetPagination
 from figures.permissions import IsStaffUser
 
+
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
-##
-## UI Template rendering views
-##
+
+
+#
+# UI Template rendering views
+#
 
 @ensure_csrf_cookie
 @login_required
 @user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser),
-    login_url=UNAUTHORIZED_USER_REDIRECT_URL,
-    redirect_field_name=None)
+                  login_url=UNAUTHORIZED_USER_REDIRECT_URL,
+                  redirect_field_name=None)
 def figures_home(request):
     '''Renders the JavaScript SPA dashboard
 
@@ -79,9 +79,9 @@ def figures_home(request):
     return render(request, 'figures/index.html', context)
 
 
-##
-## Mixins for API views
-##
+#
+# Mixins for API views
+#
 
 class CommonAuthMixin(object):
     '''Provides a common authorization base for the Figures API views
@@ -91,14 +91,12 @@ class CommonAuthMixin(object):
     permission_classes = (IsAuthenticated, IsStaffUser, )
 
 
-##
-## Views for data in edX platform
-##
+#
+# Views for data in edX platform
+#
 
-# We're going straight to the model so that we ensure we
-# are getting the behavior we want.
 
-#@view_auth_classes(is_authenticated=True)
+# @view_auth_classes(is_authenticated=True)
 class CoursesIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     '''Provides a list of courses with abbreviated details
 
@@ -136,7 +134,6 @@ class UserIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     Uses figures.filters.UserFilter to select subsets of User objects
     '''
-
     model = get_user_model()
     queryset = get_user_model().objects.all()
     pagination_class = FiguresLimitOffsetPagination
@@ -162,9 +159,9 @@ class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-##
-## Views for Figures models
-##
+#
+# Views for Figures models
+#
 
 class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
@@ -180,7 +177,6 @@ class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
         return queryset
 
 
-#class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
     model = SiteDailyMetrics
@@ -195,9 +191,10 @@ class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
         return queryset
 
 
-##
-## Views for the front end
-##
+#
+# Views for the front end
+#
+
 
 class GeneralSiteMetricsView(CommonAuthMixin, APIView):
     '''
@@ -206,10 +203,6 @@ class GeneralSiteMetricsView(CommonAuthMixin, APIView):
     and list the most recent data for all sites (or filtered sites)
     '''
 
-    # queryset = SiteDailyMetrics.objects.all()
-    # pagination_class = None
-    # serializer_class = GeneralSiteMetricsSerializer
-    #TODO add filters
     pagination_class = FiguresLimitOffsetPagination
 
     @property
@@ -236,28 +229,6 @@ class GeneralSiteMetricsView(CommonAuthMixin, APIView):
             }
         return Response(data)
 
-    # def list(self, request):
-
-    #     #queryset = self.filter_queryset(self.get_queryset())
-    #     queryset = 
-    #     serializer = self.get_serializer(queryset, many=True)
-
-    #     return Response(serializer.data)
-
-    # def retrieve(self, request, thread_id=None):
-    #     """
-    #     Implements the GET method for thread ID
-    #     """
-    #     requested_fields = request.GET.get('requested_fields')
-    #     return Response(get_thread(request, thread_id, requested_fields))
-
-    # def retrieve(self, request, site_id=None):
-    #     """
-    #     Implements the GET method for thread ID
-    #     """
-    #     requested_fields = request.GET.get('requested_fields')
-    #     return Response(get_thread(request, thread_id, requested_fields))
-
 
 class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     '''
@@ -269,7 +240,7 @@ class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = GeneralCourseDataSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        course_id_str = kwargs.get('pk','')
+        course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
         course_overview = get_object_or_404(CourseOverview, pk=course_key)
         return Response(GeneralCourseDataSerializer(course_overview).data)
@@ -289,7 +260,7 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     def retrieve(self, request, *args, **kwargs):
 
         # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
-        course_id_str = kwargs.get('pk','')
+        course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
         course_overview = get_object_or_404(CourseOverview, pk=course_key)
         return Response(CourseDetailsSerializer(course_overview).data)
@@ -306,11 +277,10 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = get_user_model()
-    queryset =  get_user_model().objects.all()
+    queryset = get_user_model().objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralUserDataSerializer
     filter_backends = (DjangoFilterBackend, )
-    #filter_class = LearnerFilterSet
     filter_class = UserFilterSet
 
     def get_queryset(self):
@@ -320,7 +290,7 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
 class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
-    queryset =  get_user_model().objects.all()
+    queryset = get_user_model().objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = LearnerDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
@@ -333,7 +303,8 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         http://localhost:8000/figures/api/learners/detail/?ids=1,2,3&foo=bar&grue=11&grue=2&grue=3&zub=[5,10,20]
         self.request.query_params
 
-        <QueryDict: {u'zub': [u'[5,10,20]'], u'grue': [u'11', u'2', u'3'], u'foo': [u'bar'], u'ids': [u'1,2,3']}>
+        <QueryDict: {u'zub': [u'[5,10,20]'], u'grue': [u'11', u'2', u'3'],
+        u'foo': [u'bar'], u'ids': [u'1,2,3']}>
         '''
         queryset = super(LearnerDetailsViewSet, self).get_queryset()
         return queryset

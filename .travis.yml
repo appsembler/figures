@@ -8,12 +8,13 @@ node_js:
 # command to install dependencies
 install:
   - pip install -r devsite/requirements.txt
-  - pip install pytest-cov
+  - pip install pytest-cov flake8
   - cd frontend && npm install && cd ..
 
 # command to run tests
 script:
   - cd frontend && npm run-script build && cd ..
+  - flake8 figures
   - py.test --cov=./
   - bash <(curl -s https://codecov.io/bash)
   

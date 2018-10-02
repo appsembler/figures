@@ -8,10 +8,6 @@ from django.utils.encoding import python_2_unicode_compatible
 
 from model_utils.models import TimeStampedModel
 
-# class CourseDailyMetricsManager(models.Manager):
-
-#     def average_progress(self, ):
-#         pass
 
 @python_2_unicode_compatible
 class CourseDailyMetrics(TimeStampedModel):
@@ -44,6 +40,7 @@ class CourseDailyMetrics(TimeStampedModel):
         return "id:{}, date_for:{}, course_id:{}".format(
             self.id, self.date_for, self.course_id)
 
+
 @python_2_unicode_compatible
 class SiteDailyMetrics(TimeStampedModel):
     '''
@@ -60,7 +57,7 @@ class SiteDailyMetrics(TimeStampedModel):
     total_enrollment_count = models.IntegerField()
 
     # Foreign key relationships
-    # site = 
+    # site =
 
     class Meta:
         ordering = ['-date_for']

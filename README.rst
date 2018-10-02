@@ -12,19 +12,12 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`_.
 Notice and Development Status
 -----------------------------
 
-**Figures is in development. We are targeting our first production ready version for July, 2018**
+**Figures is in development. We are targeting our first production ready version for October, 2018**
 
 This Document
 =============
 
 * This document is a work in progress (WIP) as we work toward the initial production ready Figures release
-
-Figures codebase
-================
-
-* June is a big month for Figures as we push toward a July release. 
-* The data pipeline is not yet in the codebase. We are actively developing the data pipeline and will add instructions with the pipeline pull request
-* The REST API is still in development. Therefore the current version shows canned data for much of the UI. As we progress toward our initial production release, we will be incrementally wiring up the front-end to the APIs as they are implemented
 
 --------
 Overview
