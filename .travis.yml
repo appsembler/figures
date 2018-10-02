@@ -5,9 +5,10 @@ python:
 # command to install dependencies
 install:
   - pip install -r devsite/requirements.txt
-  - pip install pytest-cov
+  - pip install pytest-cov flake8
 
 # command to run tests
 script:
+  - flake8 figures
   - py.test --cov=./
   - bash <(curl -s https://codecov.io/bash)

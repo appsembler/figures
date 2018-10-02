@@ -25,4 +25,3 @@ django_settings.WEBPACK_LOADER.update(FIGURES_APP={
 FIGURES = {
     'APP_DIR': APP_DIR,
 }
-

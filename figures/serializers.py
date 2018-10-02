@@ -12,9 +12,10 @@ from student.models import CourseEnrollment
 
 from .models import CourseDailyMetrics, SiteDailyMetrics
 
-###
-### Summary serializers for listing
-###
+
+#
+# Summary serializers for listing
+#
 
 class CourseIndexSerializer(serializers.Serializer):
     '''Provides a limited set of course overview information
@@ -36,13 +37,13 @@ class UserIndexSerializer(serializers.Serializer):
     '''
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
-    fullname = serializers.CharField(source='profile.name', default=None,
-        read_only=True)
+    fullname = serializers.CharField(
+        source='profile.name', default=None, read_only=True)
 
 
-###
-### Serializers for edx-platform models
-###
+#
+# Serializers for edx-platform models
+#
 
 class CourseOverviewSerializer(serializers.ModelSerializer):
 
@@ -59,19 +60,21 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
     '''
     course = CourseOverviewSerializer(read_only=True)
     user = UserIndexSerializer(read_only=True)
+
     class Meta:
         model = CourseEnrollment
         editable = False
 
 
-###
-### Figures model serializers
-###
+#
+# Figures model serializers
+#
 
 class CourseDailyMetricsSerializer(serializers.ModelSerializer):
     '''Provides summary data about a specific course
     '''
     average_progress = serializers.DecimalField(max_digits=2, decimal_places=2)
+
     class Meta:
         model = CourseDailyMetrics
 
