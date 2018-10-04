@@ -13,14 +13,16 @@ from dateutil.parser import parse as dateutil_parse
 from django.core.management.base import BaseCommand, CommandError
 
 
-from figures.tasks import populate_daily_metrics
+from figures.tasks import (
+    populate_daily_metrics,
+    experimental_populate_daily_metrics,
+)
 
 
 class Command(BaseCommand):
     '''Populate Figures metrics models
 
     '''
-
     help = dedent(__doc__).strip()
 
     def add_arguments(self, parser):
@@ -39,6 +41,12 @@ class Command(BaseCommand):
                             action='store_true',
                             default=False,
                             help='Overwrite metrics records if they exist for the given date')
+        parser.add_argument('--experimental',
+                            action='store_true',
+                            default=False,
+                            help=('Run with Celery workflows (Warning: This is still under' +
+                                  ' development and likely to get stuck/hung jobs'))
+
 
     def handle(self, *args, **options):
         print('populating Figures metrics...')
@@ -47,10 +55,21 @@ class Command(BaseCommand):
             date_for=options['date'],
             force_update=options['force_update'],
             )
-        if options['no_delay']:
-            results = populate_daily_metrics(**kwargs)
+
+        experimental = options['experimental']
+        options.pop('experimental')
+
+        if experimental:
+            if options['no_delay']:
+                results = experimental_populate_daily_metrics(**kwargs)
+            else:
+                results = experimental_populate_daily_metrics.delay(**kwargs)
         else:
-            results = populate_daily_metrics.delay(**kwargs)
+            if options['no_delay']:
+                results = populate_daily_metrics(**kwargs)
+            else:
+                results = populate_daily_metrics.delay(**kwargs)
+
 
         # TODO: improve this message to say 'today' when options['date'] is None
         print('Management command populate_figures_metrics complete. date_for: {}'.format(

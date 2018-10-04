@@ -285,25 +285,3 @@ class CourseDailyMetricsLoader(object):
             )
         )
         return (cdm, created,)
-
-
-class CourseDailyMetricsJob(object):
-
-    @staticmethod
-    def run(*args, **kwargs):
-        '''
-        TODO: add try block and log failures
-        '''
-        filter_args = kwargs.get('filter_args', {})
-        force_update = kwargs.get('force_update', False)
-        date_for = kwargs.get('date_for',)
-        results = []
-        courses = kwargs.get('courses', CourseOverview.objects.filter(**filter_args))
-        for course in courses:
-            cdm, created = CourseDailyMetricsLoader(course.id).load(
-                date_for=date_for,
-                force_update=force_update,
-                )
-            results.append(dict(obj=cdm, created=created))
-
-        return results
