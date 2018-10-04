@@ -1,6 +1,11 @@
 '''
 This module provides default values for running Figures.
 
+We need to add Figures to ``WEBPACK_LOADER`` and ``CELERYBEAT_SCHEDULE``
+
+So we're injecting them here to minimze customizations needed in edx-platform's
+settings
+
 '''
 import datetime
 import os

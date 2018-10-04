@@ -17,7 +17,7 @@ from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseEnrollment
-
+from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
 
 from figures.helpers import as_course_key, as_date, next_day, prev_day
 from figures.metrics import LearnerCourseGrades
@@ -49,7 +49,6 @@ def get_num_enrolled_in_exclude_admins(course_id, date_for):
     and modified to filter on date LT
 
     '''
-    from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
     course_locator = course_id
 
     if getattr(course_id, 'ccx', None):
@@ -81,7 +80,6 @@ def get_average_progress(course_id, date_for, course_enrollments):
 
     for ce in course_enrollments:
         lcg = LearnerCourseGrades(user_id=ce.user.id,course_id=course_id)
-        print('learner: {}, pct={}'.format(lcg.learner.username, lcg.course_grade.percent))
         progress.append(lcg.progress_percent())
 
     if len(progress):
@@ -129,9 +127,6 @@ def get_days_to_complete(course_id, date_for):
                      course_id=course_id,
                      user_id=cert.user.id,
                     ))
-
-        print('start date = {}, cert_date = {}'.format(
-            ce[0].created, cert.created_date))
         days.append((cert.created_date - ce[0].created).days)
     return dict(days=days, errors=errors)
 
@@ -294,8 +289,8 @@ class CourseDailyMetricsLoader(object):
 
 class CourseDailyMetricsJob(object):
 
-    @classmethod
-    def run(self, *args, **kwargs):
+    @staticmethod
+    def run(*args, **kwargs):
         '''
         TODO: add try block and log failures
         '''

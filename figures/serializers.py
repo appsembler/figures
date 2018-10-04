@@ -472,7 +472,6 @@ class LearnersCoursesSerializer(serializers.Serializer):
     courses = serializers.SerializerMethodField()
 
     def get_courses(self, user):
-        print('get_courses for user "{}"'.format(user))
         course_ids = CourseEnrollment.objects.filter(
             user=user).values_list('course_id', flat=True).distinct()
 

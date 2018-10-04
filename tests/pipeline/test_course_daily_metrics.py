@@ -5,16 +5,8 @@
 import datetime
 import pytest
 
-from django.utils.timezone import utc
-
 from courseware.models import StudentModule
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseEnrollment, CourseAccessRole
-
-# from figures.pipeline.course_daily_metrics import (
-#     CourseDailyMetricsExtractor,
-#     CourseDailyMetricsLoader,
-# )
 
 from figures.helpers import next_day
 from figures.pipeline import course_daily_metrics as pipeline_cdm
@@ -25,7 +17,6 @@ from tests.factories import (
     CourseOverviewFactory,
     GeneratedCertificateFactory,
     StudentModuleFactory,
-    UserFactory,
 )
 
 
@@ -37,13 +28,12 @@ class TestGetCourseEnrollments(object):
         '''
 
         '''
-        #self.today = datetime.datetime.utcnow().replace(tzinfo=utc).date()
-        self.today = datetime.datetime(2018,6,1).replace(tzinfo=utc).date()
-        self.course_overviews = [CourseOverviewFactory() for i in range(1,3)]
+        self.today = datetime.date(2018, 6, 1)
+        self.course_overviews = [CourseOverviewFactory() for i in range(1, 3)]
         self.course_enrollments = []
         for co in self.course_overviews:
             self.course_enrollments.extend(
-                [CourseEnrollmentFactory(course_id=co.id) for i in range(1,3)])
+                [CourseEnrollmentFactory(course_id=co.id) for i in range(1, 3)])
 
     def test_get_all_course_enrollments(self):
         '''
@@ -52,11 +42,9 @@ class TestGetCourseEnrollments(object):
         '''
         assert len(self.course_enrollments) == CourseEnrollment.objects.count()
 
-
     def test_get_course_enrollments_for_course(self):
         '''
         '''
-
         course_id = self.course_overviews[0].id
         expected_ce = CourseEnrollment.objects.filter(
             course_id=course_id,
@@ -87,10 +75,10 @@ class TestCourseDailyMetricsPipelineFunctions(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.today = datetime.datetime(2018,6,1).replace(tzinfo=utc).date()
+        self.today = datetime.date(2018, 6, 1)
         self.course_overview = CourseOverviewFactory()
         self.course_enrollments = [CourseEnrollmentFactory(
-            course_id=self.course_overview.id) for i in range(1,8)]
+            course_id=self.course_overview.id) for i in range(1, 8)]
         self.course_access_roles = [CourseAccessRoleFactory(
             user=self.course_enrollments[i].user,
             course_id=self.course_enrollments[i].course_id,
@@ -105,7 +93,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             modified=self.today
             ) for ce in self.course_enrollments]
 
-        self.cert_days_to_complete = [10,20,30]
+        self.cert_days_to_complete = [10, 20, 30]
         self.expected_avg_cert_days_to_complete = 20
         self.generated_certificates = [
             GeneratedCertificateFactory(
@@ -207,12 +195,14 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         assert actual == self.expected_avg_cert_days_to_complete
 
     def test_get_num_learners_completed(self):
-        
+        '''
+        '''
         actual = pipeline_cdm.get_num_learners_completed(
             course_id=self.course_overview.id,
             date_for=self.today)
 
         assert actual == len(self.generated_certificates)
+
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsExtractor(object):
@@ -224,7 +214,7 @@ class TestCourseDailyMetricsExtractor(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.course_enrollments = [CourseEnrollmentFactory() for i in range(1,5)]
+        self.course_enrollments = [CourseEnrollmentFactory() for i in range(1, 5)]
         self.student_module = StudentModuleFactory()
 
     def test_extract(self):
@@ -232,18 +222,18 @@ class TestCourseDailyMetricsExtractor(object):
         results = pipeline_cdm.CourseDailyMetricsExtractor().extract(course_id)
         assert results
 
+
 @pytest.mark.django_db
-class TestCourseDailyMetricsExtractor(object):
+class TestCourseDailyMetricsLoader(object):
     '''Provides minimal checking that CourseDailyMetricsLoader works
 
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.course_enrollments = [CourseEnrollmentFactory() for i in range(1,5)]
+        self.course_enrollments = [CourseEnrollmentFactory() for i in range(1, 5)]
         self.student_module = StudentModuleFactory()
 
     def test_load(self):
         course_id = self.course_enrollments[0].course_id
         results = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
         assert results
-

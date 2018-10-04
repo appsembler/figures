@@ -1,5 +1,8 @@
-'''
+'''Tests figures.pipeline.
 
+TODO:
+
+* Add tests for the individual field extractors
 '''
 
 import datetime
@@ -18,21 +21,26 @@ from tests.factories import (
     UserFactory,
 )
 
-# TODO: Add tests for the individual field extractors
+
+DEFAULT_START_DATE = datetime.datetime(2018, 1, 1, 0, 0, tzinfo=utc)
+DEFAULT_END_DATE = datetime.datetime(2018, 3, 1, 0, 0, tzinfo=utc)
 
 # Course Daily Metrics data
 CDM_INPUT_TEST_DATA = [
-    dict(enrollment_count=0,
+    dict(
+        enrollment_count=0,
         active_learners_today=0,
         average_progress=None,
         average_days_to_complete=None,
         num_learners_completed=0),
-    dict(enrollment_count=50,
+    dict(
+        enrollment_count=50,
         active_learners_today=5,
         average_progress=0.25,
         average_days_to_complete=24,
         num_learners_completed=0),
-    dict(enrollment_count=100,
+    dict(
+        enrollment_count=100,
         active_learners_today=10,
         average_progress=0.75,
         average_days_to_complete=12,
@@ -62,13 +70,51 @@ SDM_EXPECTED_RESULTS = dict(
 
 
 @pytest.mark.django_db
+class TestCourseDailyMetricsMissingCdm(object):
+    '''
+    TODO: Do we want to add a test for when there are no courses?
+    '''
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        '''
+        '''
+        self.date_for = DEFAULT_END_DATE
+        self.course_count = 4
+        self.course_overviews = [CourseOverviewFactory(
+            created=self.date_for) for i in range(self.course_count)]
+
+    def test_no_missing(self):
+        '''
+        '''
+        [CourseDailyMetricsFactory(
+            date_for=self.date_for,
+            course_id=course.id) for course in self.course_overviews]
+        course_ids = pipeline_sdm.missing_course_daily_metrics(
+            date_for=self.date_for)
+        assert course_ids == set([])
+
+    def test_missing(self):
+        '''
+        '''
+        [
+            CourseDailyMetricsFactory(
+                date_for=self.date_for, course_id=self.course_overviews[0].id),
+            CourseDailyMetricsFactory(
+                date_for=self.date_for, course_id=self.course_overviews[1].id),
+        ]
+        expected_missing = [unicode(co.id) for co in self.course_overviews[2:]]
+        actual = pipeline_sdm.missing_course_daily_metrics(date_for=self.date_for)
+        assert actual == set(expected_missing)
+
+
+@pytest.mark.django_db
 class TestCourseDailyMetricsPipelineFunctions(object):
     '''
     Run tests on standalone methods in pipeline.site_daily_metrics
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.date_for = datetime.datetime.utcnow().replace(tzinfo=utc).date()
+        self.date_for = datetime.date(2018, 6, 1)
         self.cdm_recs = [CourseDailyMetricsFactory(
             date_for=self.date_for,
             **cdm
@@ -86,7 +132,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     ])
     def test_get_previous_cumulative_active_user_count(self, prev_day_data, expected):
         if prev_day_data:
-            prev_day_sdm = SiteDailyMetricsFactory(
+            SiteDailyMetricsFactory(
                 date_for=prev_day(self.date_for),
                 **prev_day_data)
         actual = pipeline_sdm.get_previous_cumulative_active_user_count(
@@ -99,33 +145,34 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         assert actual == expected
 
 
-
 @pytest.mark.django_db
 class TestSiteDailyMetricsExtractor(object):
-
+    '''
+    TODO: We need to test with ``date_for`` as both for now and a time in the past
+    '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.date_for = datetime.datetime.utcnow().replace(tzinfo=utc).date()
-        self.users = [UserFactory() for i in range(0,3)]
-        self.course_overviews = [CourseOverviewFactory() for i in range(0,3)]
+        self.date_for = datetime.date(2018, 10, 1)
+        self.users = [UserFactory() for i in range(0, 3)]
+        self.course_overviews = [CourseOverviewFactory() for i in range(0, 3)]
         self.cdm_recs = [CourseDailyMetricsFactory(
-            date_for=prev_day(self.date_for),
+            date_for=self.date_for,
             **cdm
             ) for cdm in CDM_INPUT_TEST_DATA]
         self.prev_day_sdm = SiteDailyMetricsFactory(
-            date_for=prev_day(prev_day(self.date_for)),
+            date_for=prev_day(self.date_for),
             **SDM_PREV_DAY[1])
 
     def test_extract(self):
-        # only 3 users because we don't want to create a large number of users
         expected_results = dict(
             cumulative_active_user_count=65,
             todays_active_user_count=15,
-            total_user_count=3,  
+            total_user_count=3,
             course_count=len(CDM_INPUT_TEST_DATA),
             total_enrollment_count=150,
         )
-        actual = pipeline_sdm.SiteDailyMetricsExtractor().extract()
+        actual = pipeline_sdm.SiteDailyMetricsExtractor().extract(
+            date_for=self.date_for)
         for key, value in expected_results.iteritems():
             assert actual[key] == value, 'failed on key: "{}"'.format(key)
 

@@ -101,7 +101,7 @@ class TestLearnerCourseGrades(object):
         expected_cert = GeneratedCertificateFactory(
             user=self.lcg.learner,
             course_id=self.lcg.course.id,
-            created_date=datetime.datetime.utcnow())
+            created_date=datetime.datetime(2018, 6, 1))
         assert expected_cert
         check_certs = self.lcg.certificates()
         assert check_certs.count() == 1

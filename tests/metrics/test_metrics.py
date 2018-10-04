@@ -30,12 +30,8 @@ import datetime
 from dateutil.rrule import rrule, DAILY
 import pytest
 
-from django.contrib.auth import get_user_model
-from django.utils import timezone
+from django.utils.timezone import utc
 
-from courseware.models import StudentModule
-
-from figures.helpers import prev_day
 from figures import metrics
 
 from tests.factories import (
@@ -53,10 +49,8 @@ from tests.factories import (
 # StudentModule based methods and classes
 
 # Test with a date range where there is at least one month in the middle
-DEFAULT_START_DATE = datetime.datetime(2018,01,01, 0, 0,
-    tzinfo=timezone.get_current_timezone())
-DEFAULT_END_DATE = datetime.datetime(2018,03,01, 0, 0,
-    tzinfo=timezone.get_current_timezone())
+DEFAULT_START_DATE = datetime.datetime(2018, 1, 1, 0, 0, tzinfo=utc)
+DEFAULT_END_DATE = datetime.datetime(2018, 3, 1, 0, 0, tzinfo=utc)
 
 
 def create_student_module_test_data(start_date, end_date):
@@ -91,6 +85,7 @@ def create_student_module_test_data(start_date, end_date):
         student_modules=student_modules,
     )
 
+
 def create_site_daily_metrics_data(start_date, end_date):
     '''
     NOTE: We can generalize this and the `create_course_daily_metrics_data`
@@ -104,8 +99,8 @@ def create_site_daily_metrics_data(start_date, end_date):
             todays_active_user_count=2,
             total_user_count=5,
             course_count=1,
-            total_enrollment_count=3
-        ).get(key,0)
+            total_enrollment_count=3,
+        ).get(key, 0)
 
     # Initial values
     data = dict(
@@ -122,8 +117,9 @@ def create_site_daily_metrics_data(start_date, end_date):
             **data
             ))
         data.update(
-            { key : val + incr_func(key) for key, val in data.iteritems()})
+            {key: val + incr_func(key) for key, val in data.iteritems()})
     return metrics
+
 
 def create_course_daily_metrics_data(start_date, end_date, course_id=None):
     '''
@@ -131,7 +127,7 @@ def create_course_daily_metrics_data(start_date, end_date, course_id=None):
 
     If course_id is provided as a parameter, then all CourseDailyMetrics objects
     will have that course_id. This is useful for testing time series for a
-    specific course. Otherwise FactoryBoy assigns the course id in the 
+    specific course. Otherwise FactoryBoy assigns the course id in the
     ``tests.factories`` module
     '''
     # Initial values
@@ -159,8 +155,9 @@ def create_course_daily_metrics_data(start_date, end_date, course_id=None):
             date_for=dt, **data))
         # This only updates the keys that are present in the incr_data dict
         data.update(
-            { key : data[key] + incr_data[key] for key in incr_data.keys()})
+            {key: data[key] + incr_data[key] for key in incr_data.keys()})
     return metrics
+
 
 def create_users_joined_over_time(start_date, end_date):
     '''
@@ -181,7 +178,7 @@ class TestGetMonthlySiteMetrics(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.today = datetime.datetime.utcnow()
+        self.today = datetime.datetime(2018, 1, 6)
         self.site_daily_metrics = None
         self.expected_keys = (
             'monthly_active_users',
@@ -208,10 +205,10 @@ class TestGetMonthlyActiveUsers(object):
     def setup(self, db):
         self.site_daily_metrics = None
 
-
     @pytest.mark.skip(reason='Test not implemented yet')
     def test_get(self):
         pass
+
 
 @pytest.mark.django_db
 class TestSiteMetricsGetters(object):
@@ -232,13 +229,12 @@ class TestSiteMetricsGetters(object):
             start_date=self.data_start_date,
             end_date=self.data_end_date)
 
-    #@pytest.mark.skip(reason='Test fails. Need to investigate')
     def test_get_active_users_for_time_period(self):
         '''
 
         '''
         student_module_sets = []
-        for i in range(0,3):
+        for i in range(0, 3):
             student_module_sets.append(
                 create_student_module_test_data(
                     start_date=self.data_start_date,
@@ -367,12 +363,11 @@ class TestCourseMetricsGetters(object):
         self.course_overview = CourseOverviewFactory()
         self.course_daily_metrics = create_course_daily_metrics_data(
             self.data_start_date, self.data_end_date,
-            course_id = self.course_overview.id)
+            course_id=self.course_overview.id)
 
     def get_average(self, attribute, val_type):
         data = [getattr(rec, attribute) for rec in self.course_daily_metrics]
         return sum(data)/val_type(len(data))
-
 
     def test_get_course_enrolled_users_for_time_period(self):
         '''
@@ -400,8 +395,8 @@ class TestCourseMetricsGetters(object):
         assert actual == self.get_average('average_days_to_complete', int)
 
     def test_get_course_num_learners_completed_for_time_period(self):
-        expected = sum([rec.num_learners_completed 
-            for rec in self.course_daily_metrics])
+        expected = sum(
+            [rec.num_learners_completed for rec in self.course_daily_metrics])
         actual = metrics.get_course_num_learners_completed_for_time_period(
             start_date=self.data_start_date,
             end_date=self.data_end_date,

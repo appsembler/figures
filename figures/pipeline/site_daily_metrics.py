@@ -1,7 +1,7 @@
 '''This module populates the figures.models.SiteDailyMetrics model
 
 
-Most of the data are from CourseDailyMetrics. Some data are not captured in 
+Most of the data are from CourseDailyMetrics. Some data are not captured in
 course metrics. These data are extracted directly from edx-platform models
 
 '''
@@ -10,18 +10,45 @@ import datetime
 
 from django.utils.timezone import utc
 from django.contrib.auth import get_user_model
-from django.db.models import Sum, Value
+from django.db.models import Sum
 
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-from figures.helpers import as_course_key, as_date, next_day, prev_day
+from figures.helpers import as_course_key, next_day, prev_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
-from figures.pipeline.course_daily_metrics import (
-    get_num_enrolled_in_exclude_admins,
-    )
 
+
+#
+# Standalone helper methods
+#
+
+
+def missing_course_daily_metrics(date_for):
+    '''
+    Return a list of course ids for any courses missing from the set of
+    CourseDailyMetrics for the given date (and site after we implement multi-
+    tenancy)
+
+    We use this to make sure that we are not missing course data when we
+    populat the SiteDailyMetrics instance for the given date
+
+    '''
+    cdm_course_keys = [
+        as_course_key(cdm.course_id) for cdm in
+        CourseDailyMetrics.objects.filter(date_for=date_for)
+    ]
+
+    course_overviews = CourseOverview.objects.filter(
+            created__lt=next_day(date_for)).exclude(id__in=cdm_course_keys)
+
+    return set(course_overviews.values_list('id', flat=True))
+
+
+#
+# Standalone methods to extract data/aggregate data for use in SiteDailyMetrics
+#
 
 def get_active_user_count_for_date(date_for, course_daily_metrics=None):
     '''
@@ -91,7 +118,7 @@ class SiteDailyMetricsExtractor(object):
         user_count = get_user_model().objects.filter(
             date_joined__lt=next_day(date_for)).count()
         course_count = CourseOverview.objects.filter(
-            enrollment_start__lt=next_day(date_for)).count()
+            created__lt=next_day(date_for)).count()
 
         todays_active_user_count = get_active_user_count_for_date(date_for)
         data['todays_active_user_count'] = todays_active_user_count
@@ -142,14 +169,3 @@ class SiteDailyMetricsLoader(object):
             )
         )
         return site_metrics, created
-
-
-class SiteDailyMetricsJob(object):
-
-    @classmethod
-    def run(self, *args, **kwargs):
-        results = SiteDailyMetricsLoader().load(
-            date_for=kwargs.get('date_for', None),
-            force_update=kwargs.get('force_update'),
-            )
-        return results
