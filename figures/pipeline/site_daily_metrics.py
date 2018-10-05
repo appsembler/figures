@@ -41,7 +41,7 @@ def missing_course_daily_metrics(date_for):
     ]
 
     course_overviews = CourseOverview.objects.filter(
-            created__lt=next_day(date_for)).exclude(id__in=cdm_course_keys)
+        created__lt=next_day(date_for)).exclude(id__in=cdm_course_keys)
 
     return set(course_overviews.values_list('id', flat=True))
 
@@ -67,17 +67,17 @@ def get_active_user_count_for_date(date_for, course_daily_metrics=None):
 
 
 def get_previous_cumulative_active_user_count(date_for):
-        ''' Returns the cumulative site-wide active user count for the previous day
+    ''' Returns the cumulative site-wide active user count for the previous day
 
-        This is a simple helper function that returns the cumulative active user
-        count for the day before the given date. Returns 0 if there is no
-        record for the previous day
-        '''
-        try:
-            return SiteDailyMetrics.objects.get(
-                date_for=prev_day(date_for)).cumulative_active_user_count or 0
-        except SiteDailyMetrics.DoesNotExist:
-            return 0
+    This is a simple helper function that returns the cumulative active user
+    count for the day before the given date. Returns 0 if there is no
+    record for the previous day
+    '''
+    try:
+        return SiteDailyMetrics.objects.get(
+            date_for=prev_day(date_for)).cumulative_active_user_count or 0
+    except SiteDailyMetrics.DoesNotExist:
+        return 0
 
 
 def get_total_enrollment_count(date_for, course_ids=None):
@@ -98,6 +98,7 @@ class SiteDailyMetricsExtractor(object):
     Currently a bag of "function". We can change this to a function if we
     decide we don't need state
     '''
+
     def __init__(self):
         pass
 
@@ -111,7 +112,7 @@ class SiteDailyMetricsExtractor(object):
         if not date_for:
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
-                )
+            )
 
         data = dict()
 
@@ -144,7 +145,7 @@ class SiteDailyMetricsLoader(object):
         if not date_for:
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
-                )
+            )
 
         # if we already have a record for the date_for and force_update is False
         # then skip getting data

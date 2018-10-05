@@ -111,6 +111,7 @@ class UserIndexSerializer(serializers.Serializer):
 # Serializers for edx-platform models
 #
 
+
 class CourseOverviewSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -157,6 +158,7 @@ class SiteDailyMetricsSerializer(serializers.ModelSerializer):
 #
 # Serializers for serving the front end views
 #
+
 
 class CourseAccessRoleForGCDSerializer(serializers.ModelSerializer):
     '''Serializer to return course staff data for GeneralCourseData
@@ -261,13 +263,21 @@ def get_course_history_metric(course_id, func, date_for, months_back):
     :returns: a dict with the current month metric and list of metrics for
     previous months
     '''
-    wrapper_func = lambda start_date, end_date: func(
-            start_date=start_date,
-            end_date=end_date,
-            course_id=course_id)
+    # wrapper_func = lambda start_date, end_date: func(
+    #         start_date=start_date,
+    #         end_date=end_date,
+    #         course_id=course_id)
+
+    # def wrapper_func(start_date, end_date):
+    #         start_date=start_date,
+    #         end_date=end_date,
+    #         course_id=course_id
 
     return get_monthly_history_metric(
-        func=wrapper_func,
+        func=lambda start_date, end_date: func(
+            start_date=start_date,
+            end_date=end_date,
+            course_id=course_id),
         date_for=date_for,
         months_back=months_back,
         )

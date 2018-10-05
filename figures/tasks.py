@@ -131,7 +131,8 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
         date_for = datetime.datetime.utcnow().replace(tzinfo=utc).date()
     date_for = date_for.strftime("%Y-%m-%d")
     logger.info(
-        'Starting task "figures.experimental_populate_daily_metrics" for date "{}"'.format(date_for))
+        'Starting task "figures.experimental_populate_daily_metrics" for date "{}"'.format(
+            date_for))
 
     courses = CourseOverview.objects.all()
     cdm_tasks = [
@@ -149,6 +150,7 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
     # * force_update is not true
 
     logger.info(
-        'Finished task "figures.experimental_populate_daily_metrics" for date "{}"'.format(date_for))
+        'Finished task "figures.experimental_populate_daily_metrics" for date "{}"'.format(
+            date_for))
 
     return results

@@ -5,13 +5,9 @@ see the model ``edx_figures.models.CourseDailyMetrics``
 
 from __future__ import print_function
 
-import datetime
 from textwrap import dedent
 
-from dateutil.parser import parse as dateutil_parse
-
-from django.core.management.base import BaseCommand, CommandError
-
+from django.core.management.base import BaseCommand
 
 from figures.tasks import (
     populate_daily_metrics,
@@ -21,14 +17,11 @@ from figures.tasks import (
 
 class Command(BaseCommand):
     '''Populate Figures metrics models
-
     '''
     help = dedent(__doc__).strip()
 
     def add_arguments(self, parser):
         '''
-
-        TODO: Add option to list courses
         '''
 
         parser.add_argument('--date',
@@ -47,7 +40,6 @@ class Command(BaseCommand):
                             help=('Run with Celery workflows (Warning: This is still under' +
                                   ' development and likely to get stuck/hung jobs'))
 
-
     def handle(self, *args, **options):
         print('populating Figures metrics...')
 
@@ -61,15 +53,14 @@ class Command(BaseCommand):
 
         if experimental:
             if options['no_delay']:
-                results = experimental_populate_daily_metrics(**kwargs)
+                experimental_populate_daily_metrics(**kwargs)
             else:
-                results = experimental_populate_daily_metrics.delay(**kwargs)
+                experimental_populate_daily_metrics.delay(**kwargs)
         else:
             if options['no_delay']:
-                results = populate_daily_metrics(**kwargs)
+                populate_daily_metrics(**kwargs)
             else:
-                results = populate_daily_metrics.delay(**kwargs)
-
+                populate_daily_metrics.delay(**kwargs)
 
         # TODO: improve this message to say 'today' when options['date'] is None
         print('Management command populate_figures_metrics complete. date_for: {}'.format(

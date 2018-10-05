@@ -1,12 +1,11 @@
+'''ETL for Course daily metrics
+
+This module performs the following:
+
+* Extracts data from edx-platform Django models and Modulestore objects
+* Transforms data (mostly collecting aggregaates at this point)
+* Loads data in to the Figures CourseDailyMetrics model
 '''
-First cut - ETL all in one for each data sink
-
-Then pull out the steps so we can have a formal, flexible, and scalable pipeline system
-
-
-'''
-
-#from figures.pipeline import Job
 
 
 # These are needed for the extractors
@@ -64,6 +63,7 @@ def get_num_enrolled_in_exclude_admins(course_id, date_for):
         created__lt=next_day(date_for),
     ).exclude(user__in=staff).exclude(user__in=admins).exclude(user__in=coaches).count()
 
+
 def get_active_learners_today(course_id, date_for):
     '''Get StudentModules given a course id and date
 
@@ -72,6 +72,7 @@ def get_active_learners_today(course_id, date_for):
         course_id=as_course_key(course_id),
         modified=as_date(date_for))
 
+
 def get_average_progress(course_id, date_for, course_enrollments):
     '''
 
@@ -79,11 +80,11 @@ def get_average_progress(course_id, date_for, course_enrollments):
     progress = []
 
     for ce in course_enrollments:
-        lcg = LearnerCourseGrades(user_id=ce.user.id,course_id=course_id)
+        lcg = LearnerCourseGrades(user_id=ce.user.id, course_id=course_id)
         progress.append(lcg.progress_percent())
 
     if len(progress):
-        average_progress = float(sum(progress))/float(len(progress))
+        average_progress = float(sum(progress)) / float(len(progress))
     else:
         average_progress = 0.0
 
@@ -95,7 +96,8 @@ def get_days_to_complete(course_id, date_for):
 
     NOTE: This is a work in progress, as it has issues to resolve:
     * It returns the delta in days, so working in ints
-    * This means if a learner starts at midnight and finished just before midnight, then 0 days will be given
+    * This means if a learner starts at midnight and finished just before
+      midnight, then 0 days will be given
 
     NOTE: This has limited scaling. We ought to test it with
     1k, 10k, 100k cert records
@@ -126,16 +128,18 @@ def get_days_to_complete(course_id, date_for):
                 dict(msg='Multiple CE records',
                      course_id=course_id,
                      user_id=cert.user.id,
-                    ))
+                     ))
         days.append((cert.created_date - ce[0].created).days)
     return dict(days=days, errors=errors)
+
 
 def calc_average_days_to_complete(days):
     rec_count = len(days)
     if rec_count:
-        return float(sum(days))/float(rec_count)
+        return float(sum(days)) / float(rec_count)
     else:
         return 0.0
+
 
 def get_average_days_to_complete(course_id, date_for):
 
@@ -154,10 +158,12 @@ def get_num_learners_completed(course_id, date_for):
 
 # Formal extractor classes
 
+
 class CourseIndicesExtractor(object):
     '''
     Extract a list of course index dicts
     '''
+
     def extract(self, **kwargs):
         '''
         TODO: Add filters in the kwargs
@@ -172,10 +178,11 @@ class CourseDailyMetricsExtractor(object):
     '''
     Prototype extractor to get data needed for CourseDailyMetrics
 
-    Next step is to break out the functionality from here to 
+    Next step is to break out the functionality from here to
     separate extractors so we have more reusability
     BUT, we will then need to find a transform
     '''
+
     def extract(self, course_id, date_for=None, **kwargs):
         '''
             defaults = dict(
@@ -191,7 +198,7 @@ class CourseDailyMetricsExtractor(object):
         if not date_for:
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
-                )
+            )
 
         # We can turn this series of calls into a parallel
         # set of calls defined in a ruleset instead of hardcoded here
@@ -201,8 +208,6 @@ class CourseDailyMetricsExtractor(object):
         course_enrollments = get_course_enrollments(
             course_id, date_for,)
 
-
-        
         data = dict(date_for=date_for, course_id=course_id)
 
         # This is the transform step
@@ -252,12 +257,12 @@ class CourseDailyMetricsLoader(object):
         need to make sure that the metrics row 'date_for' is the same as
         provided in the data. So before hacking something together, I want to
         think this over some more.
-        
+
         '''
         if not date_for:
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
-                )
+            )
 
         # if we already have a record for the date_for and force_update is False
         # then skip getting data
@@ -276,7 +281,7 @@ class CourseDailyMetricsLoader(object):
         cdm, created = CourseDailyMetrics.objects.update_or_create(
             course_id=self.course_id,
             date_for=date_for,
-            defaults = dict(
+            defaults=dict(
                 enrollment_count=data['enrollment_count'],
                 active_learners_today=data['active_learners_today'],
                 average_progress=data['average_progress'],
