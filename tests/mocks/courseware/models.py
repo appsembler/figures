@@ -7,7 +7,6 @@ from openedx.core.djangoapps.xmodule_django.models import (
     #! LocationKeyField,
     )
 
-#from openedx.core.djangoapps.xmodule_django.models import BlockTypeKeyField, CourseKeyField, LocationKeyField
 
 class StudentModule(models.Model):
     '''Mocks the courseware.models.StudentModule

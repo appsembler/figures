@@ -3,6 +3,7 @@
 '''
 from collections import OrderedDict
 
+
 class MockAggregatedScore(object):
     '''
 
@@ -19,6 +20,7 @@ class MockAggregatedScore(object):
 
     def __repr__(self):
         return self.__str__()
+
 
 class MockSubsectionGrade(object):
     '''
@@ -57,9 +59,9 @@ def create_chapter_grades():
     return OrderedDict(
         alpha=dict(
             sections=[
-                MockSubsectionGrade(),
-                MockSubsectionGrade(),
-                MockSubsectionGrade(),
+                MockSubsectionGrade(tw_earned=0.0, tw_possible=0.0),
+                MockSubsectionGrade(tw_earned=0.0,tw_possible=0.5),
+                MockSubsectionGrade(tw_earned=0.5,tw_possible=1.0),
             ],
             url_name=u'ec7e84694fca2d073731a462a5916a7a',
             display_name=u'Module 1 - Overview',
@@ -77,9 +79,16 @@ def create_chapter_grades():
 
 
 class CourseGrade(object):
-
-    def __init__(self, user, course_data, *args, **kwargs):
+    '''
+    Production class inherits from CourseGradeBase
+    '''
+    def __init__(self, user, course_data, percent=0, letter_grade=None, passed=False, *args, **kwargs):
         self.user = user
         self.course_data = course_data,
+        self.percent = percent
+        self.passed = passed
+
+        # Convert empty strings to None when reading from the table
+        self.letter_grade = letter_grade or None
         self.chapter_grades = kwargs.get('chapter_grades',
             create_chapter_grades())

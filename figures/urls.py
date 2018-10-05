@@ -4,9 +4,8 @@ Figures URL definitions
 
 from django.conf.urls import include, url
 from rest_framework import routers
-from django.views.generic.base import RedirectView
 
-from . import views
+from figures import views
 
 router = routers.DefaultRouter()
 
@@ -28,9 +27,10 @@ router.register(
     base_name='course-enrollments')
 
 
-##
-## For the front end UI
-##
+#
+# For the front end UI
+#
+
 
 router.register(
     r'courses-index',
@@ -57,8 +57,10 @@ router.register(
     views.LearnerDetailsViewSet,
     base_name='users-detail')
 
+
 # TODO: Consider changing this path to be 'users' or 'users/summary'
 # So that all user data fall under the same root path
+
 router.register(
     r'user-index',
     views.UserIndexViewSet,
@@ -75,5 +77,4 @@ urlpatterns = [
     url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
         name='general-site-metrics'),
     url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')
-    # url(r'^.*/', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
 ]

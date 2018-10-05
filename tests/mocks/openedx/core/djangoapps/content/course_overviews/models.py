@@ -51,7 +51,7 @@ class CourseOverview(models.Model):
     # display_org_with_default
     display_org_with_default = models.TextField()
     number = models.TextField()
-
+    created = models.DateTimeField(null=True) # from TimeStampedModel
     enrollment_start = models.DateTimeField(null=True)
     enrollment_end = models.DateTimeField(null=True)
     self_paced = models.BooleanField(default=False)

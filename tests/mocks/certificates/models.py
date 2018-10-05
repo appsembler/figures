@@ -7,4 +7,4 @@ from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 class GeneratedCertificate(models.Model):
     user = models.ForeignKey(User)
     course_id = CourseKeyField(max_length=255, blank=True, default=None)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField()

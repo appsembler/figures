@@ -8,6 +8,7 @@ Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
 '''
 
 import datetime
+from django.utils.timezone import utc
 
 from django.contrib.auth import get_user_model
 #from django_countries.fields import CountryField
@@ -83,11 +84,13 @@ class CourseOverviewFactory(DjangoModelFactory):
     org = 'StarFleetAcademy'
     number = '2161'
     display_org_with_default = factory.LazyAttribute(lambda o: o.org)
+    created = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,01, tzinfo=factory.compat.UTC))
     enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
         2018,02,02, tzinfo=factory.compat.UTC))
-    self_paced = False
     enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
         2018,05,05, tzinfo=factory.compat.UTC))
+    self_paced = False
 
 
 class CourseTeamFactory(DjangoModelFactory):
@@ -111,7 +114,7 @@ class GeneratedCertificateFactory(DjangoModelFactory):
     )
     course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
     created_date = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
 
 
 class StudentModuleFactory(DjangoModelFactory):
@@ -121,12 +124,12 @@ class StudentModuleFactory(DjangoModelFactory):
     student = factory.SubFactory(
         UserFactory,
     )
-    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
-    created = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
-
-    modified = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
+    created = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,02, tzinfo=factory.compat.UTC))
+    modified = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018,02,02, tzinfo=factory.compat.UTC))
 
 
 class CourseEnrollmentFactory(DjangoModelFactory):
@@ -139,8 +142,7 @@ class CourseEnrollmentFactory(DjangoModelFactory):
     course_id = factory.SelfAttribute('course_overview.id')
     course_overview = factory.SubFactory(CourseOverviewFactory)
     created = factory.Sequence(lambda n:
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n))
-
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
 
 class CourseAccessRoleFactory(DjangoModelFactory):
     class Meta:
@@ -161,7 +163,7 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = CourseDailyMetrics
     date_for = factory.Sequence(lambda n:
-        datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
     course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     enrollment_count = factory.Sequence(lambda n: n)
@@ -175,7 +177,7 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = SiteDailyMetrics
     date_for = factory.Sequence(lambda n:
-        datetime.date(2018, 1, 1) + datetime.timedelta(days=n))
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
     cumulative_active_user_count = factory.Sequence(lambda n: n)
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)

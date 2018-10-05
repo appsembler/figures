@@ -1,6 +1,7 @@
 
 import calendar
 import datetime
+from django.utils.timezone import utc
 
 import pytest
 
@@ -66,7 +67,7 @@ class TestDateTimeHelper(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.now = datetime.datetime.now()
+        self.now = datetime.datetime(2018, 6, 1)
 
     def test_get_now_from_datetime(self):
         expected = self.now
@@ -99,7 +100,7 @@ class TestDateTimeHelper(object):
             minute=0,
             second=0,
             microsecond=0,
-            )
+            ).replace(tzinfo=utc)
         assert as_datetime(a_date) == expected
 
     def test_get_now_from_invalid_type(self):
@@ -114,7 +115,7 @@ class TestDateTimeHelper(object):
 class TestDateHelper(object):
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.now = datetime.datetime.now()
+        self.now = datetime.datetime(2018, 6, 1)
 
     def test_get_now_from_str(self):
         format = '%Y-%m-%d'
@@ -153,7 +154,7 @@ class TestDeltaDays(object):
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.now = datetime.datetime.now()
+        self.now = datetime.datetime(2018, 6, 1)
 
     @pytest.mark.parametrize('days', range(-2,3))
     def test_days_from(self, days):
