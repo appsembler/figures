@@ -33,6 +33,7 @@ django_settings.WEBPACK_LOADER.update(FIGURES_APP={
     'STATS_FILE': WEBPACK_STATS_FULL_PATH,
     })
 
+# How many records the Figures REST API will return on a page by default
 DEFAULT_PAGINATION_LIMIT = 20
 
 
@@ -46,9 +47,11 @@ FIGURES = {
     'DAILY_METRICS_IMPORT_MINUTE': FIGENV_SETTINGS.get('DAILY_METRICS_IMPORT_MINUTE', 0),
 }
 
-###
-### Initial implementation for the Figures pipeline job sche
-###
+
+#
+# Initial implementation for the Figures pipeline job sche
+#
+
 
 if FIGURES['ENABLE_DAILY_METRICS_IMPORT']:
     django_settings.CELERYBEAT_SCHEDULE['figures-populate-daily-metrics'] = {

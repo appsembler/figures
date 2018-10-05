@@ -134,9 +134,10 @@ class CourseDailyMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     '''
     date = django_filters.DateFromToRangeFilter(name='date_for')
+
     class Meta:
         model = CourseDailyMetrics
-        fields = ['date_for', 'date', 'course_id',]
+        fields = ['date_for', 'date', 'course_id', ]
 
 
 class SiteDailyMetricsFilter(django_filters.FilterSet):
@@ -152,6 +153,7 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     '''
     date = django_filters.DateFromToRangeFilter(name='date_for')
+
     class Meta:
         model = SiteDailyMetrics
         fields = ['date_for', 'date']
@@ -164,9 +166,10 @@ class LearnerFilterSet(django_filters.FilterSet):
     is_active = django_filters.BooleanFilter(name='is_active',)
     course_id = django_filters.MethodFilter(action='filter_course_id')
     user_ids = django_filters.MethodFilter(action='filter_user_ids')
+
     class Meta:
         model = get_user_model()
-        fields = ['username', 'course_id', 'user_ids', 'is_active' ]
+        fields = ['username', 'course_id', 'user_ids', 'is_active']
 
     def filter_course_id(self, queryset, course_id_str):
         '''

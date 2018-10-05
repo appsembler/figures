@@ -11,6 +11,7 @@ from .models import (
     SiteDailyMetrics,
     )
 
+
 @admin.register(CourseDailyMetrics)
 class CourseDailyMetricsAdmin(admin.ModelAdmin):
     '''Defines the admin interface for the CourseDailyMetrics model
@@ -18,6 +19,7 @@ class CourseDailyMetricsAdmin(admin.ModelAdmin):
     list_display = ('id', 'date_for', 'course_id', 'enrollment_count',
                     'average_progress', 'average_days_to_complete',
                     'num_learners_completed',)
+
 
 @admin.register(SiteDailyMetrics)
 class SiteDailyMetricsAdmin(admin.ModelAdmin):
