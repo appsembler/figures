@@ -19,11 +19,12 @@ from figures.serializers import (
     CourseDetailsSerializer,
     CourseEnrollmentSerializer,
     GeneralCourseDataSerializer,
-    LearnerDetailsSerializer,
+    GeneralUserDataSerializer,
     LearnerCourseDetailsSerializer,
+    LearnerDetailsSerializer,
+    SerializeableCountryField,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
-    GeneralUserDataSerializer,
 )
 
 from tests.factories import (
@@ -35,6 +36,22 @@ from tests.factories import (
     SiteDailyMetricsFactory,
     UserFactory,
     )
+
+
+class TestSerializableCountryField(object):
+
+    @pytest.mark.parametrize('value, expected_result', [
+            ('abc', 'abc'),
+            ('', ''),
+            (None, ''),
+        ])
+    def test_representation(self, value, expected_result):
+        '''This tests the missing coverage in ``to_representation`` when
+        the country field is blank. We don't need a real Countries object, we
+        can test with any string
+
+        '''
+        assert SerializeableCountryField().to_representation(value) == expected_result
 
 
 @pytest.mark.django_db
@@ -113,6 +130,13 @@ class TestCourseDetailsSerializer(object):
         assert parse(data['end_date']) == self.course_overview.enrollment_end
         assert data['self_paced'] == self.course_overview.self_paced
 
+    def test_get_staff_with_no_course(self):
+        '''Create a serializer for a course with a different ID than for the
+        data we set up. This simulates when there are no staff members for the
+        given course, which will have a different ID than the one we created in
+        the setup method
+        '''
+        assert CourseDetailsSerializer().get_staff(CourseOverviewFactory()) == []
 
 
 class TestCourseEnrollmentSerializer(object):
@@ -245,34 +269,19 @@ class TestGeneralCourseDataSerializer(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        #self.course_id = 'course-v1:AlphaOrg+A001+RUN'
-
-        #self.enrollment_datetime = datetime.datetime(2018, 02, 02, tzinfo=pytz.UTC)
-        # self.course_overview_attributes = dict(
-        #     id=self.course_id,
-
-        # )
-        
-        #self.course_overview = CourseOverviewFactory(**self.course_overview_attributes)
         self.course_overview = CourseOverviewFactory()
         self.users = [ UserFactory(), UserFactory()]
-
         self.course_access_roles = [
-            CourseAccessRoleFactory(
-                user=self.users[0],
-                course_id=self.course_overview.id,
-                role='staff'),
-            CourseAccessRoleFactory(
-                user=self.users[1],
-                course_id=self.course_overview.id,
-                role='administrator'),
+            CourseAccessRoleFactory(user=self.users[0],
+                                    course_id=self.course_overview.id,
+                                    role='staff'),
+            CourseAccessRoleFactory(user=self.users[1],
+                                    course_id=self.course_overview.id,
+                                    role='administrator'),
         ]
-
         self.serializer = GeneralCourseDataSerializer(instance=self.course_overview)
-
-
         self.expected_fields = [
-            'course_id', 'course_name', 'course_code','org', 'start_date',
+            'course_id', 'course_name', 'course_code', 'org', 'start_date',
             'end_date', 'self_paced', 'staff', 'metrics',
         ]
 
@@ -292,10 +301,14 @@ class TestGeneralCourseDataSerializer(object):
         assert parse(data['end_date']) == self.course_overview.enrollment_end
         assert data['self_paced'] == self.course_overview.self_paced
 
-        #assert data[''] == self.course_overview.
-        
-
-        #assert data['date_joined'] == str(self.a_datetime.date())
+    def test_get_metrics_with_cdm_records(self):
+        '''Tests we get the data for the latest CourseDailyMetrics object
+        '''
+        dates = ['2018-01-01', '2018-02-01',]
+        [CourseDailyMetricsFactory(course_id=self.course_overview.id,
+                                   date_for=date) for date in dates]
+        assert self.serializer.get_metrics(
+            self.course_overview)['date_for'] == dates[-1]
 
 
 class TestGeneralUserDataSerializer(object):
@@ -304,7 +317,7 @@ class TestGeneralUserDataSerializer(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.a_datetime = datetime.datetime(2018, 02, 02, tzinfo=pytz.UTC)
+        self.a_datetime = datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC)
         self.user_attributes = {
             'username': 'alpha_one',
             'profile__name': 'Alpha One',

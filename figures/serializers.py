@@ -1,10 +1,7 @@
 '''Serializers used in Figures
 
-
-Incomplete
-----------
-
-The 'history' sections of the returned data is not yet implemented.
+Outstanding issues
+------------------
 
 For learner details, dates are not stored for when sections and/or subsections
 are completed
@@ -288,7 +285,8 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
 
     Initial implementation uses serializer emthods to retrieve some data
 
-    Need to ask edX team why CourseOverview doesn't have a
+    Need to ask edX team why CourseEnrollment doesn't have a foreign key 
+    relationship to CourseOverview
     '''
     course_id = serializers.CharField(source='id', read_only=True)
     course_name = serializers.CharField(
@@ -493,20 +491,6 @@ class UserDemographicSerializer(serializers.Serializer):
         allow_blank=True,
         required=False,
         read_only=True)
-
-
-class LearnersCoursesSerializer(serializers.Serializer):
-
-    courses = serializers.SerializerMethodField()
-
-    def get_courses(self, user):
-        course_ids = CourseEnrollment.objects.filter(
-            user=user).values_list('course_id', flat=True).distinct()
-
-        course_overviews = CourseOverview.objects.filter(
-            id__in=[as_course_key(course_id) for course_id in course_ids])
-
-        return [CourseOverviewSerializer(data).data for data in course_overviews]
 
 
 class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
