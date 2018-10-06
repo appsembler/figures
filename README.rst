@@ -12,12 +12,20 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`_.
 Notice and Development Status
 -----------------------------
 
-**Figures is in development. We are targeting our first production ready version for October, 2018**
 
-This Document
-=============
+October 7, 2018
+===============
 
-* This document is a work in progress (WIP) as we work toward the initial production ready Figures release
+**We're almost there!**
+
+We're wrapping up the final steps to roll out Figures initial release this week:
+
+* Update the installation and configuration instructions (meaning the instructions below will change)
+* Update the front end (JavaScript React app) package dependencies to addres known security issues
+* Build and add the static assets to the Figures Django reusable app
+* Push and test to PyPI testing, validate the package
+* Push to production PyPI
+
 
 --------
 Overview
