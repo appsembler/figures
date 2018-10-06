@@ -15,14 +15,16 @@ from rest_framework.test import (
     )
 
 from figures.models import CourseDailyMetrics
+from figures.pagination import FiguresLimitOffsetPagination
 from figures.views import CourseDailyMetricsViewSet
 
 from tests.factories import CourseDailyMetricsFactory, UserFactory
 from tests.helpers import create_metrics_model_timeseries
+from tests.views.base import BaseViewTest
 
 
 @pytest.mark.django_db
-class TestCourseDailyMetricsView(object):
+class TestCourseDailyMetricsView(BaseViewTest):
     '''Tests the viewset for CourseDailyMetrics
 
     Notes:
@@ -37,8 +39,14 @@ class TestCourseDailyMetricsView(object):
     type for the dates. This should simplify this a lot 
     # http://www.django-rest-framework.org/api-guide/fields/#date-and-time-fields
     '''
+
+    request_path = 'api/course-daily-metrics/'
+    view_class = CourseDailyMetricsViewSet
+
     @pytest.fixture(autouse=True)
     def setup(self, db):
+
+        super(TestCourseDailyMetricsView, self).setup(db)
         self.first_day = parse('2018-01-01')
         self.last_day = parse('2018-03-31')
         self.date_fields = set(['date_for', 'created', 'modified',])
@@ -80,21 +88,36 @@ class TestCourseDailyMetricsView(object):
         '''
         first_day='2018-02-01'
         last_day='2018-02-28'
-        endpoint = 'api/course-daily-metrics/?date_0={}&date_1={}'.format(
-            first_day, last_day)
+        endpoint = '{}?date_0={}&date_1={}'.format(
+            self.request_path, first_day, last_day)
 
         expected_data = CourseDailyMetrics.objects.filter(
             date_for__range=(first_day, last_day))
         factory = APIRequestFactory()
         request = factory.get(endpoint)
-        force_authenticate(request, user=UserFactory())
-        view = CourseDailyMetricsViewSet.as_view({'get':'list'})
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get':'list'})
         response = view(request)
         assert response.status_code == 200
-        assert len(response.data) == expected_data.count()
+
+        # Expect the following format for pagination
+        # {
+        #     "count": 2,
+        #     "next": null, # or a url
+        #     "previous": null, # or a url
+        #     "results": [
+        #     ...           # list of the results
+        #     ]
+        # }
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+
+
+        assert len(response.data['results']) == FiguresLimitOffsetPagination.default_limit
 
         # Hack: Check date and datetime values explicitly
-        for data in response.data:
+        for data in response.data['results']:
+            # Note: This only tests the data in the first response page
             db_rec = expected_data.get(id=data['id'])
             self.assert_response_equal(data, db_rec)
 
@@ -111,15 +134,14 @@ class TestCourseDailyMetricsView(object):
         ),
     ])
     def test_create(self, data):
-        factory = APIRequestFactory()
+        '''Tests creating a record for the CourseDailyMetrics model
+        '''
 
         # Might not need to set format='json'
-        request = factory.post('api/course-daily-metrics/', data, format='json')
-        force_authenticate(request, user=UserFactory())
-        view = CourseDailyMetricsViewSet.as_view({'post': 'create'})
-        
+        request = APIRequestFactory().post(self.request_path, data, format='json')
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'post': 'create'})
         response = view(request)
-
         assert response.status_code == 201
         obj = CourseDailyMetrics.objects.get(
             date_for=data['date_for'],

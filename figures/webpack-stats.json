@@ -1,0 +1,28 @@
+{
+    "chunks": {
+        "main": [
+            {
+                "name": "static/js/main.9a35969a.js",
+                "path": "/Users/jbaldwin/work/appsembler/devstacks/gfig3/src/figures/figures/static/figures/static/js/main.9a35969a.js",
+                "publicPath": "/static/figures/static/js/main.9a35969a.js"
+            },
+            {
+                "name": "styles.css",
+                "path": "/Users/jbaldwin/work/appsembler/devstacks/gfig3/src/figures/figures/static/figures/styles.css",
+                "publicPath": "/static/figures/styles.css"
+            },
+            {
+                "name": "static/js/main.9a35969a.js.map",
+                "path": "/Users/jbaldwin/work/appsembler/devstacks/gfig3/src/figures/figures/static/figures/static/js/main.9a35969a.js.map",
+                "publicPath": "/static/figures/static/js/main.9a35969a.js.map"
+            },
+            {
+                "name": "styles.css.map",
+                "path": "/Users/jbaldwin/work/appsembler/devstacks/gfig3/src/figures/figures/static/figures/styles.css.map",
+                "publicPath": "/static/figures/styles.css.map"
+            }
+        ]
+    },
+    "publicPath": "/static/figures/",
+    "status": "done"
+}

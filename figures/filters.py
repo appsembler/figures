@@ -74,7 +74,7 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
         fields = ['course_id', 'user_id', 'is_active', ]
 
 
-class UserFilter(django_filters.FilterSet):
+class UserFilterSet(django_filters.FilterSet):
     '''Provides filtering for User model objects
 
     Note: User has a 1:1 relationship with the edx-platform LMS
@@ -89,10 +89,36 @@ class UserFilter(django_filters.FilterSet):
     country = django_filters.CharFilter(
         name='profile__country', lookup_type='iexact')
 
+    user_ids = django_filters.MethodFilter(action='filter_user_ids')
+    enrolled_in_course_id = django_filters.MethodFilter(
+        action='filter_enrolled_in_course_id')
+
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'country', 'is_active', 'is_staff',
-                  'is_superuser', ]
+                  'is_superuser', 'enrolled_in_course_id', 'user_ids', ]
+
+    def filter_user_ids(self, queryset, user_ids_str):
+
+        user_ids = [id for id in user_ids_str.split(',') if id.isdigit()]
+        return queryset.filter(id__in=user_ids)
+
+    def filter_enrolled_in_course_id(self, queryset, course_id_str):
+        '''
+
+        This method converts the course id string to a CourseLocator object
+        and returns the filtered queryset. This is required because
+        CourseEnrollment course_id fields are of type CourseKeyField
+
+        Query parameters with plus signs '+' in the string are automatically
+        replaced with spaces, so we need to put the '+' back in for CourseKey
+        to be able to create a course key object from the string
+        '''
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        # get course enrollments for the course
+        user_ids = CourseEnrollment.objects.filter(
+            course_id=course_key).values_list('user__id', flat=True).distinct()
+        return queryset.filter(id__in=user_ids)
 
 
 class CourseDailyMetricsFilter(django_filters.FilterSet):

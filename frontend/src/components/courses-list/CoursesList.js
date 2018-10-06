@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { List } from 'immutable';
 import PropTypes from 'prop-types';
 import styles from './_courses-list.scss';
 import classNames from 'classnames/bind';
@@ -12,75 +13,54 @@ class CoursesList extends Component {
 
     this.state = {
       sortListBy: '',
-      coursesData: [],
+      coursesList: List()
     };
 
     this.changeSorting = this.changeSorting.bind(this);
-    this.sortByParameter = this.sortByParameter.bind(this);
-    this.populateCourseData = this.populateCourseData.bind(this);
   }
 
   changeSorting = (parameter) => {
-    let dataParameter;
+    let coursesList = this.state.coursesList;
     if (parameter === 'alphabetically') {
-      dataParameter = 'courseTitle';
+      coursesList = coursesList.sortBy(item => item['course_name']).reverse()
     } else if (parameter === 'learners-enrolled') {
-      dataParameter = 'learnersEnrolled';
+      coursesList = coursesList.sortBy(item => item['learners_enrolled']['current_month']).reverse()
     } else if (parameter === 'average-progress') {
-      dataParameter = 'averageProgress';
+      coursesList = coursesList.sortBy(item => item['average_progress']['current_month']).reverse()
     } else if (parameter === 'completion-time') {
-      dataParameter = 'averageCompletionTime';
+      coursesList = coursesList.sortBy(item => item['average_days_to_complete']['current_month']).reverse()
     } else if (parameter === 'completed-learners') {
-      dataParameter = 'numberLearnersCompleted';
+      coursesList = coursesList.sortBy(item => item['users_completed']['current_month']).reverse()
     }
-    let sortedData = this.sortByParameter(this.state.coursesData, dataParameter);
     this.setState({
-      coursesData: sortedData,
+      coursesList: coursesList,
       sortListBy: parameter,
     })
   }
 
-  sortByParameter = (data, parameter) => {
-    data.sort(function(a, b) {
-      if(a[parameter] < b[parameter]) return -1;
-      if(a[parameter] > b[parameter]) return 1;
-      return 0;
-    });
-    return data;
-  }
-
-  populateCourseData = () => {
-    let coursesData = [];
-    let tempItem = {};
-    let courseIds = this.props.getIdListFunction();
-    courseIds.forEach((id, index) => {
-      tempItem = this.props.getCourseDataFunction(id);
-      tempItem.courseId = id;
-      coursesData.push(tempItem);
-    });
-    this.setState({
-      coursesData: coursesData,
-    });
-  }
-
-  componentDidMount() {
-    this.populateCourseData();
+  componentWillReceiveProps = (nextProps) => {
+    if (nextProps !== this.props) {
+      this.setState({
+        coursesList: List(nextProps.coursesList)
+      })
+    }
   }
 
   render() {
-    const courseItems = this.state.coursesData.map((item, index) => {
+    const courseItems = this.state.coursesList.toArray().map((item, index) => {
       return (
         <CoursesListItem
-          courseName={item.courseTitle}
-          courseId={item.courseId}
-          courseIsSelfPaced={item.isSelfPaced}
-          startDate={item.startDate}
-          endDate={item.endDate}
-          courseStaff={item.courseStaff}
-          averageCompletionTime={item.averageCompletionTime}
-          averageProgress={item.averageProgress}
-          learnersEnrolled={item.learnersEnrolled}
-          numberLearnersCompleted={item.numberLearnersCompleted}
+          courseName={item['course_name']}
+          courseId={item['course_id']}
+          courseCode={item['course_code']}
+          courseIsSelfPaced={item['self_paced']}
+          startDate={item['start_date']}
+          endDate={item['end_date']}
+          courseStaff={item['staff']}
+          averageCompletionTime={item['average_days_to_complete'].current_month}
+          averageProgress={item['average_progress'].current_month}
+          learnersEnrolled={item['learners_enrolled'].current_month}
+          numberLearnersCompleted={item['users_completed'].current_month}
           key={index}
         />
       )
@@ -112,13 +92,13 @@ class CoursesList extends Component {
 }
 
 CoursesList.defaultProps = {
-  listTitle: 'Course data:'
+  listTitle: 'Course data:',
+  CoursesList: []
 }
 
 CoursesList.propTypes = {
   listTitle: PropTypes.string,
-  getIdListFunction: PropTypes.func,
-  getCourseDataFunction: PropTypes.func,
+  coursesList: PropTypes.array
 };
 
 export default CoursesList;

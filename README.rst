@@ -207,7 +207,11 @@ In the Vagrant VM, as user *edxapp*, navigate to the following directory::
 
 And run the following::
 
-	./manage.py lms migrate figures
+	./manage.py lms migrate figures --settings=<environment settings>
+
+Where ``environment settings`` is ``devstack`` for the default named release. Individual organizations may tailor their environment settings. Appsmebler uses ``devstack_appsembler`` for its fork::
+
+	./manage.py lms migrate figures --settings=devstack_appsembler
 
 
 7. Install Figures front-end dependencies

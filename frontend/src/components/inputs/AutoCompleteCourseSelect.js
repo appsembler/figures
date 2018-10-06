@@ -86,9 +86,9 @@ class AutoCompleteCourseSelect extends Component {
 
     coursesList = this.props.coursesIndex.map((item, index) => {
       return {
-        courseId: item.id,
-        courseName: item.name,
-        courseNumber: item.number,
+        courseId: item['course_id'],
+        courseName: item['course_name'],
+        courseNumber: item['course_code']
       }
     })
 
@@ -116,6 +116,7 @@ class AutoCompleteCourseSelect extends Component {
             <button onClick={this.modalTrigger} className={styles['modal-dismiss']}><FontAwesomeIcon icon={faTimes}/></button>
           </div>
         )}
+        {this.state.modalActive && <div className={styles['selector-backdrop']} onClick={this.modalTrigger}></div>}
       </div>
     )
   }

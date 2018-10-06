@@ -9,8 +9,13 @@
 ## General Python package dependencies
 ###
 
+celery==3.1.18
+
 python-dateutil==2.1
 path.py==8.2.1
+
+# Yes, this is old but is the one specified by Ginkgo edx-platform
+pytz==2016.7
 
 ##
 ## Django package dependencies

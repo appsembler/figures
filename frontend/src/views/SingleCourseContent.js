@@ -1,181 +1,122 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { addActiveApiFetch, removeActiveApiFetch } from 'base/redux/actions/Actions';
 import classNames from 'classnames/bind';
 import styles from './_single-course-content.scss';
+import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
+import HeaderContentCourse from 'base/components/header-views/header-content-course/HeaderContentCourse';
 import BaseStatCard from 'base/components/stat-cards/BaseStatCard';
 import LearnerStatistics from 'base/components/learner-statistics/LearnerStatistics';
 import CourseLearnersList from 'base/components/course-learners-list/CourseLearnersList';
+import apiConfig from 'base/apiConfig';
 
 let cx = classNames.bind(styles);
-
-const testNumberOfLearners = [
-  {
-    value: 6,
-    period: '11/2017'
-  },
-  {
-    value: 4,
-    period: '12/2017'
-  },
-  {
-    value: 12,
-    period: '01/2017'
-  },
-  {
-    value: 51,
-    period: '02/2017'
-  },
-  {
-    value: 31,
-    period: '03/2017'
-  },
-  {
-    value: 132,
-    period: '04/2017'
-  },
-]
-
-const testAverageProgress = [
-  {
-    value: 0.3,
-    period: '11/2017'
-  },
-  {
-    value: 0.4,
-    period: '12/2017'
-  },
-  {
-    value: 0.6,
-    period: '01/2017'
-  },
-  {
-    value: 0.9,
-    period: '02/2017'
-  },
-  {
-    value: 0.71,
-    period: '03/2017'
-  },
-  {
-    value: 0.46,
-    period: '04/2017'
-  },
-]
-
-const testCourseIds = [
-  'A193-2016Q4',
-  'A194-2016Q4',
-  'A195-2016Q4',
-]
-
-const testCourseData = {
-  'A193-2016Q4': {
-    courseTitle: 'This is the course title',
-    isSelfPaced: false,
-    startDate: '30-12-2018',
-    endDate: '30-12-2018',
-    courseStaff: ['Matej Grozdanović', 'Harry Klein', 'Nate Aune'],
-    learnersEnrolled: 150,
-    averageProgress: 0.41,
-    averageCompletionTime: '41 days',
-    numberLearnersCompleted: 38,
-  },
-  'A194-2016Q4': {
-    courseTitle: 'Another course title',
-    isSelfPaced: false,
-    startDate: '30-12-2018',
-    endDate: '30-12-2018',
-    courseStaff: ['Harry Klein', 'Nate Aune'],
-    learnersEnrolled: 350,
-    averageProgress: 0.21,
-    averageCompletionTime: '31 days',
-    numberLearnersCompleted: 57,
-  },
-  'A195-2016Q4': {
-    courseTitle: 'Introduction to fake courses and fake certification',
-    isSelfPaced: true,
-    startDate: '',
-    endDate: '',
-    courseStaff: ['Matej Grozdanović', 'Nate Aune'],
-    learnersEnrolled: 110,
-    averageProgress: 0.81,
-    averageCompletionTime: '65 days',
-    numberLearnersCompleted: 38,
-  }
-}
-
 
 class SingleCourseContent extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-
+      courseData: {},
+      allLearnersLoaded: true,
+      learnersList: [],
+      apiFetchMoreLearnersUrl: null
     };
 
-    this.apiSimulator = this.apiSimulator.bind(this);
+    this.fetchCourseData = this.fetchCourseData.bind(this);
+    this.fetchLearnersData = this.fetchLearnersData.bind(this);
+    this.setLearnersData = this.setLearnersData.bind(this);
   }
 
-  apiSimulator = (dataParameter, dataAmount) => {
-    let sourceData;
-    if (dataParameter === 'number-of-learners') {
-      sourceData = testNumberOfLearners;
-    } else if (dataParameter === 'average-progress') {
-      sourceData = testAverageProgress;
-    }
-    if (dataAmount > sourceData.length) {
-      return sourceData;
-    } else {
-      return sourceData.slice(-dataAmount);
-    }
-  };
-
-  courseIdListApiSimulator = () => {
-    return testCourseIds;
+  fetchCourseData = () => {
+    this.props.addActiveApiFetch();
+    fetch((apiConfig.coursesDetailed + this.props.courseId + '/'), { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => this.setState({
+        courseData: json
+      }, () => this.props.removeActiveApiFetch()))
   }
 
-  courseDataApiSimulator = (courseId) => {
-    return testCourseData[courseId];
+  fetchLearnersData = () => {
+    this.props.addActiveApiFetch();
+    fetch((this.state.apiFetchMoreLearnersUrl === null) ? (apiConfig.learnersDetailed + '?enrolled_in_course_id=' + this.props.courseId) : this.state.apiFetchMoreLearnersUrl, { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => this.setLearnersData(json['results'], json['next']))
+  }
+
+  setLearnersData = (results, paginationNext) => {
+    const tempLearners = this.state.learnersList.concat(results);
+    this.setState ({
+      allLearnersLoaded: paginationNext === null,
+      learnersList: tempLearners,
+      apiFetchMoreLearnersUrl: paginationNext
+    }, () => this.props.removeActiveApiFetch())
+  }
+
+  componentDidMount() {
+    this.fetchCourseData();
+    this.fetchLearnersData();
   }
 
   render() {
     return (
-      <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
-        <BaseStatCard
-          cardTitle='Number of enrolled learners'
-          cardDescription='Leverage agile frameworks to provide a robust synopsis for high level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='number-of-learners'
-        />
-        <BaseStatCard
-          cardTitle='Average course progress'
-          cardDescription='At the end of the day, going forward, a new normal that has evolved from generation X is on the runway heading towards a streamlined cloud solution.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='average-progress'
-          dataType='percentage'
-        />
-        <BaseStatCard
-          cardTitle='Average time to complete'
-          cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='number-of-learners'
-          singleValue
-          value='41d 36h 22m'
-        />
-        <BaseStatCard
-          cardTitle='User course completions'
-          cardDescription='Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment. Bring to the table win-win survival strategies to ensure proactive domination.'
-          getDataFunction={this.apiSimulator}
-          dataParameter='average-progress'
-          dataType='percentage'
-        />
-        <LearnerStatistics />
-        <CourseLearnersList
-          paginationMaxRows = {3}
-          courseId = {this.props.courseId}
-        />
+      <div className="ef--layout-root">
+        <HeaderAreaLayout>
+          <HeaderContentCourse
+            startDate = {this.state.courseData['start_date']}
+            endDate = {this.state.courseData['end_date']}
+            courseName = {this.state.courseData['course_name']}
+            courseCode = {this.state.courseData['course_code']}
+            isSelfPaced = {this.state.courseData['self_paced']}
+            learnersEnrolled = {this.state.courseData['learners_enrolled']}
+          />
+        </HeaderAreaLayout>
+        <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
+          <BaseStatCard
+            cardTitle='Number of enrolled learners'
+            mainValue={this.state.courseData['learners_enrolled'] ? this.state.courseData['learners_enrolled']['current_month'] : 0}
+            valueHistory={this.state.courseData['learners_enrolled'] ? this.state.courseData['learners_enrolled']['history'] : []}
+          />
+          <BaseStatCard
+            cardTitle='Average course progress'
+            mainValue={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['current_month'] : 0}
+            valueHistory={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['history'] : []}
+          />
+          <BaseStatCard
+            cardTitle='Average time to complete'
+            mainValue={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['current_month'] : 0}
+            valueHistory={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['history'] : []}
+          />
+          <BaseStatCard
+            cardTitle='User course completions'
+            mainValue={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['current_month'] : 0}
+            valueHistory={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['history'] : []}
+          />
+          <LearnerStatistics
+            learnersData = {this.state.learnersList}
+          />
+          <CourseLearnersList
+            courseId = {this.props.courseId}
+            allLearnersLoaded = {this.state.allLearnersLoaded}
+            apiFetchMoreLearnersFunction = {this.fetchLearnersData}
+            learnersData = {this.state.learnersList}
+          />
+        </div>
       </div>
     );
   }
 }
 
-export default SingleCourseContent;
+const mapStateToProps = (state, ownProps) => ({
+
+})
+
+const mapDispatchToProps = dispatch => ({
+  addActiveApiFetch: () => dispatch(addActiveApiFetch()),
+  removeActiveApiFetch: () => dispatch(removeActiveApiFetch()),
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SingleCourseContent)

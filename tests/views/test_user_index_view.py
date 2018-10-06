@@ -13,18 +13,17 @@ from rest_framework.test import (
     force_authenticate,
     )
 
-from figures.views import (
-    UserIndexView,
-    )
+from figures.views import UserIndexViewSet
 
 from tests.factories import UserFactory
+from tests.views.base import BaseViewTest
 
 USER_DATA = [
-    {'id': 1, 'username': u'alpha', 'fullname': u'Alpha One',
+    {'id': 101, 'username': u'alpha', 'fullname': u'Alpha One',
      'is_active': True, 'country': 'CA'},
-    {'id': 2, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
-    {'id': 3, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
-    {'id': 4, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
+    {'id': 102, 'username': u'alpha02', 'fullname': u'Alpha Two', 'is_active': False, 'country': 'UK'},
+    {'id': 103, 'username': u'bravo', 'fullname': u'Bravo One', 'is_active': True, 'country': 'US'},
+    {'id': 104, 'username': u'bravo02', 'fullname': u'Bravo Two', 'is_active': True, 'country': 'UY'},
 ]
 
 def make_user(**kwargs):
@@ -38,44 +37,65 @@ def make_user(**kwargs):
 
 
 @pytest.mark.django_db
-class TestUserIndexView(object):
+class TestUserIndexViewSet(BaseViewTest):
     '''Tests the UserIndexView view class
     '''
 
+    request_path = 'api/user-index/'
+    view_class = UserIndexViewSet
+
     @pytest.fixture(autouse=True)
     def setup(self, db):
+        super(TestUserIndexViewSet, self).setup(db)
         self.users = [make_user(**data) for data in USER_DATA]
+        self.usernames = [data['username'] for data in USER_DATA]
         self.expected_result_keys = ['id', 'username', 'fullname']
 
     def get_expected_results(self, **filter):
         '''returns a list of dicts of the filtered user data
-
+        
         '''
         return list(
             get_user_model().objects.filter(**filter).annotate(
                 fullname=F('profile__name')).values(*self.expected_result_keys))
 
-    @pytest.mark.parametrize('endpoint, filter', [
-        ('api/user-index', {}),
-        ('api/user-index/?is_active=False', {'is_active': False}),
-        ('api/user-index/?country=UY', {'profile__country': 'UY'}),
+    @pytest.mark.parametrize('query_params, filter_args', [
+        ('', {}),
+        ('?is_active=False', {'is_active': False}),
+        ('?country=UY', {'profile__country': 'UY'}),
         # test lowercase is supported for country query param
-        ('api/user-index/?country=uy', {'profile__country': 'UY'}),
+        ('?country=uy', {'profile__country': 'UY'}),
         ])
-    def test_get_user_index(self, endpoint, filter):
+    def test_get_user_index(self, query_params, filter_args):
         '''Tests retrieving a list of users with abbreviated details
 
         The fields in each returned record are identified by
             `figures.serializers.UserIndexSerializer`
 
         '''
-        expected_data = self.get_expected_results(**filter)
+        expected_data = self.get_expected_results(**filter_args)
 
-        factory = APIRequestFactory()
-        request = factory.get(endpoint)
-        force_authenticate(request, user=self.users[0])
-        view = UserIndexView.as_view()
+        request = APIRequestFactory().get(
+            self.request_path + query_params)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get':'list'})
         response = view(request)
         assert response.status_code == 200
-        assert len(response.data) == len(expected_data)
-        assert response.data == expected_data
+
+        # Expect the following format for pagination
+        # {
+        #     "count": 2,
+        #     "next": null, # or a url
+        #     "previous": null, # or a url
+        #     "results": [
+        #     ...           # list of the results
+        #     ]
+        # }
+        assert set(response.data.keys()) == set(
+            ['count', 'next', 'previous', 'results',])
+
+        assert len(response.data['results']) == len(expected_data)
+        for rec in response.data['results']:
+            match_rec = (item for item in expected_data 
+                if item['username'] == rec['username']).next()
+            assert rec == match_rec

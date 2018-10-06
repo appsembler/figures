@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import figuresLogo from 'base/images/logo/edx-figures--logo--negative.svg';
+import figuresLogo from 'base/images/logo/figures--logo--negative.svg';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import 'base/App.css';
 import 'base/sass/base/_grid.scss';

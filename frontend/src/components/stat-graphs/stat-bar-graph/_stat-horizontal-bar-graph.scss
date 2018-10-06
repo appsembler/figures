@@ -16,13 +16,13 @@
     margin-right: calcRem(10);
     display: flex;
     align-items: center;
-    width: calcRem(160);
+    width: calcRem(260);
     flex-shrink: 0;
     font-size: calcRem(14);
     color: $base-text-color;
 
     .label-text {
-      width: calcRem(100);
+      width: calcRem(200);
       margin-right: calcRem(10);
       text-align: left;
     }

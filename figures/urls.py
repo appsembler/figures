@@ -4,9 +4,8 @@ Figures URL definitions
 
 from django.conf.urls import include, url
 from rest_framework import routers
-from django.views.generic.base import RedirectView
 
-from . import views
+from figures import views
 
 router = routers.DefaultRouter()
 
@@ -28,6 +27,46 @@ router.register(
     base_name='course-enrollments')
 
 
+#
+# For the front end UI
+#
+
+
+router.register(
+    r'courses-index',
+    views.CoursesIndexViewSet,
+    base_name='courses-index')
+
+router.register(
+    r'courses/general',
+    views.GeneralCourseDataViewSet,
+    base_name='courses-general')
+
+router.register(
+    r'courses/detail',
+    views.CourseDetailsViewSet,
+    base_name='courses-detail')
+
+router.register(
+    r'users/general',
+    views.GeneralUserDataViewSet,
+    base_name='users-general')
+
+router.register(
+    r'users/detail',
+    views.LearnerDetailsViewSet,
+    base_name='users-detail')
+
+
+# TODO: Consider changing this path to be 'users' or 'users/summary'
+# So that all user data fall under the same root path
+
+router.register(
+    r'user-index',
+    views.UserIndexViewSet,
+    base_name='user-index')
+
+
 urlpatterns = [
 
     # UI Templates
@@ -35,8 +74,7 @@ urlpatterns = [
 
     # REST API
     url(r'^api/', include(router.urls, namespace='api')),
-    url(r'^api/courses-index/', views.CoursesIndexView.as_view(),
-        name='courses-index'),
-    url(r'^api/user-index/', views.UserIndexView.as_view(), name='user-index'),
-    url('', RedirectView.as_view(pattern_name='figures-home'), name="catch-all")
+    url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
+        name='general-site-metrics'),
+    url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')
 ]

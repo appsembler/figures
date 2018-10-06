@@ -14,6 +14,7 @@ button.selector-trigger-button {
   font-family: $font-family;
   font-weight: 600;
   transition: all 0.2s ease-in-out;
+  margin-left: calcRem(20);
 
   &.positive {
     border: calcRem(2) solid $primary-color;
@@ -42,6 +43,7 @@ button.selector-trigger-button {
   background: #FFFFFF;
   box-shadow: 2px 4px 6px 0 rgba(0,0,0,0.15);
   border-radius: $elements-border-radius;
+  z-index: 50;
 }
 
 .modal-dismiss {
@@ -128,4 +130,13 @@ textarea, input[type="text"], input[type="url"], input[type="email"], input[type
 
     }
   }
+}
+
+.selector-backdrop {
+  position: fixed;
+  z-index: 5;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }

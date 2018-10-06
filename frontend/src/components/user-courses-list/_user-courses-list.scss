@@ -1,0 +1,98 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/stat-cards';
+
+.user-courses-list {
+  grid-column: span 3;
+  padding-left: calcRem(30);
+}
+
+.course-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-bottom: calcRem(28);
+  margin-bottom: calcRem(20);
+
+  .course-info {
+    width: calcRem(250);
+    padding-right: calcRem(20);
+    margin-right: calcRem(20);
+    border-right: 1px solid lighten($base-text-color, 70%);
+    max-width: 100%;
+    flex-shrink: 0;
+    flex-grow: 0;
+
+    .course-code {
+      display: block;
+      font-size: calcRem(14);
+      font-weight: bold;
+      color: $primary-color;
+      margin-bottom: calcRem(5);
+    }
+
+    .course-name {
+      display: block;
+      font-size: calcRem(18);
+      font-weight: bold;
+      color: $base-text-color;
+      margin-bottom: calcRem(10);
+      line-height: 130%;
+    }
+  }
+
+  .user-stats {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    width: 100%;
+    flex-grow: 1;
+    flex-shrink: 1;
+
+    .stat {
+      flex-grow: 0;
+      flex-shrink: 0;
+      width: 25%;
+      list-style-type: none;
+      text-align: center;
+
+      .stat-label {
+        display: block;
+        width: 100%;
+        margin-bottom: calcRem(10);
+        font-size: calcRem(12);
+        color: lighten($base-text-color, 30%);
+      }
+
+      .stat-value {
+        font-size: calcRem(14);
+        display: block;
+
+        .completed-icon {
+          color: $positive-color;
+        }
+      }
+    }
+  }
+
+  .progress-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calcRem(8);
+    background-color: #eee;
+
+    .bar {
+      background-color: $primary-color;
+      display: block;
+      height: calcRem(8);
+
+      &.finished {
+        background-color: $positive-color;
+      }
+    }
+  }
+}

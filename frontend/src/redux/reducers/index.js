@@ -5,6 +5,7 @@ import usersIndex from './usersIndexReducers';
 import userData from './userDataReducers';
 import report from './reportReducers';
 import reportsList from './reportsListReducers';
+import generalData from './generalDataReducers';
 
 export default combineReducers({
   coursesIndex,
@@ -12,5 +13,6 @@ export default combineReducers({
   userData,
   reportsList,
   report,
+  generalData,
   routing: routerReducer
 })
