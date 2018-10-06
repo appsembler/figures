@@ -285,7 +285,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
 
     Initial implementation uses serializer emthods to retrieve some data
 
-    Need to ask edX team why CourseEnrollment doesn't have a foreign key 
+    Need to ask edX team why CourseEnrollment doesn't have a foreign key
     relationship to CourseOverview
     '''
     course_id = serializers.CharField(source='id', read_only=True)
