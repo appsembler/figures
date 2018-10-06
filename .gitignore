@@ -107,6 +107,11 @@ node_modules
 
 frontend/webpack-stats.json
 
+# Sublime Text
+
+*.sublime-project
+*.sublime-workspace
+
 # Mac junk
 .DS_Store
 
