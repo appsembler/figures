@@ -1,0 +1,5 @@
+# Package dependencies for Figures docs
+
+Sphinx==1.8.1
+recommonmark==0.4.0
+
