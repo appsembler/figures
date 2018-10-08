@@ -107,7 +107,7 @@ As a top level key, add the following::
 		"figures"
 	]
 
-We suggest adding the above immediately after ``ACTIVATION_EMAIL_SUPPORT_LINL`` so that it is in alphabetical order.
+We suggest adding the above immediately after ``ACTIVATION_EMAIL_SUPPORT_LINK`` so that it is in alphabetical order.
 
 In the FEATURES section, add ``"ENABLE_FIGURES": true``::
 
