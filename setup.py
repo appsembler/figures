@@ -1,3 +1,19 @@
+'''
+
+If we want to exclude the top level 'tests' from the build, change the line:
+
+::
+
+    packages=find_packages(),
+
+to
+
+::
+
+    packages=find_packages(exclude=['tests.*', 'tests']),
+
+'''
+
 import os
 from setuptools import find_packages, setup
 
