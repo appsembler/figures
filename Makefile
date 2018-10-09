@@ -2,13 +2,14 @@
 # Work in progress makefile to simplify Figures development
 #
 
-.PHONY: help clean_tests clean_webpack_buld clean_python_build lint pip_install test
+.PHONY: help clean_tests clean_webpack_buld clean_python_build build_python lint pip_install test
 
 help:
 	@echo "Targets:"
 	@echo " - clean_test"
 	@echo " - clean_webpack_build"
 	@echo " - clean_python_build"
+	@echo " - build_python"
 	@echo " - coverage"
 	@echo " - lint"
 	@echo " - pip_install"
@@ -29,6 +30,9 @@ clean_webpack_build:
 clean_python_build:
 	rm -rf dist
 	rm -rf Figures.egg-info
+
+build_python: clean_python_build
+	python setup.py sdist bdist_wheel
 
 coverage:
 	py.test --cov-report term-missing --cov=figures tests/

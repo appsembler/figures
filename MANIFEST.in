@@ -1,5 +1,7 @@
 include LICENSE
 include README.rst
+include figures/webpack-stats.json
 recursive-include figures/static *
 recursive-include figures/templates *
 recursive-include docs *
+include tests/test-webpack-stats.json
