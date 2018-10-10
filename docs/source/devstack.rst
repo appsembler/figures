@@ -154,7 +154,7 @@ And run the following::
 
 	./manage.py lms migrate figures --settings=<environment settings>
 
-Where ``environment settings`` is ``devstack`` for the default named release. Individual organizations may tailor their environment settings. Appsmebler uses ``devstack_appsembler`` for its fork::
+Where ``environment settings`` is ``devstack`` for the default named release. Individual organizations may tailor their environment settings. Appsembler uses ``devstack_appsembler`` for its fork::
 
 	./manage.py lms migrate figures --settings=devstack_appsembler
 
