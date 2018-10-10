@@ -78,5 +78,12 @@ ENV_TOKENS = {
 }
 
 
-# This is all we need to instantiate edx-figures with default settings
-from figures.settings import FIGURES
+# Enable Figures if it is included
+# This should be the same code as used in the LMS settings
+if 'figures' in INSTALLED_APPS:
+    import figures
+    figures.update_settings(
+        WEBPACK_LOADER,
+        CELERYBEAT_SCHEDULE,
+        ENV_TOKENS.get('FIGURES', {}))
+
