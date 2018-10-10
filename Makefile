@@ -2,7 +2,7 @@
 # Work in progress makefile to simplify Figures development
 #
 
-.PHONY: help clean_tests clean_webpack_buld clean_python_build build_python lint pip_install test
+.PHONY: help clean_tests clean_webpack_buld clean_python_build build_python lint pip_install test twine_check twine_push_test
 
 help:
 	@echo "Targets:"
@@ -32,7 +32,7 @@ clean_python_build:
 	rm -rf Figures.egg-info
 
 build_python: clean_python_build
-	python setup.py sdist bdist_wheel
+	python setup.py sdist bdist_wheel --universal
 
 coverage:
 	py.test --cov-report term-missing --cov=figures tests/
@@ -48,3 +48,9 @@ test: clean
 	# For tests to run. Best to do this in a venv
 	py.test
 
+
+twine_check:
+	twine check dist/*
+
+twine_push_test:
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*

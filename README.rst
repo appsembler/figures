@@ -4,7 +4,7 @@ Figures
 
 |travis-badge| |codecov-badge|
 
-Reporting and data retrieval app for `Open edX <https://open.edx.org/>`_.
+Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
@@ -13,18 +13,10 @@ Notice and Development Status
 -----------------------------
 
 
-October 7, 2018
+October 9, 2018
 ===============
 
-**We're almost there!**
-
-We're wrapping up the final steps to roll out Figures initial release this week:
-
-* Update the installation and configuration instructions (meaning the instructions below will change)
-* Update the front end (JavaScript React app) package dependencies to addres known security issues
-* Build and add the static assets to the Figures Django reusable app
-* Push and test to PyPI testing, validate the package
-* Push to production PyPI
+Figures is now avaible on `PyPI <https://pypi.org/project/figures/>`__ for open beta testing!
 
 
 --------
@@ -33,14 +25,14 @@ Overview
 
 Figures is a reporting and data retrieval app. It plugs into the edx-platform LMS app server. Its goal is to provide site-wide and cross-course analytics that compliment Open edX's traditional course-centric analytics.
 
-To evolve Figures to meet community needs, we are keeping in mind as principles the following features, which Jill Vogel outlined in her `lightweight analytics <https://edxchange.opencraft.com/t/analytics-lighter-faster-cheaper/202>`_ post on ed Xchange:
+To evolve Figures to meet community needs, we are keeping in mind as principles the following features, which Jill Vogel outlined in her `lightweight analytics <https://edxchange.opencraft.com/t/analytics-lighter-faster-cheaper/202>`__ post on ed Xchange:
 
 * Real time (or near real time) updates
 * Lightweight deployment
 * Flexible reporting
 * Simpler contributions
 
-Please refer to the Figures `design document <https://docs.google.com/document/d/16orj6Ag1R158-J-zSBfiY31RKQ5FuSu1O5F-zpSKOg4/>`_ for more details on goals and architecture.
+Please refer to the Figures `design document <https://docs.google.com/document/d/16orj6Ag1R158-J-zSBfiY31RKQ5FuSu1O5F-zpSKOg4/>`__ for more details on goals and architecture.
 
 
 ------------
@@ -51,6 +43,9 @@ Requirements
 * Django (1.8)
 * Open edX (Ginkgo)
 
+
+.. _installation:
+
 ------------
 Installation
 ------------
@@ -58,12 +53,12 @@ Installation
 Devstack
 ========
 
-Go `here <docs/source/devstack.rst>`_ for instructions to install and run Figures in devstack.
+Go `here <docs/source/devstack.rst>`__ for instructions to install and run Figures in devstack.
 
 Production
 ==========
 
-go `here <docs/source/install.rst>`_ for instructions to install Figures in production.
+go `here <docs/source/install.rst>`__ for instructions to install Figures in production.
 
 --------------------
 Project Architecture
@@ -89,22 +84,30 @@ Testing
 The unit tests **should** be able to run on any OS that supports Python 2.7.x
 
 Clone the repo:
+
 ::
+
  	git@github.com:appsembler/figures.git
 
 Go to the project directory:
+
 ::
+
 	cd figures
 
-Create a `virtualenv <https://virtualenv.pypa.io/en/stable/>`_.
+Create a `virtualenv <https://virtualenv.pypa.io/en/stable/>`__ for Python 2.7.x.
 
 Install required Python packages:
+
 ::
+
 	pip install -r devsite/requirements.txt
 
 From the `figures` repository root directory:
+
 ::
-	pytest
+
+	py.test
 
 If all goes well, the Figures unit tests will all complete succesfully
 
@@ -112,7 +115,11 @@ If all goes well, the Figures unit tests will all complete succesfully
 Future
 ------
 
-Open edX "Hawthorn" will provide a plug-in architecture. This will hopefully simplify Figures installation.
+* Open edX "Hawthorn" will provide a plug-in architecture. This will hopefully simplify Figures installation even more
+* Backport to Ficus
+* Downloadable report files
+* Plugin architecture to extend Figures for custom data sources
+
 
 -----------------
 How to Contribute
@@ -120,6 +127,8 @@ How to Contribute
 
 
 TODO: Add details here or separate `CONTRIBUTING` file to the root of the repo
+
+.. _reporting_security_issues:
 
 -------------------------
 Reporting Security Issues
