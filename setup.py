@@ -25,13 +25,13 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='Figures',
-    version='0.1.1',
+    version='0.1.2',
     packages=find_packages(),
     include_package_data=True,
     license='MIT',
     description='Reporting and data retrieval for Open edX',
     long_description=README,
-    url='https://www.appsembler.com/',
+    url='https://github.com/appsembler/figures',
     author='Appsembler',
     author_email='opensources@appsembler.com',
     classifiers=[
@@ -39,7 +39,7 @@ setup(
         'Framework :: Django',
         'Framework :: Django :: 1.8',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT Lincense',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
