@@ -8,7 +8,7 @@
 Figures on Devstack
 ===================
 
-This document covers installing and running Figures in Ginkgo devstack.
+This document covers installing and running Figures in **Ginkgo** devstack.
 
 We use the label ``<project>`` as a placeholder for your local devstack project folder. This is the folder that contains the `Vagrantfile <https://github.com/edx/configuration/blob/open-release/ginkgo.master/vagrant/release/devstack/Vagrantfile>`_ for the project to which you are installing and running Figures. 
 
@@ -21,6 +21,10 @@ This section describes installing Figures in the Open edX "Ginkgo" release Devst
 To run the Figures front-end in Devstack, you will need to run a Webpack development server on port 3000 to serve the frontend assets. This is in addition to running the LMS. You do not need to run the CMS to run Figures in Devstack.
 
 Figures uses `Django Webpack Loader <https://github.com/owais/django-webpack-loader>`_ to serve the React app from the LMS. You can learn more about how this works by reading the Django Webpack Loader README.
+
+
+**NOTE** The following instructions assume that you are setting up devstack for active figures development.
+
 
 Prerequisites
 -------------
@@ -94,7 +98,7 @@ Figures should now be installed. To confirm, run the following::
 
 You should see a line like::
 
-	Figures (0.1.0, /edx/src/figures)
+	Figures (0.1.3, /edx/src/figures)
 
 
 4. Update the Devstack LMS env file
@@ -108,14 +112,6 @@ As a top level key, add the following::
 	]
 
 We suggest adding the above immediately after ``ACTIVATION_EMAIL_SUPPORT_LINK`` so that it is in alphabetical order.
-
-In the FEATURES section, add ``"ENABLE_FIGURES": true``::
-
-	"FEATURES": {
-		... 
-		"ENABLE_FIGURES": true,
-		...
-	}
 
 
 5. Update your edx-platform
@@ -131,17 +127,21 @@ If you edit from within the VM, your edx-platform project is here::
 
 Edit ``lms/urls.py`` to add the following to the bottom of the file::
 
-
-	if settings.FEATURES.get('ENABLE_FIGURES'):
-    	urlpatterns += (
-    		url(r'^figures/',
-    		    include('figures.urls', namespace='figures')),
-    	)
+	if 'figures' in settings.INSTALLED_APPS:
+		urlpatterns += (
+			url(r'^figures/',
+			    include('figures.urls', namespace='figures')),
+		)	
 
 
 Edit ``lms/envs/devstack.py`` to add the following to the bottom of the file::
 
-	from figures.settings import FIGURES
+	if 'figures' in INSTALLED_APPS:
+	    import figures
+	    figures.update_settings(
+	        WEBPACK_LOADER,
+	        CELERYBEAT_SCHEDULE,
+	        ENV_TOKENS.get('FIGURES', {}))
 
 
 6. Run migrations for Figures
