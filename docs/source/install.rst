@@ -144,7 +144,11 @@ At the bottom of the ``lms/envs/aws.py`` file, add the following:
 ::
 
 	if 'figures' in INSTALLED_APPS:
-		import figures.settings
+	    import figures
+	    figures.update_settings(
+	        WEBPACK_LOADER,
+	        CELERYBEAT_SCHEDULE,
+	        ENV_TOKENS.get('FIGURES', {}))
 
 **IMPORTANT**: Make sure that you do the above import *AFTER* ``WEBPACK_LOADER`` and ``CELERYBEAT_SCHEDULE`` have been declared in the LMS envs.
 
