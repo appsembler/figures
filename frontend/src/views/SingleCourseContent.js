@@ -83,7 +83,7 @@ class SingleCourseContent extends Component {
             valueHistory={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['history'] : []}
           />
           <BaseStatCard
-            cardTitle='Average time to complete'
+            cardTitle='Average days to complete'
             mainValue={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['current_month'] : 0}
             valueHistory={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['history'] : []}
           />
