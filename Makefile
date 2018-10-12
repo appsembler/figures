@@ -54,3 +54,7 @@ twine_check:
 
 twine_push_test:
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+twine_push_prod:
+	twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+
