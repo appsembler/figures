@@ -6,7 +6,7 @@
 
 help:
 	@echo "Targets:"
-	@echo " - clean_test"
+	@echo " - clean_tests"
 	@echo " - clean_webpack_build"
 	@echo " - clean_python_build"
 	@echo " - build_python"
@@ -14,6 +14,9 @@ help:
 	@echo " - lint"
 	@echo " - pip_install"
 	@echo " - test"
+	@echo " -twine_check"
+	@echo " -twine_push_test"
+	@echo " -twine_push_prod"
 
 clean_tests:
 	find tests -type f -name "*.pyc" -exec rm -f {} \;
