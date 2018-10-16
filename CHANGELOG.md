@@ -1,5 +1,5 @@
 RELEASE HISTORY
-=======
+===============
 
 ## 0.1.3
 
@@ -15,4 +15,4 @@ Packaging fix.
 
 ## 0.1.0
 
-Initial release for open .
+Initial release for open testing.
