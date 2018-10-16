@@ -91,6 +91,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
     logger.info('Starting task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
 
+    # Tahoe Filter on site/org
     for course in CourseOverview.objects.all():
         populate_single_cdm(
             course_id=course.id,

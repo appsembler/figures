@@ -58,6 +58,7 @@ UNAUTHORIZED_USER_REDIRECT_URL = '/'
 # UI Template rendering views
 #
 
+# Tahoe - Need to update this for Tahoe AMC 'admin' users
 @ensure_csrf_cookie
 @login_required
 @user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser),
@@ -88,6 +89,8 @@ class CommonAuthMixin(object):
 
     '''
     authentication_classes = (BasicAuthentication, SessionAuthentication, )
+
+    # Tahoe - Need to add new permissions class to filter on Site and AMC user
     permission_classes = (IsAuthenticated, IsStaffUser, )
 
 

@@ -15,6 +15,8 @@ class CourseDailyMetrics(TimeStampedModel):
 
     '''
     date_for = models.DateField()
+    # Tahoe - add 'org' or 'site' 
+    # Consider is that for the community, org may be a subset of site (multiple orgs in a site?)
 
     # Leaving as a simple string for initial development
     # TODO: Follow on to decide if we want to make this an FK to
@@ -48,6 +50,8 @@ class SiteDailyMetrics(TimeStampedModel):
     add FK to site and make site + date_for unique together
     '''
 
+    # Tahoe - add site and/or org member
+    # Tahoe - set uniqueness to site id + date_for
     # Date for which this record's data are collected
     date_for = models.DateField(unique=True)
     cumulative_active_user_count = models.IntegerField(blank=True, null=True)

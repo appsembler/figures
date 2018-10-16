@@ -47,6 +47,9 @@ def update_celerybeat_schedule(celerybeat_schedule_settings, figures_env_tokens=
     if not figures_env_tokens:
         figures_env_tokens = {}
 
+    # Tahoe - ok for a single site, but we want to run multiple top level (site) tasks
+    # Tahoe - consider separate RabbitMQ cluster for analytics
+
     celerybeat_schedule_settings[DAILY_METRICS_CELERY_TASK_LABEL] = {
         'task': 'figures.tasks.populate_daily_metrics',
         'schedule': crontab(

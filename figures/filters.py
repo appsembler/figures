@@ -35,8 +35,11 @@ class CourseOverviewFilter(django_filters.FilterSet):
     '''
 
     display_name = django_filters.CharFilter(lookup_type='icontains')
+
+    # Tahoe - need to ignore org filtering
     org = django_filters.CharFilter(
         name='display_org_with_default', lookup_type='iexact')
+
     number = django_filters.CharFilter(
         name='display_number_with_default', lookup_type='iexact')
     number_contains = django_filters.CharFilter(
