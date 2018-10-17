@@ -5,10 +5,9 @@
 import datetime
 import pytest
 
-from courseware.models import StudentModule
 from student.models import CourseEnrollment, CourseAccessRole
 
-from figures.helpers import next_day
+from figures.helpers import next_day, prev_day
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 
 from tests.factories import (
@@ -52,7 +51,6 @@ class TestGetCourseEnrollments(object):
         results_ce = pipeline_cdm.get_course_enrollments(
             course_id=course_id,
             date_for=self.today).values_list('id', flat=True)
-
         assert set(results_ce) == set(expected_ce)
 
 
@@ -78,20 +76,22 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         self.today = datetime.date(2018, 6, 1)
         self.course_overview = CourseOverviewFactory()
         self.course_enrollments = [CourseEnrollmentFactory(
-            course_id=self.course_overview.id) for i in range(1, 8)]
+            course_id=self.course_overview.id) for i in range(4)]
+
         self.course_access_roles = [CourseAccessRoleFactory(
             user=self.course_enrollments[i].user,
             course_id=self.course_enrollments[i].course_id,
             role=role,
             ) for i, role in enumerate(self.COURSE_ROLES)]
 
-        # create student modules mod
-        self.student_modules = [StudentModuleFactory(
-            course_id=ce.course_id,
-            student=ce.user,
-            created=ce.created,
-            modified=self.today
-            ) for ce in self.course_enrollments]
+        # create student modules for yesterday and today
+        for day in [prev_day(self.today), self.today]:
+            self.student_modules = [StudentModuleFactory(
+                course_id=ce.course_id,
+                student=ce.user,
+                created=ce.created,
+                modified=day
+                ) for ce in self.course_enrollments]
 
         self.cert_days_to_complete = [10, 20, 30]
         self.expected_avg_cert_days_to_complete = 20
@@ -129,17 +129,15 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             course_id=str(self.course_overview.id), date_for=self.today)
         assert actual_count == expected_count
 
-    def test_get_active_learners_today(self):
+    def test_get_active_learner_ids_today(self):
         '''
 
         TODO: in the setup, add student module records modified in the past and
         add filtering to the expected_count here
         '''
-        expected_recs = StudentModule.objects.filter(
-            course_id=self.course_overview.id, modified=self.today)
-        actual_recs = pipeline_cdm.get_active_learners_today(
+        recs = pipeline_cdm.get_active_learner_ids_today(
             course_id=self.course_overview.id, date_for=self.today)
-        assert actual_recs.count() == expected_recs.count()
+        assert recs.count() == len(self.course_enrollments)
 
     def test_get_average_progress(self):
         '''
