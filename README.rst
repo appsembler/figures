@@ -13,10 +13,11 @@ Notice and Development Status
 -----------------------------
 
 
-October 9, 2018
-===============
+Figures is now avaible on `PyPI <https://pypi.org/project/figures/>`__ for open beta testing on Open edX Ginkgo!
 
-Figures is now avaible on `PyPI <https://pypi.org/project/figures/>`__ for open beta testing!
+Currently it runs on Ginkgo. We're actively working on a backport to Ficus and have Hawthorn in the backlog.
+
+If you find bugs or run into issues, please submit an issue ticket to the `Figures issue tracker <https://github.com/appsembler/figures/issues>`__ on Github.
 
 
 --------
