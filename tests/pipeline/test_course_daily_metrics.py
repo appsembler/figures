@@ -129,7 +129,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             course_id=str(self.course_overview.id), date_for=self.today)
         assert actual_count == expected_count
 
-    def test_get_active_learners_today(self):
+    def test_get_active_learner_ids_today(self):
         '''
 
         TODO: in the setup, add student module records modified in the past and
@@ -137,7 +137,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         '''
         expected_recs = StudentModule.objects.filter(
             course_id=self.course_overview.id, modified=self.today)
-        actual_recs = pipeline_cdm.get_active_learners_today(
+        actual_recs = pipeline_cdm.get_active_learner_ids_today(
             course_id=self.course_overview.id, date_for=self.today)
         assert actual_recs.count() == expected_recs.count()
 

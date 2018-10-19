@@ -22,10 +22,11 @@ parameter to support multi-tenancy
 '''
 
 import datetime
+from decimal import Decimal
 import math
 
 from django.contrib.auth import get_user_model
-from django.db.models import Avg, Max, Sum
+from django.db.models import Avg, Max
 
 from certificates.models import GeneratedCertificate
 from courseware.courses import get_course_by_id
@@ -351,7 +352,8 @@ def get_course_average_progress_for_time_period(start_date, end_date, course_id)
 
     qs = CourseDailyMetrics.objects.filter(**filter_args)
     if qs:
-        return qs.aggregate(average=Avg('average_progress'))['average']
+        value = qs.aggregate(average=Avg('average_progress'))['average']
+        return float(Decimal(value).quantize(Decimal('.00')))
     else:
         return 0.0
 
