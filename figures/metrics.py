@@ -384,7 +384,7 @@ def get_course_num_learners_completed_for_time_period(start_date, end_date, cour
 
     qs = CourseDailyMetrics.objects.filter(**filter_args)
     if qs:
-        return qs.aggregate(sum=Sum('num_learners_completed'))['sum']
+        return qs.aggregate(max=Max('num_learners_completed'))['max']
     else:
         return 0
 

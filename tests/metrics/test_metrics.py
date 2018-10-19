@@ -395,7 +395,7 @@ class TestCourseMetricsGetters(object):
         assert actual == self.get_average('average_days_to_complete', int)
 
     def test_get_course_num_learners_completed_for_time_period(self):
-        expected = sum(
+        expected = max(
             [rec.num_learners_completed for rec in self.course_daily_metrics])
         actual = metrics.get_course_num_learners_completed_for_time_period(
             start_date=self.data_start_date,
