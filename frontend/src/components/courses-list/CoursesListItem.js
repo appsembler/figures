@@ -59,7 +59,7 @@ class CoursesListItem extends Component {
             </div>
             <div className={styles['single-stat']}>
               <span className={styles['stat-label']}>
-                Average time to completion:
+                Average days to complete:
               </span>
               <span className={styles['stat-value']}>
                 {this.props.averageCompletionTime ? this.props.averageCompletionTime : 'n/a'}
