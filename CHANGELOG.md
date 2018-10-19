@@ -1,4 +1,4 @@
-RELEASE HISTORY
+Release History
 ===============
 
 ## 0.1.3
