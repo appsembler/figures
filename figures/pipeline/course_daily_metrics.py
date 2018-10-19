@@ -248,7 +248,7 @@ class CourseDailyMetricsLoader(object):
     def get_data(self, date_for):
         return self.extractor.extract(
             course_id=self.course_id,
-            data_for=date_for)
+            date_for=date_for)
 
     def load(self, date_for=None, force_update=False, **kwargs):
         '''
