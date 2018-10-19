@@ -1,6 +1,10 @@
 Release History
 ===============
 
+## 0.1.4
+
+Metrics and pipeline bug fixes, UI cleanup, documentation updates.
+
 ## 0.1.3
 
 Updated how settings integrate with the Open edX LMS and  updated related documentation.
