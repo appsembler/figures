@@ -154,7 +154,8 @@ def get_average_days_to_complete(course_id, date_for):
 
 def get_num_learners_completed(course_id, date_for):
     certificates = GeneratedCertificate.objects.filter(
-        course_id=as_course_key(course_id))
+        course_id=as_course_key(course_id),
+        created_date__lt=next_day(date_for))
     return certificates.count()
 
 # Formal extractor classes
@@ -216,11 +217,10 @@ class CourseDailyMetricsExtractor(object):
         # we can do a lambda for course_enrollments to get the count
 
         data['enrollment_count'] = course_enrollments.count()
-
-        active_learners_today = get_active_learner_ids_today(
+        active_learner_ids_today = get_active_learner_ids_today(
             course_id, date_for,)
-        if active_learners_today:
-            active_learners_today = active_learners_today.count()
+        if active_learner_ids_today:
+            active_learners_today = active_learner_ids_today.count()
         else:
             active_learners_today = 0
 
@@ -244,7 +244,7 @@ class CourseDailyMetricsLoader(object):
     def get_data(self, date_for):
         return self.extractor.extract(
             course_id=self.course_id,
-            data_for=date_for)
+            date_for=date_for)
 
     def load(self, date_for=None, force_update=False, **kwargs):
         '''

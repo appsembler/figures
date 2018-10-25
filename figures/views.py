@@ -298,13 +298,6 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         '''
-        <QueryDict: {u'foo': [u'bar'], u'ids': [u'1,2,3']}>
-
-        http://localhost:8000/figures/api/learners/detail/?ids=1,2,3&foo=bar&grue=11&grue=2&grue=3&zub=[5,10,20]
-        self.request.query_params
-
-        <QueryDict: {u'zub': [u'[5,10,20]'], u'grue': [u'11', u'2', u'3'],
-        u'foo': [u'bar'], u'ids': [u'1,2,3']}>
         '''
         queryset = super(LearnerDetailsViewSet, self).get_queryset()
         return queryset
