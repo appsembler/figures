@@ -217,7 +217,6 @@ class CourseDailyMetricsExtractor(object):
         # we can do a lambda for course_enrollments to get the count
 
         data['enrollment_count'] = course_enrollments.count()
-
         active_learner_ids_today = get_active_learner_ids_today(
             course_id, date_for,)
         if active_learner_ids_today:
