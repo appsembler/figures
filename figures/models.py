@@ -3,8 +3,11 @@ Defines Figures models
 
 '''
 
+from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+
+from jsonfield import JSONField
 
 from model_utils.models import TimeStampedModel
 
@@ -64,3 +67,35 @@ class SiteDailyMetrics(TimeStampedModel):
 
     def __str__(self):
         return "{} {}".format(self.id, self.date_for)
+
+
+@python_2_unicode_compatible
+class PipelineError(TimeStampedModel):
+    '''
+    Captures errors when running Figures pipeline.
+
+    TODO: Add organization foreign key when we add multi-tenancy
+    '''
+    UNSPECIFIED_DATA = 'UNS'
+    GRADES_DATA = 'GRA'
+    COURSE_DATA = 'COU'
+    SITE_DATA = 'SIT'
+
+    ERROR_TYPE_CHOICES = (
+        (UNSPECIFIED_DATA, 'Unspecified data error'),
+        (GRADES_DATA, 'Grades data error'),
+        (COURSE_DATA, 'Course data error'),
+        (SITE_DATA, 'Site data error'),
+        )
+    error_type = models.CharField(
+        max_length=3, choices=ERROR_TYPE_CHOICES, default=UNSPECIFIED_DATA)
+    error_data = JSONField()
+    # Attributes for convenient querying
+    course_id = models.CharField(max_length=255, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created']
+
+    def __str__(self):
+        return "{}, {}, {}".format(self.id, self.created, self.error_type)
