@@ -8,7 +8,12 @@ TODO:
 import datetime
 import pytest
 
+from django.contrib.auth import get_user_model
 from django.utils.timezone import utc
+
+from openedx.core.djangoapps.content.course_overviews.models import (
+    CourseOverview,
+)
 
 from figures.helpers import prev_day
 from figures.models import SiteDailyMetrics
@@ -153,8 +158,12 @@ class TestSiteDailyMetricsExtractor(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.date_for = datetime.date(2018, 10, 1)
-        self.users = [UserFactory() for i in range(0, 3)]
-        self.course_overviews = [CourseOverviewFactory() for i in range(0, 3)]
+        self.users = [UserFactory(
+            date_joined=self.date_for - datetime.timedelta(days=60)
+            ) for i in range(0, 3)]
+        self.course_overviews = [CourseOverviewFactory(
+            created=self.date_for - datetime.timedelta(days=60)
+            ) for i in range(0, 3)]
         self.cdm_recs = [CourseDailyMetricsFactory(
             date_for=self.date_for,
             **cdm
@@ -167,10 +176,16 @@ class TestSiteDailyMetricsExtractor(object):
         expected_results = dict(
             cumulative_active_user_count=65,
             todays_active_user_count=15,
-            total_user_count=3,
+            total_user_count=len(self.users),
             course_count=len(CDM_INPUT_TEST_DATA),
             total_enrollment_count=150,
         )
+
+        for course in CourseOverview.objects.all():
+            assert course.created.date() < self.date_for
+        for user in get_user_model().objects.all():
+            assert user.date_joined.date() < self.date_for
+
         actual = pipeline_sdm.SiteDailyMetricsExtractor().extract(
             date_for=self.date_for)
         for key, value in expected_results.iteritems():
