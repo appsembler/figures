@@ -3,11 +3,15 @@
 '''
 
 import datetime
+import mock
 import pytest
+
+from django.core.exceptions import PermissionDenied
 
 from student.models import CourseEnrollment, CourseAccessRole
 
 from figures.helpers import next_day, prev_day
+from figures.models import PipelineError
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 
 from tests.factories import (
@@ -162,6 +166,21 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         # hardcode the expected value
         assert actual == 0.5
 
+    @mock.patch('figures.metrics.LearnerCourseGrades.course_progress',
+                side_effect=PermissionDenied('mock-failure'))
+    def test_get_average_progress_error(self, mock_lcg):
+        assert PipelineError.objects.count() == 0
+        course_enrollments = CourseEnrollment.objects.filter(
+            course_id=self.course_overview.id)
+
+        results = pipeline_cdm.get_average_progress(
+                course_id=self.course_overview.id,
+                date_for=self.today,
+                course_enrollments=course_enrollments
+                )
+        assert results == pytest.approx(0.0)
+        assert PipelineError.objects.count() == course_enrollments.count()
+
     def test_get_days_to_complete(self):
         '''
 
@@ -198,7 +217,6 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         actual = pipeline_cdm.get_num_learners_completed(
             course_id=self.course_overview.id,
             date_for=self.today)
-
         assert actual == len(self.generated_certificates)
 
 

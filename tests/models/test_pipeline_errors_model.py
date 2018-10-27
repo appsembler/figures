@@ -41,8 +41,7 @@ class TestPipelineError(object):
         assert obj.error_type == error_type
 
     def test_str(self):
-        obj = PipelineError(
+        obj = PipelineError.objects.create(
             error_data=self.error_data,
             error_type=PipelineError.GRADES_DATA)
-        obj.save()
         assert str(obj) == '{}, {}, {}'.format(obj.id, obj.created, obj.error_type)

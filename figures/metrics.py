@@ -34,7 +34,6 @@ from courseware.models import StudentModule
 from student.models import CourseEnrollment
 
 from figures.compat import CourseGradeFactory, chapter_grade_values
-
 from figures.helpers import (
     as_course_key,
     as_date,
@@ -77,8 +76,13 @@ class LearnerCourseGrades(object):
     TODO: Make convenience method to instantiate from a GeneratedCertificate
     '''
 
-    def __init__(self, user_id, course_id):
+    def __init__(self, user_id, course_id, **kwargs):
         '''
+
+        If CourseGradeFactory is unable to retrieve the course blocks, raises
+
+            django.core.exceptions.PermissionDenied(
+                "User does not have access to this course")
         '''
         self.learner = get_user_model().objects.get(id=user_id)
         self.course = get_course_by_id(course_key=as_course_key(course_id))
@@ -171,6 +175,17 @@ class LearnerCourseGrades(object):
         else:
             return float(progress_details['sections_worked']) / float(
                 progress_details['count'])
+
+    @staticmethod
+    def course_progress(course_enrollment):
+        lcg = LearnerCourseGrades(
+                user_id=course_enrollment.user.id,
+                course_id=course_enrollment.course_id,
+        )
+        course_progress_details = lcg.progress()
+        return dict(
+            course_progress_details=course_progress_details,
+            progress_percent=lcg.progress_percent(course_progress_details))
 
 
 '''
