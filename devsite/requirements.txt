@@ -30,6 +30,13 @@ django-webpack-loader==0.5.0
 django-model-utils==2.3.1
 
 ##
+## Documentation (Sphinx) dependencies
+##
+
+Sphinx==1.8.1
+recommonmark==0.4.0
+
+##
 ## Open edX package dependencies
 ##
 
