@@ -11,7 +11,7 @@ Please note that we're currently focused on developing and troubleshooting Figur
 
 If you encounter any issues with installing or running Figures, please first ensure that your installation is working correctly and that the problem is with Figures. 
 
-* `Open edX installation instructions <https://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/>`__
+Please see the documentation `Installing, Configuring, and Running the Open edX Platform <https://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/>`__ for guidance in getting Open edX set up.
 
 If you run into issues installing Open edX and cannot find an answer in the above Open edX installation instructions, you can post your issue in Open edX slack #general or #ops channels.
 
