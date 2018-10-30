@@ -30,6 +30,13 @@ django-webpack-loader==0.5.0
 django-model-utils==2.3.1
 
 ##
+## Documentation (Sphinx) dependencies
+##
+
+Sphinx==1.8.1
+recommonmark==0.4.0
+
+##
 ## Open edX package dependencies
 ##
 
@@ -40,6 +47,7 @@ edx-opaque-keys==0.4
 ## Pytest dependencies
 ##
 
+coverage==4.5.1
 factory-boy==2.5.1
 pylint==1.8.2
 pylint-django==0.9.1
@@ -47,3 +55,4 @@ pytest==3.1.3
 pytest-django==3.1.2
 pytest-mock==1.7.1
 pytest-pythonpath==0.7.2
+pytest-cov==2.6.0

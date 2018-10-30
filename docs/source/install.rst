@@ -6,6 +6,18 @@ Installing Figures
 
 This document describes how to install and configure Figures to run in Open edX.
 
+
+Please note that we're currently focused on developing and troubleshooting Figures, and *not* general Open edX/devstack issues.
+
+If you encounter any issues with installing or running Figures, please first ensure that your installation is working correctly and that the problem is with Figures. 
+
+Please see the documentation `Installing, Configuring, and Running the Open edX Platform <https://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/>`__ for guidance in getting Open edX set up.
+
+If you run into issues installing Open edX and cannot find an answer in the above Open edX installation instructions, you can post your issue in Open edX slack #general or #ops channels.
+
+Once you know that you've got your base Open edX environment working and you are certain the issue with with Figures, please file an issue in `Figures github issues <https://github.com/appsembler/figures/issues>`__.
+
+
 ------------
 Requirements
 ------------
