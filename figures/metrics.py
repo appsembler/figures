@@ -93,6 +93,12 @@ class LearnerCourseGrades(object):
         return u'{} - {} - {} '.format(
             self.course.id, self.learner.id, self.learner.username)
 
+    @staticmethod
+    def from_course_enrollment(course_enrollment):
+        return LearnerCourseGrades(
+            user_id=course_enrollment.user.id,
+            course_id=course_enrollment.course_id)
+
     @property
     def chapter_grades(self):
         '''convenience wrapper, mostly as a reminder'''
