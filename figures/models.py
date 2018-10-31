@@ -76,10 +76,10 @@ class PipelineError(TimeStampedModel):
 
     TODO: Add organization foreign key when we add multi-tenancy
     '''
-    UNSPECIFIED_DATA = 'UNS'
-    GRADES_DATA = 'GRA'
-    COURSE_DATA = 'COU'
-    SITE_DATA = 'SIT'
+    UNSPECIFIED_DATA = 'UNSPECIFIED'
+    GRADES_DATA = 'GRADES'
+    COURSE_DATA = 'COURSE'
+    SITE_DATA = 'SITE'
 
     ERROR_TYPE_CHOICES = (
         (UNSPECIFIED_DATA, 'Unspecified data error'),

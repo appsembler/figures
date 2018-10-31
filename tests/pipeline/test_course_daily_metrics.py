@@ -1,6 +1,6 @@
-'''
+"""Tests the pipeline to extract data and populate the CourseDailyMetrics model
 
-'''
+"""
 
 import datetime
 import mock
@@ -28,9 +28,6 @@ class TestGetCourseEnrollments(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        '''
-
-        '''
         self.today = datetime.date(2018, 6, 1)
         self.course_overviews = [CourseOverviewFactory() for i in range(1, 3)]
         self.course_enrollments = []
@@ -39,15 +36,13 @@ class TestGetCourseEnrollments(object):
                 [CourseEnrollmentFactory(course_id=co.id) for i in range(1, 3)])
 
     def test_get_all_course_enrollments(self):
-        '''
+        """
         Sanity check test that we have all the course enrollments in
         self.course_enrollments
-        '''
+        """
         assert len(self.course_enrollments) == CourseEnrollment.objects.count()
 
     def test_get_course_enrollments_for_course(self):
-        '''
-        '''
         course_id = self.course_overviews[0].id
         expected_ce = CourseEnrollment.objects.filter(
             course_id=course_id,
@@ -60,7 +55,7 @@ class TestGetCourseEnrollments(object):
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsPipelineFunctions(object):
-    '''
+    """
     Initial implementation is focused on setting a baseline and providing code
     coverage. It also only tests with the date_for of 'now' and creates test
     data with dates in the past.
@@ -72,7 +67,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     TODO: Update test data for a series of dates and test 'date_for' for a date
     in the past where test data will contain data before on and after the
     date we'll pass as the 'date_for' parameter
-    '''
+    """
     COURSE_ROLES = ['ccx_coach', 'instructor', 'staff']
 
     @pytest.fixture(autouse=True)
@@ -110,9 +105,9 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             ) for i, days in enumerate(self.cert_days_to_complete)]
 
     def test_get_num_enrolled_in_exclude_admins(self):
-        '''
+        """
 
-        '''
+        """
 
         # Get the number of course enrollments
         ce_count = CourseEnrollment.objects.filter(
@@ -134,22 +129,22 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         assert actual_count == expected_count
 
     def test_get_active_learner_ids_today(self):
-        '''
+        """
 
         TODO: in the setup, add student module records modified in the past and
         add filtering to the expected_count here
-        '''
+        """
         recs = pipeline_cdm.get_active_learner_ids_today(
             course_id=self.course_overview.id, date_for=self.today)
         assert recs.count() == len(self.course_enrollments)
 
     def test_get_average_progress(self):
-        '''
+        """
         [John] This test needs work. The function it is testing needs work too
         for testability. We don't want to reproduce the function's behavior, we
         just want to be able to set up the source data with expected output and
         go.
-        '''
+        """
         course_enrollments = CourseEnrollment.objects.filter(
             course_id=self.course_overview.id)
 
@@ -166,8 +161,10 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         # hardcode the expected value
         assert actual == 0.5
 
-    @mock.patch('figures.metrics.LearnerCourseGrades.course_progress',
-                side_effect=PermissionDenied('mock-failure'))
+    @mock.patch(
+        'figures.metrics.LearnerCourseGrades.course_progress',
+        side_effect=PermissionDenied('mock-failure')
+    )
     def test_get_average_progress_error(self, mock_lcg):
         assert PipelineError.objects.count() == 0
         course_enrollments = CourseEnrollment.objects.filter(
@@ -182,9 +179,6 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         assert PipelineError.objects.count() == course_enrollments.count()
 
     def test_get_days_to_complete(self):
-        '''
-
-        '''
         expected = dict(
             days=self.cert_days_to_complete,
             errors=[])
@@ -196,24 +190,18 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         assert actual == expected
 
     def test_calc_average_days_to_complete(self):
-        '''
-        '''
         actual = pipeline_cdm.calc_average_days_to_complete(
             self.cert_days_to_complete)
 
         assert actual == self.expected_avg_cert_days_to_complete
 
     def test_get_average_days_to_complete(self):
-        '''
-        '''
         actual = pipeline_cdm.get_average_days_to_complete(
             course_id=self.course_overview.id,
             date_for=self.today)
         assert actual == self.expected_avg_cert_days_to_complete
 
     def test_get_num_learners_completed(self):
-        '''
-        '''
         actual = pipeline_cdm.get_num_learners_completed(
             course_id=self.course_overview.id,
             date_for=self.today)
@@ -222,12 +210,12 @@ class TestCourseDailyMetricsPipelineFunctions(object):
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsExtractor(object):
-    '''
+    """
     Provides minimal checking that CourseDailyMetricsExtractor works
 
     * Verifies that we can create an instance of the class
     * Verifies that we can call the extract method
-    '''
+    """
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.course_enrollments = [CourseEnrollmentFactory() for i in range(1, 5)]
@@ -241,9 +229,8 @@ class TestCourseDailyMetricsExtractor(object):
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsLoader(object):
-    '''Provides minimal checking that CourseDailyMetricsLoader works
-
-    '''
+    """Provides minimal checking that CourseDailyMetricsLoader works
+    """
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.course_enrollments = [CourseEnrollmentFactory() for i in range(1, 5)]
