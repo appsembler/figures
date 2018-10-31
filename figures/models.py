@@ -88,7 +88,7 @@ class PipelineError(TimeStampedModel):
         (SITE_DATA, 'Site data error'),
         )
     error_type = models.CharField(
-        max_length=3, choices=ERROR_TYPE_CHOICES, default=UNSPECIFIED_DATA)
+        max_length=255, choices=ERROR_TYPE_CHOICES, default=UNSPECIFIED_DATA)
     error_data = JSONField()
     # Attributes for convenient querying
     course_id = models.CharField(max_length=255, blank=True)
