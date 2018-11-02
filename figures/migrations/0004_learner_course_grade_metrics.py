@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('figures', '0002_course_daily_metrics'),
+        ('figures', '0003_pipelineerror'),
     ]
 
     operations = [
@@ -32,6 +32,10 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ('date_for', 'user__username', 'course_id'),
             },
+        ),
+        migrations.AlterModelOptions(
+            name='pipelineerror',
+            options={'ordering': ['-created']},
         ),
         migrations.AlterUniqueTogether(
             name='learnercoursegrademetrics',
