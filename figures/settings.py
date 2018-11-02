@@ -1,9 +1,12 @@
-'''
+"""
 This module provides default values for running Figures along with functions to
 add entries to the Django conf settings needed to run Figures.
 
-'''
+"""
+
+import copy
 import os
+import sys
 
 from celery.schedules import crontab
 
@@ -12,9 +15,20 @@ DEFAULT_PAGINATION_LIMIT = 20
 
 DAILY_METRICS_CELERY_TASK_LABEL = 'figures-populate-daily-metrics'
 
+DEFAULT_LOG_PIPELINE_ERRORS_TO_DB = True
+
+env_tokens = {}
+
+
+def log_pipeline_errors_to_db():
+    """Capture pipeline errors to the figures.models.PipelineError model
+    """
+    return bool(env_tokens.get('LOG_PIPELINE_ERRORS_TO_DB',
+                               DEFAULT_LOG_PIPELINE_ERRORS_TO_DB))
+
 
 def update_webpack_loader(webpack_loader_settings, figures_env_tokens=None):
-    '''
+    """
     figures_env_tokens is a dict retrieved from the ``ENV_TOKENS`` in the LMS
     settings
 
@@ -22,7 +36,7 @@ def update_webpack_loader(webpack_loader_settings, figures_env_tokens=None):
 
         django.conf.settings.ENV_TOKENS.get('FIGURES', {})
 
-    '''
+    """
     # Specify the 'figures' package directory
     app_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -41,9 +55,9 @@ def update_webpack_loader(webpack_loader_settings, figures_env_tokens=None):
 
 
 def update_celerybeat_schedule(celerybeat_schedule_settings, figures_env_tokens=None):
-    '''Initial implementation for the Figures pipeline job schedule configuration
+    """Initial implementation for the Figures pipeline job schedule configuration
 
-    '''
+    """
     if not figures_env_tokens:
         figures_env_tokens = {}
 
@@ -56,10 +70,19 @@ def update_celerybeat_schedule(celerybeat_schedule_settings, figures_env_tokens=
         }
 
 
+def update_env_tokens(figures_env_tokens):
+    """Captures Figures settings declared in the ``lms.env.json`` file
+
+    This is used to allow configuration driven behavior in Figures
+    """
+    thismodule = sys.modules[__name__]
+    setattr(thismodule, 'env_tokens', copy.deepcopy(figures_env_tokens))
+
+
 def update_settings(webpack_loader_settings,
                     celerybeat_schedule_settings,
                     figures_env_tokens):
-    '''Adds entries to the environment settings
+    """Adds entries to the environment settings
     This is a convenience method that calls the following:
 
     ::
@@ -77,7 +100,7 @@ def update_settings(webpack_loader_settings,
             "ENABLE_DAILY_METRICS_IMPORT": false
         },
 
-    '''
+    """
     update_webpack_loader(webpack_loader_settings, figures_env_tokens)
 
     enable_celerybeat_job = True
@@ -86,3 +109,4 @@ def update_settings(webpack_loader_settings,
             'ENABLE_DAILY_METRICS_IMPORT', True)
     if enable_celerybeat_job:
         update_celerybeat_schedule(celerybeat_schedule_settings, figures_env_tokens)
+    update_env_tokens(figures_env_tokens)

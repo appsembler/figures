@@ -1,20 +1,21 @@
-'''
-Defines Figures models
+"""Defines Figures models
 
-'''
+"""
 
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+
+from jsonfield import JSONField
 
 from model_utils.models import TimeStampedModel
 
 
 @python_2_unicode_compatible
 class CourseDailyMetrics(TimeStampedModel):
-    '''Metrics data specific to an individual course
+    """Metrics data specific to an individual course
 
-    '''
+    """
     date_for = models.DateField()
 
     # Leaving as a simple string for initial development
@@ -44,10 +45,10 @@ class CourseDailyMetrics(TimeStampedModel):
 
 @python_2_unicode_compatible
 class SiteDailyMetrics(TimeStampedModel):
-    '''
+    """
     TODO: Add Multi-site support
     add FK to site and make site + date_for unique together
-    '''
+    """
 
     # Date for which this record's data are collected
     date_for = models.DateField(unique=True)
@@ -108,3 +109,34 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     def __str__(self):
         return "{} {} {} {}".format(
             self.id, self.date_for, self.user.username, self.course_id)
+
+
+class PipelineError(TimeStampedModel):
+    """
+    Captures errors when running Figures pipeline.
+
+    TODO: Add organization foreign key when we add multi-tenancy
+    """
+    UNSPECIFIED_DATA = 'UNSPECIFIED'
+    GRADES_DATA = 'GRADES'
+    COURSE_DATA = 'COURSE'
+    SITE_DATA = 'SITE'
+
+    ERROR_TYPE_CHOICES = (
+        (UNSPECIFIED_DATA, 'Unspecified data error'),
+        (GRADES_DATA, 'Grades data error'),
+        (COURSE_DATA, 'Course data error'),
+        (SITE_DATA, 'Site data error'),
+        )
+    error_type = models.CharField(
+        max_length=255, choices=ERROR_TYPE_CHOICES, default=UNSPECIFIED_DATA)
+    error_data = JSONField()
+    # Attributes for convenient querying
+    course_id = models.CharField(max_length=255, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created']
+
+    def __str__(self):
+        return "{}, {}, {}".format(self.id, self.created, self.error_type)

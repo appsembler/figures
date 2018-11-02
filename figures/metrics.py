@@ -31,9 +31,9 @@ from django.db.models import Avg, Max
 from certificates.models import GeneratedCertificate
 from courseware.courses import get_course_by_id
 from courseware.models import StudentModule
-from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
 from student.models import CourseEnrollment
 
+from figures.compat import CourseGradeFactory, chapter_grade_values
 from figures.helpers import (
     as_course_key,
     as_date,
@@ -76,12 +76,13 @@ class LearnerCourseGrades(object):
     TODO: Make convenience method to instantiate from a GeneratedCertificate
     '''
 
-    def __init__(self, user_id, course_id):
+    def __init__(self, user_id, course_id, **kwargs):
         '''
-        Tidbits:
-        courseware_summary = course_grade.chapter_grades.values()
-        grade_summary = course_grade.summary
 
+        If CourseGradeFactory is unable to retrieve the course blocks, raises
+
+            django.core.exceptions.PermissionDenied(
+                "User does not have access to this course")
         '''
         self.learner = get_user_model().objects.get(id=user_id)
         self.course = get_course_by_id(course_key=as_course_key(course_id))
@@ -125,10 +126,15 @@ class LearnerCourseGrades(object):
     def sections(self, only_graded=False, **kwargs):
         '''
         yields objects of type:
-        lms.djangoapps.grades.new.subsection_grade.SubsectionGrade
+            lms.djangoapps.grades.new.subsection_grade.SubsectionGrade
+
+        Compatibility:
+
+        In Ficus, at least in the default devstack data, chapter_grades is a list
+        of dicts
         '''
 
-        for chapter_grade in self.course_grade.chapter_grades.values():
+        for chapter_grade in chapter_grade_values(self.course_grade.chapter_grades):
             for section in chapter_grade['sections']:
                 if not only_graded or (only_graded and self.is_section_graded(section)):
                     yield section
@@ -175,6 +181,17 @@ class LearnerCourseGrades(object):
         else:
             return float(progress_details['sections_worked']) / float(
                 progress_details['count'])
+
+    @staticmethod
+    def course_progress(course_enrollment):
+        lcg = LearnerCourseGrades(
+                user_id=course_enrollment.user.id,
+                course_id=course_enrollment.course_id,
+        )
+        course_progress_details = lcg.progress()
+        return dict(
+            course_progress_details=course_progress_details,
+            progress_percent=lcg.progress_percent(course_progress_details))
 
 
 '''

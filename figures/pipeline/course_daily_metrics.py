@@ -19,8 +19,9 @@ from student.models import CourseEnrollment
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
 
 from figures.helpers import as_course_key, as_date, next_day, prev_day
-from figures.metrics import LearnerCourseGrades
-from figures.models import CourseDailyMetrics
+import figures.metrics
+from figures.models import CourseDailyMetrics, PipelineError
+from figures.pipeline.logger import log_error
 from figures.serializers import CourseIndexSerializer
 
 # TODO: Move extractors to figures.pipeline.extract module
@@ -81,11 +82,29 @@ def get_average_progress(course_id, date_for, course_enrollments):
     progress = []
 
     for ce in course_enrollments:
-        lcg = LearnerCourseGrades(user_id=ce.user.id, course_id=course_id)
-        progress.append(lcg.progress_percent())
-
+        try:
+            course_progress = figures.metrics.LearnerCourseGrades.course_progress(ce)
+        except Exception as e:
+            error_data = dict(
+                msg='Unable to get course blocks',
+                username=ce.user.username,
+                course_id=str(ce.course_id),
+                exception=str(e),
+                )
+            log_error(
+                error_data=error_data,
+                error_type=PipelineError.GRADES_DATA,
+                user=ce.user,
+                course_id=ce.course_id,
+                )
+            course_progress = dict(
+                progress_percent=0.0,
+                course_progress_details=None)
+        if course_progress:
+            progress.append(course_progress)
     if len(progress):
-        average_progress = float(sum(progress)) / float(len(progress))
+        progress_percent = [rec['progress_percent'] for rec in progress]
+        average_progress = float(sum(progress_percent)) / float(len(progress_percent))
     else:
         average_progress = 0.0
 

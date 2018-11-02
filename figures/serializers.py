@@ -42,7 +42,8 @@ from figures.metrics import (
     get_monthly_history_metric,
     LearnerCourseGrades,
     )
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import CourseDailyMetrics, SiteDailyMetrics, PipelineError
+from figures.pipeline.logger import log_error
 
 
 # Temporarily hardcoding here
@@ -533,6 +534,9 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
         '''
         TODO: Add this to metrics, then we'll need to store per-user progress data
         For initial implementation, we get the
+
+        TODO: We will cache course grades, so we'll refactor this method to  use
+        the cache, so we'll likely change the call to LearnerCourseGrades
         '''
         cert = GeneratedCertificate.objects.filter(
             user=course_enrollment.user,
@@ -544,13 +548,22 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
         else:
             course_completed = False
 
-        lcg = LearnerCourseGrades(
-            user_id=course_enrollment.user.id,
-            course_id=course_enrollment.course_id,
-            )
-
-        course_progress_details = lcg.progress()
-        course_progress = lcg.progress_percent(course_progress_details)
+        try:
+            course_progress = LearnerCourseGrades.course_progress(course_enrollment)
+        except Exception as e:
+            error_data = dict(
+                msg='Unable to get course blocks',
+                username=course_enrollment.user.username,
+                course_id=str(course_enrollment.course_id),
+                exception=str(e)
+                )
+            log_error(
+                error_data=error_data,
+                error_type=PipelineError.GRADE_DATA,
+                )
+            course_progress = dict(
+                progress_percent=0.0,
+                course_progress_details=None)
 
         # Empty list initially, then will fill after we implement capturing
         # learner specific progress
@@ -558,8 +571,8 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
 
         data = dict(
             course_completed=course_completed,
-            course_progress=course_progress,
-            course_progress_details=course_progress_details,
+            course_progress=course_progress['progress_percent'],
+            course_progress_details=course_progress['course_progress_details'],
             course_progress_history=course_progress_history,
             )
         return data

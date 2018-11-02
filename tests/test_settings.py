@@ -6,10 +6,20 @@ each of the Figures entries to ``WEBPACK_LOADER`` and ``CELERYBEAT_SCHEDULE``
 are correctly assigned
 '''
 
+import mock
 import pytest
 
 from figures import update_settings
 from figures import settings as figures_settings
+
+
+@pytest.mark.parametrize('env_tokens, expected ', [
+        ({'LOG_PIPELINE_ERRORS_TO_DB': True}, True),
+        ({'LOG_PIPELINE_ERRORS_TO_DB': False}, False),
+    ])
+def test_log_pipeline_errors_to_db_true(env_tokens, expected):
+    with mock.patch('figures.settings.env_tokens', env_tokens):
+        assert figures_settings.log_pipeline_errors_to_db() == expected
 
 
 class TestUpdateSettings(object):
@@ -54,6 +64,7 @@ class TestUpdateSettings(object):
         '''
 
         '''
+        figures_settings.env_tokens = dict()
         update_settings(
             webpack_loader_settings=self.webpack_loader_settings,
             celerybeat_schedule_settings=self.celerybeat_schedule_settings,
@@ -66,3 +77,5 @@ class TestUpdateSettings(object):
             self.validate_celerybeat_schedule_settings()
         else:
             assert self.celery_task_name not in self.celerybeat_schedule_settings
+
+        assert figures_settings.env_tokens == figures_env_tokens
