@@ -1,4 +1,4 @@
-'''
+"""
 
 We're starting with doing monthly metrics. Then we will refactor to provide
 programmatic timespans
@@ -19,7 +19,7 @@ sure that any code that calls these methods is properly authorizing the user
 After initial production release, We will follow on with adding 'site' as a
 parameter to support multi-tenancy
 
-'''
+"""
 
 import datetime
 from decimal import Decimal
@@ -50,8 +50,8 @@ from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
 def period_str(month_tuple, format='%Y/%m'):
-    '''Returns display date for the given month tuple containing year, month, day
-    '''
+    """Returns display date for the given month tuple containing year, month, day
+    """
     return datetime.date(*month_tuple).strftime(format)
 
 
@@ -61,7 +61,7 @@ def period_str(month_tuple, format='%Y/%m'):
 
 
 class LearnerCourseGrades(object):
-    '''
+    """
     TODO: create lazy method to get the CourseOverview object
 
     Members
@@ -74,16 +74,16 @@ class LearnerCourseGrades(object):
     values:
 
     TODO: Make convenience method to instantiate from a GeneratedCertificate
-    '''
+    """
 
     def __init__(self, user_id, course_id, **kwargs):
-        '''
+        """
 
         If CourseGradeFactory is unable to retrieve the course blocks, raises
 
             django.core.exceptions.PermissionDenied(
                 "User does not have access to this course")
-        '''
+        """
         self.learner = get_user_model().objects.get(id=user_id)
         self.course = get_course_by_id(course_key=as_course_key(course_id))
         self.course._field_data_cache = {}  # pylint: disable=protected-access
@@ -102,7 +102,8 @@ class LearnerCourseGrades(object):
 
     @property
     def chapter_grades(self):
-        '''convenience wrapper, mostly as a reminder'''
+        """Convenience wrapper, mostly as a reminder
+        """
         return self.course_grade.chapter_grades
 
     def certificates(self):
@@ -124,7 +125,7 @@ class LearnerCourseGrades(object):
             return False
 
     def sections(self, only_graded=False, **kwargs):
-        '''
+        """
         yields objects of type:
             lms.djangoapps.grades.new.subsection_grade.SubsectionGrade
 
@@ -132,7 +133,7 @@ class LearnerCourseGrades(object):
 
         In Ficus, at least in the default devstack data, chapter_grades is a list
         of dicts
-        '''
+        """
 
         for chapter_grade in chapter_grade_values(self.course_grade.chapter_grades):
             for section in chapter_grade['sections']:
@@ -140,20 +141,20 @@ class LearnerCourseGrades(object):
                     yield section
 
     def sections_list(self, only_graded=False):
-        '''Convenience method that returns a list by calling the iterator method,
+        """Convenience method that returns a list by calling the iterator method,
         ``sections``
-        '''
+        """
         return [section for section in self.sections(only_graded=only_graded)]
 
     def progress(self):
-        '''
+        """
         TODO: FIGURE THIS OUT
         There are two ways we can go about measurig progress:
 
         The percentage grade points toward the total grade points
         OR
         the number of sections completed toward the total number of sections
-        '''
+        """
         count = points_possible = points_earned = sections_worked = 0
 
         for section in self.sections(only_graded=True):
@@ -171,9 +172,9 @@ class LearnerCourseGrades(object):
         )
 
     def progress_percent(self, progress_details=None):
-        '''
+        """
         TODO: This func needs work
-        '''
+        """
         if not progress_details:
             progress_details = self.progress()
         if not progress_details['count']:
@@ -194,7 +195,7 @@ class LearnerCourseGrades(object):
             progress_percent=lcg.progress_percent(course_progress_details))
 
 
-'''
+"""
 Support methods for Course and Sitewide aggregate metrics
 
 Note the common theme in many of these methods in filtering on a date range
@@ -207,16 +208,16 @@ Retrieving from the Figures metrics models should be much faster
 
 We may refactor these into a base class with the contructor params of
 start_date, end_date, site
-'''
+"""
 
 
 def get_active_users_for_time_period(start_date, end_date, site=None, course_ids=None):
-    '''
+    """
     Returns the number of users active in the time period.
 
     This is determined by finding the unique user ids for StudentModule records
     modified in a time period
-    '''
+    """
     filter_args = dict(
         created__gt=prev_day(start_date),
         modified__lt=next_day(end_date))
@@ -227,7 +228,7 @@ def get_active_users_for_time_period(start_date, end_date, site=None, course_ids
 
 
 def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwargs):
-    '''
+    """
     Returns the maximum number of users who joined before or on the end date
 
     Even though we don't need the start_date, we follow the method signature
@@ -236,7 +237,7 @@ def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwar
 
     TODO: Consider first trying to get the data from the SiteDailyMetrics
     model. If there are no records, then get the data from the User model
-    '''
+    """
     def calc_from_user_model():
         filter_args = dict(
             date_joined__lt=next_day(end_date),
@@ -260,10 +261,10 @@ def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwar
 
 
 def get_total_site_users_joined_for_time_period(start_date, end_date, site=None, course_ids=None):
-    '''returns the number of new enrollments for the time period
+    """returns the number of new enrollments for the time period
 
     NOTE: Untested and not yet used in the general site metrics, but we'll want to add it
-    '''
+    """
     def calc_from_user_model():
         filter_args = dict(
             date_joined__gt=prev_day(start_date),
@@ -279,10 +280,10 @@ def get_total_site_users_joined_for_time_period(start_date, end_date, site=None,
 
 
 def get_total_enrollments_for_time_period(start_date, end_date, site=None, course_ids=None):
-    '''Returns the maximum number of enrollments
+    """Returns the maximum number of enrollments
 
     This returns the count of unique enrollments, not unique learners
-    '''
+    """
     filter_args = dict(
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
@@ -297,10 +298,10 @@ def get_total_enrollments_for_time_period(start_date, end_date, site=None, cours
 
 def get_total_site_courses_for_time_period(start_date, end_date, site=None,
                                            course_ids=None, **kwargs):
-    '''
+    """
     Potential fix:
     get unique course ids from CourseEnrollment
-    '''
+    """
     def calc_from_site_daily_metrics():
         filter_args = dict(
             date_for__gt=prev_day(start_date),
@@ -327,10 +328,10 @@ def get_total_site_courses_for_time_period(start_date, end_date, site=None,
 
 
 def get_total_course_completions_for_time_period(start_date, end_date, site=None, course_ids=None):
-    '''
+    """
     This metric is not currently captured in SiteDailyMetrics, so retrieving from
     course dailies instead
-    '''
+    """
     def calc_from_course_daily_metrics():
         filter_args = dict(
             date_for__gt=prev_day(start_date),
@@ -350,9 +351,9 @@ def get_total_course_completions_for_time_period(start_date, end_date, site=None
 
 
 def get_course_enrolled_users_for_time_period(start_date, end_date, course_id):
-    '''
+    """
 
-    '''
+    """
     filter_args = dict(
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
@@ -398,9 +399,9 @@ def get_course_average_days_to_complete_for_time_period(start_date, end_date, co
 
 
 def get_course_num_learners_completed_for_time_period(start_date, end_date, course_id):
-    '''
+    """
     We're duplicating some code.
-    '''
+    """
     filter_args = dict(
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
@@ -416,7 +417,7 @@ def get_course_num_learners_completed_for_time_period(start_date, end_date, cour
 
 def get_monthly_history_metric(func, date_for, months_back,
                                include_current_in_history=True):
-    '''Convenience method to retrieve current and historic data
+    """Convenience method to retrieve current and historic data
 
     Convenience function to populate monthly metrics data with history. Purpose
     is to provide a time series list of values for a particular metrics going
@@ -432,7 +433,7 @@ def get_monthly_history_metric(func, date_for, months_back,
     Each list item contains two keys, ``period``, containing the year and month
     for the data and ``value`` containing the numeric value of the data
 
-    '''
+    """
     date_for = as_date(date_for)
     history = []
 
@@ -456,7 +457,7 @@ def get_monthly_history_metric(func, date_for, months_back,
 
 
 def get_monthly_site_metrics(date_for=None, **kwargs):
-    '''Gets current metrics with history
+    """Gets current metrics with history
 
     Arg: date_for - if specified, uses that date as the 'current' date
     Useful for testing and for looking at past days as 'today'
@@ -521,7 +522,7 @@ def get_monthly_site_metrics(date_for=None, **kwargs):
         ]
       }
     }
-    '''
+    """
 
     if date_for:
         date_for = as_date(date_for)
