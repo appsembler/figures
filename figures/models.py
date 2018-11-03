@@ -68,9 +68,17 @@ class SiteDailyMetrics(TimeStampedModel):
         return "{} {}".format(self.id, self.date_for)
 
 
+class LearnerCourseGradeMetricsManager(models.Manager):
+    """Custom model manager for LearnerCourseGrades model
+    """
+    def most_recent_for_learner_course(self, user, course_id):
+        return self.filter(
+            user=user, course_id=str(course_id)).order_by('-date_for').first()
+
+
 @python_2_unicode_compatible
 class LearnerCourseGradeMetrics(TimeStampedModel):
-    """Thisz model provides caching for grades
+    """This model stores metrics for a learner and course on a given date
 
     THIS MODEL IS EVOLVING
 
@@ -102,6 +110,8 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     sections_worked = models.IntegerField()
     sections_possible = models.IntegerField()
 
+    objects = LearnerCourseGradeMetricsManager()
+
     class Meta:
         unique_together = ('user', 'course_id', 'date_for',)
         ordering = ('date_for', 'user__username', 'course_id',)
@@ -109,6 +119,32 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     def __str__(self):
         return "{} {} {} {}".format(
             self.id, self.date_for, self.user.username, self.course_id)
+
+    @property
+    def progress_percent(self):
+        """Returns the sections worked divided by the sections possible
+
+        If sections possible is zero then returns 0
+
+        Sections possible can be zero when there are no graded sections in a
+        course.
+        """
+        if self.sections_possible:
+            return self.sections_worked / self.sections_possible
+        else:
+            return 0.0
+
+    @property
+    def progress_details(self):
+        """This method gets the progress details.
+        This method is a temporary fix until the serializers are updated.
+        """
+        return dict(
+            points_possible=self.points_possible,
+            points_earned=self.points_earned,
+            sections_worked=self.sections_worked,
+            sections_possible=self.sections_possible,
+        )
 
 
 class PipelineError(TimeStampedModel):
