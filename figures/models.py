@@ -130,7 +130,7 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
         course.
         """
         if self.sections_possible:
-            return self.sections_worked / self.sections_possible
+            return float(self.sections_worked) / float(self.sections_possible)
         else:
             return 0.0
 
