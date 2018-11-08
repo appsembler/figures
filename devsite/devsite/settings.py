@@ -1,6 +1,8 @@
 """
 Django settings for the Figures devsite development server
 
+This settings file is intended for operation only in a development environment
+
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -21,7 +23,7 @@ USE_TZ = True
 TIME_ZONE = 'UTC'
 ALLOWED_HOSTS = []
 
-# Needed for Python to find the mock edx-platform modules
+# Adds the mock edx-platform modules to the Python module search path
 sys.path.append(
     os.path.normpath(os.path.join(PROJECT_ROOT_DIR, 'tests/mocks'))
     )
@@ -42,8 +44,9 @@ INSTALLED_APPS = (
     'devsite',
     'figures',
 
-    # edx-platform apps. Mocks are used by default
-    # See: figures/tests/mocks/
+    # Include mock edx-platform apps.
+    # These are apps on which Figures has dependencies
+    # See: <figures repo>/tests/mocks/
     # Also note the paths set in edx-figures/pytest.ini
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
@@ -134,15 +137,24 @@ REST_FRAMEWORK = {
 }
 
 
-# It expects them from the project's settings (django.conf.settings)
+#
+# Declare empty dicts for settings required by Figures
+#
+
+# Webpack loader is required to load Figure's front-end
 WEBPACK_LOADER = {}
+
+# Blank dict declared so that the Figures settings dependencies
+# Included here for completeness in having this settings file match behavior in
+# the LMS settings
 CELERYBEAT_SCHEDULE = {}
 
-# Declare values we need from server vars (e.g. lms.env.json)
+# The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
+# We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
 
 # Enable Figures if it is included
-# This should be the same code as used in the LMS settings
+# This replicates the dependencies used in the LMS in edx-platform to load Figures
 if 'figures' in INSTALLED_APPS:
     import figures
     figures.update_settings(
