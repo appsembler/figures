@@ -64,7 +64,7 @@ class TestFiguresHomeView(object):
         request = self.factory.get(reverse('figures-home'))
         request.user = get_user_model().objects.get(username=username)
         response = figures_home(request)
-        assert response.status_code == status_code
+        assert response.status_code == status_code, "username={}".format(username)
         if status_code == 302:
             assert response['location'] == UNAUTHORIZED_USER_REDIRECT_URL
 

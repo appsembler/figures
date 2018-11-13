@@ -30,6 +30,7 @@ DATABASES = {
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sites',
     'rest_framework',
     'django_countries',
     'django_filters',
@@ -44,6 +45,7 @@ INSTALLED_APPS = (
     'openedx.core.djangoapps.content.course_overviews',
     'student',
     'certificates',
+    'organizations',
 )
 
 LOCALE_PATHS = [

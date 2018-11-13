@@ -11,7 +11,9 @@ import datetime
 from django.utils.timezone import utc
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 #from django_countries.fields import CountryField
+
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
@@ -25,6 +27,8 @@ from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
+
+import organizations
 
 from figures.helpers import as_course_key
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
@@ -183,3 +187,26 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     course_count = factory.Sequence(lambda n: n)
     total_enrollment_count = factory.Sequence(lambda n: n)
     #site = factory.RelatedFactory(SiteFactory, 'site')
+
+
+# Dependencies for edx-organizations
+
+
+class SiteFactory(DjangoModelFactory):
+    class Meta:
+        model = Site
+    domain = factory.Sequence(lambda n: 'site{}.example.com'.format(n))
+    name = factory.Sequence(lambda n: 'Site {}'.format(n))
+
+
+# edx-organizations Factories
+
+
+class UserSiteMappingFactory(DjangoModelFactory):
+    class Meta:
+        model = organizations.models.UserSiteMapping
+
+    user = factory.SubFactory(UserFactory)
+    site = factory.SubFactory(SiteFactory)
+    is_active = True
+    is_amc_admin = False

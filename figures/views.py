@@ -4,6 +4,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -48,7 +49,8 @@ from .serializers import (
 )
 from figures import metrics
 from figures.pagination import FiguresLimitOffsetPagination
-from figures.permissions import IsStaffUser
+import figures.permissions
+import figures.settings
 
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
@@ -60,7 +62,7 @@ UNAUTHORIZED_USER_REDIRECT_URL = '/'
 
 @ensure_csrf_cookie
 @login_required
-@user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser),
+@user_passes_test(lambda u: u.is_active,
                   login_url=UNAUTHORIZED_USER_REDIRECT_URL,
                   redirect_field_name=None)
 def figures_home(request):
@@ -70,6 +72,13 @@ def figures_home(request):
     TODO: Should we make this a view class?
 
     '''
+    # We probably want to roll this into a decorator
+    if figures.settings.is_multi_tenant():
+        if not figures.permissions.is_site_admin_user(request):
+            return HttpResponseRedirect('/')
+    else:
+        if not (request.user.is_staff or request.user.is_superuser):
+            return HttpResponseRedirect('/')
 
     # Placeholder context vars just to illustrate returning API hosts to the
     # client. This one uses a protocol relative url
@@ -88,7 +97,11 @@ class CommonAuthMixin(object):
 
     '''
     authentication_classes = (BasicAuthentication, SessionAuthentication, )
-    permission_classes = (IsAuthenticated, IsStaffUser, )
+    permission_classes = (
+        IsAuthenticated,
+        figures.permissions.IsStaffUser,
+        figures.permissions.IsSiteAdminUser,
+    )
 
 
 #

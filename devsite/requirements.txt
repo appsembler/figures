@@ -46,6 +46,12 @@ edx-opaque-keys==0.4
 #edx-drf-extensions==1.2.2
 
 ##
+## Multi-tenancy
+##
+
+git+https://github.com/appsembler/edx-organizations.git@0.4.1-appsembler10
+
+##
 ## Pytest dependencies
 ##
 
