@@ -10,6 +10,7 @@ import pytest
 import pytz
 
 from django.db import models
+from django.utils.timezone import utc
 
 from student.models import CourseEnrollment
 
@@ -374,7 +375,7 @@ class TestLearnerCourseDetailsSerializer(object):
         #     'profile__country': 'CA',
         # }
         #self.user = UserFactory(**self.user_attributes)
-        self.certificate_date = datetime.datetime(2018,04,01)
+        self.certificate_date = datetime.datetime(2018, 4, 1, tzinfo=utc)
         self.course_enrollment = CourseEnrollmentFactory(
             )
         self.generated_certificate = GeneratedCertificateFactory(

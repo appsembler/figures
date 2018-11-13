@@ -178,7 +178,7 @@ class TestGetMonthlySiteMetrics(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.today = datetime.datetime(2018, 1, 6)
+        self.today = datetime.datetime(2018, 1, 6, tzinfo=utc)
         self.site_daily_metrics = None
         self.expected_keys = (
             'monthly_active_users',

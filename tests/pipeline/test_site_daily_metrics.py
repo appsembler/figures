@@ -15,7 +15,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-from figures.helpers import prev_day
+from figures.helpers import as_datetime, prev_day
 from figures.models import SiteDailyMetrics
 from figures.pipeline import site_daily_metrics as pipeline_sdm
 
@@ -159,10 +159,10 @@ class TestSiteDailyMetricsExtractor(object):
     def setup(self, db):
         self.date_for = datetime.date(2018, 10, 1)
         self.users = [UserFactory(
-            date_joined=self.date_for - datetime.timedelta(days=60)
+            date_joined=as_datetime(self.date_for - datetime.timedelta(days=60))
             ) for i in range(0, 3)]
         self.course_overviews = [CourseOverviewFactory(
-            created=self.date_for - datetime.timedelta(days=60)
+            created=as_datetime(self.date_for - datetime.timedelta(days=60))
             ) for i in range(0, 3)]
         self.cdm_recs = [CourseDailyMetricsFactory(
             date_for=self.date_for,

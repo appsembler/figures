@@ -37,6 +37,7 @@ from figures.compat import CourseGradeFactory, chapter_grade_values
 from figures.helpers import (
     as_course_key,
     as_date,
+    as_datetime,
     next_day,
     prev_day,
     previous_months_iterator,
@@ -212,8 +213,8 @@ def get_active_users_for_time_period(start_date, end_date, site=None, course_ids
     modified in a time period
     '''
     filter_args = dict(
-        created__gt=prev_day(start_date),
-        modified__lt=next_day(end_date))
+        created__gt=as_datetime(prev_day(start_date)),
+        modified__lt=as_datetime(next_day(end_date)))
     if course_ids:
         filter_args['course_ids__in'] = course_ids
 
