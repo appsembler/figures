@@ -10,7 +10,7 @@ from django.core.exceptions import PermissionDenied
 
 from student.models import CourseEnrollment, CourseAccessRole
 
-from figures.helpers import next_day, prev_day
+from figures.helpers import as_datetime, next_day, prev_day
 from figures.models import PipelineError
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 
@@ -46,7 +46,8 @@ class TestGetCourseEnrollments(object):
         course_id = self.course_overviews[0].id
         expected_ce = CourseEnrollment.objects.filter(
             course_id=course_id,
-            created__lt=next_day(self.today)).values_list('id', flat=True)
+            created__lt=as_datetime(
+                next_day(self.today))).values_list('id', flat=True)
         results_ce = pipeline_cdm.get_course_enrollments(
             course_id=course_id,
             date_for=self.today).values_list('id', flat=True)
@@ -89,7 +90,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
                 course_id=ce.course_id,
                 student=ce.user,
                 created=ce.created,
-                modified=day
+                modified=as_datetime(day)
                 ) for ce in self.course_enrollments]
 
         self.cert_days_to_complete = [10, 20, 30]

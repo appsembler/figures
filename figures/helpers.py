@@ -47,7 +47,7 @@ def as_datetime(val):
             ).replace(tzinfo=utc)
 
     elif isinstance(val, basestring):
-        return dateutil_parse(val)
+        return dateutil_parse(val).replace(tzinfo=utc)
     else:
         raise TypeError(
             'value of type "{}" cannot be converted to a datetime object'.format(
