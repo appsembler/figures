@@ -18,7 +18,7 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from student.models import CourseEnrollment
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
 
-from figures.helpers import as_course_key, as_date, next_day, prev_day
+from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 import figures.metrics
 from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
@@ -41,7 +41,7 @@ def get_course_enrollments(course_id, date_for):
     """
     return CourseEnrollment.objects.filter(
         course_id=as_course_key(course_id),
-        created__lt=next_day(date_for),
+        created__lt=as_datetime(next_day(date_for)),
     )
 
 
@@ -63,7 +63,7 @@ def get_num_enrolled_in_exclude_admins(course_id, date_for):
     return CourseEnrollment.objects.filter(
         course_id=course_id,
         is_active=1,
-        created__lt=next_day(date_for),
+        created__lt=as_datetime(next_day(date_for)),
     ).exclude(user__in=staff).exclude(user__in=admins).exclude(user__in=coaches).count()
 
 
@@ -74,7 +74,7 @@ def get_active_learner_ids_today(course_id, date_for):
     """
     return StudentModule.objects.filter(
         course_id=as_course_key(course_id),
-        modified=as_date(date_for)).values_list('student__id', flat=True).distinct()
+        modified=as_datetime(date_for)).values_list('student__id', flat=True).distinct()
 
 
 def get_average_progress(course_id, date_for, course_enrollments):
@@ -139,7 +139,7 @@ def get_days_to_complete(course_id, date_for):
     """
     certificates = GeneratedCertificate.objects.filter(
         course_id=as_course_key(course_id),
-        created_date__lte=as_date(date_for))
+        created_date__lte=as_datetime(date_for))
 
     days = []
     errors = []
@@ -179,7 +179,7 @@ def get_average_days_to_complete(course_id, date_for):
 def get_num_learners_completed(course_id, date_for):
     certificates = GeneratedCertificate.objects.filter(
         course_id=as_course_key(course_id),
-        created_date__lt=next_day(date_for))
+        created_date__lt=as_datetime(next_day(date_for)))
     return certificates.count()
 
 # Formal extractor classes

@@ -1,4 +1,4 @@
-
+ 
 import calendar
 import datetime
 from django.utils.timezone import utc
@@ -76,14 +76,14 @@ class TestDateTimeHelper(object):
     def test_get_now_from_str(self):
         format = '%Y-%m-%d %H:%M:%S'
         a_datetime_str = self.now.strftime(format)
-        expected = dateutil_parse(a_datetime_str)
+        expected = dateutil_parse(a_datetime_str).replace(tzinfo=utc)
         assert isinstance(a_datetime_str, str)
         assert as_datetime(a_datetime_str) == expected
 
     def test_get_now_from_unicode(self):
         format = '%Y-%m-%d %H:%M:%S'
         a_datetime_str = unicode(self.now.strftime(format))
-        expected = dateutil_parse(a_datetime_str)
+        expected = dateutil_parse(a_datetime_str).replace(tzinfo=utc)
         assert isinstance(a_datetime_str, unicode)
         assert as_datetime(a_datetime_str) == expected
 
