@@ -15,7 +15,7 @@ Notice and Development Status
 
 Figures is now avaible on `PyPI <https://pypi.org/project/figures/>`__ for open beta testing on Open edX Ginkgo!
 
-Currently it runs on Ginkgo. We're actively working on a backport to Ficus and have Hawthorn in the backlog.
+Currently it runs on Ficus and Ginkgo. We have Hawthorn in the backlog. We welcome community involvement to upgrade to Hawthorn.
 
 If you find bugs or run into issues, please submit an issue ticket to the `Figures issue tracker <https://github.com/appsembler/figures/issues>`__ on Github.
 
@@ -42,7 +42,7 @@ Requirements
 
 * Python (2.7)
 * Django (1.8)
-* Open edX (Ginkgo)
+* Open edX (Ficus or Ginkgo)
 
 
 .. _installation:
@@ -117,7 +117,6 @@ Future
 ------
 
 * Open edX "Hawthorn" will provide a plug-in architecture. This will hopefully simplify Figures installation even more
-* Backport to Ficus
 * Downloadable report files
 * Plugin architecture to extend Figures for custom data sources
 
