@@ -2,7 +2,6 @@
 Django settings for the Figures devsite development server
 
 This settings file is intended for operation only in a development environment
-
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -141,8 +140,10 @@ REST_FRAMEWORK = {
 # Declare empty dicts for settings required by Figures
 #
 
+
 # Webpack loader is required to load Figure's front-end
 WEBPACK_LOADER = {}
+
 
 # Blank dict declared so that the Figures settings dependencies
 # Included here for completeness in having this settings file match behavior in
