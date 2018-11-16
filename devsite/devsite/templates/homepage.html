@@ -8,6 +8,11 @@
     <h1>Welcome to the Figures development web site!</h1>
     <h3>These are the links you are looking for:</h3>
     <ul>
+    {% if user.is_authenticated %}
+      <li><a href="{% url 'logout' %}">log out</a>
       <li><a href="{% url 'figures:figures-home' %}">Figures UI</a></li>
+    {% else %}
+      <li><a href="{% url 'login' %}">log in</a>
+    {% endif %}
     </ul>
 {% endblock %}

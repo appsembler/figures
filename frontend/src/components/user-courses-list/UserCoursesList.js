@@ -47,7 +47,7 @@ class UserCoursesList extends Component {
                 Points earned:
               </span>
               <span className={styles['stat-value']}>
-                {course['progress_data']['course_progress_details'].earned} (of {course['progress_data']['course_progress_details'].possible})
+                {course['progress_data']['course_progress_details'].points_earned} (of {course['progress_data']['course_progress_details'].points_possible})
               </span>
             </li>
             <li className={styles['stat']}>

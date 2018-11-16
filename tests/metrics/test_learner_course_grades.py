@@ -5,6 +5,8 @@
 from collections import OrderedDict
 import datetime
 
+from django.utils.timezone import utc
+import mock
 import pytest
 
 from figures.metrics import LearnerCourseGrades
@@ -101,7 +103,7 @@ class TestLearnerCourseGrades(object):
         expected_cert = GeneratedCertificateFactory(
             user=self.lcg.learner,
             course_id=self.lcg.course.id,
-            created_date=datetime.datetime(2018, 6, 1))
+            created_date=datetime.datetime(2018, 6, 1, tzinfo=utc))
         assert expected_cert
         check_certs = self.lcg.certificates()
         assert check_certs.count() == 1
@@ -125,13 +127,13 @@ class TestLearnerCourseGrades(object):
         assert self.lcg.is_section_graded(section) == check
 
 
-    ##
-    ## The following two tests test retrieving sections from chapter grades
-    ##
-    ## We have two methods instead of parametrizing for simplicity and that
-    ## decorators can't accept class instance variables for the class method
-    ## for which the decorator is applied. We would have to build our test
-    ## data outside of the class
+    #
+    # The following two tests test retrieving sections from chapter grades
+    #
+    # We have two methods instead of parametrizing for simplicity and that
+    # decorators can't accept class instance variables for the class method
+    # for which the decorator is applied. We would have to build our test
+    # data outside of the class
 
     def test_sections_all(self):
         '''
@@ -180,3 +182,31 @@ class TestLearnerCourseGrades(object):
         )
 
         assert self.lcg.progress_percent(progress_details) == 0.0
+
+
+#
+# Test LearnerCourseGrades static methods
+#
+
+
+@pytest.mark.django_db
+def test_lcg_course_progress():
+    '''
+    This is a basic test. We want to expand on it to create specific mock values
+    returned by CourseGradeFactory (assigned to LearnerCourseGrades
+    course_grade.chapter_grades attributes)
+
+    The expected data are pulled from the hardcoded values in the mocks.
+    See ``tests/mocks/lms/djangoapps/grades/new/course_grade.py``
+    '''
+    expected = dict(
+        progress_percent=0.5,
+        course_progress_details=dict(
+            count=2,
+            sections_worked=1,
+            points_possible=1.5,
+            points_earned=0.5,
+            ))
+    course_enrollment = CourseEnrollmentFactory()
+    course_progress = LearnerCourseGrades.course_progress(course_enrollment)
+    assert course_progress == expected

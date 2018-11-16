@@ -1,6 +1,10 @@
 Release History
 ===============
 
+## 0.1.5
+
+Ficus now supported, performance improvements, bug fixes.
+
 ## 0.1.4
 
 Metrics and pipeline bug fixes, UI cleanup, documentation updates.

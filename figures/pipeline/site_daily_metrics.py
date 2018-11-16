@@ -16,7 +16,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-from figures.helpers import as_course_key, next_day, prev_day
+from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
@@ -117,9 +117,9 @@ class SiteDailyMetricsExtractor(object):
         data = dict()
 
         user_count = get_user_model().objects.filter(
-            date_joined__lt=next_day(date_for)).count()
+            date_joined__lt=as_datetime(next_day(date_for))).count()
         course_count = CourseOverview.objects.filter(
-            created__lt=next_day(date_for)).count()
+            created__lt=as_datetime(next_day(date_for))).count()
 
         todays_active_user_count = get_active_user_count_for_date(date_for)
         data['todays_active_user_count'] = todays_active_user_count
