@@ -14,6 +14,25 @@ from figures import settings as figures_settings
 
 
 @pytest.mark.parametrize('env_tokens, expected ', [
+        ({'IS_MULTISITE': True}, True),
+        ({'IS_MULTISITE': False}, False),
+    ])
+def test_is_multisite(env_tokens, expected):
+    """
+    Test env_tokens work properly for Figures multisite settings
+    """
+    with mock.patch('figures.settings.env_tokens', env_tokens):
+        assert figures_settings.is_multisite() == expected
+
+
+def test_is_multisite_default():
+    """
+    Just test that the default behavior is multisite is disabled in settings
+    """
+    assert not figures_settings.is_multisite()
+
+
+@pytest.mark.parametrize('env_tokens, expected ', [
         ({'LOG_PIPELINE_ERRORS_TO_DB': True}, True),
         ({'LOG_PIPELINE_ERRORS_TO_DB': False}, False),
     ])
