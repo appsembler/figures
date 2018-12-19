@@ -3,6 +3,7 @@
 """
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -15,6 +16,10 @@ from model_utils.models import TimeStampedModel
 class CourseDailyMetrics(TimeStampedModel):
     """Metrics data specific to an individual course
 
+    CourseDailyMetrics instances are created before the SiteDailyMetrics. This,
+    along with the fact we now filter course metrics for a given site, we aren't
+    adding a SiteDailyMetrics foreign key. This is subject to change as the code
+    evolves.
     """
     date_for = models.DateField()
 
@@ -23,7 +28,7 @@ class CourseDailyMetrics(TimeStampedModel):
     # the CourseOverview model or have the course_id be a
     # CourseKeyField
     course_id = models.CharField(max_length=255)
-
+    site = models.ForeignKey(Site, default=settings.SITE_ID)
     enrollment_count = models.IntegerField()
     active_learners_today = models.IntegerField()
     # Do we want cumulative average progress for the month?
@@ -46,26 +51,36 @@ class CourseDailyMetrics(TimeStampedModel):
 @python_2_unicode_compatible
 class SiteDailyMetrics(TimeStampedModel):
     """
-    TODO: Add Multi-site support
-    add FK to site and make site + date_for unique together
+    Stores metrics for a given site and day
     """
 
     # Date for which this record's data are collected
-    date_for = models.DateField(unique=True)
+    date_for = models.DateField()
+    site = models.ForeignKey(Site, default=settings.SITE_ID)
     cumulative_active_user_count = models.IntegerField(blank=True, null=True)
     todays_active_user_count = models.IntegerField(blank=True, null=True)
     total_user_count = models.IntegerField()
     course_count = models.IntegerField()
     total_enrollment_count = models.IntegerField()
 
-    # Foreign key relationships
-    # site =
-
     class Meta:
-        ordering = ['-date_for']
+        """
+        SiteDailyMetrics view and serializer tests fail when we include 'site'
+        in the `unique_together` fields:
+
+            unique_together = ['site', 'date_for']
+
+            ValueError: Cannot assign "1": "SiteDailyMetrics.site" must be a
+            "Site" instance
+
+        Since we do want to constrain uniqueness per site+day, we'll need to fix
+        this
+        """
+        ordering = ['-date_for', 'site']
 
     def __str__(self):
-        return "{} {}".format(self.id, self.date_for)
+        return "id:{}, date_for:{}, site:{}".format(
+            self.id, self.date_for, self.site.domain)
 
 
 class LearnerCourseGradeMetricsManager(models.Manager):
@@ -102,9 +117,10 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
 
     """
     date_for = models.DateField()
+    # TODO: We should require the user
     user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
     course_id = models.CharField(max_length=255, blank=True)
-
+    site = models.ForeignKey(Site, default=settings.SITE_ID)
     points_possible = models.FloatField()
     points_earned = models.FloatField()
     sections_worked = models.IntegerField()
@@ -170,6 +186,7 @@ class PipelineError(TimeStampedModel):
     # Attributes for convenient querying
     course_id = models.CharField(max_length=255, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+    site = models.ForeignKey(Site, blank=True, null=True)
 
     class Meta:
         ordering = ['-created']

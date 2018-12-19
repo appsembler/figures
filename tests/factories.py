@@ -11,7 +11,8 @@ import datetime
 from django.utils.timezone import utc
 
 from django.contrib.auth import get_user_model
-#from django_countries.fields import CountryField
+from django.contrib.sites.models import Site
+
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
@@ -30,6 +31,13 @@ from figures.helpers import as_course_key
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
+
+
+class SiteFactory(DjangoModelFactory):
+    class Meta:
+        model = Site
+    domain = factory.Sequence(lambda n: 'site-{}.example.com'.format(n))
+    name = factory.Sequence(lambda n: 'Site {}'.format(n))
 
 
 class UserProfileFactory(DjangoModelFactory):

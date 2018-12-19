@@ -64,8 +64,8 @@ class TestCourseDailyMetricsView(BaseViewTest):
         assert response_data['date_for'] == str(obj.date_for)
         assert parse(response_data['created']) == obj.created
         assert parse(response_data['modified']) == obj.modified
-
-        for field_name in (self.expected_results_keys - self.date_fields):
+        check_fields = self.expected_results_keys - self.date_fields - set(['site'])
+        for field_name in check_fields:
             obj_field = getattr(obj, field_name)
             if (type(response_data) in (float, Decimal,) or 
                 type(obj_field) in (float, Decimal,)):

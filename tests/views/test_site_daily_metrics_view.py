@@ -108,10 +108,8 @@ class TestSiteDailyMetricsView(BaseViewTest):
             assert data['date_for'] == str(db_rec.date_for)
             assert parse(data['created']) == db_rec.created
             assert parse(data['modified']) == db_rec.modified
-
-        field_names = self.expected_results_keys - self.date_fields
-
-        for field_name in (self.expected_results_keys - self.date_fields):
+        check_fields = self.expected_results_keys - self.date_fields - set(['site'])
+        for field_name in check_fields:
             assert data[field_name] == getattr(db_rec,field_name)
 
     # @pytest.mark.parametrize('username, status_code', [

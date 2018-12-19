@@ -15,6 +15,10 @@ def root(*args):
     """
     return join(abspath(dirname(__file__)), *args)
 
+
+# Set the default Site (django.contrib.sites.models.Site)
+SITE_ID = 1
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -30,6 +34,7 @@ DATABASES = {
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sites',
     'rest_framework',
     'django_countries',
     'django_filters',
@@ -86,4 +91,3 @@ if 'figures' in INSTALLED_APPS:
         WEBPACK_LOADER,
         CELERYBEAT_SCHEDULE,
         ENV_TOKENS.get('FIGURES', {}))
-

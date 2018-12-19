@@ -22,6 +22,9 @@ USE_TZ = True
 TIME_ZONE = 'UTC'
 ALLOWED_HOSTS = []
 
+# Set the default Site (django.contrib.sites.models.Site)
+SITE_ID = 1
+
 # Adds the mock edx-platform modules to the Python module search path
 sys.path.append(
     os.path.normpath(os.path.join(PROJECT_ROOT_DIR, 'tests/mocks'))
@@ -33,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
