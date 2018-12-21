@@ -14,8 +14,9 @@ from figures import settings as figures_settings
 
 
 @pytest.mark.parametrize('env_tokens, expected ', [
-        ({'IS_MULTISITE': True}, True),
-        ({'IS_MULTISITE': False}, False),
+        ({'IS_FIGURES_MULTISITE': True}, True),
+        ({'IS_FIGURES_MULTISITE': False}, False),
+        ({}, False),
     ])
 def test_is_multisite(env_tokens, expected):
     """
@@ -23,13 +24,6 @@ def test_is_multisite(env_tokens, expected):
     """
     with mock.patch('figures.settings.env_tokens', env_tokens):
         assert figures_settings.is_multisite() == expected
-
-
-def test_is_multisite_default():
-    """
-    Just test that the default behavior is multisite is disabled in settings
-    """
-    assert not figures_settings.is_multisite()
 
 
 @pytest.mark.parametrize('env_tokens, expected ', [

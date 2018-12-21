@@ -25,7 +25,7 @@ def is_multisite():
     """
     Override by setting ``IS_MULTISITE`` to true in the Figures env settings
     """
-    return bool(env_tokens.get('IS_MULTISITE',
+    return bool(env_tokens.get('IS_FIGURES_MULTISITE',
                                DEFAULT_IS_MULTISITE))
 
 
