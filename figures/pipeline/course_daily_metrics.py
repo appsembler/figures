@@ -24,6 +24,7 @@ from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
 import figures.pipeline.loaders
 from figures.serializers import CourseIndexSerializer
+import figures.sites
 
 # TODO: Move extractors to figures.pipeline.extract module
 
@@ -263,6 +264,7 @@ class CourseDailyMetricsLoader(object):
 
     def __init__(self, course_id):
         self.course_id = course_id
+        # TODO: Consider adding extractor as optional param
         self.extractor = CourseDailyMetricsExtractor()
 
     def get_data(self, date_for):
@@ -300,6 +302,7 @@ class CourseDailyMetricsLoader(object):
         data = self.get_data(date_for=date_for)
         cdm, created = CourseDailyMetrics.objects.update_or_create(
             course_id=self.course_id,
+            site=figures.sites.get_site_for_course(self.course_id),
             date_for=date_for,
             defaults=dict(
                 enrollment_count=data['enrollment_count'],

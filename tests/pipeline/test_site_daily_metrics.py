@@ -9,6 +9,7 @@ import datetime
 import pytest
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
 from openedx.core.djangoapps.content.course_overviews.models import (
@@ -193,8 +194,11 @@ class TestSiteDailyMetricsExtractor(object):
 
 
 @pytest.mark.django_db
-class TestSiteDailyMetricsLoader(object):
+class TestSiteDailyMetricsLoaderSingleSite(object):
+    """
+    Tests the site metrics loading for single site (standalone) deployments
 
+    """
     FIELD_VALUES = dict(
                 todays_active_user_count=1,
                 cumulative_active_user_count=2,
@@ -205,18 +209,27 @@ class TestSiteDailyMetricsLoader(object):
 
     class MockExtractor(object):
         def extract(self, **kwargs):
-            return TestSiteDailyMetricsLoader.FIELD_VALUES
+            return TestSiteDailyMetricsLoaderSingleSite.FIELD_VALUES
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
         pass
 
     def test_load_for_today(self):
+        assert Site.objects.count() == 1
         assert SiteDailyMetrics.objects.count() == 0
         loader = pipeline_sdm.SiteDailyMetricsLoader(
             extractor=self.MockExtractor())
-        site_metrics, created = loader.load()
+        site_metrics, created = loader.load(site=Site.objects.first())
 
         sdm = SiteDailyMetrics.objects.first()
         for key, value in self.FIELD_VALUES.iteritems():
             assert getattr(sdm, key) == value, 'failed on key: "{}"'.format(key)
+
+
+    def test_no_course_overviews(self):
+        """
+
+        """
+        assert SiteDailyMetrics.objects.count() == 0
+        loader = pipeline_sdm.SiteDailyMetricsLoader

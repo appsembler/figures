@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'openedx.core.djangoapps.content.course_overviews',
     'student',
     'certificates',
+    'organizations',
 )
 
 LOCALE_PATHS = [

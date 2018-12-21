@@ -64,7 +64,8 @@ class TestCourseDailyMetrics(object):
         assert metrics2 == metrics
 
     def test_site(self):
-        """Tests expected CourseDailyMetrics behavior for working with a Site
+        """
+        Tests expected CourseDailyMetrics behavior for working with a Site
         """
         assert Site.objects.count() == 1
 

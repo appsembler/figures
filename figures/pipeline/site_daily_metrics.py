@@ -136,9 +136,15 @@ class SiteDailyMetricsLoader(object):
     def __init__(self, extractor=None):
         self.extractor = extractor or SiteDailyMetricsExtractor()
 
-    def load(self, date_for=None, force_update=False, **kwargs):
+    def load(self, site, date_for=None, force_update=False, **kwargs):
         '''
-        TODO: Add filtering for
+        Architectural note:
+        Initially, we're going to be explicit, requiring callers to specify the
+        site model instance to be associated with the site specific metrics
+        model(s) we are populating
+
+        TODOs:
+        Add filtering for
         * Multi-tenancy
         * Course acess groups
         '''
@@ -151,7 +157,7 @@ class SiteDailyMetricsLoader(object):
         # then skip getting data
         if not force_update:
             try:
-                sdm = SiteDailyMetrics.objects.get(date_for=date_for)
+                sdm = SiteDailyMetrics.objects.get(date_for=date_for, site=site)
                 return (sdm, False,)
 
             except SiteDailyMetrics.DoesNotExist:
@@ -161,6 +167,7 @@ class SiteDailyMetricsLoader(object):
         data = self.extractor.extract(date_for=date_for)
         site_metrics, created = SiteDailyMetrics.objects.update_or_create(
             date_for=date_for,
+            site=site,
             defaults=dict(
                 cumulative_active_user_count=data['cumulative_active_user_count'],
                 todays_active_user_count=data['todays_active_user_count'],

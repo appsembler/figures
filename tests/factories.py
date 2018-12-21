@@ -20,17 +20,37 @@ from factory.django import DjangoModelFactory
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-
+# from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
+import organizations
+# from organizations import tests as org_tests
 from figures.helpers import as_course_key
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
+from tests.helpers import organizations_support_sites
+
+
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
+
+
+
+# class SiteConfigurationFactory(factory.DjangoModelFactory):
+#     class Meta(object):
+#         model = SiteConfiguration
+
+#     site = factory.SubFactory(SiteFactory)
+#     enabled = True
+#     values = {
+#         'PLATFORM_NAME': factory.SelfAttribute('site.name'),
+#         'SITE_NAME': factory.SelfAttribute('site.domain'),
+#     }
+#     sass_variables = {}
+#     page_elements = {}
 
 
 class SiteFactory(DjangoModelFactory):
@@ -79,6 +99,57 @@ class UserFactory(DjangoModelFactory):
         if extracted:
             for team in extracted:
                 self.teams.add(team)
+
+
+if organizations_support_sites():
+    class OrganizationFactory(DjangoModelFactory):
+        class Meta:
+            model = organizations.models.Organization
+
+        name = factory.Sequence(u'organization name {}'.format)
+        short_name = factory.Sequence(u'name{}'.format)
+        description = factory.Sequence(u'description{}'.format)
+        logo = None
+        active = True
+
+        # Appsembler fork specific:
+        @factory.post_generation
+        def sites(self, create, extracted, **kwargs):
+            if not create:
+                return
+            if extracted:
+                for site in extracted:
+                    self.sites.add(site)
+else:
+    class OrganizationFactory(DjangoModelFactory):
+        class Meta:
+            model = organizations.models.Organization
+
+        name = factory.Sequence(u'organization name {}'.format)
+        short_name = factory.Sequence(u'name{}'.format)
+        description = factory.Sequence(u'description{}'.format)
+        logo = None
+        active = True
+
+
+class OrganizationCourseFactory(DjangoModelFactory):
+    class Meta:
+        model = organizations.models.OrganizationCourse
+
+    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    organization = factory.SubFactory(OrganizationFactory)
+    active = True
+
+
+if organizations_support_sites():
+    class UserOrganizationMappingFactory(factory.DjangoModelFactory):
+        class Meta(object):
+            model = organizations.models.UserOrganizationMapping
+
+        user = factory.SubFactory(UserFactory)
+        organization = factory.SubFactory(OrganizationFactory)
+        is_active = True
+        is_amc_admin = False
 
 
 class CourseOverviewFactory(DjangoModelFactory):

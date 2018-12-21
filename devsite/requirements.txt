@@ -45,6 +45,14 @@ recommonmark==0.4.0
 edx-opaque-keys==0.4
 #edx-drf-extensions==1.2.2
 
+# Hopefully a very temporary fix
+# * Organization/site mapping requires Appsembler's fork
+# edx-organizations==0.4.1
+git+https://github.com/appsembler/edx-organizations.git@0.4.1-appsembler10
+
+# #egg=edx-organizations==0.4.1-appsembler
+
+
 ##
 ## Pytest dependencies
 ##

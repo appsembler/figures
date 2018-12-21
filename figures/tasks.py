@@ -5,6 +5,7 @@ Figures Celery tasks. Initially this module contains tasks for the ETL pipeline.
 import datetime
 import time
 
+from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
 from celery import chord
@@ -17,7 +18,7 @@ from student.models import CourseEnrollment
 from figures.helpers import as_course_key, as_date
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
-
+import figures.sites
 
 logger = get_task_logger(__name__)
 
@@ -53,11 +54,12 @@ def populate_single_cdm(course_id, date_for=None, force_update=False):
 
 
 @shared_task
-def populate_site_daily_metrics(**kwargs):
+def populate_site_daily_metrics(site_id, **kwargs):
     '''Populate a SiteDailyMetrics record
     '''
     logger.debug("populate_site_daily_metrics called")
     SiteDailyMetricsLoader().load(
+        site=Site.objects.get(id=site_id),
         date_for=kwargs.get('date_for', None),
         force_update=kwargs.get('force_update', False),
         )
@@ -91,12 +93,19 @@ def populate_daily_metrics(date_for=None, force_update=False):
     logger.info('Starting task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
 
-    for course in CourseOverview.objects.all():
-        populate_single_cdm(
-            course_id=course.id,
+    # print('testing...')
+    # import pdb; pdb.set_trace()
+    for site in Site.objects.all():
+        for course in figures.sites.get_courses_for_site(site):
+            populate_single_cdm(
+                course_id=course.id,
+                date_for=date_for,
+                force_update=force_update)
+        populate_site_daily_metrics(
+            site_id=site.id,
             date_for=date_for,
             force_update=force_update)
-    populate_site_daily_metrics(date_for=date_for, force_update=force_update)
+
     logger.info('Finished task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
 
