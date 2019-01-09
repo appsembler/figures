@@ -204,12 +204,18 @@ module.exports = {
               loader: 'css-loader',
               options: {
                 modules: true,
+                data: "$primary-color: #ff0000",
                 sourceMap: true,
                 importLoaders: 2,
                 localIdentName: '[local]__[hash:base64:8]'
               }
             },
-            'sass-loader'
+            {
+              loader: 'sass-loader',
+              options: {
+                data: "" + (process.env.PRIMARY_COLOR ? ("$primary-color: " + process.env.PRIMARY_COLOR + "; ") : "") + (process.env.REM_BASE ? ("$rem-base-size: " + process.env.REM_BASE + ";") : "") + (process.env.BASE_FONT_SIZE ? ("$base-font-size: " + process.env.BASE_FONT_SIZE + ";") : "") + (process.env.BASE_TEXT_COLOR ? ("$base-text-color: " + process.env.BASE_TEXT_COLOR + ";") : ""),
+              }
+            },
           ]
         })
       },
