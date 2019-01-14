@@ -33,13 +33,17 @@ def is_site_admin_user(request):
     return has_permission
 
 
+def is_active_staff_or_superuser(request):
+    return request.user and request.user.is_active and (
+           request.user.is_staff or request.user.is_superuser)
+
+
 class IsStaffUser(BasePermission):
     """
-    Allow access to only staff users or superusers
+    Allow access to only active staff users or superusers
     """
     def has_permission(self, request, view):
-        return request.user and request.user.is_active and (
-            request.user.is_staff or request.user.is_superuser)
+        return is_active_staff_or_superuser(request)
 
 
 class IsSiteAdminUser(BasePermission):
