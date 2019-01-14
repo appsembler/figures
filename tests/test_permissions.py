@@ -2,19 +2,32 @@
 
 '''
 
+import mock
 import pytest
 
 from django.contrib.auth import get_user_model
 
+import django.contrib.sites.shortcuts
+
 from rest_framework.test import APIRequestFactory
 
-from figures.permissions import IsStaffUser
+import figures.permissions
+import figures.settings
 
-from tests.factories import UserFactory
+from tests.factories import OrganizationFactory, SiteFactory, UserFactory
+
+# For multisite testing
+try:
+    from tests.factories import UserOrganizationMappingFactory
+except:
+    pass
+
+from tests.helpers import organizations_support_sites
 from tests.views.helpers import create_test_users
 
+
 @pytest.mark.django_db
-class TestPermissions(object):
+class TestPermissionsForStandaloneMode(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
@@ -31,10 +44,66 @@ class TestPermissions(object):
         '''
         request = APIRequestFactory().get('/')
         request.user = get_user_model().objects.get(username=username)
-        permission = IsStaffUser().has_permission(request, None)
+        permission = figures.permissions.IsStaffUser().has_permission(request, None)
         assert permission == allow
 
         # verify that inactive users are denied permission
         request.user.is_active = False
-        permission = IsStaffUser().has_permission(request, None)
+        permission = figures.permissions.IsStaffUser().has_permission(request, None)
         assert permission == False
+
+    @pytest.mark.parametrize('username, allow', [
+        ('regular_user', False),
+        ('staff_user', True),
+        ('super_user', True),
+        ('superstaff_user', True),
+    ])
+    def test_is_site_admin_user(self, username, allow):
+        request = APIRequestFactory().get('/')
+        request.user = get_user_model().objects.get(username=username)
+        permission = figures.permissions.IsSiteAdminUser().has_permission(request, None)
+        assert permission == allow
+
+
+@pytest.mark.skipif(not organizations_support_sites(),
+                    reason='Organizations support sites')
+@pytest.mark.django_db
+class TestSiteAdminPermissionsForMultisiteMode(object):
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.site = SiteFactory()
+        self.organization = OrganizationFactory(sites=[self.site])
+        self.callers = [
+            UserFactory(username='alpha_nonadmin'),
+            UserFactory(username='alpha_site_admin'),
+        ]
+        self.user_organization_mappings = [
+            UserOrganizationMappingFactory(
+                user=self.callers[0],
+                organization=self.organization),
+            UserOrganizationMappingFactory(
+                user=self.callers[1],
+                organization=self.organization,
+                is_amc_admin=True)
+        ]
+        self.env_tokens = {'IS_FIGURES_MULTISITE': True}
+
+    # @mock.patch('figures.settings')
+    @pytest.mark.parametrize('username, allow', [
+        ('alpha_nonadmin', False),
+        ('alpha_site_admin', True)])
+    # def test_is_site_admin_user(self, figures_settings, username, allow):
+    def test_is_site_admin_user(self, monkeypatch, username, allow):
+        def test_site(request):
+            return self.site
+        request = APIRequestFactory().get('/')
+        request.META['HTTP_HOST'] = self.site.domain
+        request.user = get_user_model().objects.get(username=username)
+        monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site', test_site)
+        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+            assert figures.settings.is_multisite()
+
+            permission = figures.permissions.IsSiteAdminUser().has_permission(
+                request, None)
+            assert permission == allow
