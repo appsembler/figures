@@ -1,5 +1,11 @@
 """
 
+figuers.sites provides a single point to retrieve site specific data
+
+In general, the rest of Figures should call this module to retrieve all site
+specific data in edx-platform, such as users, course overviews, and 
+course enrollments as examples
+
 TODO:
 Document how organization site mapping works
 """
@@ -56,6 +62,10 @@ def get_site_for_course(course_id):
         # Operating in single site / standalone mode, return the default site
         site = Site.objects.get(id=settings.SITE_ID)
     return site
+
+
+def get_organizations_for_site(site):
+    orgs = organizations.models.Organization.objects.filter(sites__in=[site])
 
 
 def get_course_keys_for_site(site):

@@ -43,7 +43,7 @@ from figures.helpers import (
     previous_months_iterator,
 )
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
-
+import figures.sites
 
 #
 # Helpers (consider moving to the ``helpers`` module
@@ -63,7 +63,18 @@ def period_str(month_tuple, format='%Y/%m'):
 
 class LearnerCourseGrades(object):
     """
-    TODO: create lazy method to get the CourseOverview object
+    Extracts a learner's progress data for a specific course
+
+    This class does not need to be site aware as it is specific to the learner
+    and course. We may want to either add a classmethod ``from_course_enrollment``
+    to instantiate or provide ``CourseEnrollment`` as a constructor param
+
+    This class should be in the pipeline
+
+    TODO: create a figures.pipeline.learner module and add this class there
+    TODO: Then enable a default learner course grade extractor that can be
+    overridden.
+    Create an abstract base class and rework this class to be derived. Then
 
     Members
     self.course: xblock.internal.CourseDescriptorWithMixins
@@ -212,23 +223,28 @@ start_date, end_date, site
 """
 
 
-def get_active_users_for_time_period(start_date, end_date, site=None, course_ids=None):
+def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):
     """
     Returns the number of users active in the time period.
 
     This is determined by finding the unique user ids for StudentModule records
     modified in a time period
     """
+    # Get list of learners for the site
+    user_ids = figures.sites.get_user_ids_for_site(site)
     filter_args = dict(
         created__gt=as_datetime(prev_day(start_date)),
-        modified__lt=as_datetime(next_day(end_date)))
+        modified__lt=as_datetime(next_day(end_date)),
+        student_id__in=user_ids,
+    )
     if course_ids:
         filter_args['course_ids__in'] = course_ids
 
-    return StudentModule.objects.filter(**filter_args).values('student__id').distinct().count()
+    return StudentModule.objects.filter(
+        **filter_args).values('student__id').distinct().count()
 
 
-def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwargs):
+def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
     """
     Returns the maximum number of users who joined before or on the end date
 
@@ -243,10 +259,12 @@ def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwar
         filter_args = dict(
             date_joined__lt=next_day(end_date),
         )
-        return get_user_model().objects.filter(**filter_args).count()
+        users = figures.sites.get_users_for_site(site)
+        return users.filter(**filter_args).count()
 
     def calc_from_site_daily_metrics():
         filter_args = dict(
+            site=site,
             date_for__gt=prev_day(start_date),
             date_for__lt=next_day(end_date))
         qs = SiteDailyMetrics.objects.filter(**filter_args)
@@ -261,7 +279,7 @@ def get_total_site_users_for_time_period(start_date, end_date, site=None, **kwar
         return calc_from_site_daily_metrics()
 
 
-def get_total_site_users_joined_for_time_period(start_date, end_date, site=None, course_ids=None):
+def get_total_site_users_joined_for_time_period(site, start_date, end_date, course_ids=None):
     """returns the number of new enrollments for the time period
 
     NOTE: Untested and not yet used in the general site metrics, but we'll want to add it
@@ -271,7 +289,8 @@ def get_total_site_users_joined_for_time_period(start_date, end_date, site=None,
             date_joined__gt=prev_day(start_date),
             date_joined__lt=next_day(end_date),
         )
-        return get_user_model().objects.filter(**filter_args).values('id').distinct().count()
+        users = figures.sites.get_users_for_site(site)
+        return users.filter(**filter_args).values('id').distinct().count()
 
     # We don't yet have this info directly in SiteDailyMetrics
     # We can calculate this for days after the initial day
@@ -280,12 +299,13 @@ def get_total_site_users_joined_for_time_period(start_date, end_date, site=None,
     return calc_from_user_model()
 
 
-def get_total_enrollments_for_time_period(start_date, end_date, site=None, course_ids=None):
+def get_total_enrollments_for_time_period(site, start_date, end_date, course_ids=None):
     """Returns the maximum number of enrollments
 
     This returns the count of unique enrollments, not unique learners
     """
     filter_args = dict(
+        site=site,
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
     )
@@ -297,7 +317,7 @@ def get_total_enrollments_for_time_period(start_date, end_date, site=None, cours
         return 0
 
 
-def get_total_site_courses_for_time_period(start_date, end_date, site=None,
+def get_total_site_courses_for_time_period(site, start_date, end_date,
                                            course_ids=None, **kwargs):
     """
     Potential fix:
@@ -305,6 +325,7 @@ def get_total_site_courses_for_time_period(start_date, end_date, site=None,
     """
     def calc_from_site_daily_metrics():
         filter_args = dict(
+            site=site,
             date_for__gt=prev_day(start_date),
             date_for__lt=next_day(end_date),
         )
@@ -319,7 +340,10 @@ def get_total_site_courses_for_time_period(start_date, end_date, site=None,
             created__gt=prev_day(start_date),
             created__lt=next_day(end_date),
         )
-        return CourseEnrollment.objects.filter(
+        # First get all the course enrollments for the site
+        ce = figures.sites.get_course_enrollments_for_site(site)
+        # Then filter on the time period
+        return ce.filter(
             **filter_args).values('course_id').distinct().count()
 
     if kwargs.get('calc_raw'):
@@ -328,13 +352,14 @@ def get_total_site_courses_for_time_period(start_date, end_date, site=None,
         return calc_from_site_daily_metrics()
 
 
-def get_total_course_completions_for_time_period(start_date, end_date, site=None, course_ids=None):
+def get_total_course_completions_for_time_period(site, start_date, end_date, course_ids=None):
     """
     This metric is not currently captured in SiteDailyMetrics, so retrieving from
     course dailies instead
     """
     def calc_from_course_daily_metrics():
         filter_args = dict(
+            site=site,
             date_for__gt=prev_day(start_date),
             date_for__lt=next_day(end_date),
         )
@@ -351,11 +376,12 @@ def get_total_course_completions_for_time_period(start_date, end_date, site=None
 # CourseDailyMetricsManager class (not yet created)
 
 
-def get_course_enrolled_users_for_time_period(start_date, end_date, course_id):
+def get_course_enrolled_users_for_time_period(site, start_date, end_date, course_id):
     """
 
     """
     filter_args = dict(
+        site=site,
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
         course_id=course_id
@@ -368,8 +394,9 @@ def get_course_enrolled_users_for_time_period(start_date, end_date, course_id):
         return 0
 
 
-def get_course_average_progress_for_time_period(start_date, end_date, course_id):
+def get_course_average_progress_for_time_period(site, start_date, end_date, course_id):
     filter_args = dict(
+        site=site,
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
         course_id=course_id
@@ -383,8 +410,9 @@ def get_course_average_progress_for_time_period(start_date, end_date, course_id)
         return 0.0
 
 
-def get_course_average_days_to_complete_for_time_period(start_date, end_date, course_id):
+def get_course_average_days_to_complete_for_time_period(site, start_date, end_date, course_id):
     filter_args = dict(
+        site=site,
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
         course_id=course_id
@@ -399,11 +427,12 @@ def get_course_average_days_to_complete_for_time_period(start_date, end_date, co
         return 0
 
 
-def get_course_num_learners_completed_for_time_period(start_date, end_date, course_id):
+def get_course_num_learners_completed_for_time_period(site, start_date, end_date, course_id):
     """
     We're duplicating some code.
     """
     filter_args = dict(
+        site=site,
         date_for__gt=prev_day(start_date),
         date_for__lt=next_day(end_date),
         course_id=course_id
@@ -416,7 +445,7 @@ def get_course_num_learners_completed_for_time_period(start_date, end_date, cour
         return 0
 
 
-def get_monthly_history_metric(func, date_for, months_back,
+def get_monthly_history_metric(func, site, date_for, months_back,
                                include_current_in_history=True):
     """Convenience method to retrieve current and historic data
 
@@ -427,10 +456,16 @@ def get_monthly_history_metric(func, date_for, months_back,
     :param date_for: The most recent date for which we generate data. This is
     the "current month"
     :param months_back: How many months back to retrieve data
-    :returns: a dict with two keys. ``current_month`` contains the monthly
+    :param include_current_in_history: flag to include the current month as well
+    as previous months
+    :type func: Python function
+    :type date_for: datetime.datetime, datetime.date, or date as a string
+    :type months_back: integer
+    :type include_current_in_history: boolean
+    :return: a dict with two keys. ``current_month`` contains the monthly
     metrics for the month in ``date_for``. ``history`` contains a list of metrics
     for the current period and perids going back ``months_back``
-
+    :rtype: dict
     Each list item contains two keys, ``period``, containing the year and month
     for the data and ``value`` containing the numeric value of the data
 
@@ -441,6 +476,7 @@ def get_monthly_history_metric(func, date_for, months_back,
     for month in previous_months_iterator(month_for=date_for, months_back=months_back,):
         period = period_str(month)
         value = func(
+            site=site,
             start_date=datetime.date(month[0], month[1], 1),
             end_date=datetime.date(month[0], month[1], month[2]),
         )
@@ -457,12 +493,17 @@ def get_monthly_history_metric(func, date_for, months_back,
         history=history,)
 
 
-def get_monthly_site_metrics(date_for=None, **kwargs):
+def get_monthly_site_metrics(site, date_for=None, **kwargs):
     """Gets current metrics with history
 
-    Arg: date_for - if specified, uses that date as the 'current' date
-    Useful for testing and for looking at past days as 'today'
-    TODO: Add site filter for multi-tenancy
+    :param site: The site object for which to collect site metrics
+    :param date_for: The date for which to collect site metrics. Optional.
+                     Defaults to current system date if not specified
+    :type site: django.contrib.sites.models.Site
+    :type date_for: datetime.datetime, datetime.date, or date as a string
+    :return: Site metrics for a a month ending on the ``date_for`` or "today"
+    if date_for is not specified
+    :rtype: dict
 
     {
       "monthly_active_users": {
@@ -543,26 +584,31 @@ def get_monthly_site_metrics(date_for=None, **kwargs):
     # This makes it easier to inspect
     monthly_active_users = get_monthly_history_metric(
         func=get_active_users_for_time_period,
+        site=site,
         date_for=date_for,
         months_back=months_back,
     )
     total_site_users = get_monthly_history_metric(
         func=get_total_site_users_for_time_period,
+        site=site,
         date_for=date_for,
         months_back=months_back,
     )
     total_site_coures = get_monthly_history_metric(
         func=get_total_site_courses_for_time_period,
+        site=site,
         date_for=date_for,
         months_back=months_back,
     )
     total_course_enrollments = get_monthly_history_metric(
         func=get_total_enrollments_for_time_period,
+        site=site,
         date_for=date_for,
         months_back=months_back,
     )
     total_course_completions = get_monthly_history_metric(
         func=get_total_course_completions_for_time_period,
+        site=site,
         date_for=date_for,
         months_back=months_back,
     )
