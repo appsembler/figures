@@ -65,7 +65,10 @@ def get_site_for_course(course_id):
 
 
 def get_organizations_for_site(site):
-    orgs = organizations.models.Organization.objects.filter(sites__in=[site])
+    """
+    TODO: Refactor the functions in this module that make this call
+    """
+    return organizations.models.Organization.objects.filter(sites__in=[site])
 
 
 def get_course_keys_for_site(site):
