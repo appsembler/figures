@@ -48,6 +48,7 @@ from figures.models import (
     PipelineError,
     )
 from figures.pipeline.logger import log_error
+import figures.sites
 
 
 # Temporarily hardcoding here
@@ -251,7 +252,7 @@ class GeneralCourseDataSerializer(serializers.Serializer):
             return []
 
 
-def get_course_history_metric(course_id, func, date_for, months_back):
+def get_course_history_metric(site, course_id, func, date_for, months_back):
     """Retieves current_month and history metric data for a course and time
     period
 
@@ -276,10 +277,13 @@ def get_course_history_metric(course_id, func, date_for, months_back):
     #         course_id=course_id
 
     return get_monthly_history_metric(
-        func=lambda start_date, end_date: func(
+        func=lambda site, start_date, end_date: func(
+            site=site,
             start_date=start_date,
             end_date=end_date,
+            # site=site,
             course_id=course_id),
+        site=site,
         date_for=date_for,
         months_back=months_back,
         )
@@ -322,6 +326,16 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
                   'average_progress', 'average_days_to_complete', 'users_completed', ]
         read_only_fields = fields
 
+    def to_representation(self, instance):
+        """
+        This is a hack to get the site for this course
+        We do this because the figures.metrics calls we are making require the
+        site object as a parameter
+        """
+        self.site = figures.sites.get_site_for_course(instance)
+        ret = super(CourseDetailsSerializer, self).to_representation(instance)
+        return ret
+
     def get_staff(self, course_overview):
         qs = CourseAccessRole.objects.filter(course_id=course_overview.id)
         if qs:
@@ -335,6 +349,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         linked
         """
         return get_course_history_metric(
+            site=self.site,
             course_id=course_overview.id,
             func=get_course_enrolled_users_for_time_period,
             date_for=datetime.datetime.utcnow(),
@@ -345,6 +360,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         """
         """
         return get_course_history_metric(
+            site=self.site,
             course_id=course_overview.id,
             func=get_course_average_progress_for_time_period,
             date_for=datetime.datetime.utcnow(),
@@ -355,6 +371,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         """
         """
         return get_course_history_metric(
+            site=self.site,
             course_id=course_overview.id,
             func=get_course_average_days_to_complete_for_time_period,
             date_for=datetime.datetime.utcnow(),
@@ -365,6 +382,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         """
         """
         return get_course_history_metric(
+            site=self.site,
             course_id=course_overview.id,
             func=get_course_num_learners_completed_for_time_period,
             date_for=datetime.datetime.utcnow(),
