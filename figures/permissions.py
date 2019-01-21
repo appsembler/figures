@@ -14,6 +14,14 @@ class MultipleOrgsPerUserNotSupported(Exception):
     pass
 
 
+def is_active_staff_or_superuser(request):
+    """
+    Standalone mode authorization check
+    """
+    return request.user and request.user.is_active and (
+           request.user.is_staff or request.user.is_superuser)
+
+
 def is_site_admin_user(request):
     """
     Determines if the requesting user has access to site admin data
@@ -74,11 +82,6 @@ def is_site_admin_user(request):
         has_permission = is_active_staff_or_superuser(request)
 
     return has_permission
-
-
-def is_active_staff_or_superuser(request):
-    return request.user and request.user.is_active and (
-           request.user.is_staff or request.user.is_superuser)
 
 
 class IsSiteAdminUser(BasePermission):
