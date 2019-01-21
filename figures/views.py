@@ -75,12 +75,8 @@ def figures_home(request):
 
     '''
     # We probably want to roll this into a decorator
-    if figures.settings.is_multisite():
-        if not figures.permissions.is_site_admin_user(request):
-            return HttpResponseRedirect('/')
-    else:
-        if not figures.permissions.IsStaffUser().has_permission(request, view=None): 
-            return HttpResponseRedirect('/')
+    if not figures.permissions.is_site_admin_user(request): 
+        return HttpResponseRedirect('/')
 
     # Placeholder context vars just to illustrate returning API hosts to the
     # client. This one uses a protocol relative url
@@ -105,7 +101,6 @@ class CommonAuthMixin(object):
     )
     permission_classes = (
         IsAuthenticated,
-        figures.permissions.IsStaffUser,
         figures.permissions.IsSiteAdminUser,
     )
 
@@ -191,7 +186,6 @@ class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
     filter_class = CourseDailyMetricsFilter
 
     def get_queryset(self):
-        # queryset = super(CourseDailyMetricsViewSet, self).get_queryset()
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         queryset = CourseDailyMetrics.objects.filter(site=site)
         return queryset
@@ -271,14 +265,20 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = CourseOverview
-    queryset = CourseOverview.objects.all()
+    # queryset = CourseOverview.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseOverviewFilter
 
-    def retrieve(self, request, *args, **kwargs):
+    def get_queryset(self):
+        print('CourseDetailsViewSet.get_queryset called')
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_courses_for_site(site)
+        return queryset
 
+    def retrieve(self, request, *args, **kwargs):
+        print('CourseDetailsSerializer.retrieve called')
         # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
