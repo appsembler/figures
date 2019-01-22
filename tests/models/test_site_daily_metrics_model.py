@@ -28,7 +28,7 @@ class TestSiteDailyMetrics(object):
 
     @pytest.mark.parametrize('rec', [
         dict(
-            date_for=datetime.date(2018,02,02),
+            date_for=datetime.date(2018, 2, 2),
             defaults=dict(
                 cumulative_active_user_count=11,
                 total_user_count=1,

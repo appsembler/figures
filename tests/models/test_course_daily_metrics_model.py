@@ -97,7 +97,7 @@ class TestCourseDailyMetrics(object):
 
     @pytest.mark.parametrize('rec', [
         dict(
-            date_for=datetime.date(2018, 02, 02),
+            date_for=datetime.date(2018, 2, 2),
             course_id='course-v1:SomeOrg+ABC01+2121',
             enrollment_count=11,
             active_learners_today=1,
