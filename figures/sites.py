@@ -3,7 +3,7 @@
 figuers.sites provides a single point to retrieve site specific data
 
 In general, the rest of Figures should call this module to retrieve all site
-specific data in edx-platform, such as users, course overviews, and 
+specific data in edx-platform, such as users, course overviews, and
 course enrollments as examples
 
 TODO:
@@ -118,9 +118,3 @@ def get_users_for_site(site):
 def get_course_enrollments_for_site(site):
     course_keys = get_course_keys_for_site(site)
     return CourseEnrollment.objects.filter(course_id__in=course_keys)
-
-
-# MultipleObjectsReturned: get() returned more than one UserOrganizationMapping -- it returned 5!
-
-#  File "/edx/src/figures/figures/orgs.py", line 40, in get_users_for_site
-#    organization__in=orgs)

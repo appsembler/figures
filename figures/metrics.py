@@ -31,7 +31,6 @@ from django.db.models import Avg, Max
 from certificates.models import GeneratedCertificate
 from courseware.courses import get_course_by_id
 from courseware.models import StudentModule
-from student.models import CourseEnrollment
 
 from figures.compat import CourseGradeFactory, chapter_grade_values
 from figures.helpers import (

@@ -76,7 +76,7 @@ def figures_home(request):
 
     '''
     # We probably want to roll this into a decorator
-    if not figures.permissions.is_site_admin_user(request): 
+    if not figures.permissions.is_site_admin_user(request):
         return HttpResponseRedirect('/')
 
     # Placeholder context vars just to illustrate returning API hosts to the

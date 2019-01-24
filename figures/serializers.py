@@ -160,18 +160,10 @@ class CourseDailyMetricsSerializer(serializers.ModelSerializer):
 class SiteDailyMetricsSerializer(serializers.ModelSerializer):
     """Proviedes summary data about the LMS site
     """
-    # site_name
-
-    # site_id = serializers.IntegerField(source='site.id')
     site = SiteSerializer()
+
     class Meta:
         model = SiteDailyMetrics
-        # fields = [
-        #     'id', 'site_id', 'date_for', 'cumulative_active_user_count',
-        #     'todays_active_user_count',
-        #     'total_user_count', 'course_count', 'total_enrollment_count',
-        #     'created', 'modified'
-        # ]
 
 
 #

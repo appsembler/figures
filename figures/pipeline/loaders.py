@@ -3,7 +3,6 @@
 """
 
 from figures.models import LearnerCourseGradeMetrics
-import figures.sites
 
 
 def save_learner_course_grades(site, date_for, course_enrollment, course_progress_details):

@@ -9,12 +9,7 @@ course metrics. These data are extracted directly from edx-platform models
 import datetime
 
 from django.utils.timezone import utc
-from django.contrib.auth import get_user_model
 from django.db.models import Sum
-
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
 
 from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
