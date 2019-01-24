@@ -446,7 +446,6 @@ class TestSiteMetricsGettersMultisite(object):
             start_date=self.data_start_date,
             end_date=self.data_end_date)
 
-        # import pdb; pdb.set_trace()
         assert count == len(student_module_sets)
 
     def test_get_total_site_users_for_time_period(self, env_tokens):

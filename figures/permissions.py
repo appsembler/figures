@@ -88,6 +88,8 @@ class IsSiteAdminUser(BasePermission):
     """
     Allow access to only site admins if in multisite mode or staff or superuser
     if in standalone mode
+
+    Would `has_object_permission` help simplify filtering by site?
     """
     def has_permission(self, request, view):
         return is_site_admin_user(request)
