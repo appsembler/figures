@@ -9,15 +9,11 @@ course metrics. These data are extracted directly from edx-platform models
 import datetime
 
 from django.utils.timezone import utc
-from django.contrib.auth import get_user_model
 from django.db.models import Sum
-
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
 
 from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
+import figures.sites
 
 
 #
@@ -25,7 +21,7 @@ from figures.models import CourseDailyMetrics, SiteDailyMetrics
 #
 
 
-def missing_course_daily_metrics(date_for):
+def missing_course_daily_metrics(site, date_for):
     '''
     Return a list of course ids for any courses missing from the set of
     CourseDailyMetrics for the given date (and site after we implement multi-
@@ -37,10 +33,11 @@ def missing_course_daily_metrics(date_for):
     '''
     cdm_course_keys = [
         as_course_key(cdm.course_id) for cdm in
-        CourseDailyMetrics.objects.filter(date_for=date_for)
+        CourseDailyMetrics.objects.filter(site=site, date_for=date_for)
     ]
 
-    course_overviews = CourseOverview.objects.filter(
+    site_course_overviews = figures.sites.get_courses_for_site(site)
+    course_overviews = site_course_overviews.filter(
         created__lt=next_day(date_for)).exclude(id__in=cdm_course_keys)
 
     return set(course_overviews.values_list('id', flat=True))
@@ -50,15 +47,15 @@ def missing_course_daily_metrics(date_for):
 # Standalone methods to extract data/aggregate data for use in SiteDailyMetrics
 #
 
-def get_active_user_count_for_date(date_for, course_daily_metrics=None):
+def get_active_user_count_for_date(site, date_for, course_daily_metrics=None):
     '''
 
     Do we have course daily metrics for the date_for?
     If so, we can use the data there,
     else, we need to calculate it or raise that we don't have data we need
     '''
-    aggregates = CourseDailyMetrics.objects.filter(date_for=date_for).aggregate(
-        Sum('active_learners_today'))
+    aggregates = CourseDailyMetrics.objects.filter(
+        site=site, date_for=date_for).aggregate(Sum('active_learners_today'))
     if aggregates and 'active_learners_today__sum' in aggregates:
         todays_active_user_count = aggregates['active_learners_today__sum'] or 0
     else:
@@ -66,7 +63,7 @@ def get_active_user_count_for_date(date_for, course_daily_metrics=None):
     return todays_active_user_count
 
 
-def get_previous_cumulative_active_user_count(date_for):
+def get_previous_cumulative_active_user_count(site, date_for):
     ''' Returns the cumulative site-wide active user count for the previous day
 
     This is a simple helper function that returns the cumulative active user
@@ -75,16 +72,18 @@ def get_previous_cumulative_active_user_count(date_for):
     '''
     try:
         return SiteDailyMetrics.objects.get(
+            site=site,
             date_for=prev_day(date_for)).cumulative_active_user_count or 0
     except SiteDailyMetrics.DoesNotExist:
         return 0
 
 
-def get_total_enrollment_count(date_for, course_ids=None):
+def get_total_enrollment_count(site, date_for, course_ids=None):
     '''Returns the total enrollments across all courses for the site
     It does not return unique learners
     '''
-    aggregates = CourseDailyMetrics.objects.filter(date_for=date_for).aggregate(
+    aggregates = CourseDailyMetrics.objects.filter(
+        site=site, date_for=date_for).aggregate(
         Sum('enrollment_count'))
     if aggregates and 'enrollment_count__sum' in aggregates:
         enrollment_count = aggregates['enrollment_count__sum'] or 0
@@ -102,7 +101,7 @@ class SiteDailyMetricsExtractor(object):
     def __init__(self):
         pass
 
-    def extract(self, date_for=None, **kwargs):
+    def extract(self, site, date_for=None, **kwargs):
         '''
         We get the count from the User model since there can be registered users
         who have not enrolled.
@@ -116,18 +115,20 @@ class SiteDailyMetricsExtractor(object):
 
         data = dict()
 
-        user_count = get_user_model().objects.filter(
+        site_users = figures.sites.get_users_for_site(site)
+        user_count = site_users.filter(
             date_joined__lt=as_datetime(next_day(date_for))).count()
-        course_count = CourseOverview.objects.filter(
+        site_courses = figures.sites.get_courses_for_site(site)
+        course_count = site_courses.filter(
             created__lt=as_datetime(next_day(date_for))).count()
 
-        todays_active_user_count = get_active_user_count_for_date(date_for)
+        todays_active_user_count = get_active_user_count_for_date(site, date_for)
         data['todays_active_user_count'] = todays_active_user_count
         data['cumulative_active_user_count'] = get_previous_cumulative_active_user_count(
-            date_for) + todays_active_user_count
+            site, date_for) + todays_active_user_count
         data['total_user_count'] = user_count
         data['course_count'] = course_count
-        data['total_enrollment_count'] = get_total_enrollment_count(date_for)
+        data['total_enrollment_count'] = get_total_enrollment_count(site, date_for)
         return data
 
 
@@ -136,9 +137,15 @@ class SiteDailyMetricsLoader(object):
     def __init__(self, extractor=None):
         self.extractor = extractor or SiteDailyMetricsExtractor()
 
-    def load(self, date_for=None, force_update=False, **kwargs):
+    def load(self, site, date_for=None, force_update=False, **kwargs):
         '''
-        TODO: Add filtering for
+        Architectural note:
+        Initially, we're going to be explicit, requiring callers to specify the
+        site model instance to be associated with the site specific metrics
+        model(s) we are populating
+
+        TODOs:
+        Add filtering for
         * Multi-tenancy
         * Course acess groups
         '''
@@ -151,16 +158,17 @@ class SiteDailyMetricsLoader(object):
         # then skip getting data
         if not force_update:
             try:
-                sdm = SiteDailyMetrics.objects.get(date_for=date_for)
+                sdm = SiteDailyMetrics.objects.get(site=site, date_for=date_for)
                 return (sdm, False,)
 
             except SiteDailyMetrics.DoesNotExist:
                 # proceed normally
                 pass
 
-        data = self.extractor.extract(date_for=date_for)
+        data = self.extractor.extract(site=site, date_for=date_for)
         site_metrics, created = SiteDailyMetrics.objects.update_or_create(
             date_for=date_for,
+            site=site,
             defaults=dict(
                 cumulative_active_user_count=data['cumulative_active_user_count'],
                 todays_active_user_count=data['todays_active_user_count'],

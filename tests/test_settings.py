@@ -14,6 +14,19 @@ from figures import settings as figures_settings
 
 
 @pytest.mark.parametrize('env_tokens, expected ', [
+        ({'IS_FIGURES_MULTISITE': True}, True),
+        ({'IS_FIGURES_MULTISITE': False}, False),
+        ({}, False),
+    ])
+def test_is_multisite(env_tokens, expected):
+    """
+    Test env_tokens work properly for Figures multisite settings
+    """
+    with mock.patch('figures.settings.env_tokens', env_tokens):
+        assert figures_settings.is_multisite() == expected
+
+
+@pytest.mark.parametrize('env_tokens, expected ', [
         ({'LOG_PIPELINE_ERRORS_TO_DB': True}, True),
         ({'LOG_PIPELINE_ERRORS_TO_DB': False}, False),
     ])

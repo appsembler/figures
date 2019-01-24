@@ -1,8 +1,12 @@
 
+import mock
 import pytest
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.db.models import F
+
+
 
 from rest_framework.test import (
     APIRequestFactory,
@@ -15,6 +19,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 from student.models import CourseEnrollment
 
+import figures.settings
 from figures.helpers import as_course_key
 from figures.views import GeneralCourseDataViewSet
 
@@ -22,10 +27,17 @@ from tests.factories import (
     CourseDailyMetricsFactory,
     CourseEnrollmentFactory,
     CourseOverviewFactory,
+    OrganizationFactory,
+    OrganizationCourseFactory,
+    SiteFactory,
     UserFactory,
     )
-
+from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
+
+if organizations_support_sites():
+    from tests.factories import UserOrganizationMappingFactory
+
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
 
@@ -82,6 +94,7 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
 
     request_path = 'api/courses/general'
     view_class = GeneralCourseDataViewSet
+
     @pytest.fixture(autouse=True)
     def setup(self, db):
         super(TestGeneralCourseDataViewSet, self).setup(db)
@@ -127,4 +140,94 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             # We're starting to need more complex data set-up, so deferring to
             # implement a 
 
+    def test_get_retrieve(self):
+        '''Tests retrieving a list of users with abbreviated details
 
+        The fields in each returned record are identified by
+            `figures.serializers.UserIndexSerializer`
+        '''
+        course_id = self.course_overviews[0].id
+        # request_path = self.request_path + '/' + str(course_id)
+        request_path = self.request_path + '?pk=' + str(course_id)
+        # import pdb; pdb.set_trace()
+        request = APIRequestFactory().get(request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get': 'retrieve'})
+        response = view(request, pk=str(course_id))
+
+        # Later, we'll elaborate on the tests. For now, some basic checks
+        assert response.status_code == 200
+        assert set(response.data.keys()) == set(self.expected_result_keys)
+        # TODO: add check for values
+
+    @pytest.mark.xfail
+    @pytest.mark.skipif(not organizations_support_sites(),
+                        reason='Organizations needs to support sites')
+    def test_get_course_in_other_site(self, monkeypatch):
+        """
+        This test is broken. Needs review of django.contrib.sites handling for
+        `get_current_site`
+        """
+        def test_site(request):
+            return alpha_site
+        with mock.patch('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': True}):
+            assert figures.settings.is_multisite()
+
+            # Stand up site specific data. Candidate for a fixture
+            alpha_site = SiteFactory(domain='alpha.site')
+            alpha_org = OrganizationFactory(sites=[alpha_site])
+            alpha_course = CourseOverviewFactory(org=alpha_org.short_name)
+            OrganizationCourseFactory(organization=alpha_org,course_id=str(alpha_course.id))
+            alpha_admin_user = UserFactory(username='alpha_admin_user')
+            UserOrganizationMappingFactory(
+                user=alpha_admin_user,
+                organization=alpha_org,
+                is_amc_admin=True)
+
+            bravo_site = SiteFactory(domain='bravo.site')
+            bravo_org = OrganizationFactory(sites=[bravo_site])
+            bravo_admin_user = UserFactory(username='bravo_admin_user')
+            UserOrganizationMappingFactory(
+                user=bravo_admin_user,
+                organization=bravo_org,
+                is_amc_admin=True)
+
+            # Run rest of test
+            request = APIRequestFactory().get(self.request_path)
+            request.META['HTTP_HOST'] = alpha_site.domain
+            monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site',
+                lambda req: alpha_site)
+            force_authenticate(request, user=alpha_admin_user)
+            view = self.view_class.as_view({'get': 'retrieve'})
+            response = view(request, pk=str(alpha_course.id))
+            assert response.status_code == 200, 'user=alpha_admin_user'
+
+            monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site',
+                lambda req: bravo_site)
+            force_authenticate(request, user=bravo_admin_user)
+            view = self.view_class.as_view({'get': 'retrieve'})
+            response = view(request, pk=str(alpha_course.id))
+            assert response.status_code == 403, 'user=bravo_admin_user'
+
+    @pytest.mark.xfail
+    @pytest.mark.skipif(not organizations_support_sites(),
+                        reason='Organizations needs to support sites')
+    def test_get_with_course_id_for_other_site(self):
+        """
+        This tests if the course can't be found in the organization
+
+        This test is incomplete
+        """
+        with mock.patch('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': True}):
+            assert figures.settings.is_multisite()
+
+            # Stand up other site. Candidate for a fixture
+            other_site = SiteFactory(domain='other.site')
+            other_org = OrganizationFactory(sites=[other_site])
+            course = CourseOverviewFactory(org=other_org.short_name)
+
+            request = APIRequestFactory().get(self.request_path)
+            force_authenticate(request, user=self.staff_user)
+            view = self.view_class.as_view({'get': 'retrieve'})
+            response = view(request, pk=str(course.id))
+            assert response.status_code == 403

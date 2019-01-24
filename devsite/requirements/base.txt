@@ -44,6 +44,7 @@ recommonmark==0.4.0
 
 edx-opaque-keys==0.4
 #edx-drf-extensions==1.2.2
+edx-organizations==0.4.1
 
 ##
 ## Pytest dependencies

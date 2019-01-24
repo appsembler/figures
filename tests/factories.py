@@ -11,7 +11,8 @@ import datetime
 from django.utils.timezone import utc
 
 from django.contrib.auth import get_user_model
-#from django_countries.fields import CountryField
+from django.contrib.sites.models import Site
+
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
@@ -19,17 +20,44 @@ from factory.django import DjangoModelFactory
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-
+# from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
+import organizations
+# from organizations import tests as org_tests
 from figures.helpers import as_course_key
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
+from tests.helpers import organizations_support_sites
+
+
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
+
+
+
+# class SiteConfigurationFactory(factory.DjangoModelFactory):
+#     class Meta(object):
+#         model = SiteConfiguration
+
+#     site = factory.SubFactory(SiteFactory)
+#     enabled = True
+#     values = {
+#         'PLATFORM_NAME': factory.SelfAttribute('site.name'),
+#         'SITE_NAME': factory.SelfAttribute('site.domain'),
+#     }
+#     sass_variables = {}
+#     page_elements = {}
+
+
+class SiteFactory(DjangoModelFactory):
+    class Meta:
+        model = Site
+    domain = factory.Sequence(lambda n: 'site-{}.example.com'.format(n))
+    name = factory.Sequence(lambda n: 'Site {}'.format(n))
 
 
 class UserProfileFactory(DjangoModelFactory):
@@ -71,6 +99,57 @@ class UserFactory(DjangoModelFactory):
         if extracted:
             for team in extracted:
                 self.teams.add(team)
+
+
+if organizations_support_sites():
+    class OrganizationFactory(DjangoModelFactory):
+        class Meta:
+            model = organizations.models.Organization
+
+        name = factory.Sequence(u'organization name {}'.format)
+        short_name = factory.Sequence(u'name{}'.format)
+        description = factory.Sequence(u'description{}'.format)
+        logo = None
+        active = True
+
+        # Appsembler fork specific:
+        @factory.post_generation
+        def sites(self, create, extracted, **kwargs):
+            if not create:
+                return
+            if extracted:
+                for site in extracted:
+                    self.sites.add(site)
+else:
+    class OrganizationFactory(DjangoModelFactory):
+        class Meta:
+            model = organizations.models.Organization
+
+        name = factory.Sequence(u'organization name {}'.format)
+        short_name = factory.Sequence(u'name{}'.format)
+        description = factory.Sequence(u'description{}'.format)
+        logo = None
+        active = True
+
+
+class OrganizationCourseFactory(DjangoModelFactory):
+    class Meta:
+        model = organizations.models.OrganizationCourse
+
+    course_id = factory.Sequence(lambda n: COURSE_ID_STR_TEMPLATE.format(n))
+    organization = factory.SubFactory(OrganizationFactory)
+    active = True
+
+
+if organizations_support_sites():
+    class UserOrganizationMappingFactory(factory.DjangoModelFactory):
+        class Meta(object):
+            model = organizations.models.UserOrganizationMapping
+
+        user = factory.SubFactory(UserFactory)
+        organization = factory.SubFactory(OrganizationFactory)
+        is_active = True
+        is_amc_admin = False
 
 
 class CourseOverviewFactory(DjangoModelFactory):
@@ -162,6 +241,7 @@ class CourseAccessRoleFactory(DjangoModelFactory):
 class CourseDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = CourseDailyMetrics
+    site = factory.SubFactory(SiteFactory)
     date_for = factory.Sequence(lambda n:
         (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
     course_id = factory.Sequence(lambda n:
@@ -176,6 +256,7 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
 class SiteDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = SiteDailyMetrics
+    site = factory.SubFactory(SiteFactory)
     date_for = factory.Sequence(lambda n:
         (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
     cumulative_active_user_count = factory.Sequence(lambda n: n)

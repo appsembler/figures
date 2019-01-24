@@ -2,8 +2,9 @@
 
 '''
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
+import django.contrib.sites.shortcuts
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -11,7 +12,9 @@ from rest_framework import viewsets
 from rest_framework.authentication import (
     BasicAuthentication,
     SessionAuthentication,
+    TokenAuthentication,
 )
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
 from rest_framework.response import Response
@@ -48,7 +51,9 @@ from .serializers import (
 )
 from figures import metrics
 from figures.pagination import FiguresLimitOffsetPagination
-from figures.permissions import IsStaffUser
+import figures.permissions
+import figures.settings
+import figures.sites
 
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
@@ -60,7 +65,7 @@ UNAUTHORIZED_USER_REDIRECT_URL = '/'
 
 @ensure_csrf_cookie
 @login_required
-@user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser),
+@user_passes_test(lambda u: u.is_active,
                   login_url=UNAUTHORIZED_USER_REDIRECT_URL,
                   redirect_field_name=None)
 def figures_home(request):
@@ -70,6 +75,9 @@ def figures_home(request):
     TODO: Should we make this a view class?
 
     '''
+    # We probably want to roll this into a decorator
+    if not figures.permissions.is_site_admin_user(request):
+        return HttpResponseRedirect('/')
 
     # Placeholder context vars just to illustrate returning API hosts to the
     # client. This one uses a protocol relative url
@@ -85,10 +93,17 @@ def figures_home(request):
 
 class CommonAuthMixin(object):
     '''Provides a common authorization base for the Figures API views
-
+    TODO: Consider moving this to figures.permissions
     '''
-    authentication_classes = (BasicAuthentication, SessionAuthentication, )
-    permission_classes = (IsAuthenticated, IsStaffUser, )
+    authentication_classes = (
+        BasicAuthentication,
+        SessionAuthentication,
+        TokenAuthentication,
+    )
+    permission_classes = (
+        IsAuthenticated,
+        figures.permissions.IsSiteAdminUser,
+    )
 
 
 #
@@ -114,7 +129,6 @@ class CoursesIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = CourseOverview
-    queryset = CourseOverview.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseIndexSerializer
 
@@ -122,10 +136,8 @@ class CoursesIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     filter_class = CourseOverviewFilter
 
     def get_queryset(self):
-        '''
-
-        '''
-        queryset = super(CoursesIndexViewSet, self).get_queryset()
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_courses_for_site(site)
         return queryset
 
 
@@ -135,27 +147,27 @@ class UserIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     Uses figures.filters.UserFilter to select subsets of User objects
     '''
     model = get_user_model()
-    queryset = get_user_model().objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = UserIndexSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = UserFilterSet
 
     def get_queryset(self):
-        queryset = super(UserIndexViewSet, self).get_queryset()
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_users_for_site(site)
         return queryset
 
 
 class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     model = CourseEnrollment
-    queryset = CourseEnrollment.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseEnrollmentSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseEnrollmentFilter
 
     def get_queryset(self):
-        queryset = super(CourseEnrollmentViewSet, self).get_queryset()
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_course_enrollments_for_site(site)
         return queryset
 
 
@@ -166,28 +178,29 @@ class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
     model = CourseDailyMetrics
-    queryset = CourseDailyMetrics.objects.all()
+    # queryset = CourseDailyMetrics.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseDailyMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseDailyMetricsFilter
 
     def get_queryset(self):
-        queryset = super(CourseDailyMetricsViewSet, self).get_queryset()
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = CourseDailyMetrics.objects.filter(site=site)
         return queryset
 
 
 class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
     model = SiteDailyMetrics
-    queryset = SiteDailyMetrics.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = SiteDailyMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = SiteDailyMetricsFilter
 
     def get_queryset(self):
-        queryset = super(SiteDailyMetricsViewSet, self).get_queryset()
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = SiteDailyMetrics.objects.filter(site=site)
         return queryset
 
 
@@ -218,10 +231,9 @@ class GeneralSiteMetricsView(CommonAuthMixin, APIView):
         '''
         Does not yet support multi-tenancy
         '''
-
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         date_for = request.query_params.get('date_for')
-
-        data = self.metrics_method(date_for=date_for)
+        data = self.metrics_method(site=site, date_for=date_for)
 
         if not data:
             data = {
@@ -235,13 +247,22 @@ class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = CourseOverview
-    queryset = CourseOverview.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralCourseDataSerializer
+
+    def get_queryset(self):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_courses_for_site(site)
+        return queryset
 
     def retrieve(self, request, *args, **kwargs):
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        site = django.contrib.sites.shortcuts.get_current_site(request)
+        if figures.settings.is_multisite():
+            if site != figures.sites.get_site_for_course(course_key):
+                # Raising NotFound instead of PermissionDenied
+                raise NotFound()
         course_overview = get_object_or_404(CourseOverview, pk=course_key)
         return Response(GeneralCourseDataSerializer(course_overview).data)
 
@@ -251,17 +272,28 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = CourseOverview
-    queryset = CourseOverview.objects.all()
+    # queryset = CourseOverview.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseOverviewFilter
 
-    def retrieve(self, request, *args, **kwargs):
+    def get_queryset(self):
+        print('CourseDetailsViewSet.get_queryset called')
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_courses_for_site(site)
+        return queryset
 
+    def retrieve(self, request, *args, **kwargs):
+        print('CourseDetailsSerializer.retrieve called')
         # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        site = django.contrib.sites.shortcuts.get_current_site(request)
+        if figures.settings.is_multisite():
+            if site != figures.sites.get_site_for_course(course_key):
+                # Raising NotFound instead of PermissionDenied
+                raise NotFound()
         course_overview = get_object_or_404(CourseOverview, pk=course_key)
         return Response(CourseDetailsSerializer(course_overview).data)
 
@@ -275,22 +307,23 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     Can filter users for a specific course by providing the 'course_id' query
     parameter
 
+    TODO: Make this class and any other User model based viewsets inherit a
+    base. The only difference between them is the serializer
     '''
     model = get_user_model()
-    queryset = get_user_model().objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = GeneralUserDataSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = UserFilterSet
 
     def get_queryset(self):
-        queryset = super(GeneralUserDataViewSet, self).get_queryset()
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_users_for_site(site)
         return queryset
 
 
 class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
-
-    queryset = get_user_model().objects.all()
+    model = get_user_model()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = LearnerDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
@@ -299,5 +332,6 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         '''
         '''
-        queryset = super(LearnerDetailsViewSet, self).get_queryset()
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_users_for_site(site)
         return queryset

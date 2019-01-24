@@ -7,8 +7,8 @@ node_js:
 
 # command to install dependencies
 install:
-  - pip install -r devsite/requirements.txt
-  - pip install pytest-cov flake8
+  - pip install -r devsite/requirements/base.txt
+  - pip install pytest-cov flake8 tox
   - cd frontend && npm install && cd ..
 
 # command to run tests
@@ -17,4 +17,7 @@ script:
   - flake8 figures
   - py.test --cov=./
   - bash <(curl -s https://codecov.io/bash)
-  
+  - tox
+
+env:
+  - TOXENV=py27-openedx_ginkgo

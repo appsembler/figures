@@ -15,9 +15,18 @@ DEFAULT_PAGINATION_LIMIT = 20
 
 DAILY_METRICS_CELERY_TASK_LABEL = 'figures-populate-daily-metrics'
 
+DEFAULT_IS_MULTISITE = False
 DEFAULT_LOG_PIPELINE_ERRORS_TO_DB = True
 
 env_tokens = {}
+
+
+def is_multisite():
+    """
+    Override by setting ``IS_MULTISITE`` to true in the Figures env settings
+    """
+    return bool(env_tokens.get('IS_FIGURES_MULTISITE',
+                               DEFAULT_IS_MULTISITE))
 
 
 def log_pipeline_errors_to_db():

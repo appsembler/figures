@@ -32,4 +32,6 @@ def log_error(error_data, error_type=None, **kwargs):
             data.update(user=kwargs['user'])
         if 'course_id' in kwargs:
             data.update(course_id=str(kwargs['course_id']))
+        if 'site' in kwargs:
+            data.update(site=kwargs['site'])
         PipelineError.objects.create(**data)
