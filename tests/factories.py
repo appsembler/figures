@@ -241,6 +241,7 @@ class CourseAccessRoleFactory(DjangoModelFactory):
 class CourseDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = CourseDailyMetrics
+    site = factory.SubFactory(SiteFactory)
     date_for = factory.Sequence(lambda n:
         (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
     course_id = factory.Sequence(lambda n:
@@ -255,6 +256,7 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
 class SiteDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = SiteDailyMetrics
+    site = factory.SubFactory(SiteFactory)
     date_for = factory.Sequence(lambda n:
         (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
     cumulative_active_user_count = factory.Sequence(lambda n: n)

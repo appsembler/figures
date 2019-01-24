@@ -26,8 +26,15 @@ class TestSiteDailyMetrics(object):
 
         '''
 
-    @pytest.mark.parametrize('rec', [
-        dict(
+    def test_create(self):
+        '''Sanity check we can create the SiteDailyMetrics model
+
+        Create a second instance the way we'll do it in the production code.
+        Assert this is correct
+        '''
+
+        rec = dict(
+            site=Site.objects.first(),
             date_for=datetime.date(2018, 2, 2),
             defaults=dict(
                 cumulative_active_user_count=11,
@@ -35,26 +42,18 @@ class TestSiteDailyMetrics(object):
                 course_count=1,
                 total_enrollment_count=1
             ),
-        ),
-    ])
-    def test_create(self, rec):
-        '''Sanity check we can create the SiteDailyMetrics model
-
-        Create a second instance the way we'll do it in the production code.
-        Assert this is correct
-        '''
-
+        )
         site_metrics, created = SiteDailyMetrics.objects.get_or_create(**rec)
-
         assert created and site_metrics
 
-    def test_site(self):
+    def test_multiple_sites(self):
         """
         Tests expected SiteDailyMetrics behavior for working with a Site
         """
         assert Site.objects.count() == 1
         default_site = Site.objects.first()
         rec = dict(
+            site=Site.objects.first(),
             date_for=datetime.date(2018, 02, 02),
             cumulative_active_user_count=11,
             total_user_count=1,

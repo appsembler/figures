@@ -20,6 +20,7 @@ looking at adding additional Figures models to capture:
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django_countries import Countries
 from rest_framework import serializers
 
@@ -136,6 +137,12 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
         editable = False
 
 
+class SiteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Site
+        editable = False
+
 #
 # Figures model serializers
 #
@@ -153,9 +160,18 @@ class CourseDailyMetricsSerializer(serializers.ModelSerializer):
 class SiteDailyMetricsSerializer(serializers.ModelSerializer):
     """Proviedes summary data about the LMS site
     """
+    # site_name
 
+    # site_id = serializers.IntegerField(source='site.id')
+    site = SiteSerializer()
     class Meta:
         model = SiteDailyMetrics
+        # fields = [
+        #     'id', 'site_id', 'date_for', 'cumulative_active_user_count',
+        #     'todays_active_user_count',
+        #     'total_user_count', 'course_count', 'total_enrollment_count',
+        #     'created', 'modified'
+        # ]
 
 
 #
@@ -220,6 +236,7 @@ class GeneralCourseDataSerializer(serializers.Serializer):
         ]
 
     """
+    # site = serializers.SerializerMethodField()
     course_id = serializers.CharField(source='id', read_only=True)
     course_name = serializers.CharField(
         source='display_name_with_default_escaped', read_only=True)
@@ -236,6 +253,19 @@ class GeneralCourseDataSerializer(serializers.Serializer):
     staff = serializers.SerializerMethodField()
 
     metrics = serializers.SerializerMethodField()
+
+    def to_representation(self, instance):
+        """
+        This is a hack to get the site for this course
+        We do this because the figures.metrics calls we are making require the
+        site object as a parameter
+        """
+        self.site = figures.sites.get_site_for_course(instance)
+        ret = super(GeneralCourseDataSerializer, self).to_representation(instance)
+        return ret
+
+    # def get_site(self, obj):
+    #     return figures.sites.get_site_for_course(str(obj.id))
 
     def get_staff(self, obj):
         qs = CourseAccessRole.objects.filter(course_id=obj.id)

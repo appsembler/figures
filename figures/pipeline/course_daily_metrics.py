@@ -82,11 +82,11 @@ def get_average_progress(course_id, date_for, course_enrollments):
     """Collects and aggregates raw course grades data
     """
     progress = []
-
     for ce in course_enrollments:
         try:
             course_progress = figures.metrics.LearnerCourseGrades.course_progress(ce)
             figures.pipeline.loaders.save_learner_course_grades(
+                site=figures.sites.get_site_for_course(course_id),
                 date_for=date_for,
                 course_enrollment=ce,
                 course_progress_details=course_progress['course_progress_details'])

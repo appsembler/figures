@@ -21,6 +21,7 @@ class CourseDailyMetrics(TimeStampedModel):
     adding a SiteDailyMetrics foreign key. This is subject to change as the code
     evolves.
     """
+    site = models.ForeignKey(Site)
     date_for = models.DateField()
 
     # Leaving as a simple string for initial development
@@ -28,7 +29,6 @@ class CourseDailyMetrics(TimeStampedModel):
     # the CourseOverview model or have the course_id be a
     # CourseKeyField
     course_id = models.CharField(max_length=255)
-    site = models.ForeignKey(Site, default=settings.SITE_ID)
     enrollment_count = models.IntegerField()
     active_learners_today = models.IntegerField()
     # Do we want cumulative average progress for the month?
@@ -54,9 +54,9 @@ class SiteDailyMetrics(TimeStampedModel):
     Stores metrics for a given site and day
     """
 
+    site = models.ForeignKey(Site)
     # Date for which this record's data are collected
     date_for = models.DateField()
-    site = models.ForeignKey(Site, default=settings.SITE_ID)
     cumulative_active_user_count = models.IntegerField(blank=True, null=True)
     todays_active_user_count = models.IntegerField(blank=True, null=True)
     total_user_count = models.IntegerField()
@@ -116,11 +116,11 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     actually needed and edx-platform uses FloatField in its grades models
 
     """
+    site = models.ForeignKey(Site)
     date_for = models.DateField()
     # TODO: We should require the user
     user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
     course_id = models.CharField(max_length=255, blank=True)
-    site = models.ForeignKey(Site, default=settings.SITE_ID)
     points_possible = models.FloatField()
     points_earned = models.FloatField()
     sections_worked = models.IntegerField()

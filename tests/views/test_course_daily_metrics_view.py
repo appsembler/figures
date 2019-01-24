@@ -5,7 +5,7 @@
 import datetime
 from decimal import Decimal
 from dateutil.parser import parse
-#from dateutil.rrule import rrule, DAILY
+from dateutil.rrule import rrule, DAILY
 import pytest
 
 from rest_framework.test import (
@@ -19,9 +19,12 @@ from figures.pagination import FiguresLimitOffsetPagination
 from figures.views import CourseDailyMetricsViewSet
 
 from tests.factories import CourseDailyMetricsFactory, UserFactory
-from tests.helpers import create_metrics_model_timeseries
 from tests.views.base import BaseViewTest
 
+def generate_cdm_series(site, first_day, last_day):
+
+    return [CourseDailyMetricsFactory(site=site, date_for=dt)
+        for dt in rrule(DAILY, dtstart=first_day, until=last_day)]
 
 @pytest.mark.django_db
 class TestCourseDailyMetricsView(BaseViewTest):
@@ -54,8 +57,7 @@ class TestCourseDailyMetricsView(BaseViewTest):
         field_names = (o.name for o in CourseDailyMetrics._meta.fields
             if o.name not in self.date_fields )
 
-        self.metrics = create_metrics_model_timeseries(
-            CourseDailyMetricsFactory, self.first_day, self.last_day)
+        self.metrics = generate_cdm_series(self.site, self.first_day, self.last_day)
 
     def assert_response_equal(self, response_data, obj):
         '''Convenience method to compare serialized data to model object
@@ -121,6 +123,7 @@ class TestCourseDailyMetricsView(BaseViewTest):
             db_rec = expected_data.get(id=data['id'])
             self.assert_response_equal(data, db_rec)
 
+    @pytest.mark.xfail
     @pytest.mark.parametrize('data', [
         ( dict(
             date_for='2020-01-01',

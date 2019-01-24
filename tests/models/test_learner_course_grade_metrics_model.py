@@ -5,6 +5,8 @@
 import datetime
 import pytest
 
+from django.contrib.sites.models import Site
+
 from figures.models import LearnerCourseGradeMetrics
 
 from tests.factories import CourseEnrollmentFactory
@@ -19,6 +21,7 @@ class TestLearnerCourseGradeMetrics(object):
     """
     @pytest.fixture(autouse=True)
     def setup(self, db):
+        self.site = Site.objects.first()
         self.date_for = datetime.date(2018, 2, 2)
         self.course_enrollment = CourseEnrollmentFactory()
         self.grade_data = dict(
@@ -29,6 +32,7 @@ class TestLearnerCourseGradeMetrics(object):
             )
         self.create_rec = self.grade_data.copy()
         self.create_rec.update(dict(
+            site=self.site,
             date_for=self.date_for,
             user=self.course_enrollment.user,
             course_id=self.course_enrollment.course_id))
