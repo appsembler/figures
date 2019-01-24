@@ -3,6 +3,7 @@
 TODO:
 
 * Add tests for the individual field extractors
+* Add test coverage for multisite mode
 '''
 
 import datetime
@@ -19,6 +20,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 from figures.helpers import as_datetime, prev_day
 from figures.models import SiteDailyMetrics
 from figures.pipeline import site_daily_metrics as pipeline_sdm
+import figures.sites
 
 from tests.factories import (
     CourseDailyMetricsFactory,
@@ -85,6 +87,7 @@ class TestCourseDailyMetricsMissingCdm(object):
         '''
         '''
         self.date_for = DEFAULT_END_DATE
+        self.site = Site.objects.first()
         self.course_count = 4
         self.course_overviews = [CourseOverviewFactory(
             created=self.date_for) for i in range(self.course_count)]
@@ -94,8 +97,10 @@ class TestCourseDailyMetricsMissingCdm(object):
         '''
         [CourseDailyMetricsFactory(
             date_for=self.date_for,
+            site=self.site,
             course_id=course.id) for course in self.course_overviews]
         course_ids = pipeline_sdm.missing_course_daily_metrics(
+            site=self.site,
             date_for=self.date_for)
         assert course_ids == set([])
 
@@ -104,12 +109,17 @@ class TestCourseDailyMetricsMissingCdm(object):
         '''
         [
             CourseDailyMetricsFactory(
-                date_for=self.date_for, course_id=self.course_overviews[0].id),
+                date_for=self.date_for,
+                site=self.site,
+                course_id=self.course_overviews[0].id),
             CourseDailyMetricsFactory(
-                date_for=self.date_for, course_id=self.course_overviews[1].id),
+                date_for=self.date_for,
+                site=self.site,
+                course_id=self.course_overviews[1].id),
         ]
         expected_missing = [unicode(co.id) for co in self.course_overviews[2:]]
-        actual = pipeline_sdm.missing_course_daily_metrics(date_for=self.date_for)
+        actual = pipeline_sdm.missing_course_daily_metrics(
+            site=self.site, date_for=self.date_for)
         assert actual == set(expected_missing)
 
 
@@ -121,7 +131,9 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.date_for = datetime.date(2018, 6, 1)
+        self.site = Site.objects.first()
         self.cdm_recs = [CourseDailyMetricsFactory(
+            site=self.site,
             date_for=self.date_for,
             **cdm
             ) for cdm in CDM_INPUT_TEST_DATA]
@@ -129,6 +141,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     def test_get_active_user_count_for_date(self):
         expected = SDM_EXPECTED_RESULTS['todays_active_user_count']
         actual = pipeline_sdm.get_active_user_count_for_date(
+            site=self.site,
             date_for=self.date_for)
         assert actual == expected
 
@@ -139,15 +152,19 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     def test_get_previous_cumulative_active_user_count(self, prev_day_data, expected):
         if prev_day_data:
             SiteDailyMetricsFactory(
+                site=self.site,
                 date_for=prev_day(self.date_for),
                 **prev_day_data)
         actual = pipeline_sdm.get_previous_cumulative_active_user_count(
+            site=self.site,
             date_for=self.date_for)
         assert actual == expected
 
     def test_get_total_enrollment_count(self):
         expected = SDM_EXPECTED_RESULTS['total_enrollment_count']
-        actual = pipeline_sdm.get_total_enrollment_count(date_for=self.date_for)
+        actual = pipeline_sdm.get_total_enrollment_count(
+            site=self.site,
+            date_for=self.date_for)
         assert actual == expected
 
 
@@ -159,6 +176,7 @@ class TestSiteDailyMetricsExtractor(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.date_for = datetime.date(2018, 10, 1)
+        self.site = Site.objects.first()
         self.users = [UserFactory(
             date_joined=as_datetime(self.date_for - datetime.timedelta(days=60))
             ) for i in range(0, 3)]
@@ -166,10 +184,12 @@ class TestSiteDailyMetricsExtractor(object):
             created=as_datetime(self.date_for - datetime.timedelta(days=60))
             ) for i in range(0, 3)]
         self.cdm_recs = [CourseDailyMetricsFactory(
+            site=self.site,
             date_for=self.date_for,
             **cdm
             ) for cdm in CDM_INPUT_TEST_DATA]
         self.prev_day_sdm = SiteDailyMetricsFactory(
+            site=self.site,
             date_for=prev_day(self.date_for),
             **SDM_PREV_DAY[1])
 
@@ -182,19 +202,20 @@ class TestSiteDailyMetricsExtractor(object):
             total_enrollment_count=150,
         )
 
-        for course in CourseOverview.objects.all():
+        for course in figures.sites.get_courses_for_site(self.site):
             assert course.created.date() < self.date_for
-        for user in get_user_model().objects.all():
+        for user in figures.sites.get_users_for_site(self.site):
             assert user.date_joined.date() < self.date_for
 
         actual = pipeline_sdm.SiteDailyMetricsExtractor().extract(
+            site=self.site,
             date_for=self.date_for)
         for key, value in expected_results.iteritems():
             assert actual[key] == value, 'failed on key: "{}"'.format(key)
 
 
 @pytest.mark.django_db
-class TestSiteDailyMetricsLoaderSingleSite(object):
+class TestSiteDailyMetricsLoader(object):
     """
     Tests the site metrics loading for single site (standalone) deployments
 
@@ -209,7 +230,7 @@ class TestSiteDailyMetricsLoaderSingleSite(object):
 
     class MockExtractor(object):
         def extract(self, **kwargs):
-            return TestSiteDailyMetricsLoaderSingleSite.FIELD_VALUES
+            return TestSiteDailyMetricsLoader.FIELD_VALUES
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
