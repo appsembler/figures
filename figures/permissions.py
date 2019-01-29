@@ -96,6 +96,8 @@ def is_site_admin_user(request):
         msg += 'user={}, has_permission={}'.format(request.user.id, has_permission)
         logger.info(msg)
 
+    msg = 'user "" is_site_admin_user = {}'
+    logger.info(msg.format(request.user.username, has_permission))
     return has_permission
 
 

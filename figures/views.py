@@ -1,6 +1,9 @@
 '''
 
 '''
+
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseRedirect
@@ -57,6 +60,8 @@ import figures.sites
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
 
+logger = logging.getLogger(__name__)
+
 
 #
 # UI Template rendering views
@@ -76,6 +81,8 @@ def figures_home(request):
     '''
     # We probably want to roll this into a decorator
     if not figures.permissions.is_site_admin_user(request):
+        msg = 'figures_home: request user, "{}" does not have permission'
+        logger.info(msg.format(request.user.username))
         return HttpResponseRedirect('/')
 
     # Placeholder context vars just to illustrate returning API hosts to the
@@ -101,7 +108,7 @@ class CommonAuthMixin(object):
     )
     permission_classes = (
         IsAuthenticated,
-        figures.permissions.IsSiteAdminUser,
+        # figures.permissions.IsSiteAdminUser,
     )
 
 
