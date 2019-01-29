@@ -28,6 +28,8 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 
+from rest_framework.test import APIRequestFactory, force_authenticate
+
 import organizations
 
 from openedx.core.djangoapps.content.course_overviews.models import (
@@ -52,6 +54,13 @@ from tests.helpers import organizations_support_sites
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
+
+# @pytest.mark.skip('test not implemented')
+# def test_get_current_site_standalone():
+#     request = None
+
+#     site = figures.sites.get_current_site(request)
+
 
 
 @pytest.mark.django_db

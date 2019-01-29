@@ -10,8 +10,13 @@ TODO:
 Document how organization site mapping works
 """
 
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
+import django.contrib.sites.shortcuts
+
+
 from django.conf import settings
 
 # TODO: Add exception handling
@@ -24,6 +29,30 @@ from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key
 import figures.settings
+
+
+logger = logging.getLogger(__name__)
+
+
+def get_current_site(request):
+    """
+    This method exists because Django 1.8 retrieves the site matching
+    django.conf.settings.SITE_ID if this attribute exists, which it does in at
+    least Ap
+    """
+
+    msg = 'figures.sites.get_current_site() called. request.user={}, request.'
+    msg += ' request host={}'
+    logger.info(msg.format(request.user, request.get_host()))
+    if figures.settings.is_multisite():
+        site = Site.objects._get_site_by_request(request)
+    else:
+        site = django.contrib.sites.shortcuts.get_current_site(request)
+    if not site:
+        msg = 'figures.sites.get_current_site(...) unable to get site for host {}'
+        logger.error(msg.format(request.get_host()))
+        # TODO: raise exception. We should always return a site object
+    return site
 
 
 def get_site_for_course(course_id):

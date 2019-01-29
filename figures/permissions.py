@@ -1,13 +1,16 @@
 '''Provides permissions for Figures views
 
 '''
-from rest_framework.permissions import BasePermission
+import logging
 
-import django.contrib.sites.shortcuts
+from rest_framework.permissions import BasePermission
 
 import organizations
 
 import figures.settings
+import figures.sites
+
+logger = logging.getLogger(__name__)
 
 
 class MultipleOrgsPerUserNotSupported(Exception):
@@ -57,7 +60,7 @@ def is_site_admin_user(request):
     4. Check the uom record if user is admin and active
     """
     if figures.settings.is_multisite():
-        current_site = django.contrib.sites.shortcuts.get_current_site(request)
+        current_site = figures.sites.get_current_site(request)
         orgs = organizations.models.Organization.objects.filter(sites__in=[current_site])
         # Should just be mappings for organizations in this site
         # If just one organization in a site, then the queryset returned
@@ -65,6 +68,13 @@ def is_site_admin_user(request):
         uom_qs = organizations.models.UserOrganizationMapping.objects.filter(
             organization__in=orgs,
             user=request.user)
+
+        msg = 'figures.permissions.is_site_admin_user: current_site={}'
+        msg += ', user_id={},'
+        if uom_qs:
+            msg += 'uom record:is_amc_admin={}, is_active={}'.format(
+                uom_qs[0].is_amc_admin, uom_qs[0].is_active)
+        logger.info(msg.format(current_site.domain, request.user.id))
 
         # This is here to Fail because multiple orgs per site is unsupported
         if uom_qs.count() > 1:
@@ -76,11 +86,18 @@ def is_site_admin_user(request):
         # for the first element
         if uom_qs and request.user.is_active:
             has_permission = uom_qs[0].is_amc_admin and uom_qs[0].is_active
+            msg = 'figures.permissions.is_site_admin_user. Has permission = {}'
+            logger.info(msg.format(has_permission))
         else:
             has_permission = False
     else:
         has_permission = is_active_staff_or_superuser(request)
+        msg = 'figures.permissions.is_site_admin_user [Standalone mode]. '
+        msg += 'user={}, has_permission={}'.format(request.user.id, has_permission)
+        logger.info(msg)
 
+    msg = 'user "" is_site_admin_user = {}'
+    logger.info(msg.format(request.user.username, has_permission))
     return has_permission
 
 

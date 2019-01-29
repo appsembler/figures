@@ -1,9 +1,11 @@
 '''
 
 '''
+
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-import django.contrib.sites.shortcuts
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -58,6 +60,8 @@ import figures.sites
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
 
+logger = logging.getLogger(__name__)
+
 
 #
 # UI Template rendering views
@@ -77,6 +81,8 @@ def figures_home(request):
     '''
     # We probably want to roll this into a decorator
     if not figures.permissions.is_site_admin_user(request):
+        msg = 'figures_home: request user, "{}" does not have permission'
+        logger.info(msg.format(request.user.username))
         return HttpResponseRedirect('/')
 
     # Placeholder context vars just to illustrate returning API hosts to the
@@ -102,7 +108,7 @@ class CommonAuthMixin(object):
     )
     permission_classes = (
         IsAuthenticated,
-        figures.permissions.IsSiteAdminUser,
+        # figures.permissions.IsSiteAdminUser,
     )
 
 
@@ -136,7 +142,7 @@ class CoursesIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     filter_class = CourseOverviewFilter
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = figures.sites.get_courses_for_site(site)
         return queryset
 
@@ -153,7 +159,7 @@ class UserIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     filter_class = UserFilterSet
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = figures.sites.get_users_for_site(site)
         return queryset
 
@@ -166,7 +172,7 @@ class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     filter_class = CourseEnrollmentFilter
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = figures.sites.get_course_enrollments_for_site(site)
         return queryset
 
@@ -185,7 +191,7 @@ class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
     filter_class = CourseDailyMetricsFilter
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = CourseDailyMetrics.objects.filter(site=site)
         return queryset
 
@@ -199,7 +205,7 @@ class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
     filter_class = SiteDailyMetricsFilter
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = SiteDailyMetrics.objects.filter(site=site)
         return queryset
 
@@ -231,7 +237,7 @@ class GeneralSiteMetricsView(CommonAuthMixin, APIView):
         '''
         Does not yet support multi-tenancy
         '''
-        site = django.contrib.sites.shortcuts.get_current_site(request)
+        site = figures.sites.get_current_site(request)
         date_for = request.query_params.get('date_for')
         data = self.metrics_method(site=site, date_for=date_for)
 
@@ -251,14 +257,14 @@ class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = GeneralCourseDataSerializer
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = figures.sites.get_courses_for_site(site)
         return queryset
 
     def retrieve(self, request, *args, **kwargs):
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-        site = django.contrib.sites.shortcuts.get_current_site(request)
+        site = figures.sites.get_current_site(request)
         if figures.settings.is_multisite():
             if site != figures.sites.get_site_for_course(course_key):
                 # Raising NotFound instead of PermissionDenied
@@ -280,7 +286,7 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         print('CourseDetailsViewSet.get_queryset called')
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = figures.sites.get_courses_for_site(site)
         return queryset
 
@@ -289,7 +295,7 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-        site = django.contrib.sites.shortcuts.get_current_site(request)
+        site = figures.sites.get_current_site(request)
         if figures.settings.is_multisite():
             if site != figures.sites.get_site_for_course(course_key):
                 # Raising NotFound instead of PermissionDenied
@@ -317,7 +323,7 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     filter_class = UserFilterSet
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = figures.sites.get_users_for_site(site)
         return queryset
 
@@ -332,6 +338,6 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         '''
         '''
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = figures.sites.get_current_site(self.request)
         queryset = figures.sites.get_users_for_site(site)
         return queryset

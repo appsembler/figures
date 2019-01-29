@@ -7,12 +7,11 @@ import pytest
 
 from django.contrib.auth import get_user_model
 
-import django.contrib.sites.shortcuts
-
 from rest_framework.test import APIRequestFactory
 
 import figures.permissions
 import figures.settings
+# import figures.sites
 
 from tests.factories import OrganizationFactory, SiteFactory, UserFactory
 
@@ -91,7 +90,7 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         request = APIRequestFactory().get('/')
         request.META['HTTP_HOST'] = self.site.domain
         request.user = get_user_model().objects.get(username=username)
-        monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site', test_site)
+        monkeypatch.setattr(figures.sites, 'get_current_site', test_site)
         with mock.patch('figures.settings.env_tokens', self.env_tokens):
             assert figures.settings.is_multisite()
 
@@ -112,7 +111,7 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         request = APIRequestFactory().get('/')
         request.META['HTTP_HOST'] = self.site.domain
         request.user = get_user_model().objects.get(username=username)
-        monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site', test_site)
+        monkeypatch.setattr(figures.sites, 'get_current_site', test_site)
         with mock.patch('figures.settings.env_tokens', self.env_tokens):
             assert figures.settings.is_multisite()
             org2 = OrganizationFactory(sites=[self.site])
