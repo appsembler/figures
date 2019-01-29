@@ -34,10 +34,6 @@ import figures.settings
 logger = logging.getLogger(__name__)
 
 
-# For troubleshooting
-logger.setLevel(logging.INFO)
-
-
 def get_current_site(request):
     """
     This method exists because Django 1.8 retrieves the site matching
@@ -47,14 +43,14 @@ def get_current_site(request):
 
     msg = 'figures.sites.get_current_site() called. request.user={}, request.'
     msg += ' request host={}'
-    logger.debug(msg.format(request.user, request.get_host()))
+    logger.info(msg.format(request.user, request.get_host()))
     if figures.settings.is_multisite():
         site = Site.objects._get_site_by_request(request)
     else:
         site = django.contrib.sites.shortcuts.get_current_site(request)
     if not site:
-        msg = 'figures.sites.get_current_site(...) unable to get site.'
-        logger.error(msg)
+        msg = 'figures.sites.get_current_site(...) unable to get site for host {}'
+        logger.error(msg.format(request.get_host()))
         # TODO: raise exception. We should always return a site object
     return site
 

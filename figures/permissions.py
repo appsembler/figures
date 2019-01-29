@@ -1,14 +1,16 @@
 '''Provides permissions for Figures views
 
 '''
-from rest_framework.permissions import BasePermission
+import logging
 
-import django.contrib.sites.shortcuts
+from rest_framework.permissions import BasePermission
 
 import organizations
 
 import figures.settings
 import figures.sites
+
+logger = logging.getLogger(__name__)
 
 
 class MultipleOrgsPerUserNotSupported(Exception):
@@ -67,6 +69,13 @@ def is_site_admin_user(request):
             organization__in=orgs,
             user=request.user)
 
+        msg = 'figures.permissions.is_site_admin_user: current_site={}'
+        msg += ', user_id={},'
+        if uom_qs:
+            msg += 'uom record:is_amc_admin={}, is_active={}'.format(
+                uom_qs[0].is_amc_admin, uom_qs[0].is_active)
+        logger.info(msg.format(current_site.domain, request.user.id))
+
         # This is here to Fail because multiple orgs per site is unsupported
         if uom_qs.count() > 1:
             raise MultipleOrgsPerUserNotSupported(
@@ -77,10 +86,15 @@ def is_site_admin_user(request):
         # for the first element
         if uom_qs and request.user.is_active:
             has_permission = uom_qs[0].is_amc_admin and uom_qs[0].is_active
+            msg = 'figures.permissions.is_site_admin_user. Has permission = {}'
+            logger.info(msg.format(has_permission))
         else:
             has_permission = False
     else:
         has_permission = is_active_staff_or_superuser(request)
+        msg = 'figures.permissions.is_site_admin_user [Standalone mode]. '
+        msg += 'user={}, has_permission={}'.format(request.user.id, has_permission)
+        logger.info(msg)
 
     return has_permission
 
