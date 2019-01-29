@@ -195,14 +195,14 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             # Run rest of test
             request = APIRequestFactory().get(self.request_path)
             request.META['HTTP_HOST'] = alpha_site.domain
-            monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site',
+            monkeypatch.setattr(figures.sites, 'get_current_site',
                 lambda req: alpha_site)
             force_authenticate(request, user=alpha_admin_user)
             view = self.view_class.as_view({'get': 'retrieve'})
             response = view(request, pk=str(alpha_course.id))
             assert response.status_code == 200, 'user=alpha_admin_user'
 
-            monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site',
+            monkeypatch.setattr(figures.sites, 'get_current_site',
                 lambda req: bravo_site)
             force_authenticate(request, user=bravo_admin_user)
             view = self.view_class.as_view({'get': 'retrieve'})

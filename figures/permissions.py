@@ -8,6 +8,7 @@ import django.contrib.sites.shortcuts
 import organizations
 
 import figures.settings
+import figures.sites
 
 
 class MultipleOrgsPerUserNotSupported(Exception):
@@ -57,7 +58,7 @@ def is_site_admin_user(request):
     4. Check the uom record if user is admin and active
     """
     if figures.settings.is_multisite():
-        current_site = django.contrib.sites.shortcuts.get_current_site(request)
+        current_site = figures.sites.get_current_site(request)
         orgs = organizations.models.Organization.objects.filter(sites__in=[current_site])
         # Should just be mappings for organizations in this site
         # If just one organization in a site, then the queryset returned
