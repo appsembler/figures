@@ -7,12 +7,13 @@ import datetime
 import mock
 import pytest
 
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 
+from opaque_keys.edx.locator import CourseLocator
 from student.models import CourseEnrollment, CourseAccessRole
 
 from figures.helpers import as_datetime, next_day, prev_day
-from figures.models import PipelineError
+from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 import figures.sites
 
@@ -55,6 +56,8 @@ class TestGetCourseEnrollments(object):
             date_for=self.today).values_list('id', flat=True)
         assert set(results_ce) == set(expected_ce)
 
+
+# Keep this
 # @mock.patch('figures.settings.env_tokens', return_value={'IS_FIGURES_MULTISITE': False})
 @pytest.mark.django_db
 class TestCourseDailyMetricsPipelineFunctions(object):
@@ -151,7 +154,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         go.
         """
         with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
-            assert figures.settings.is_multisite() == False
+            assert not figures.settings.is_multisite()
             course_enrollments = CourseEnrollment.objects.filter(
                 course_id=self.course_overview.id)
             actual = pipeline_cdm.get_average_progress(
@@ -246,8 +249,54 @@ class TestCourseDailyMetricsLoader(object):
         self.course_enrollments = [CourseEnrollmentFactory() for i in range(1, 5)]
         self.student_module = StudentModuleFactory()
 
-    def test_load(self):
+    def test_load(self, monkeypatch):
+        course_id = "course-v1:certs-appsembler+001+2019"
+
+        def get_data(self, date_for):
+            return {
+                'average_progress': 1.0,
+                'num_learners_completed': 2,
+                'enrollment_count': 3,
+                'average_days_to_complete': 0.0,
+                'course_id': CourseLocator(u'certs-appsembler', u'001', u'2019', None, None),
+                'date_for': date_for,
+                'active_learners_today': 0}
+
+        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+            monkeypatch.setattr(
+                figures.pipeline.course_daily_metrics.CourseDailyMetricsLoader,
+                'get_data', get_data)
+            cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
+            assert cdm and created
+
+    def test_load_existing(self, monkeypatch):
         with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
             course_id = self.course_enrollments[0].course_id
-            results = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
-            assert results
+            assert CourseDailyMetrics.objects.count() == 0
+            cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
+            assert cdm and created
+            assert CourseDailyMetrics.objects.count() == 1
+            cdm2, created2 = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
+            assert cdm2 and not created2
+            assert cdm2.id == cdm.id
+            assert CourseDailyMetrics.objects.count() == 1
+
+    @pytest.mark.parametrize('average_progress', [-1.0, -0.01, 1.01])
+    def test_load_invalid_data(self, monkeypatch, average_progress):
+        def mock_get_average_progress(course_id, date_for, course_enrollments):
+            return average_progress
+        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+            course_id = self.course_enrollments[0].course_id
+            monkeypatch.setattr(
+                figures.pipeline.course_daily_metrics,
+                'get_average_progress',
+                mock_get_average_progress)
+            with pytest.raises(ValidationError) as execinfo:
+                assert CourseDailyMetrics.objects.count() == 0
+                cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
+                assert CourseDailyMetrics.objects.count() == 0
+                assert 'average_progress' in execinfo.value.message_dict
+
+    @pytest.mark.skip('Implement me!')
+    def test_load_force_update(self):
+        pass

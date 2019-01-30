@@ -1,15 +1,18 @@
-"""ETL for Course daily metrics
+"""ETL for Course Daily Metrics (CDM)
 
 This module performs the following:
 
 * Extracts data from edx-platform Django models and Modulestore objects
 * Transforms data (mostly collecting aggregaates at this point)
 * Loads data in to the Figures CourseDailyMetrics model
+
+The extractors work locally on the LMS
+Future: add a remote mode to pull data via REST API
 """
-
-
-# These are needed for the extractors
 import datetime
+import logging
+
+from django.db import transaction
 from django.utils.timezone import utc
 
 from certificates.models import GeneratedCertificate
@@ -26,10 +29,14 @@ import figures.pipeline.loaders
 from figures.serializers import CourseIndexSerializer
 import figures.sites
 
+
+logger = logging.getLogger(__name__)
+
 # TODO: Move extractors to figures.pipeline.extract module
 
-# The extractors work locally on the LMS
-# Future: add a remote mode to pull data via REST API
+
+class InvalideCourseAverageProgress(Exception):
+    pass
 
 #
 # Extraction helper methods
@@ -266,11 +273,36 @@ class CourseDailyMetricsLoader(object):
         self.course_id = course_id
         # TODO: Consider adding extractor as optional param
         self.extractor = CourseDailyMetricsExtractor()
+        self.site = figures.sites.get_site_for_course(self.course_id)
 
     def get_data(self, date_for):
         return self.extractor.extract(
             course_id=self.course_id,
             date_for=date_for)
+
+    @transaction.atomic
+    def save_metrics(self, date_for, data):
+        """
+        convenience method to handle saving and validating in a transaction
+
+        Raises django.core.exceptions.ValidationError if the record fails
+        validation
+        """
+
+        cdm, created = CourseDailyMetrics.objects.update_or_create(
+            course_id=self.course_id,
+            site=self.site,
+            date_for=date_for,
+            defaults=dict(
+                enrollment_count=data['enrollment_count'],
+                active_learners_today=data['active_learners_today'],
+                average_progress=data['average_progress'],
+                average_days_to_complete=int(round(data['average_days_to_complete'])),
+                num_learners_completed=data['num_learners_completed'],
+            )
+        )
+        cdm.clean_fields()
+        return (cdm, created,)
 
     def load(self, date_for=None, force_update=False, **kwargs):
         """
@@ -280,36 +312,26 @@ class CourseDailyMetricsLoader(object):
         provided in the data. So before hacking something together, I want to
         think this over some more.
 
+        If the record alrdady exists and force_update is False, then simply
+        return the record with the 'created' flag to False. This saves us an
+        unnecessary call to extract data
+
+        Raises ValidationError if invalid data is attempted to be saved to the
+        course daily metrics model instance
         """
         if not date_for:
             date_for = prev_day(
-                datetime.datetime.utcnow().replace(tzinfo=utc).date()
-            )
+                datetime.datetime.utcnow().replace(tzinfo=utc).date())
 
-        # if we already have a record for the date_for and force_update is False
-        # then skip getting data
-        if not force_update:
-            try:
-                cdm = CourseDailyMetrics.objects.get(
-                    course_id=self.course_id,
-                    date_for=date_for)
+        try:
+            cdm = CourseDailyMetrics.objects.get(course_id=self.course_id,
+                                                 date_for=date_for)
+            # record found, only update if force update flag is True
+            if not force_update:
                 return (cdm, False,)
-
-            except CourseDailyMetrics.DoesNotExist:
-                # proceed normally
-                pass
+        except CourseDailyMetrics.DoesNotExist:
+            # record not found, move on to creating
+            pass
 
         data = self.get_data(date_for=date_for)
-        cdm, created = CourseDailyMetrics.objects.update_or_create(
-            course_id=self.course_id,
-            site=figures.sites.get_site_for_course(self.course_id),
-            date_for=date_for,
-            defaults=dict(
-                enrollment_count=data['enrollment_count'],
-                active_learners_today=data['active_learners_today'],
-                average_progress=data['average_progress'],
-                average_days_to_complete=data['average_days_to_complete'],
-                num_learners_completed=data['num_learners_completed'],
-            )
-        )
-        return (cdm, created,)
+        return self.save_metrics(date_for=date_for, data=data)

@@ -147,9 +147,9 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             `figures.serializers.UserIndexSerializer`
         '''
         course_id = self.course_overviews[0].id
+        # TODO: Add course id to path as well as query param
         # request_path = self.request_path + '/' + str(course_id)
         request_path = self.request_path + '?pk=' + str(course_id)
-        # import pdb; pdb.set_trace()
         request = APIRequestFactory().get(request_path)
         force_authenticate(request, user=self.staff_user)
         view = self.view_class.as_view({'get': 'retrieve'})
