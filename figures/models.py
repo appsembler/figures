@@ -4,6 +4,7 @@
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -33,7 +34,10 @@ class CourseDailyMetrics(TimeStampedModel):
     active_learners_today = models.IntegerField()
     # Do we want cumulative average progress for the month?
     average_progress = models.DecimalField(
-        max_digits=2, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=2, blank=True, null=True,
+        validators=[MaxValueValidator(1.0), MinValueValidator(0.0)],
+        )
+
     average_days_to_complete = models.IntegerField(blank=True, null=True)
     num_learners_completed = models.IntegerField()
 

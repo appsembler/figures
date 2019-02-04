@@ -16,9 +16,11 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key, as_date
+from figures.models import PipelineError
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
 import figures.sites
+from figures.pipeline.logger import log_error_to_db
 
 logger = get_task_logger(__name__)
 
@@ -46,6 +48,7 @@ def populate_single_cdm(course_id, date_for=None, force_update=False):
     logger.info(msg)
 
     start_time = time.time()
+
     cdm_obj, created = CourseDailyMetricsLoader(
         course_id).load(date_for=date_for, force_update=force_update)
     elapsed_time = time.time() - start_time
@@ -57,13 +60,15 @@ def populate_single_cdm(course_id, date_for=None, force_update=False):
 def populate_site_daily_metrics(site_id, **kwargs):
     '''Populate a SiteDailyMetrics record
     '''
-    logger.debug("populate_site_daily_metrics called")
+    logger.debug(
+        'populate_site_daily_metrics called for site_id={}'.format(site_id))
     SiteDailyMetricsLoader().load(
         site=Site.objects.get(id=site_id),
         date_for=kwargs.get('date_for', None),
         force_update=kwargs.get('force_update', False),
         )
-    logger.debug('done running populate_site_daily_metrics')
+    logger.debug(
+        'done running populate_site_daily_metrics for site_id={}"'.format(site_id))
 
 
 @shared_task
@@ -93,14 +98,32 @@ def populate_daily_metrics(date_for=None, force_update=False):
     logger.info('Starting task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
 
-    # print('testing...')
-    # import pdb; pdb.set_trace()
     for site in Site.objects.all():
         for course in figures.sites.get_courses_for_site(site):
-            populate_single_cdm(
-                course_id=course.id,
-                date_for=date_for,
-                force_update=force_update)
+            try:
+                populate_single_cdm(
+                    course_id=course.id,
+                    date_for=date_for,
+                    force_update=force_update)
+            except Exception as e:
+                logger.exception('figures.tasks.populate_daily_metrics failed')
+                # Always capture CDM load exceptions to the Figures pipeline
+                # error table
+                error_data = dict(
+                    date_for=date_for,
+                    msg='figures.tasks.populate_daily_metrics failed',
+                    exception_class=e.__class__.__name__,
+                    )
+                if hasattr(e, 'message_dict'):
+                    error_data['message_dict'] = e.message_dict
+                log_error_to_db(
+                    error_data=error_data,
+                    error_type=PipelineError.COURSE_DATA,
+                    course_id=str(course.id),
+                    site=site,
+                    logger=logger,
+                    log_pipeline_errors_to_db=True,
+                    )
         populate_site_daily_metrics(
             site_id=site.id,
             date_for=date_for,

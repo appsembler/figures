@@ -10,11 +10,14 @@ import datetime
 import pytest
 
 from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
+
+from opaque_keys.edx.locator import CourseLocator
 
 from figures.models import CourseDailyMetrics
 
-from tests.factories import CourseDailyMetricsFactory, SiteFactory
+from tests.factories import SiteFactory
 
 
 @pytest.mark.django_db
@@ -61,6 +64,74 @@ class TestCourseDailyMetrics(object):
         assert metrics2 and not created
         assert metrics2 == metrics
 
+    def test_update_or_create(self):
+        course_id = "course-v1:certs-appsembler+001+2019"
+        date_for = "2019-01-30"
+        data = {
+            'average_progress': 0.1,
+            'num_learners_completed': 2,
+            'enrollment_count': 3,
+            'average_days_to_complete': 0.0,
+            'course_id': CourseLocator(u'certs-appsembler', u'001', u'2019', None, None),
+            'date_for': date_for,
+            'active_learners_today': 0}
+
+        cdm, created = CourseDailyMetrics.objects.update_or_create(
+            course_id=course_id,
+            site=self.site,
+            date_for=date_for,
+            defaults=dict(
+                enrollment_count=data['enrollment_count'],
+                active_learners_today=data['active_learners_today'],
+                average_progress=data['average_progress'],
+                average_days_to_complete=1,  # int(round(data['average_days_to_complete'])),
+                num_learners_completed=0,  # data['num_learners_completed'],
+            )
+        )
+
+    @pytest.mark.parametrize('average_progress', [-1.0, -0.01, 1.01])
+    def test_with_invalid_average_progress(self, average_progress):
+        """
+        Apparently Django models don't validate automatically on save
+        """
+        assert average_progress < 0 or average_progress > 1
+        rec = dict(
+            site=self.site,
+            date_for=datetime.date(2018, 2, 2),
+            course_id='course-v1:SomeOrg+ABC01+2121',
+            enrollment_count=11,
+            active_learners_today=1,
+            average_progress=average_progress,
+            average_days_to_complete=5,
+            num_learners_completed=10
+        )
+        obj = CourseDailyMetrics(**rec)
+        with pytest.raises(ValidationError) as execinfo:
+            obj.clean_fields()
+
+        assert 'average_progress' in execinfo.value.message_dict
+
+    @pytest.mark.parametrize('average_progress',
+        [0.0, 0.01, 0.5, 0.99, 0.999, 1.0])
+    def test_with_valid_average_progress(self, average_progress):
+        """
+        Average progress must be between 0.0 and 1.0 inclusive
+        """
+
+        rec =  dict(
+            site=self.site,
+            date_for=datetime.date(2018, 2, 2),
+            course_id='course-v1:SomeOrg+ABC01+2121',
+            enrollment_count=11,
+            active_learners_today=1,
+            average_progress=average_progress,
+            average_days_to_complete=5,
+            num_learners_completed=10
+        )
+        metrics = CourseDailyMetrics.objects.create(**rec)
+        assert metrics.average_progress == average_progress
+        metrics.clean_fields()
+
     def test_site(self):
         """
         Tests expected CourseDailyMetrics behavior for working with a Site
@@ -100,7 +171,7 @@ class TestCourseDailyMetrics(object):
         date_for and course_id. It should raise IntegrityError
         '''
 
-        rec =  dict(
+        rec = dict(
             site=self.site,
             date_for=datetime.date(2018, 2, 2),
             course_id='course-v1:SomeOrg+ABC01+2121',
@@ -113,6 +184,7 @@ class TestCourseDailyMetrics(object):
         metrics = CourseDailyMetrics.objects.create(**rec)
         with pytest.raises(IntegrityError) as e_info:
             metrics = CourseDailyMetrics.objects.create(**rec)
+            assert e_info.value.message.startswith('UNIQUE constraint failed')
 
     @pytest.mark.skip(reason='Test not yet implemented')
     def test_get_by_unique_fields(self):
