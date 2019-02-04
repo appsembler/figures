@@ -100,17 +100,11 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
         super(TestGeneralCourseDataViewSet, self).setup(db)
         self.users = [make_user(**data) for data in USER_DATA]
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
-        #self.course_enrollments = [make_course_enrollments(user, self.course_overviews) for user in self.users]
-        #self.course_daily_metrics = [make_course_daily_metrics()]
         self.expected_result_keys = [
             'course_id', 'course_name', 'course_code','org', 'start_date',
             'end_date', 'self_paced', 'staff', 'metrics',
         ]
 
-    # @pytest.mark.parametrize('endpoint, filter', [
-    #     ('api/courses/general', {}),
-    #     ])
-    #def test_get_list(self, endpoint, filter):
     def test_get_list(self):
         '''Tests retrieving a list of users with abbreviated details
 
@@ -147,8 +141,6 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             `figures.serializers.UserIndexSerializer`
         '''
         course_id = self.course_overviews[0].id
-        # TODO: Add course id to path as well as query param
-        # request_path = self.request_path + '/' + str(course_id)
         request_path = self.request_path + '?pk=' + str(course_id)
         request = APIRequestFactory().get(request_path)
         force_authenticate(request, user=self.staff_user)

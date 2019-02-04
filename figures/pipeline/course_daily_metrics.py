@@ -8,6 +8,8 @@ This module performs the following:
 
 The extractors work locally on the LMS
 Future: add a remote mode to pull data via REST API
+
+# TODO: Move extractors to figures.pipeline.extract module
 """
 import datetime
 import logging
@@ -32,11 +34,6 @@ import figures.sites
 
 logger = logging.getLogger(__name__)
 
-# TODO: Move extractors to figures.pipeline.extract module
-
-
-class InvalideCourseAverageProgress(Exception):
-    pass
 
 #
 # Extraction helper methods

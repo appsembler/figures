@@ -20,7 +20,7 @@ from figures.models import PipelineError
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
 import figures.sites
-from figures.pipeline.logger import log_error
+from figures.pipeline.logger import log_error_to_db
 
 logger = get_task_logger(__name__)
 
@@ -49,7 +49,6 @@ def populate_single_cdm(course_id, date_for=None, force_update=False):
 
     start_time = time.time()
 
-    # TODO: We
     cdm_obj, created = CourseDailyMetricsLoader(
         course_id).load(date_for=date_for, force_update=force_update)
     elapsed_time = time.time() - start_time
@@ -107,6 +106,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
                     date_for=date_for,
                     force_update=force_update)
             except Exception as e:
+                logger.exception('figures.tasks.populate_daily_metrics failed')
                 # Always capture CDM load exceptions to the Figures pipeline
                 # error table
                 error_data = dict(
@@ -116,7 +116,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
                     )
                 if hasattr(e, 'message_dict'):
                     error_data['message_dict'] = e.message_dict
-                log_error(
+                log_error_to_db(
                     error_data=error_data,
                     error_type=PipelineError.COURSE_DATA,
                     course_id=str(course.id),
