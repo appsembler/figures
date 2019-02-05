@@ -50,13 +50,13 @@ def get_course_enrollments(course_id, date_for):
     )
 
 
-def get_num_enrolled_in_exclude_admins(course_id, date_for):
+def get_enrolled_in_exclude_admins(course_id, date_for=None):
     """
     Copied over from CourseEnrollmentManager.num_enrolled_in_exclude_admins method
     and modified to filter on date LT
 
     """
-    course_locator = course_id
+    course_locator = as_course_key(course_id)
 
     if getattr(course_id, 'ccx', None):
         course_locator = course_id.to_course_locator()
@@ -64,12 +64,13 @@ def get_num_enrolled_in_exclude_admins(course_id, date_for):
     staff = CourseStaffRole(course_locator).users_with_role()
     admins = CourseInstructorRole(course_locator).users_with_role()
     coaches = CourseCcxCoachRole(course_locator).users_with_role()
+    filter_args = dict(course_id=course_id, is_active=1)
 
-    return CourseEnrollment.objects.filter(
-        course_id=course_id,
-        is_active=1,
-        created__lt=as_datetime(next_day(date_for)),
-    ).exclude(user__in=staff).exclude(user__in=admins).exclude(user__in=coaches).count()
+    if date_for:
+        filter_args.update(dict(created__lt=as_datetime(next_day(date_for))))
+
+    return CourseEnrollment.objects.filter(**filter_args).exclude(
+        user__in=staff).exclude(user__in=admins).exclude(user__in=coaches)
 
 
 def get_active_learner_ids_today(course_id, date_for):
@@ -232,9 +233,8 @@ class CourseDailyMetricsExtractor(object):
             )
 
         # We can turn this series of calls into a parallel
-        # set of calls defined in a ruleset instead of hardcoded here
-        # Get querysets and datasets we'll use
-        # We do this to reduce calls
+        # set of calls defined in a ruleset instead of hardcoded here after
+        # retrieving the core quersets
 
         course_enrollments = get_course_enrollments(
             course_id, date_for,)
@@ -245,7 +245,8 @@ class CourseDailyMetricsExtractor(object):
         # After we get this working, we can then define them declaratively
         # we can do a lambda for course_enrollments to get the count
 
-        data['enrollment_count'] = course_enrollments.count()
+        data['enrollment_count'] = get_enrolled_in_exclude_admins(
+            course_id, date_for).count()
         active_learner_ids_today = get_active_learner_ids_today(
             course_id, date_for,)
         if active_learner_ids_today:
