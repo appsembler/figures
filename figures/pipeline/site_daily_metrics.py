@@ -38,7 +38,7 @@ def missing_course_daily_metrics(site, date_for):
 
     site_course_overviews = figures.sites.get_courses_for_site(site)
     course_overviews = site_course_overviews.filter(
-        created__lt=next_day(date_for)).exclude(id__in=cdm_course_keys)
+        created__lt=as_datetime(next_day(date_for))).exclude(id__in=cdm_course_keys)
 
     return set(course_overviews.values_list('id', flat=True))
 
