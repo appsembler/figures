@@ -12,6 +12,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 from student.models import CourseEnrollment
 
+from figures.pipeline.course_daily_metrics import get_enrolled_in_exclude_admins
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
@@ -115,9 +116,7 @@ class UserFilterSet(django_filters.FilterSet):
         to be able to create a course key object from the string
         '''
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-        # get course enrollments for the course
-        user_ids = CourseEnrollment.objects.filter(
-            course_id=course_key).values_list('user__id', flat=True).distinct()
+        user_ids = get_enrolled_in_exclude_admins(course_id=course_key)
         return queryset.filter(id__in=user_ids)
 
 

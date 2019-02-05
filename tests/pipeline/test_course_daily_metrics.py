@@ -110,7 +110,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
                     ),
             ) for i, days in enumerate(self.cert_days_to_complete)]
 
-    def test_get_num_enrolled_in_exclude_admins(self):
+    def test_get_enrolled_in_exclude_admins(self):
         """
 
         """
@@ -126,14 +126,14 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             expected_count = ce_count - ce_non_students
             assert ce_count > 0 and ce_non_students > 0 and expected_count > 0, 'say something'
 
-            actual_count = pipeline_cdm.get_num_enrolled_in_exclude_admins(
+            learners = pipeline_cdm.get_enrolled_in_exclude_admins(
                 course_id=self.course_overview.id, date_for=self.today)
 
-            assert actual_count == expected_count
+            assert learners.count() == expected_count
 
-            actual_count = pipeline_cdm.get_num_enrolled_in_exclude_admins(
+            learners = pipeline_cdm.get_enrolled_in_exclude_admins(
                 course_id=str(self.course_overview.id), date_for=self.today)
-            assert actual_count == expected_count
+            assert learners.count() == expected_count
 
     def test_get_active_learner_ids_today(self):
         """
