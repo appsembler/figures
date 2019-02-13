@@ -30,7 +30,7 @@ def is_site_admin_user(request):
       or superuser.
     * If figures is running in multisite mode, then the user needs to belong to
       the site through the site's organization and have admin permission for
-      that organization
+      that organization or have staff or superuser access.
 
     ## Multisite implementation
 
@@ -56,31 +56,32 @@ def is_site_admin_user(request):
     3. Get the user org mappings for the orgs and user in the request
     4. Check the uom record if user is admin and active
     """
-    if figures.settings.is_multisite():
-        current_site = django.contrib.sites.shortcuts.get_current_site(request)
-        orgs = organizations.models.Organization.objects.filter(sites__in=[current_site])
-        # Should just be mappings for organizations in this site
-        # If just one organization in a site, then the queryset returned
-        # should contain just one element
-        uom_qs = organizations.models.UserOrganizationMapping.objects.filter(
-            organization__in=orgs,
-            user=request.user)
+    has_permission = is_active_staff_or_superuser(request)
+    if not has_permission:
+        if figures.settings.is_multisite():
+            current_site = django.contrib.sites.shortcuts.get_current_site(request)
+            orgs = organizations.models.Organization.objects.filter(sites__in=[current_site])
+            # Should just be mappings for organizations in this site
+            # If just one organization in a site, then the queryset returned
+            # should contain just one element
+            uom_qs = organizations.models.UserOrganizationMapping.objects.filter(
+                organization__in=orgs,
+                user=request.user)
 
-        # This is here to Fail because multiple orgs per site is unsupported
-        if uom_qs.count() > 1:
-            raise MultipleOrgsPerUserNotSupported(
-                'Only one org per user per site is allowed. found {}'.format(
-                    uom_qs.count())
-                )
-        # Since Tahoe does just one org, we're going to cheat and just look
-        # for the first element
-        if uom_qs and request.user.is_active:
-            has_permission = uom_qs[0].is_amc_admin and uom_qs[0].is_active
+            # This is here to Fail because multiple orgs per site is unsupported
+            if uom_qs.count() > 1:
+                raise MultipleOrgsPerUserNotSupported(
+                    'Only one org per user per site is allowed. found {}'.format(
+                        uom_qs.count())
+                    )
+            # Since Tahoe does just one org, we're going to cheat and just look
+            # for the first element
+            if uom_qs and request.user.is_active:
+                has_permission = uom_qs[0].is_amc_admin and uom_qs[0].is_active
+            else:
+                has_permission = False
         else:
-            has_permission = False
-    else:
-        has_permission = is_active_staff_or_superuser(request)
-
+            has_permission = is_active_staff_or_superuser(request)
     return has_permission
 
 

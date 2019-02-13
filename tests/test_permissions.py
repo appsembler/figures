@@ -76,10 +76,15 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
                 organization=self.organization,
                 is_amc_admin=True)
         ]
+        self.callers += create_test_users()
         self.env_tokens = {'IS_FIGURES_MULTISITE': True}
 
     # @mock.patch('figures.settings')
     @pytest.mark.parametrize('username, allow', [
+        ('regular_user', False),
+        ('staff_user', True),
+        ('super_user', True),
+        ('superstaff_user', True),
         ('alpha_nonadmin', False),
         ('alpha_site_admin', True),
         ('nosite_staff', False),
@@ -97,7 +102,7 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
 
             permission = figures.permissions.IsSiteAdminUser().has_permission(
                 request, None)
-            assert permission == allow
+            assert permission is allow, 'user {}'.format(username)
 
             # verify that inactive users are denied permission
             request.user.is_active = False
