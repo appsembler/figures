@@ -102,7 +102,7 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
 
             permission = figures.permissions.IsSiteAdminUser().has_permission(
                 request, None)
-            assert permission is allow, 'user {}'.format(username)
+            assert permission is allow, 'User "{username}" should have access'.format(username=username)
 
             # verify that inactive users are denied permission
             request.user.is_active = False
