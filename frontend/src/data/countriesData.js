@@ -241,7 +241,8 @@ const countriesWithCodes = {
   "EH": "Western Sahara",
   "YE": "Yemen",
   "ZM": "Zambia",
-  "ZW": "Zimbabwe"
+  "ZW": "Zimbabwe",
+  "ND": "Not defined",
 }
 
 export default countriesWithCodes

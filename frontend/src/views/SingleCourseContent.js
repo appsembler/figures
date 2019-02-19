@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { addActiveApiFetch, removeActiveApiFetch } from 'base/redux/actions/Actions';
 import classNames from 'classnames/bind';
@@ -17,9 +18,9 @@ class SingleCourseContent extends Component {
     super(props);
 
     this.state = {
-      courseData: {},
+      courseData: Immutable.Map(),
       allLearnersLoaded: true,
-      learnersList: [],
+      learnersList: Immutable.List(),
       apiFetchMoreLearnersUrl: null
     };
 
@@ -33,7 +34,7 @@ class SingleCourseContent extends Component {
     fetch((apiConfig.coursesDetailed + this.props.courseId + '/'), { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({
-        courseData: json
+        courseData: Immutable.fromJS(json)
       }, () => this.props.removeActiveApiFetch()))
   }
 
@@ -45,7 +46,7 @@ class SingleCourseContent extends Component {
   }
 
   setLearnersData = (results, paginationNext) => {
-    const tempLearners = this.state.learnersList.concat(results);
+    const tempLearners = this.state.learnersList.concat(Immutable.fromJS(results));
     this.setState ({
       allLearnersLoaded: paginationNext === null,
       learnersList: tempLearners,
@@ -63,34 +64,34 @@ class SingleCourseContent extends Component {
       <div className="ef--layout-root">
         <HeaderAreaLayout>
           <HeaderContentCourse
-            startDate = {this.state.courseData['start_date']}
-            endDate = {this.state.courseData['end_date']}
-            courseName = {this.state.courseData['course_name']}
-            courseCode = {this.state.courseData['course_code']}
-            isSelfPaced = {this.state.courseData['self_paced']}
-            learnersEnrolled = {this.state.courseData['learners_enrolled']}
+            startDate = {this.state.courseData.getIn(['start_date'])}
+            endDate = {this.state.courseData.getIn(['end_date'])}
+            courseName = {this.state.courseData.getIn(['course_name'])}
+            courseCode = {this.state.courseData.getIn(['course_code'])}
+            isSelfPaced = {this.state.courseData.getIn(['self_paced'])}
+            learnersEnrolled = {this.state.courseData.getIn(['learners_enrolled'])}
           />
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
             cardTitle='Number of enrolled learners'
-            mainValue={this.state.courseData['learners_enrolled'] ? this.state.courseData['learners_enrolled']['current_month'] : 0}
-            valueHistory={this.state.courseData['learners_enrolled'] ? this.state.courseData['learners_enrolled']['history'] : []}
+            mainValue={this.state.courseData.getIn(['learners_enrolled', 'current_month'], 0)}
+            valueHistory={this.state.courseData.getIn(['learners_enrolled', 'history'], [])}
           />
           <BaseStatCard
             cardTitle='Average course progress'
-            mainValue={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['current_month'] : 0}
-            valueHistory={this.state.courseData['average_progress'] ? this.state.courseData['average_progress']['history'] : []}
+            mainValue={this.state.courseData.getIn(['average_progress', 'current_month'], 0)}
+            valueHistory={this.state.courseData.getIn(['average_progress', 'history'], [])}
           />
           <BaseStatCard
             cardTitle='Average days to complete'
-            mainValue={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['current_month'] : 0}
-            valueHistory={this.state.courseData['average_days_to_complete'] ? this.state.courseData['average_days_to_complete']['history'] : []}
+            mainValue={this.state.courseData.getIn(['average_days_to_complete', 'current_month'], 0)}
+            valueHistory={this.state.courseData.getIn(['average_days_to_complete', 'history'], [])}
           />
           <BaseStatCard
             cardTitle='User course completions'
-            mainValue={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['current_month'] : 0}
-            valueHistory={this.state.courseData['users_completed'] ? this.state.courseData['users_completed']['history'] : []}
+            mainValue={this.state.courseData.getIn(['users_completed', 'current_month'], 0)}
+            valueHistory={this.state.courseData.getIn(['users_completed', 'history'], [])}
           />
           <LearnerStatistics
             learnersData = {this.state.learnersList}

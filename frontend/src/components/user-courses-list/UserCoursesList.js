@@ -8,22 +8,17 @@ import { faCheck } from '@fortawesome/fontawesome-free-solid';
 let cx = classNames.bind(styles);
 
 class UserCoursesList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
 
   render() {
+
     const coursesRender = this.props.enrolledCoursesData.map((course, index) => {
-      const progressBarWidth = (course['progress_data']['course_progress']*100).toFixed(0) + '%';
+      const progressBarWidth = (course.getIn(['progress_data', 'course_progress'], 0)*100).toFixed(0) + '%';
 
       return (
         <div key={index} className={cx({'stat-card': true, 'course-item': true})}>
           <div className={styles['course-info']}>
             <span className={styles['course-code']}>{course['course_code']}</span>
-            <Link className={styles['course-name']} to={"/figures/course/" + course['course_id']}>{course['course_name']}</Link>
+            <Link className={styles['course-name']} to={"/figures/course/" + course.getIn(['course_id'], "")}>{course.getIn(['course_name'], "")}</Link>
           </div>
           <ul className={styles['user-stats']}>
             <li className={styles['stat']}>
@@ -31,7 +26,7 @@ class UserCoursesList extends Component {
                 Date enrolled:
               </span>
               <span className={styles['stat-value']}>
-                {course['date_enrolled']}
+                {course.getIn(['date_enrolled'])}
               </span>
             </li>
             <li className={styles['stat']}>
@@ -39,7 +34,7 @@ class UserCoursesList extends Component {
                 Course completed:
               </span>
               <span className={styles['stat-value']}>
-                {course['progress_data']['course_completed'] ? <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} /> : '-'}
+                {course.getIn(['progress_data', 'course_completed']) ? <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} /> : '-'}
               </span>
             </li>
             <li className={styles['stat']}>
@@ -47,7 +42,7 @@ class UserCoursesList extends Component {
                 Points earned:
               </span>
               <span className={styles['stat-value']}>
-                {course['progress_data']['course_progress_details'].points_earned} (of {course['progress_data']['course_progress_details'].points_possible})
+                {course.getIn(['progress_data', 'course_progress_details', 'points_earned'], 0)} (of {course.getIn(['progress_data', 'course_progress_details', 'points_possible'], 0)})
               </span>
             </li>
             <li className={styles['stat']}>
@@ -55,12 +50,12 @@ class UserCoursesList extends Component {
                 Overall progress:
               </span>
               <span className={styles['stat-value']}>
-                {(course['progress_data']['course_progress']*100).toFixed(2)}%
+                {(course.getIn(['progress_data', 'course_progress'], 0)*100).toFixed(2)}%
               </span>
             </li>
           </ul>
           <div className={styles['progress-bar']}>
-            <span className={cx({'bar': true, 'finished': course['progress_data']['course_completed']})} style={{width: progressBarWidth}}></span>
+            <span className={cx({'bar': true, 'finished': course.getIn(['progress_data', 'course_completed'])})} style={{width: progressBarWidth}}></span>
           </div>
         </div>
       )

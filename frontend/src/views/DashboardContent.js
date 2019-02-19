@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames/bind';
 import { connect } from 'react-redux';
+import Immutable from 'immutable';
 import styles from './_dashboard-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import HeaderContentMaus from 'base/components/header-views/header-content-maus/HeaderContentMaus';
@@ -16,7 +17,7 @@ class DashboardContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      coursesDetailed: [],
+      coursesDetailed: Immutable.List(),
     };
     this.fetchCoursesList = this.fetchCoursesList.bind(this);
   }
@@ -25,7 +26,7 @@ class DashboardContent extends Component {
     fetch(apiConfig.coursesDetailed, { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({
-        coursesDetailed: json['results']
+        coursesDetailed: Immutable.fromJS(json['results'])
       }))
   }
 
@@ -44,23 +45,23 @@ class DashboardContent extends Component {
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
             cardTitle='Number of registered learners'
-            mainValue={this.props.generalData['total_site_users']['current_month']}
-            valueHistory={this.props.generalData['total_site_users']['history']}
+            mainValue={this.props.generalData.getIn(['total_site_users', 'current_month'])}
+            valueHistory={this.props.generalData.getIn(['total_site_users', 'history'])}
           />
           <BaseStatCard
             cardTitle='Number of course enrollments'
-            mainValue={this.props.generalData['total_course_enrollments']['current_month']}
-            valueHistory={this.props.generalData['total_course_enrollments']['history']}
+            mainValue={this.props.generalData.getIn(['total_course_enrollments', 'current_month'])}
+            valueHistory={this.props.generalData.getIn(['total_course_enrollments', 'history'])}
           />
           <BaseStatCard
             cardTitle='Number of courses'
-            mainValue={this.props.generalData['total_site_coures']['current_month']}
-            valueHistory={this.props.generalData['total_site_coures']['history']}
+            mainValue={this.props.generalData.getIn(['total_site_courses', 'current_month'])}
+            valueHistory={this.props.generalData.getIn(['total_site_courses', 'history'])}
           />
           <BaseStatCard
             cardTitle='User course completions'
-            mainValue={this.props.generalData['total_course_completions']['current_month']}
-            valueHistory={this.props.generalData['total_course_completions']['history']}
+            mainValue={this.props.generalData.getIn(['total_course_completions', 'current_month'])}
+            valueHistory={this.props.generalData.getIn(['total_course_completions', 'history'])}
           />
           <CoursesList
             coursesList={this.state.coursesDetailed}
@@ -72,7 +73,7 @@ class DashboardContent extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  generalData: state.generalData.data
+  generalData: Immutable.fromJS(state.generalData.data)
 })
 
 export default connect(

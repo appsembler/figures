@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { addActiveApiFetch, removeActiveApiFetch } from 'base/redux/actions/Actions';
 import classNames from 'classnames/bind';
@@ -36,7 +37,7 @@ class SingleUserContent extends Component {
     super(props);
 
     this.state = {
-      userData: {}
+      userData: Immutable.Map()
     };
 
     this.fetchUserData = this.fetchUserData.bind(this);
@@ -47,7 +48,7 @@ class SingleUserContent extends Component {
     fetch((apiConfig.learnersDetailed + this.props.userId + '/'), { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({
-        userData: json
+        userData: Immutable.fromJS(json)
       }, () => this.props.removeActiveApiFetch()))
   }
 
@@ -56,15 +57,14 @@ class SingleUserContent extends Component {
   }
 
   render() {
-    const dateJoined = new Date(this.state.userData['date_joined']);
-    console.log("UserData:", this.state.userData)
+    const dateJoined = new Date(this.state.userData.getIn(['date_joined']));
 
     return (
       <div className="ef--layout-root">
         <HeaderAreaLayout>
           <HeaderContentUser
-            image = {this.state.userData['profile_image'] ? this.state.userData['profile_image']['image_url_large'] : ''}
-            name = {this.state.userData['name']}
+            image = {this.state.userData.getIn(['profile_image', 'image_url_large'])}
+            name = {this.state.userData.getIn(['name'])}
           />
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'user-content': true})}>
@@ -75,15 +75,15 @@ class SingleUserContent extends Component {
             <ul className={styles['user-details']}>
               <li>
                 <span className={styles['label']}>Username:</span>
-                <span className={styles['value']}>{this.state.userData['username']}</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['username'])}</span>
               </li>
               <li>
                 <span className={styles['label']}>Year of birth:</span>
-                <span className={styles['value']}>{this.state.userData['year_of_birth']}</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['year_of_birth'])}</span>
               </li>
               <li>
                 <span className={styles['label']}>Gender:</span>
-                <span className={styles['value']}>{genderDict[this.state.userData['gender']]}</span>
+                <span className={styles['value']}>{genderDict[this.state.userData.getIn(['gender'])]}</span>
               </li>
               <li>
                 <span className={styles['label']}>Date joined:</span>
@@ -91,28 +91,28 @@ class SingleUserContent extends Component {
               </li>
               <li>
                 <span className={styles['label']}>Is active:</span>
-                <span className={styles['value']}>{this.state.userData['is_active'] ? 'Active user' : 'User inactive'}</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['is_active'], false) ? 'Active user' : 'User inactive'}</span>
               </li>
               <li>
                 <span className={styles['label']}>Courses enrolled:</span>
-                <span className={styles['value']}>{this.state.userData['courses'] ? this.state.userData['courses'].length : ""}</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['courses']) ? this.state.userData.getIn(['courses']).length : ""}</span>
               </li>
               <li>
                 <span className={styles['label']}>Country:</span>
-                <span className={styles['value']}>{this.state.userData['country'] ? countries.getName(this.state.userData['country'], "en") : "Not Available"}</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['country']) ? countries.getName(this.state.userData.getIn(['country']), "en") : "Not Available"}</span>
               </li>
               <li>
                 <span className={styles['label']}>Level of education:</span>
-                <span className={styles['value']}>{this.state.userData['level_of_education'] ? educationLevelsDict[this.state.userData['level_of_education']] : 'Not Available'}</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['level_of_education']) ? educationLevelsDict[this.state.userData.getIn(['level_of_education'])] : 'Not Available'}</span>
               </li>
               <li>
                 <span className={styles['label']}>Email address:</span>
-                <span className={styles['value']}><a href={"mailto:" + this.state.userData['email']}>{this.state.userData['email']}</a></span>
+                <span className={styles['value']}><a href={"mailto:" + this.state.userData.getIn(['email'])}>{this.state.userData.getIn(['email'])}</a></span>
               </li>
             </ul>
           </div>
           <UserCoursesList
-            enrolledCoursesData={this.state.userData['courses'] ? this.state.userData['courses'] : []}
+            enrolledCoursesData={this.state.userData.getIn(['courses'], [])}
           />
         </div>
       </div>
