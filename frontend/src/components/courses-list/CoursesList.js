@@ -22,15 +22,15 @@ class CoursesList extends Component {
   changeSorting = (parameter) => {
     let coursesList = this.state.coursesList;
     if (parameter === 'alphabetically') {
-      coursesList = coursesList.sortBy(item => item['course_name']).reverse()
+      coursesList = coursesList.sortBy(item => item.getIn(['course_name'])).reverse()
     } else if (parameter === 'learners-enrolled') {
-      coursesList = coursesList.sortBy(item => item['learners_enrolled']['current_month']).reverse()
+      coursesList = coursesList.sortBy(item => item.getIn(['learners_enrolled', 'current_month'])).reverse()
     } else if (parameter === 'average-progress') {
-      coursesList = coursesList.sortBy(item => item['average_progress']['current_month']).reverse()
+      coursesList = coursesList.sortBy(item => item.getIn(['average_progress', 'current_month'])).reverse()
     } else if (parameter === 'completion-time') {
-      coursesList = coursesList.sortBy(item => item['average_days_to_complete']['current_month']).reverse()
+      coursesList = coursesList.sortBy(item => item.getIn(['average_days_to_complete', 'current_month'])).reverse()
     } else if (parameter === 'completed-learners') {
-      coursesList = coursesList.sortBy(item => item['users_completed']['current_month']).reverse()
+      coursesList = coursesList.sortBy(item => item.getIn(['users_completed', 'current_month'])).reverse()
     }
     this.setState({
       coursesList: coursesList,
@@ -47,20 +47,20 @@ class CoursesList extends Component {
   }
 
   render() {
-    const courseItems = this.state.coursesList.toArray().map((item, index) => {
+    const courseItems = this.state.coursesList.map((item, index) => {
       return (
         <CoursesListItem
-          courseName={item['course_name']}
-          courseId={item['course_id']}
-          courseCode={item['course_code']}
-          courseIsSelfPaced={item['self_paced']}
-          startDate={item['start_date']}
-          endDate={item['end_date']}
-          courseStaff={item['staff']}
-          averageCompletionTime={item['average_days_to_complete'].current_month}
-          averageProgress={item['average_progress'].current_month}
-          learnersEnrolled={item['learners_enrolled'].current_month}
-          numberLearnersCompleted={item['users_completed'].current_month}
+          courseName={item.get('course_name')}
+          courseId={item.get('course_id')}
+          courseCode={item.get('course_code')}
+          courseIsSelfPaced={item.get('self_paced')}
+          startDate={item.get('start_date')}
+          endDate={item.get('end_date')}
+          courseStaff={item.get('staff')}
+          averageCompletionTime={item.getIn(['average_days_to_complete', 'current_month'])}
+          averageProgress={item.getIn(['average_progress', 'current_month'])}
+          learnersEnrolled={item.getIn(['learners_enrolled', 'current_month'])}
+          numberLearnersCompleted={item.getIn(['users_completed', 'current_month'])}
           key={index}
         />
       )

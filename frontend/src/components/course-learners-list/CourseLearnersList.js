@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Immutable from 'immutable';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import countriesWithCodes from 'base/data/countriesData';
@@ -21,7 +22,7 @@ class CourseLearnersList extends Component {
   }
 
   isCurrentCourse = (course) => {
-    return course['course_id'] === this.props.courseId
+    return course.get('course_id') === this.props.courseId
   }
 
   paginationLoadMore = () => {
@@ -39,19 +40,20 @@ class CourseLearnersList extends Component {
     }
   }
 
-
   render() {
+    console.log(this.props.learnersData.toJS());
+
     const learnersRender = this.props.learnersData.map((user, index) => {
-      const courseSpecificData = user['courses'].find(this.isCurrentCourse);
+      const courseSpecificData = user.getIn(['courses']).find(this.isCurrentCourse) ? user.getIn(['courses']).find(this.isCurrentCourse) : Immutable.List();
 
       return (
         <li key={index} className={styles['learner-row']}>
-          <span className={styles['name']}><Link to={'/figures/user/' + user['id']}>{user['name']}</Link></span>
-          <span className={styles['country']}>{countriesWithCodes[user['country']]}</span>
-          <span className={styles['date-enrolled']}>{moment(courseSpecificData['date_enrolled']).format('LL')}</span>
-          <span className={styles['course-progress']}>{(courseSpecificData['progress_data']['course_progress']*100).toFixed(2)}%</span>
-          <span className={styles['course-completed']}>{courseSpecificData['progress_data']['course_completed'] && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
-          <span className={styles['date-completed']}>{courseSpecificData['progress_data']['course_completed'] ? courseSpecificData['progress_data']['date_completed'] : '-'}</span>
+          <span className={styles['name']}><Link to={'/figures/user/' + user.getIn(['id'])}>{user.getIn(['name'])}</Link></span>
+          <span className={styles['country']}>{countriesWithCodes[user.getIn(['country'], 'ND')]}</span>
+          <span className={styles['date-enrolled']}>{moment(courseSpecificData.getIn(['date_enrolled'])).format('LL')}</span>
+          <span className={styles['course-progress']}>{(courseSpecificData.getIn(['progress_data', 'course_progress'], 0)*100).toFixed(2)}%</span>
+          <span className={styles['course-completed']}>{courseSpecificData.getIn(['progress_data', 'course_completed'], false) && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
+          <span className={styles['date-completed']}>{courseSpecificData.getIn(['progress_data', 'course_completed'], false) ? courseSpecificData.getIn(['progress_data', 'date_completed']) : '-'}</span>
         </li>
       )
     })
