@@ -116,7 +116,8 @@ class UserFilterSet(django_filters.FilterSet):
         to be able to create a course key object from the string
         '''
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-        user_ids = get_enrolled_in_exclude_admins(course_id=course_key)
+        enrollments = get_enrolled_in_exclude_admins(course_id=course_key)
+        user_ids = enrollments.values_list('user__id', flat=True)
         return queryset.filter(id__in=user_ids)
 
 
