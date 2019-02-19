@@ -41,7 +41,6 @@ class CourseLearnersList extends Component {
   }
 
   render() {
-    console.log(this.props.learnersData.toJS());
 
     const learnersRender = this.props.learnersData.map((user, index) => {
       const courseSpecificData = user.getIn(['courses']).find(this.isCurrentCourse) ? user.getIn(['courses']).find(this.isCurrentCourse) : Immutable.List();
