@@ -44,7 +44,7 @@ class DashboardContent extends Component {
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
-            cardTitle='Number of registered learners asadadad'
+            cardTitle='Number of registered learners'
             mainValue={this.props.generalData.getIn(['total_site_users', 'current_month'])}
             valueHistory={this.props.generalData.getIn(['total_site_users', 'history'])}
           />
