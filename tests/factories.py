@@ -28,9 +28,13 @@ from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 import organizations
-# from organizations import tests as org_tests
+
 from figures.helpers import as_course_key
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    LearnerCourseGradeMetrics,
+    SiteDailyMetrics,
+)
 
 from tests.helpers import organizations_support_sites
 
@@ -251,6 +255,21 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
     average_progress = 0.50
     average_days_to_complete = 10
     num_learners_completed = 5
+
+
+class LearnerCourseGradeMetricsFactory(DjangoModelFactory):
+    class Meta:
+        model = LearnerCourseGradeMetrics
+    site = factory.SubFactory(SiteFactory)
+    date_for = factory.Sequence(lambda n:
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
+    user = factory.SubFactory(UserFactory)
+    course_id = factory.Sequence(lambda n:
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    points_possible = 30.0
+    points_earned = 15.0
+    sections_worked = 5
+    sections_possible = 10
 
 
 class SiteDailyMetricsFactory(DjangoModelFactory):

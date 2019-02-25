@@ -160,8 +160,6 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
         This test is broken. Needs review of django.contrib.sites handling for
         `get_current_site`
         """
-        def test_site(request):
-            return alpha_site
         with mock.patch('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': True}):
             assert figures.settings.is_multisite()
 
