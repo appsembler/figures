@@ -77,10 +77,17 @@ def get_active_learner_ids_today(course_id, date_for):
     """Get unique user ids for learners who are active today for the given
     course and date
 
+    Note: When Figures no longer has to support Django 1.8, we can simplify
+    this date check:
+        https://docs.djangoproject.com/en/1.9/ref/models/querysets/#date
     """
+    date_for_as_datetime = as_datetime(date_for)
     return StudentModule.objects.filter(
         course_id=as_course_key(course_id),
-        modified=as_datetime(date_for)).values_list('student__id', flat=True).distinct()
+        modified__year=date_for_as_datetime.year,
+        modified__month=date_for_as_datetime.month,
+        modified__day=date_for_as_datetime.day,
+        ).values_list('student__id', flat=True).distinct()
 
 
 def get_average_progress(course_id, date_for, course_enrollments):
