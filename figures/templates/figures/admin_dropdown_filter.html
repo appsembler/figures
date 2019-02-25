@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{# Attribution: Original code here: https://github.com/mrts/django-admin-list-filter-dropdown #}
+
+<script type="text/javascript">
+    var figures_go_from_select = function(opt) { window.location = window.location.pathname + opt };
+</script>
+<h3>{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}</h3>
+<ul class="admin-filter-{{ title|cut:' ' }}">
+{# Set the number after slice to the number of choices less one that trigger the selection list #}
+{% if choices|slice:"4:" %}
+    <li>
+    <select class="form-control" style="width: 95%;margin-left: 2%;"
+        onchange="figures_go_from_select(this.options[this.selectedIndex].value)">
+    {% for choice in choices %}
+        <option {% if choice.selected %}selected="selected"{% endif %}
+         value="{{ choice.query_string|iriencode }}">{{ choice.display }}</option>
+    {% endfor %}
+    </select>
+    </li>
+{% else %}
+    <h3>Default</h3>
+    {% for choice in choices %}
+            <li {% if choice.selected %}class="selected"{% endif %}>
+            <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a></li>
+    {% endfor %}
+{% endif %}
+</ul>
