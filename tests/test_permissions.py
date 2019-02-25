@@ -45,12 +45,12 @@ class TestPermissionsForStandaloneMode(object):
         request = APIRequestFactory().get('/')
         request.user = get_user_model().objects.get(username=username)
         permission = figures.permissions.IsSiteAdminUser().has_permission(request, None)
-        assert permission == allow, 'username: "{}"'.format(username)
+        assert permission == allow, 'username: "{username}"'.format(username=username)
 
         # verify that inactive users are denied permission
         request.user.is_active = False
         permission = figures.permissions.IsSiteAdminUser().has_permission(request, None)
-        assert permission is False, 'username: "{}"'.format(username)
+        assert permission is False, 'username: "{username}"'.format(username=username)
 
 
 @pytest.mark.skipif(not organizations_support_sites(),
@@ -102,13 +102,15 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
 
             permission = figures.permissions.IsSiteAdminUser().has_permission(
                 request, None)
-            assert permission is allow, 'User "{username}" should have access'.format(username=username)
+            assert permission is allow, 'User "{username}" should have access'.format(
+                username=username)
 
             # verify that inactive users are denied permission
             request.user.is_active = False
             permission = figures.permissions.IsSiteAdminUser().has_permission(
                 request, None)
-            assert permission is False, 'username: "{}"'.format(username)
+            assert permission is False, 'username: "{username}"'.format(
+                username=username)
 
     def test_multiple_user_orgs(self, monkeypatch):
         def test_site(request):
