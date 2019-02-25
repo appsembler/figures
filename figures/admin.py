@@ -14,13 +14,13 @@ import figures.models
 
 
 class AllValuesDropdownFilter(AllValuesFieldListFilter):
-    """Show droplist when there are more than three filter choices for this field
+    """Show dropdown when there are more than three filter choices for this field
     """
     template = 'figures/admin_dropdown_filter.html'
 
 
 class RelatedOnlyDropdownFilter(RelatedOnlyFieldListFilter):
-    """Show droplist when there are more than three filter choices for this field
+    """Show dropdown when there are more than three filter choices for this field
     """
     template = 'figures/admin_dropdown_filter.html'
 
