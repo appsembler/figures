@@ -381,7 +381,7 @@ class TestSiteMetricsGettersStandalone(object):
             'total_site_users',
             'total_course_completions',
             'total_course_enrollments',
-            'total_site_coures',
+            'total_site_courses',
             'monthly_active_users'
         ]
         expected_2nd_lvl_keys = ['current_month', 'history']
@@ -533,7 +533,7 @@ class TestSiteMetricsGettersMultisite(object):
             'total_site_users',
             'total_course_completions',
             'total_course_enrollments',
-            'total_site_coures',
+            'total_site_courses',
             'monthly_active_users'
         ]
         expected_2nd_lvl_keys = ['current_month', 'history']
