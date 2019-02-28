@@ -54,7 +54,7 @@ class CoursesListItem extends Component {
                 Average progress:
               </span>
               <span className={styles['stat-value']}>
-                {this.props.averageProgress*100}%
+                {(this.props.averageProgress*100).toFixed(2)}%
               </span>
             </div>
             <div className={styles['single-stat']}>
