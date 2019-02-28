@@ -94,6 +94,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Mac junk
+.DS_Store
+
 # mkdocs documentation
 /site
 
@@ -112,12 +115,13 @@ frontend/webpack-stats.json
 *.sublime-project
 *.sublime-workspace
 
-# Mac junk
-.DS_Store
-
 # SQLite
-devsite/db.sqlite3
+devsite/*.sqlite3
 
 # Vi, Vim, swap
 *.swp
+
+# misc folders
+scratch
+sandbox
 
