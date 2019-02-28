@@ -593,7 +593,7 @@ def get_monthly_site_metrics(site, date_for=None, **kwargs):
         date_for=date_for,
         months_back=months_back,
     )
-    total_site_coures = get_monthly_history_metric(
+    total_site_courses = get_monthly_history_metric(
         func=get_total_site_courses_for_time_period,
         site=site,
         date_for=date_for,
@@ -615,7 +615,7 @@ def get_monthly_site_metrics(site, date_for=None, **kwargs):
     return dict(
         monthly_active_users=monthly_active_users,
         total_site_users=total_site_users,
-        total_site_coures=total_site_coures,
+        total_site_courses=total_site_courses,
         total_course_enrollments=total_course_enrollments,
         total_course_completions=total_course_completions,
     )
