@@ -43,7 +43,7 @@ class CourseDailyMetrics(TimeStampedModel):
 
     class Meta:
         unique_together = ('course_id', 'date_for',)
-        ordering = ('date_for', 'course_id',)
+        ordering = ('-date_for', 'course_id',)
 
     # Any other data we want?
 
