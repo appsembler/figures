@@ -3,6 +3,7 @@ Provides filtering for objects retrieved in Figures
 '''
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 import django_filters
 
 from opaque_keys.edx.keys import CourseKey
@@ -157,3 +158,15 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
     class Meta:
         model = SiteDailyMetrics
         fields = ['date_for', 'date']
+
+
+class SiteFilterSet(django_filters.FilterSet):
+    """
+    Note: The Site filter has no knowledge of a default site, nor should it
+    """
+    domain = django_filters.CharFilter(lookup_type='icontains')
+    name = django_filters.CharFilter(lookup_type='icontains')
+
+    class Meta:
+        model = Site
+        fields = ['domain', 'name']

@@ -4,6 +4,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django.contrib.sites.shortcuts
+from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -34,6 +35,7 @@ from .filters import (
     CourseEnrollmentFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
+    SiteFilterSet,
     UserFilterSet,
 )
 from .models import CourseDailyMetrics, SiteDailyMetrics
@@ -46,6 +48,7 @@ from .serializers import (
 
     LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
+    SiteSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer
 )
@@ -105,6 +108,20 @@ class CommonAuthMixin(object):
         figures.permissions.IsSiteAdminUser,
     )
 
+
+class StaffUserOnDefaultSiteAuthMixin(object):
+    '''Provides a common authorization base for the Figures API views
+    TODO: Consider moving this to figures.permissions
+    '''
+    authentication_classes = (
+        BasicAuthentication,
+        SessionAuthentication,
+        TokenAuthentication,
+    )
+    permission_classes = (
+        IsAuthenticated,
+        figures.permissions.IsStaffUserOnDefaultSite,
+    )
 
 #
 # Views for data in edX platform
@@ -170,10 +187,10 @@ class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         queryset = figures.sites.get_course_enrollments_for_site(site)
         return queryset
 
-
 #
 # Views for Figures models
 #
+
 
 class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
@@ -272,20 +289,17 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = CourseOverview
-    # queryset = CourseOverview.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseOverviewFilter
 
     def get_queryset(self):
-        print('CourseDetailsViewSet.get_queryset called')
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         queryset = figures.sites.get_courses_for_site(site)
         return queryset
 
     def retrieve(self, request, *args, **kwargs):
-        print('CourseDetailsSerializer.retrieve called')
         # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
@@ -335,3 +349,14 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         queryset = figures.sites.get_users_for_site(site)
         return queryset
+
+
+class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    """
+    model = Site
+    queryset = Site.objects.all()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = SiteSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = SiteFilterSet
