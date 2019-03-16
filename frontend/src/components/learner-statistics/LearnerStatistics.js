@@ -162,8 +162,6 @@ class LearnerStatistics extends Component {
       { value: 'education', label: 'By education level' },
     ])
 
-    console.log(this.state.graphData);
-
     return (
       <section className={styles['courses-list']}>
         <div className={styles['header']}>
