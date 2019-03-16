@@ -31,7 +31,7 @@ DATABASES = {
 }
 
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sites',
@@ -48,9 +48,20 @@ INSTALLED_APPS = (
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'student',
-    'certificates',
     'organizations',
-)
+]
+
+
+# certificates app
+
+# edx-platform uses the app config
+# 'lms.djangoapps.certificates.apps.CertificatesConfig'
+# Our mock uses the package path
+# TO emulate pre-hawthorn
+#INSTALLED_APPS += ('certificates')
+
+INSTALLED_APPS.append('lms.djangoapps.certificates')
+
 
 LOCALE_PATHS = [
     root('figures', 'conf', 'locale'),

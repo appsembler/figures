@@ -31,9 +31,9 @@ from openedx.core.djangoapps.user_api.accounts.serializers import (
     AccountLegacyProfileSerializer,
 )
 
-from certificates.models import GeneratedCertificate
 from student.models import CourseAccessRole, CourseEnrollment
 
+from figures.compat import GeneratedCertificate
 from figures.helpers import as_course_key
 from figures.metrics import (
     get_course_enrolled_users_for_time_period,

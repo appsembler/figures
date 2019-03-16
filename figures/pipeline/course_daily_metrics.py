@@ -17,7 +17,6 @@ import logging
 from django.db import transaction
 from django.utils.timezone import utc
 
-from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseEnrollment
@@ -29,6 +28,7 @@ from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
 import figures.pipeline.loaders
 from figures.serializers import CourseIndexSerializer
+from figures.compat import GeneratedCertificate
 import figures.sites
 
 

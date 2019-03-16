@@ -22,13 +22,13 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 # from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 import organizations
 
+from figures.compat import GeneratedCertificate
 from figures.helpers import as_course_key
 from figures.models import (
     CourseDailyMetrics,

@@ -30,7 +30,7 @@ sys.path.append(
     os.path.normpath(os.path.join(PROJECT_ROOT_DIR, 'tests/mocks'))
     )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,8 +54,17 @@ INSTALLED_APPS = (
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'student',
-    'certificates',
-)
+]
+
+# certificates app
+
+# edx-platform uses the app config
+# 'lms.djangoapps.certificates.apps.CertificatesConfig'
+# Our mock uses the package path
+# TO emulate pre-hawthorn
+#INSTALLED_APPS += ('certificates')
+INSTALLED_APPS.append('lms.djangoapps.certificates')
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
