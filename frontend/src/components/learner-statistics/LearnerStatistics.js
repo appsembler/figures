@@ -108,7 +108,7 @@ class LearnerStatistics extends Component {
     let educationLevelStats = this.state.educationLevelStats;
     learnersData.forEach((learner, index) => {
       //country
-      const learnerCountryTemp = learner.country ? learner.country : 'n-a';
+      const learnerCountryTemp = learner.getIn(['country']) ? learner.getIn(['country']) : 'n-a';
       let foundIndex = countryStats.findIndex(item => (item.value === learnerCountryTemp));
       if (foundIndex !== -1) {
         countryStats = countryStats.set(foundIndex, { value: learnerCountryTemp, label: (learnerCountryTemp !== 'n-a') ? countries.getName(learnerCountryTemp, "en") : "Not available", count: countryStats.get(foundIndex).count + 1 });
@@ -116,11 +116,11 @@ class LearnerStatistics extends Component {
         countryStats = countryStats.push({ value: learnerCountryTemp, label: (learnerCountryTemp !== 'n-a') ? countries.getName(learnerCountryTemp, "en") : "Not available", count: 1 })
       }
       //gender
-      const genderTemp = learner.gender ? learner.gender : 'n-a';
+      const genderTemp = learner.getIn(['gender']) ? learner.getIn(['gender']) : 'n-a';
       foundIndex = genderStats.findIndex(item => (item.value === genderTemp));
       genderStats = genderStats.set(foundIndex, { value: genderTemp, label: genderStats.get(foundIndex).label, count: genderStats.get(foundIndex).count + 1 });
       //education
-      const educationLevelTemp = learner.level_of_education ? learner.level_of_education : 'n-a';
+      const educationLevelTemp = learner.getIn(['level_of_education']) ? learner.getIn(['level_of_education']) : 'n-a';
       foundIndex = educationLevelStats.findIndex(item => (item.value === educationLevelTemp));
       educationLevelStats = educationLevelStats.set(foundIndex, { value: educationLevelTemp, label: educationLevelStats.get(foundIndex).label, count: educationLevelStats.get(foundIndex).count + 1 });
     })
@@ -148,9 +148,11 @@ class LearnerStatistics extends Component {
   }
 
   componentWillReceiveProps = (nextProps) => {
-    if (nextProps.learnersData.length) {
-      this.analyzeData(nextProps.learnersData);
-    }
+    this.analyzeData(nextProps.learnersData);
+  }
+
+  componentDidMount() {
+    this.analyzeData(this.props.learnersData);
   }
 
   render() {
@@ -159,6 +161,8 @@ class LearnerStatistics extends Component {
       { value: 'country', label: 'By country' },
       { value: 'education', label: 'By education level' },
     ])
+
+    console.log(this.state.graphData);
 
     return (
       <section className={styles['courses-list']}>
