@@ -37,7 +37,7 @@ class StatBarGraph extends Component {
     return (
       <ResponsiveContainer className={styles['stat-bar-graph']} width="100%" height={this.props.graphHeight}>
         <BarChart
-          data={this.props.data}
+          data={this.props.data.toJS()}
           margin={{top: 0, bottom: 0, left: 0, right: 0}}
           barCategoryGap={2}
         >
