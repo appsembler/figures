@@ -5,6 +5,17 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 
 let cx = classNames.bind(styles);
 
+const parseCourseDate = (fetchedDate) => {
+  if (fetchedDate === null) {
+    return "-";
+  } else if (Date.parse(fetchedDate)) {
+    const tempDate = new Date(fetchedDate);
+    return tempDate.toUTCString();
+  } else {
+    return fetchedDate;
+  }
+}
+
 class CustomTooltip extends Component {
 
   render() {
@@ -27,8 +38,6 @@ class CustomTooltip extends Component {
 class HeaderContentCourse extends Component {
 
   render() {
-    const courseStartDate = new Date(this.props.startDate);
-    const courseEndDate = new Date(this.props.endDate);
 
     return (
       <section className={styles['header-content-course']}>
@@ -42,9 +51,9 @@ class HeaderContentCourse extends Component {
             {this.props.isSelfPaced ? (
               <span className={styles['course-date']}>This course is self-paced</span>
             ) : [
-              <span key='courseStart' className={styles['course-date']}>Starts: {courseStartDate.toUTCString()}</span>,
+              <span key='courseStart' className={styles['course-date']}>Starts: {parseCourseDate(this.props.startDate)}</span>,
               this.props.endDate && <span key='separator' className={styles['course-info-separator']}>|</span>,
-              this.props.endDate && <span key='courseEnd' className={styles['course-date']}>Ends: {courseEndDate.toUTCString()}</span>,
+              this.props.endDate && <span key='courseEnd' className={styles['course-date']}>Ends: {parseCourseDate(this.props.endDate)}</span>,
             ]}
           </div>
           <span className={styles['text-separator']} />
