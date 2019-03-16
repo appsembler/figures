@@ -11,6 +11,8 @@
 
   &:hover {
     box-shadow: 0 calcRem(6) calcRem(12) 0 rgba(0,0,0,0.25);
+    cursor: pointer;
+    text-decoration: none;
   }
 
   .sections-separator {

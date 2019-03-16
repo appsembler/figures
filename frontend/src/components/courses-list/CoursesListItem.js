@@ -24,7 +24,7 @@ class CoursesListItem extends Component {
     });
 
     return (
-      <div className={styles['course-list-item']} key={this.props.courseId}>
+      <Link to={'/figures/course/' + this.props.courseId} className={styles['course-list-item']} key={this.props.courseId}>
         <div className={styles['general-info-section']}>
           <span className={styles['course-id']}>{this.props.courseCode}</span>
           <span className={styles['course-name']}>{this.props.courseName}</span>
@@ -89,7 +89,7 @@ class CoursesListItem extends Component {
         <div className={styles['button-section']}>
           <Link to={'/figures/course/' + this.props.courseId} className={styles['course-button']}>Course details</Link>
         </div>
-      </div>
+      </Link>
     )
   }
 }
