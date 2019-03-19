@@ -715,9 +715,12 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
         """
         This method is a hack until I figure out customizing DRF fields and/or
         related serializers to explicitly link models not linked via FK
+
         """
-        return LearnerCourseDetailsSerializer(
-            CourseEnrollment.objects.filter(user=user), many=True).data
+
+        course_enrollments = figures.sites.get_course_enrollments_for_site(
+            self.context.get('site')).filter(user=user)
+        return LearnerCourseDetailsSerializer(course_enrollments, many=True).data
 
     def get_profile_image(self, user):
         if hasattr(user, 'profile'):
