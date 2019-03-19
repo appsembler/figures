@@ -3,11 +3,30 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import classNames from 'classnames/bind';
 import styles from './_header-content-maus.scss';
-import { ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, Tooltip } from 'recharts';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import { faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/fontawesome-free-solid';
 
 let cx = classNames.bind(styles);
+
+class CustomTooltip extends Component {
+
+  render() {
+    const { active } = this.props;
+
+    if (active) {
+      const { payload } = this.props;
+      return (
+        <div className={styles['bar-tooltip']}>
+          <span className={styles['tooltip-value']}>{payload[0].value}</span>
+          <p>active users in {payload[0].payload.period}</p>
+        </div>
+      );
+    }
+
+    return null;
+  }
+}
 
 class HeaderContentMaus extends Component {
   render() {
@@ -48,6 +67,11 @@ class HeaderContentMaus extends Component {
               margin={{top: 0, bottom: 0, left: 0, right: 0}}
             >
               <Area type='linear' dataKey='value' stroke='none' fill='#ffffff' fillOpacity={0.8} />
+              <Tooltip
+                content={<CustomTooltip/>}
+                cursor={{ fill: 'rgba(255, 255, 255, 0.15)'}}
+                offset={0}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
