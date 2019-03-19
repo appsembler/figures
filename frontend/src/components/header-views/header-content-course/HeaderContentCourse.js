@@ -5,6 +5,17 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 
 let cx = classNames.bind(styles);
 
+const parseCourseDate = (fetchedDate) => {
+  if (fetchedDate === null) {
+    return "-";
+  } else if (Date.parse(fetchedDate)) {
+    const tempDate = new Date(fetchedDate);
+    return tempDate.toUTCString();
+  } else {
+    return fetchedDate;
+  }
+}
+
 class CustomTooltip extends Component {
 
   render() {
@@ -27,8 +38,8 @@ class CustomTooltip extends Component {
 class HeaderContentCourse extends Component {
 
   render() {
-    const courseStartDate = new Date(this.props.startDate);
-    const courseEndDate = new Date(this.props.endDate);
+
+    const displayCourseHeaderGraph = false;
 
     return (
       <section className={styles['header-content-course']}>
@@ -42,54 +53,60 @@ class HeaderContentCourse extends Component {
             {this.props.isSelfPaced ? (
               <span className={styles['course-date']}>This course is self-paced</span>
             ) : [
-              <span key='courseStart' className={styles['course-date']}>Starts: {courseStartDate.toUTCString()}</span>,
+              <span key='courseStart' className={styles['course-date']}>Starts: {parseCourseDate(this.props.startDate)}</span>,
               this.props.endDate && <span key='separator' className={styles['course-info-separator']}>|</span>,
-              this.props.endDate && <span key='courseEnd' className={styles['course-date']}>Ends: {courseEndDate.toUTCString()}</span>,
+              this.props.endDate && <span key='courseEnd' className={styles['course-date']}>Ends: {parseCourseDate(this.props.endDate)}</span>,
             ]}
           </div>
-          <span className={styles['text-separator']} />
-          <div className={styles['learners-info']}>
-            <strong>{this.props.learnersEnrolled && this.props.learnersEnrolled['current_month']}</strong> learners currently enrolled, progressing through sections as displayed below:
-          </div>
+          {displayCourseHeaderGraph ? [
+            <span className={styles['text-separator']} />,
+            <div className={styles['learners-info']}>
+              <strong>{this.props.learnersEnrolled && this.props.learnersEnrolled['current_month']}</strong> learners currently enrolled, progressing through sections as displayed below:
+            </div>
+          ] : (
+            <span className={styles['graph-bottom-padding']} />
+          )}
         </div>
-        <div className={cx({ 'graph-bars-container': true, 'container': true})}>
-          <ResponsiveContainer width="100%" height={140}>
-            <BarChart
-              data={this.props.data}
-              margin={{top: 0, bottom: 0, left: 0, right: 0}}
-              barCategoryGap={4}
-            >
-              <Tooltip
-                content={<CustomTooltip/>}
-                cursor={{ fill: 'rgba(255, 255, 255, 0.15)'}}
-                offset={0}
-              />
-              <Bar dataKey='value' stroke='none' fill='#ffffff' fillOpacity={0.8} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div className={styles['graph-labels-wrapper']}>
-          <div className={cx({ 'graph-labels-container': true, 'container': true})}>
-            <ResponsiveContainer width="100%" height={100}>
+        {displayCourseHeaderGraph ? [
+          <div className={cx({ 'graph-bars-container': true, 'container': true})}>
+            <ResponsiveContainer width="100%" height={140}>
               <BarChart
                 data={this.props.data}
                 margin={{top: 0, bottom: 0, left: 0, right: 0}}
                 barCategoryGap={4}
               >
-                <XAxis
-                  dataKey='lessonTitle'
-                  axisLine={false}
-                  tickLine={false}
-                  height={100}
-                  angle={90}
-                  textAnchor="start"
-                  interval={0}
-                  //tick={<CustomXAxisLabel />}
+                <Tooltip
+                  content={<CustomTooltip/>}
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.15)'}}
+                  offset={0}
                 />
+                <Bar dataKey='value' stroke='none' fill='#ffffff' fillOpacity={0.8} />
               </BarChart>
             </ResponsiveContainer>
+          </div>,
+          <div className={styles['graph-labels-wrapper']}>
+            <div className={cx({ 'graph-labels-container': true, 'container': true})}>
+              <ResponsiveContainer width="100%" height={100}>
+                <BarChart
+                  data={this.props.data}
+                  margin={{top: 0, bottom: 0, left: 0, right: 0}}
+                  barCategoryGap={4}
+                >
+                  <XAxis
+                    dataKey='lessonTitle'
+                    axisLine={false}
+                    tickLine={false}
+                    height={100}
+                    angle={90}
+                    textAnchor="start"
+                    interval={0}
+                    //tick={<CustomXAxisLabel />}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        ] : ""}
       </section>
     );
   }

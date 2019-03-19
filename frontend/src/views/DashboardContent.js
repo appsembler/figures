@@ -44,22 +44,17 @@ class DashboardContent extends Component {
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
-            cardTitle='Number of registered learners'
+            cardTitle='Registered learners'
             mainValue={this.props.generalData.getIn(['total_site_users', 'current_month'])}
             valueHistory={this.props.generalData.getIn(['total_site_users', 'history'])}
           />
           <BaseStatCard
-            cardTitle='Number of course enrollments'
+            cardTitle='Course enrollments'
             mainValue={this.props.generalData.getIn(['total_course_enrollments', 'current_month'])}
             valueHistory={this.props.generalData.getIn(['total_course_enrollments', 'history'])}
           />
           <BaseStatCard
-            cardTitle='Number of courses'
-            mainValue={this.props.generalData.getIn(['total_site_courses', 'current_month'])}
-            valueHistory={this.props.generalData.getIn(['total_site_courses', 'history'])}
-          />
-          <BaseStatCard
-            cardTitle='User course completions'
+            cardTitle='Course completions'
             mainValue={this.props.generalData.getIn(['total_course_completions', 'current_month'])}
             valueHistory={this.props.generalData.getIn(['total_course_completions', 'history'])}
           />

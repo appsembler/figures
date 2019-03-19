@@ -80,8 +80,9 @@ class SingleCourseContent extends Component {
           />
           <BaseStatCard
             cardTitle='Average course progress'
-            mainValue={this.state.courseData.getIn(['average_progress', 'current_month'], 0)}
+            mainValue={this.state.courseData.getIn(['average_progress', 'current_month'], 0).toFixed(2)}
             valueHistory={this.state.courseData.getIn(['average_progress', 'history'], [])}
+            dataType='percentage'
           />
           <BaseStatCard
             cardTitle='Average days to complete'
