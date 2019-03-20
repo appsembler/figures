@@ -221,8 +221,8 @@ class GeneralCourseDataSerializer(serializers.Serializer):
                     "average_completion_time": "some_time_in_standardised_format",
                     "users_completed": 493, // total number of users that have
                                             // completed the course since the
-                                            // course was created
-                }
+                                     tests/views/base.py       // course was created
+                }tests/views/base.py
             },
             ...
         ]
@@ -237,9 +237,9 @@ class GeneralCourseDataSerializer(serializers.Serializer):
     org = serializers.CharField(
         source='display_org_with_default', read_only=True)
     start_date = serializers.DateTimeField(
-        source='enrollment_start', read_only=True, default=None)
+        source='start', read_only=True, default=None)
     end_date = serializers.DateTimeField(
-        source='enrollment_end', read_only=True, default=None)
+        source='end', read_only=True, default=None)
     self_paced = serializers.BooleanField(read_only=True)
 
     staff = serializers.SerializerMethodField()
@@ -327,9 +327,9 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
     org = serializers.CharField(
         source='display_org_with_default', read_only=True)
     start_date = serializers.DateTimeField(
-        source='enrollment_start', read_only=True, default=None)
+        source='start', read_only=True, default=None)
     end_date = serializers.DateTimeField(
-        source='enrollment_end', read_only=True, default=None)
+        source='end', read_only=True, default=None)
     self_paced = serializers.BooleanField(read_only=True)
 
     staff = serializers.SerializerMethodField()

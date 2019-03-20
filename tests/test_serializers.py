@@ -128,8 +128,8 @@ class TestCourseDetailsSerializer(object):
         assert data['course_name'] == self.course_overview.display_name
         assert data['course_code'] == self.course_overview.number
         assert data['org'] == self.course_overview.org
-        assert parse(data['start_date']) == self.course_overview.enrollment_start
-        assert parse(data['end_date']) == self.course_overview.enrollment_end
+        assert parse(data['start_date']) == self.course_overview.start
+        assert parse(data['end_date']) == self.course_overview.end
         assert data['self_paced'] == self.course_overview.self_paced
 
     def test_get_staff_with_no_course(self):
@@ -319,8 +319,8 @@ class TestGeneralCourseDataSerializer(object):
         assert data['course_name'] == self.course_overview.display_name
         assert data['course_code'] == self.course_overview.number
         assert data['org'] == self.course_overview.org
-        assert parse(data['start_date']) == self.course_overview.enrollment_start
-        assert parse(data['end_date']) == self.course_overview.enrollment_end
+        assert parse(data['start_date']) == self.course_overview.start
+        assert parse(data['end_date']) == self.course_overview.end
         assert data['self_paced'] == self.course_overview.self_paced
 
     def test_get_metrics_with_cdm_records(self):
