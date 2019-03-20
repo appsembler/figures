@@ -51,7 +51,7 @@ class TestGetCourseEnrollments(object):
             course_id=course_id,
             created__lt=as_datetime(
                 next_day(self.today))).values_list('id', flat=True)
-        results_ce = pipeline_cdm.get_course_enrollments(
+        results_ce = pipeline_cdm.get_enrolled_in_exclude_admins(
             course_id=course_id,
             date_for=self.today).values_list('id', flat=True)
         assert set(results_ce) == set(expected_ce)

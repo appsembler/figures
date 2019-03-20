@@ -55,6 +55,8 @@ def get_enrolled_in_exclude_admins(course_id, date_for=None):
     Copied over from CourseEnrollmentManager.num_enrolled_in_exclude_admins method
     and modified to filter on date LT
 
+    If no date is provided then the date is not used as a filter
+
     """
     course_locator = as_course_key(course_id)
 
@@ -243,7 +245,7 @@ class CourseDailyMetricsExtractor(object):
         # set of calls defined in a ruleset instead of hardcoded here after
         # retrieving the core quersets
 
-        course_enrollments = get_course_enrollments(
+        course_enrollments = get_enrolled_in_exclude_admins(
             course_id, date_for,)
 
         data = dict(date_for=date_for, course_id=course_id)
@@ -252,8 +254,7 @@ class CourseDailyMetricsExtractor(object):
         # After we get this working, we can then define them declaratively
         # we can do a lambda for course_enrollments to get the count
 
-        data['enrollment_count'] = get_enrolled_in_exclude_admins(
-            course_id, date_for).count()
+        data['enrollment_count'] = course_enrollments.count()
         active_learner_ids_today = get_active_learner_ids_today(
             course_id, date_for,)
         if active_learner_ids_today:
