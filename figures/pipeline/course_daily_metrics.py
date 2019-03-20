@@ -35,19 +35,7 @@ import figures.sites
 logger = logging.getLogger(__name__)
 
 
-#
 # Extraction helper methods
-#
-
-
-def get_course_enrollments(course_id, date_for):
-    """Convenience method to get a filterd queryset of CourseEnrollment objects
-
-    """
-    return CourseEnrollment.objects.filter(
-        course_id=as_course_key(course_id),
-        created__lt=as_datetime(next_day(date_for)),
-    )
 
 
 def get_enrolled_in_exclude_admins(course_id, date_for=None):
