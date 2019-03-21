@@ -53,7 +53,7 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
 
     '''
 
-    course_id = django_filters.MethodFilter(action='filter_course_id')
+    course_id = django_filters.MethodFilter(action='course_id')
     is_active = django_filters.BooleanFilter(name='is_active',)
 
     def filter_course_id(self, queryset, course_id_str):
@@ -84,15 +84,17 @@ class UserFilterSet(django_filters.FilterSet):
     We're starting with a few fields and will add as we find we want/need them
 
     '''
-    is_active = django_filters.BooleanFilter(name='is_active',)
+    is_active = django_filters.BooleanFilter(name='is_active')
+    is_staff = django_filters.BooleanFilter(name='is_staff')
+    is_superuser = django_filters.BooleanFilter(name='is_superuser')
     username = django_filters.CharFilter(lookup_type='icontains')
     email = django_filters.CharFilter(lookup_type='icontains')
     country = django_filters.CharFilter(
         name='profile__country', lookup_type='iexact')
 
-    user_ids = django_filters.MethodFilter(action='filter_user_ids')
+    user_ids = django_filters.MethodFilter(action='user_ids')
     enrolled_in_course_id = django_filters.MethodFilter(
-        action='filter_enrolled_in_course_id')
+        action='enrolled_in_course_id')
 
     class Meta:
         model = get_user_model()
