@@ -221,8 +221,8 @@ class GeneralCourseDataSerializer(serializers.Serializer):
                     "average_completion_time": "some_time_in_standardised_format",
                     "users_completed": 493, // total number of users that have
                                             // completed the course since the
-                                     tests/views/base.py       // course was created
-                }tests/views/base.py
+                                            // course was created
+                }
             },
             ...
         ]
