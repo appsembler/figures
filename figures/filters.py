@@ -1,6 +1,15 @@
-'''
-Provides filtering for objects retrieved in Figures
-'''
+"""Provides filtering for objects retrieved in Figures
+
+*IMPORTANT: The Hawthorn upgrade currently breaks use of Django Filter versions prior to 1.0
+
+This means filters are not compatible with releases prior to Hawthorn.
+
+Some work has been done to support Django Filter prior to 1.0 but it is not complete.
+
+See the following for breaking changes when upgrading to Django Filter 1.0:
+
+https://django-filter.readthedocs.io/en/master/guide/migration.html#migrating-to-1-0
+"""
 
 from django.contrib.auth import get_user_model
 import django_filters
@@ -65,11 +74,7 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
     '''Provides filtering for the CourseEnrollment model objects
 
     '''
-    # course_id = char_method_filter(method='filter_course_id')
-    # if hasattr(django_filters, 'MethodFilter'):
-    #     course_id = django_filters.MethodFilter(action='filter_course_id')
-    # else:
-    course_id = django_filters.CharFilter(method='filter_course_id')
+    course_id = char_method_filter(method='filter_course_id')
     is_active = django_filters.BooleanFilter(name='is_active',)
 
     def filter_course_id(self, queryset, name, value):
@@ -109,6 +114,7 @@ class UserFilterSet(django_filters.FilterSet):
         name='profile__country', lookup_expr='iexact')
     user_ids = char_method_filter(method='filter_user_ids')
     enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
+
 
     class Meta:
         model = get_user_model()
