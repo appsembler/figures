@@ -16,6 +16,20 @@ from figures.pipeline.course_daily_metrics import get_enrolled_in_exclude_admins
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 
 
+def char_method_filter(method):
+    """
+    method is the method name string
+    Check if old style first
+
+    Pre v1:
+    """
+    if hasattr(django_filters, 'MethodFilter'):
+        return django_filters.MethodFilter(action=method)
+    else:
+        return django_filters.CharFilter(method=method)
+
+
+
 class CourseOverviewFilter(django_filters.FilterSet):
     '''Provides filtering for CourseOverview model objects
 
@@ -35,13 +49,13 @@ class CourseOverviewFilter(django_filters.FilterSet):
 
     '''
 
-    display_name = django_filters.CharFilter(lookup_type='icontains')
+    display_name = django_filters.CharFilter(lookup_expr='icontains')
     org = django_filters.CharFilter(
-        name='display_org_with_default', lookup_type='iexact')
+        name='display_org_with_default', lookup_expr='iexact')
     number = django_filters.CharFilter(
-        name='display_number_with_default', lookup_type='iexact')
+        name='display_number_with_default', lookup_expr='iexact')
     number_contains = django_filters.CharFilter(
-        name='display_number_with_default', lookup_type='icontains')
+        name='display_number_with_default', lookup_expr='icontains')
 
     class Meta:
         model = CourseOverview
@@ -53,10 +67,15 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
 
     '''
 
-    course_id = django_filters.MethodFilter(action='filter_course_id')
+    # course_id = char_method_filter(method='filter_course_id')
+
+    # if hasattr(django_filters, 'MethodFilter'):
+    #     course_id = django_filters.MethodFilter(action='filter_course_id')
+    # else:
+    course_id = django_filters.CharFilter(method='filter_course_id')
     is_active = django_filters.BooleanFilter(name='is_active',)
 
-    def filter_course_id(self, queryset, course_id_str):
+    def filter_course_id(self, queryset, name, value):
         '''
 
         This method converts the course id string to a CourseLocator object
@@ -67,7 +86,8 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
         replaced with spaces, so we need to put the '+' back in for CourseKey
         to be able to create a course key object from the string
         '''
-        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+
+        course_key = CourseKey.from_string(value.replace(' ', '+'))
         return queryset.filter(course_id=course_key)
 
     class Meta:
@@ -85,14 +105,13 @@ class UserFilterSet(django_filters.FilterSet):
 
     '''
     is_active = django_filters.BooleanFilter(name='is_active',)
-    username = django_filters.CharFilter(lookup_type='icontains')
-    email = django_filters.CharFilter(lookup_type='icontains')
+    username = django_filters.CharFilter(lookup_expr='icontains')
+    email = django_filters.CharFilter(lookup_expr='icontains')
     country = django_filters.CharFilter(
-        name='profile__country', lookup_type='iexact')
+        name='profile__country', lookup_expr='iexact')
 
-    user_ids = django_filters.MethodFilter(action='filter_user_ids')
-    enrolled_in_course_id = django_filters.MethodFilter(
-        action='filter_enrolled_in_course_id')
+    user_ids = char_method_filter(method='filter_user_ids')
+    enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
 
     class Meta:
         model = get_user_model()
@@ -104,7 +123,7 @@ class UserFilterSet(django_filters.FilterSet):
         user_ids = [id for id in user_ids_str.split(',') if id.isdigit()]
         return queryset.filter(id__in=user_ids)
 
-    def filter_enrolled_in_course_id(self, queryset, course_id_str):
+    def filter_enrolled_in_course_id(self, queryset, name, value):
         '''
 
         This method converts the course id string to a CourseLocator object
@@ -115,7 +134,7 @@ class UserFilterSet(django_filters.FilterSet):
         replaced with spaces, so we need to put the '+' back in for CourseKey
         to be able to create a course key object from the string
         '''
-        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        course_key = CourseKey.from_string(value.replace(' ', '+'))
         enrollments = get_enrolled_in_exclude_admins(course_id=course_key)
         user_ids = enrollments.values_list('user__id', flat=True)
         return queryset.filter(id__in=user_ids)

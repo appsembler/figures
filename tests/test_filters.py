@@ -231,7 +231,8 @@ class UserFilterSetTest(TestCase):
     def test_filter_enrolled_in_course_id(self):
         res = UserFilterSet().filter_enrolled_in_course_id(
             queryset=self.User.objects.all(),
-            course_id_str=unicode(self.course_overview.id))
+            name='course_id',
+            value=unicode(self.course_overview.id))
 
         self.assertQuerysetEqual(
             res,
