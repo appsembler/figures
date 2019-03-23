@@ -62,6 +62,24 @@ INSTALLED_APPS = [
 
 INSTALLED_APPS.append('lms.djangoapps.certificates')
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            join('devsite', 'devsite', 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
 
 LOCALE_PATHS = [
     root('figures', 'conf', 'locale'),
