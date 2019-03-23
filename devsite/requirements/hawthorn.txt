@@ -11,6 +11,8 @@
 
 celery==3.1.25
 
+# Faker is used to seed mock data in devsite
+Faker==1.0.4
 python-dateutil==2.7.3
 path.py==8.2.1
 
