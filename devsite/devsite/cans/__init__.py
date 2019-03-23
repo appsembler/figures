@@ -1,9 +1,9 @@
-'''
+"""
 devsite.cans contains canned mock data to demo Figures
 
 BE CAREFUL to avoid cyclical dependencies
 
-'''
+"""
 
 from .users import USER_DATA
 from .course_overviews import COURSE_OVERVIEW_DATA

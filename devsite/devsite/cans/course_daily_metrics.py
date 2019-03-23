@@ -11,10 +11,11 @@ from .course_overviews import COURSE_OVERVIEW_DATA
 
 
 def gen_avg_progress(prev_days_value):
-    '''
+    """
     Implement a reasonable range based on previous day's values
-    '''
+    """
     return float('{0:.2f}'.format(random()))
+
 
 def gen_num_learners_completed(yesterday):
     prev_val = yesterday.get('num_learners_completed',0)
@@ -25,12 +26,12 @@ def gen_num_learners_completed(yesterday):
 
 
 def generate_cdm_data_for_course(course_id):
-    '''
+    """
     Just getting it working first, then we'll make the values more reasonable
 
     like value = sorted([lower_bound, x, upper_bound])[1]
 
-    '''
+    """
     cdm_data = []
     yesterday = {}
     end_date = prev_day(datetime.datetime.now())
