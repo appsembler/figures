@@ -16,11 +16,15 @@ except ImportError:
     RELEASE_LINE = None
 
 try:
-    # First try to import for the path as of ginkgo
-    from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
+    # First try to import for the path as of hawthorn
+    from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 except ImportError:
-    # try the pre-ginkgo path
-    from lms.djangoapps.grades.new.course_grade import CourseGradeFactory    # noqa: F401
+    try:
+        # Next try to import for the path as of ginkgo
+        from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
+    except ImportError:
+        # try the pre-ginkgo path
+        from lms.djangoapps.grades.new.course_grade import CourseGradeFactory    # noqa: F401
 
 try:
     # First try to import for the path as of hawthorn
@@ -48,3 +52,6 @@ def chapter_grade_values(chapter_grades):
         # TODO: improve clarity, add a message
         # This may be what
         raise TypeError
+
+
+# def django_filter

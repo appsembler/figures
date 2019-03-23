@@ -135,6 +135,7 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseEnrollment
         editable = False
+        exclude = ()
 
 
 class SiteSerializer(serializers.ModelSerializer):
@@ -142,6 +143,7 @@ class SiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Site
         editable = False
+        exclude = ()
 
 #
 # Figures model serializers
@@ -155,6 +157,7 @@ class CourseDailyMetricsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CourseDailyMetrics
+        exclude = ()
 
 
 class SiteDailyMetricsSerializer(serializers.ModelSerializer):
@@ -164,7 +167,7 @@ class SiteDailyMetricsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SiteDailyMetrics
-
+        exclude = ()
 
 #
 # Serializers for serving the front end views

@@ -76,4 +76,3 @@ class TestCourseEnrollmentViewSet(BaseViewTest):
         for data in response.data['results']:
             db_rec = expected_data.get(id=data['id'])
             assert parse(data['created']) == db_rec.created
-

@@ -120,7 +120,8 @@ class TestCourseDailyMetricsMissingCdm(object):
         expected_missing = [unicode(co.id) for co in self.course_overviews[2:]]
         actual = pipeline_sdm.missing_course_daily_metrics(
             site=self.site, date_for=self.date_for)
-        assert actual == set(expected_missing)
+
+        assert set([str(obj) for obj in actual]) == set(expected_missing)
 
 
 @pytest.mark.django_db
