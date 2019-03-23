@@ -8,6 +8,7 @@ import random
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.utils import IntegrityError
+from django.utils.timezone import utc
 
 from lms.djangoapps.certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
@@ -23,11 +24,16 @@ from figures.pipeline import site_daily_metrics as pipeline_sdm
 from devsite import cans
 
 
-DAYS_BACK = 180
+DAYS_BACK = 10  # 180
+
 LAST_DAY = prev_day(datetime.datetime.now())
 
 FAKE = faker.Faker()
 
+# Quick and dirty debuging
+VERBOSE = False
+NO_LEARNERS_PER_COURSE = 10
+NO_COURSES = 2
 
 def get_site():
     """
@@ -57,9 +63,9 @@ def seed_course_overviews(data=None):
                 org=rec['org'],
                 display_org_with_default=rec['org'],
                 number=rec['number'],
-                created=rec['created'],
-                enrollment_start=rec['enrollment_start'],
-                enrollment_end=rec['enrollment_end'],
+                created=as_datetime(rec['created']).replace(tzinfo=utc),
+                enrollment_start=as_datetime(rec['enrollment_start']).replace(tzinfo=utc),
+                enrollment_end=as_datetime(rec['enrollment_end']).replace(tzinfo=utc),
             )
         )
 
@@ -90,7 +96,7 @@ def seed_users(data=None):
                 )
             user.is_staff = rec.get('is_staff', False)
             user.is_superuser = rec.get('is_superuser', False)
-            user.date_joined = FAKE.date_between(first_date, LAST_DAY)
+            user.date_joined = as_datetime(FAKE.date_between(first_date, LAST_DAY)).replace(tzinfo=utc)
             user.save()
             created_users.append(user)
             if profile_rec:
@@ -101,7 +107,7 @@ def seed_users(data=None):
                     country=profile_rec.get('country', None),
                 )
         except IntegrityError as e:
-            print('**** COLLISION **** {}'.format(e))
+            print('skipping duplicate user email {}'.format(e))
     return created_users
 
 
@@ -116,19 +122,20 @@ def seed_course_enrollments_for_course(course_id, users, max_days_back):
         return days_from(today, days_back * -1 )
 
     for user in users:
-        print('seeding course enrollment for user {}'.format(user.username))
+        if VERBOSE:
+            print('seeding course enrollment for user {}'.format(user.username))
         CourseEnrollment.objects.update_or_create(
             course_id=as_course_key(course_id),
             course_overview=CourseOverview.objects.get(id=course_id),
             user=user,
-            created=enroll_date(max_days_back),
+            created=as_datetime(enroll_date(max_days_back)).replace(tzinfo=utc),
             )
 
 
 def seed_course_enrollments():
     for co in CourseOverview.objects.all():
         #users_in_course = random.randint(40,200)
-        users = seed_users(cans.users.UserGenerator(100))
+        users = seed_users(cans.users.UserGenerator(NO_LEARNERS_PER_COURSE))
         seed_course_enrollments_for_course(co.id, users, DAYS_BACK)
 
 
@@ -154,14 +161,14 @@ def seed_student_modules():
     '''
 
     for ce in CourseEnrollment.objects.all():
-        for i in range(random.randint(1,5)):
+        for i in range(random.randint(1, 5)):
 
             #sm_created = days_from(ce.created, random.randint(0,5))
             StudentModule.objects.update_or_create(
                 student=ce.user,
                 course_id=ce.course_id,
                 created=ce.created,
-                modified=FAKE.date_between(ce.created, LAST_DAY),
+                modified=as_datetime(FAKE.date_between(ce.created, LAST_DAY)).replace(tzinfo=utc),
             )
 
 
@@ -170,7 +177,7 @@ def seed_course_completions():
     go over the dates
     '''
     end_date = LAST_DAY
-    start_date = days_from(end_date, -180)
+    start_date = days_from(end_date, -DAYS_BACK)
 
 
     for co in CourseOverview.objects.all():
@@ -185,7 +192,8 @@ def seed_course_completions():
             GeneratedCertificate.objects.create(
                 user=ce.user,
                 course_id=co.id,
-                created_date=FAKE.date_between(ce.created, LAST_DAY))
+                created_date=as_datetime(FAKE.date_between(ce.created, LAST_DAY)).replace(tzinfo=utc),
+            )
 
 
 def seed_course_daily_metrics_fixed(data=None):
@@ -210,13 +218,13 @@ def seed_course_daily_metrics_for_course(course_id):
 
     # get first date
     end_date = LAST_DAY
-    start_date = days_from(end_date, -180)
+    start_date = days_from(end_date, -DAYS_BACK)
     #extractor = pipeline_cdm.CourseDailyMetricsExtractor()
 
     for dt in rrule(DAILY, dtstart=start_date, until=end_date):
         #data = extractor.extract(course_id=course_id, date_for=dt,)
         # Hack data
-        print('populating day {} for course {}'.format(dt, course_id))
+        # print('populating day {} for course {}'.format(dt, course_id))
         cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load(
             date_for=dt, force_update=True)
 
@@ -224,7 +232,7 @@ def seed_course_daily_metrics_for_course(course_id):
 def seed_course_daily_metrics():
 
     for co in CourseOverview.objects.all():
-        print('seeding CDM for course {}'.format(co.id))
+        # print('seeding CDM for course {}'.format(co.id))
         seed_course_daily_metrics_for_course(co.id)
 
 
@@ -239,7 +247,7 @@ def seed_site_daily_metrics(data=None):
     #     print('collecting for date {}'.format(a_date))
 
     end_date = LAST_DAY
-    start_date = days_from(end_date, -180)
+    start_date = days_from(end_date, -DAYS_BACK)
     #extractor = pipeline_cdm.CourseDailyMetricsExtractor()
 
     for dt in rrule(DAILY, dtstart=start_date, until=end_date):
@@ -257,12 +265,27 @@ def wipe():
 
 
 def seed_all():
+
+    print("seeding mock platform models")
+    print("----------------------------")
+    print("seeding course overviews...")
     seed_course_overviews()
+    print("seeding users...")
     seed_users()
+    print("seeding course enrollments...")
     seed_course_enrollments()
-    # Need to fix this one
-    #seed_course_access_roles()
+
+    print("- skipping seeding seed_course_access_roles, broken")
+    # print("seeding course enrollments...")
+    # seed_course_access_roles()
+
+    print("seeding student modules...")
     seed_student_modules()
+    print("seeding course completions...")
     seed_course_completions()
+    print("seeding figures metrics models")
+    print("------------------------------")
+    print("seeding course daily metrics...")
     seed_course_daily_metrics()
+    print("seeding site daily metrics...")
     seed_site_daily_metrics()
