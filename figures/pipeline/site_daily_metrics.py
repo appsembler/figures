@@ -155,7 +155,8 @@ class SiteDailyMetricsLoader(object):
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
             )
-
+        else:
+            date_for = as_datetime(date_for).replace(tzinfo=utc)
         # if we already have a record for the date_for and force_update is False
         # then skip getting data
         if not force_update:

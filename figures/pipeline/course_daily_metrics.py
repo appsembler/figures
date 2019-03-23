@@ -328,7 +328,8 @@ class CourseDailyMetricsLoader(object):
         if not date_for:
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date())
-
+        else:
+            date_for = as_datetime(date_for).replace(tzinfo=utc)
         try:
             cdm = CourseDailyMetrics.objects.get(course_id=self.course_id,
                                                  date_for=date_for)
