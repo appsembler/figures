@@ -17,7 +17,7 @@ from tests.factories import (
     )
 
 # Mock objects to test course and course section grade metrics
-from lms.djangoapps.grades.new.course_grade import (
+from lms.djangoapps.grades.course_grade import (
     MockAggregatedScore,
     MockSubsectionGrade,
     )

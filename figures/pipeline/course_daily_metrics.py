@@ -12,6 +12,7 @@ Future: add a remote mode to pull data via REST API
 # TODO: Move extractors to figures.pipeline.extract module
 """
 import datetime
+from decimal import Decimal
 import logging
 
 from django.db import transaction
@@ -301,7 +302,7 @@ class CourseDailyMetricsLoader(object):
             defaults=dict(
                 enrollment_count=data['enrollment_count'],
                 active_learners_today=data['active_learners_today'],
-                average_progress=data['average_progress'],
+                average_progress=str(data['average_progress']),
                 average_days_to_complete=int(round(data['average_days_to_complete'])),
                 num_learners_completed=data['num_learners_completed'],
             )
