@@ -28,9 +28,10 @@ from figures.pipeline import site_daily_metrics as pipeline_sdm
 from devsite import cans
 
 FAKE = faker.Faker()
-LAST_DAY = prev_day(datetime.datetime.now())
+LAST_DAY = days_from(datetime.datetime.now(), -2)
 
-DAYS_BACK = 30  # 180
+
+DAYS_BACK = 90  # 180
 NO_LEARNERS_PER_COURSE = 50
 
 # Quick and dirty debuging
@@ -163,7 +164,8 @@ def seed_student_modules():
                 student=ce.user,
                 course_id=ce.course_id,
                 created=ce.created,
-                modified=as_datetime(FAKE.date_between(ce.created, LAST_DAY)).replace(tzinfo=utc),
+                modified=as_datetime(FAKE.date_between(
+                    ce.created, LAST_DAY)).replace(tzinfo=utc),
             )
 
 
@@ -172,11 +174,8 @@ def seed_course_completions():
     go over the dates
     """
     end_date = LAST_DAY
-    start_date = days_from(end_date, -DAYS_BACK)
-
 
     for co in CourseOverview.objects.all():
-        
         # Note there is a performance hit for using '?'
         qs = CourseEnrollment.objects.filter(course_id=co.id)
         # we just want a few of the enrollments to have completed
@@ -187,7 +186,8 @@ def seed_course_completions():
             GeneratedCertificate.objects.create(
                 user=ce.user,
                 course_id=co.id,
-                created_date=as_datetime(FAKE.date_between(ce.created, LAST_DAY)).replace(tzinfo=utc),
+                created_date=as_datetime(FAKE.date_between(
+                    ce.created, LAST_DAY)).replace(tzinfo=utc),
             )
 
 
@@ -251,7 +251,7 @@ def wipe():
 
 
 def seed_all():
-    print("seeding mock platform models")
+    print("\nseeding mock platform models")
     print("----------------------------")
     print("seeding course overviews...")
     seed_course_overviews()
@@ -268,7 +268,7 @@ def seed_all():
     seed_student_modules()
     print("seeding course completions...")
     seed_course_completions()
-    print("seeding figures metrics models")
+    print("\nseeding figures metrics models")
     print("------------------------------")
     print("seeding course daily metrics...")
     seed_course_daily_metrics()
