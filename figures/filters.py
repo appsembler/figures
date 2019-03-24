@@ -29,7 +29,6 @@ def char_method_filter(method):
         return django_filters.CharFilter(method=method)
 
 
-
 class CourseOverviewFilter(django_filters.FilterSet):
     '''Provides filtering for CourseOverview model objects
 
@@ -70,7 +69,7 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
     # if hasattr(django_filters, 'MethodFilter'):
     #     course_id = django_filters.MethodFilter(action='filter_course_id')
     # else:
-    course_id = django_filters.CharFilter(method='course_id')
+    course_id = django_filters.CharFilter(method='filter_course_id')
     is_active = django_filters.BooleanFilter(name='is_active',)
 
     def filter_course_id(self, queryset, name, value):
@@ -84,7 +83,6 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
         replaced with spaces, so we need to put the '+' back in for CourseKey
         to be able to create a course key object from the string
         '''
-
         course_key = CourseKey.from_string(value.replace(' ', '+'))
         return queryset.filter(course_id=course_key)
 
@@ -109,17 +107,16 @@ class UserFilterSet(django_filters.FilterSet):
     email = django_filters.CharFilter(lookup_expr='icontains')
     country = django_filters.CharFilter(
         name='profile__country', lookup_expr='iexact')
-    user_ids = char_method_filter(method='user_ids')
-    enrolled_in_course_id = char_method_filter(method='enrolled_in_course_id')
+    user_ids = char_method_filter(method='filter_user_ids')
+    enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
 
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'country', 'is_active', 'is_staff',
                   'is_superuser', 'enrolled_in_course_id', 'user_ids', ]
 
-    def filter_user_ids(self, queryset, user_ids_str):
-
-        user_ids = [id for id in user_ids_str.split(',') if id.isdigit()]
+    def filter_user_ids(self, queryset, name, value):
+        user_ids = [id for id in value.split(',') if id.isdigit()]
         return queryset.filter(id__in=user_ids)
 
     def filter_enrolled_in_course_id(self, queryset, name, value):

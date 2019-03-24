@@ -91,7 +91,8 @@ class CourseEnrollmentFilterTest(TestCase):
 
         res = CourseEnrollmentFilter().filter_course_id(
             queryset=CourseEnrollment.objects.all(),
-            course_id_str=str(course_id))
+            name='course_id',
+            value=str(course_id))
         self.assertQuerysetEqual(
             res,
             [o.id for o in expected_results],
@@ -225,7 +226,8 @@ class UserFilterSetTest(TestCase):
     def test_filter_user_ids(self):
         res = UserFilterSet().filter_user_ids(
             queryset=self.User.objects.all(),
-            user_ids_str='{},{}'.format(self.users[0].id, self.users[1].id))
+            name='user_ids',
+            value='{},{}'.format(self.users[0].id, self.users[1].id))
 
         self.assertQuerysetEqual(
             res,

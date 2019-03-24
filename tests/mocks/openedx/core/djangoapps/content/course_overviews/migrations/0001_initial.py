@@ -23,6 +23,8 @@ class Migration(migrations.Migration):
                 ('display_org_with_default', models.TextField()),
                 ('number', models.TextField()),
                 ('created', models.DateTimeField(null=True)),
+                ('start', models.DateTimeField(null=True)),
+                ('end', models.DateTimeField(null=True)),
                 ('enrollment_start', models.DateTimeField(null=True)),
                 ('enrollment_end', models.DateTimeField(null=True)),
                 ('self_paced', models.BooleanField(default=False)),
