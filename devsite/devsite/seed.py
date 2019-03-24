@@ -30,8 +30,7 @@ from devsite import cans
 FAKE = faker.Faker()
 LAST_DAY = days_from(datetime.datetime.now(), -2)
 
-
-DAYS_BACK = 90  # 180
+DAYS_BACK = 180
 NO_LEARNERS_PER_COURSE = 50
 
 # Quick and dirty debuging
