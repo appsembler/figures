@@ -168,11 +168,15 @@ class CourseOverviewFactory(DjangoModelFactory):
     number = '2161'
     display_org_with_default = factory.LazyAttribute(lambda o: o.org)
     created = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,02,01, tzinfo=factory.compat.UTC))
+        2018, 2, 1, tzinfo=factory.compat.UTC))
     enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,02,02, tzinfo=factory.compat.UTC))
+        2018, 3, 1, tzinfo=factory.compat.UTC))
     enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,05,05, tzinfo=factory.compat.UTC))
+        2018, 3, 15, tzinfo=factory.compat.UTC))
+    start = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018, 4, 1, tzinfo=factory.compat.UTC))
+    end = fuzzy.FuzzyDateTime(datetime.datetime(
+        2018, 6, 1, tzinfo=factory.compat.UTC))
     self_paced = False
 
 

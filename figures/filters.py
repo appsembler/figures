@@ -66,13 +66,11 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
     '''Provides filtering for the CourseEnrollment model objects
 
     '''
-
     # course_id = char_method_filter(method='filter_course_id')
-
     # if hasattr(django_filters, 'MethodFilter'):
     #     course_id = django_filters.MethodFilter(action='filter_course_id')
     # else:
-    course_id = django_filters.CharFilter(method='filter_course_id')
+    course_id = django_filters.CharFilter(method='course_id')
     is_active = django_filters.BooleanFilter(name='is_active',)
 
     def filter_course_id(self, queryset, name, value):
@@ -104,14 +102,15 @@ class UserFilterSet(django_filters.FilterSet):
     We're starting with a few fields and will add as we find we want/need them
 
     '''
-    is_active = django_filters.BooleanFilter(name='is_active',)
+    is_active = django_filters.BooleanFilter(name='is_active')
+    is_staff = django_filters.BooleanFilter(name='is_staff')
+    is_superuser = django_filters.BooleanFilter(name='is_superuser')
     username = django_filters.CharFilter(lookup_expr='icontains')
     email = django_filters.CharFilter(lookup_expr='icontains')
     country = django_filters.CharFilter(
         name='profile__country', lookup_expr='iexact')
-
-    user_ids = char_method_filter(method='filter_user_ids')
-    enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
+    user_ids = char_method_filter(method='user_ids')
+    enrolled_in_course_id = char_method_filter(method='enrolled_in_course_id')
 
     class Meta:
         model = get_user_model()
