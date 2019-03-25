@@ -12,13 +12,16 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 Notice and Development Status
 -----------------------------
 
+24 MAR 2019 - Hawthorn Pre-release
+==================================
 
-Figures is now avaible on `PyPI <https://pypi.org/project/figures/>`__ for open beta testing on Open edX Ginkgo!
+**We have a Hawthorn pre-release available!**
 
-Currently it runs on Ficus and Ginkgo. We have Hawthorn in the backlog. We welcome community involvement to upgrade to Hawthorn.
+* Figures now runs in the Hawthorn Docker devstack and also has a standalone development mode.
+* More details to come over the next week
+* Go here to get Figures installed and running in your development workspace: https://github.com/appsembler/figures/blob/hawthorn-upgrade/DEVELOPER-QUICKSTART.md
 
 If you find bugs or run into issues, please submit an issue ticket to the `Figures issue tracker <https://github.com/appsembler/figures/issues>`__ on Github.
-
 
 --------
 Overview
@@ -35,15 +38,13 @@ To evolve Figures to meet community needs, we are keeping in mind as principles 
 
 Please refer to the Figures `design document <https://docs.google.com/document/d/16orj6Ag1R158-J-zSBfiY31RKQ5FuSu1O5F-zpSKOg4/>`__ for more details on goals and architecture.
 
-
 ------------
 Requirements
 ------------
 
 * Python (2.7)
-* Django (1.8)
-* Open edX (Ficus or Ginkgo)
-
+* Django (1.11)
+* Open edX Hawthorn
 
 .. _installation:
 
