@@ -17,7 +17,7 @@ Hawthorn Pre-release
 
 We have a Hawthorn pre-release available! Read more about it here: 
 
-* https://github.com/appsembler/figures/blob/hawthorn-upgrade/README.md
+* https://github.com/appsembler/figures/blob/hawthorn-upgrade/README.rst
 
 Go here to get Figures installed and running in your development workspace:
 
