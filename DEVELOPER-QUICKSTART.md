@@ -40,7 +40,7 @@ now we'll run [pytest](https://docs.pytest.org/) to make sure that the tests pas
 pytest
 ```
 
-## 4. Setup Figures standalone server
+## 4. Set up Figures standalone server
 
 Navigate to your Figures workspace (you will be here if you just completed the previous step)
 
