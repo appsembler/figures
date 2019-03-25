@@ -27,14 +27,11 @@ On your development machine, open a terminal (command line shell) and create or 
 
 **These instructions assume you are running a Python virtualenv**
 
-If you want to use the development branch, substitute `hawthorn-upgrade` for `hawthorn-prerelease`
-
-`hawthorn-upgrade` is the live development branch to support Hawthorn.
 
 In the terminal, run the following:
 
 ```
-git clone -b hawthorn-prerelease https://github.com/appsembler/figures.git
+git clone -b hawthorn-upgrade https://github.com/appsembler/figures.git
 cd figures
 pip install -r devsite/requirements/hawthorn.txt
 ```
