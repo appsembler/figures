@@ -124,4 +124,8 @@ _TODO: provide example of adding custom layout settings_
 
 ## 7. Running the frontend Webpack server
 
-_Section incomplete_
+_TODO: Add this section_
+
+## 8. Installing Figures on Hawthorn Docker Devstack
+
+_TODO: Add this section_
