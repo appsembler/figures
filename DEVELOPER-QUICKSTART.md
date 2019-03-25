@@ -45,7 +45,6 @@ now we'll run [pytest](https://docs.pytest.org/) to make sure that the tests pas
 pytest
 ```
 
-
 ## 4. Setup Figures standalone server
 
 Navigate to your Figures workspace (you will be here if you just completed the previous step)
@@ -77,12 +76,11 @@ When you open your browser to the above address, you will see the development se
 
 There's nothing impressive about it. But you will see a login form.
 
-Enter the credentials you used to create the superuser in step 4
+Enter the credentials you used to create the superuser in step 4.
 
-Now you can click on the Figures link 
+Now you can click on the Figures link on the page to go to the Figures dashboard.
 
-
-## 6. Navigating around
+## 6. Navigating around Figures
 
 _Section incomplete_
 
@@ -94,25 +92,36 @@ Pages of interest:
 
 ## 7. Running the pipeline manually
 
-_Section incomplete_
+The Figures pipeline will automatically run once a day in a running Open edX Hawthorn instance. The default time os 02:00 UTC and can be configured in the server vars (`lms.env.json`).
 
+You can also run the pipeline manually with the Django management command provided with Figures. This command is `populate_figures_metrics`. You will see options if you run `./management.py populate_figures_metrics --help`
+
+Make sure you have your development virtualenv running. Then navigate to the `devsite` directory and run the following:
+
+```
+./manage.py populate_figures_metrics --no-delay
+```
+
+This will run the pipeline immediately instead of being queued to celery.
 
 ## 8. Building the front end
 
 _Section incomplete_
 
-The frontend assets come pre-built for the Hawthorn prerelease. If you modify the front end code
+The frontend assets come pre-built for the Hawthorn prerelease. If you modify the front end code then you will either need to re-compile the frontend assets or run the Webpack development server. This section describes how to build the front end, which is also needed to deploy your modifications in a production environment.
 
+You will need NPM installed to build the front end assets. 
+
+From your project root, run the following:
+
+```
+cd frontend
+npm install
+npm run build
+```
 
 _TODO: provide example of adding custom layout settings_
 
+## 7. Running the frontend Webpack server
 
-From your project root, `cd frontend`
-
-npm install
-
-
-## 7. Running the frontend in de
-
-
-
+_Section incomplete_
