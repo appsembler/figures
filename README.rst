@@ -12,13 +12,23 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 Notice and Development Status
 -----------------------------
 
+Hawthorn Pre-release
+====================
 
-Figures is now avaible on `PyPI <https://pypi.org/project/figures/>`__ for open beta testing on Open edX Ginkgo!
+We have a Hawthorn pre-release available! Read more about it here: 
 
-Currently it runs on Ficus and Ginkgo. We have Hawthorn in the backlog. We welcome community involvement to upgrade to Hawthorn.
+* https://github.com/appsembler/figures/blob/hawthorn-upgrade/README.md
+
+Go here to get Figures installed and running in your development workspace:
+
+* https://github.com/appsembler/figures/blob/hawthorn-upgrade/DEVELOPER-QUICKSTART.md
+
+Figures on PyPI
+===============
+
+Figures 0.1.6 is avaible on `PyPI <https://pypi.org/project/figures/>`__ for open beta testing on Open edX Ginkgo. This release also runs on Ficus.
 
 If you find bugs or run into issues, please submit an issue ticket to the `Figures issue tracker <https://github.com/appsembler/figures/issues>`__ on Github.
-
 
 --------
 Overview
@@ -35,7 +45,6 @@ To evolve Figures to meet community needs, we are keeping in mind as principles 
 
 Please refer to the Figures `design document <https://docs.google.com/document/d/16orj6Ag1R158-J-zSBfiY31RKQ5FuSu1O5F-zpSKOg4/>`__ for more details on goals and architecture.
 
-
 ------------
 Requirements
 ------------
@@ -43,7 +52,6 @@ Requirements
 * Python (2.7)
 * Django (1.8)
 * Open edX (Ficus or Ginkgo)
-
 
 .. _installation:
 
@@ -59,7 +67,7 @@ Go `here <docs/source/devstack.rst>`__ for instructions to install and run Figur
 Production
 ==========
 
-go `here <docs/source/install.rst>`__ for instructions to install Figures in production.
+Go `here <docs/source/install.rst>`__ for instructions to install Figures in production.
 
 --------------------
 Project Architecture
@@ -74,7 +82,6 @@ Back-end
 ========
 
 The Figures back-end is a reusable Django app. It contains a set of REST API endpoints that serve a dual purpose of providing data to the front-end and to remote clients.
-
 
 -------
 Testing
