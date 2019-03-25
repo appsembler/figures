@@ -9,8 +9,6 @@ Requirements are that you have Python 2.7.x installed on your development machin
 
 ## 2. Create a virtualenv
 
-_TODO: cleanup this section_
-
 You should use a Python virtualenv to run Figures standalone development mode. This avoids adding packages to the global or user space python instances.
 
 ### Resources
