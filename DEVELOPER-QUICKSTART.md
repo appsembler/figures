@@ -5,7 +5,7 @@
 
 This document guides you through getting Figures setup on your development machine.
 
-Requirements are that you have Python 2.7.x installed on your development machine. Hawthorn devstack uses 2.7.12. It is also highly recommended that you install `[virtualenv](https://virtualenv.pypa.io/)`
+Requirements are that you have Python 2.7.x installed on your development machine. Hawthorn devstack uses 2.7.12. It is also highly recommended that you install [virtualenv](https://virtualenv.pypa.io/).
 
 ## 2. Create a virtualenv
 
