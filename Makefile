@@ -60,3 +60,13 @@ twine_push_test:
 
 twine_push_prod:
 	twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+
+reset_mock_migrations:
+	# Run this command if you want to regenerate all the model supporting mocks
+	# TODO: delete existing migrations and the devsite sqlite database
+
+	cd devsite
+	./manage.py makemigrations certificates
+	./manage.py makemigrations courseware
+	./manage.py makemigrations course_overviews
+	./manage.py makemigrations student
