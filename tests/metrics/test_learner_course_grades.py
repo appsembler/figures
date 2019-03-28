@@ -197,7 +197,7 @@ def test_lcg_course_progress():
     course_grade.chapter_grades attributes)
 
     The expected data are pulled from the hardcoded values in the mocks.
-    See ``tests/mocks/lms/djangoapps/grades/new/course_grade.py``
+    See ``tests/mocks/lms/djangoapps/grades/course_grade.py``
     '''
     expected = dict(
         progress_percent=0.5,

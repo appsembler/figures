@@ -162,7 +162,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
                 date_for=self.today,
                 course_enrollments=course_enrollments
                 )
-            # See tests/mocks/lms/djangoapps/grades/new/course_grade.py for
+            # See tests/mocks/lms/djangoapps/grades/course_grade.py for
             # the source subsection grades that
 
             # TODO: make the mock data more configurable so we don't have to
