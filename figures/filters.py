@@ -110,6 +110,7 @@ class UserFilterSet(django_filters.FilterSet):
     is_superuser = django_filters.BooleanFilter(name='is_superuser')
     username = django_filters.CharFilter(lookup_expr='icontains')
     email = django_filters.CharFilter(lookup_expr='icontains')
+
     country = django_filters.CharFilter(
         name='profile__country', lookup_expr='iexact')
     user_ids = char_method_filter(method='filter_user_ids')
