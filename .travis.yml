@@ -7,7 +7,7 @@ node_js:
 
 # command to install dependencies
 install:
-  - pip install -r devsite/requirements/base.txt
+  - pip install -r devsite/requirements/hawthorn.txt
   - pip install pytest-cov flake8 tox
   - cd frontend && npm install && cd ..
 
