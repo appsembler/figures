@@ -116,7 +116,6 @@ class UserFilterSet(django_filters.FilterSet):
     user_ids = char_method_filter(method='filter_user_ids')
     enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
 
-
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'country', 'is_active', 'is_staff',

@@ -12,7 +12,6 @@ Future: add a remote mode to pull data via REST API
 # TODO: Move extractors to figures.pipeline.extract module
 """
 import datetime
-from decimal import Decimal
 import logging
 
 from django.db import transaction
