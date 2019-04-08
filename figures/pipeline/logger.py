@@ -10,7 +10,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 
 from figures.models import PipelineError
-from figures import settings
+from figures import helpers as figure_helpers
 
 default_logger = logging.getLogger(__name__)
 
@@ -36,5 +36,5 @@ def log_error(error_data, error_type=None, **kwargs):
         indent=1,
         cls=DjangoJSONEncoder))
 
-    if settings.log_pipeline_errors_to_db() or kwargs.get('log_pipeline_errors_to_db', False):
+    if figure_helpers.log_pipeline_errors_to_db() or kwargs.get('log_pipeline_errors_to_db', False):
         log_error_to_db(error_data, error_type, **kwargs)

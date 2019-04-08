@@ -12,7 +12,7 @@ import django.contrib.sites.shortcuts
 from rest_framework.test import APIRequestFactory
 
 import figures.permissions
-import figures.settings
+import figures.helpers
 
 from tests.factories import OrganizationFactory, SiteFactory, UserFactory
 
@@ -96,7 +96,7 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
                 is_amc_admin=True)
         ]
         self.callers += create_test_users()
-        self.env_tokens = {'IS_FIGURES_MULTISITE': True}
+        self.features = {'FIGURES_IS_MULTISITE': True}
 
     # @mock.patch('figures.settings')
     @pytest.mark.parametrize('username, allow', [
@@ -116,8 +116,8 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         request.META['HTTP_HOST'] = self.site.domain
         request.user = get_user_model().objects.get(username=username)
         monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site', test_site)
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.settings.features', self.features):
+            assert figures.helpers.is_multisite()
 
             permission = figures.permissions.IsSiteAdminUser().has_permission(
                 request, None)
@@ -139,8 +139,8 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         request.META['HTTP_HOST'] = self.site.domain
         request.user = get_user_model().objects.get(username=username)
         monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site', test_site)
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.settings.features', self.features):
+            assert figures.helpers.is_multisite()
             org2 = OrganizationFactory(sites=[self.site])
             UserOrganizationMappingFactory(user=request.user, organization=org2),
             with pytest.raises(figures.permissions.MultipleOrgsPerUserNotSupported):

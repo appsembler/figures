@@ -23,7 +23,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key
-import figures.settings
+import figures.helpers
 
 
 def default_site():
@@ -50,7 +50,7 @@ def get_site_for_course(course_id):
     TODO: Figure out how we want to handle ``DoesNotExist``
     whether to let it raise back up raw or handle with a custom exception
     """
-    if figures.settings.is_multisite():
+    if figures.helpers.is_multisite():
         org_courses = organizations.models.OrganizationCourse.objects.filter(
             course_id=str(course_id))
         if org_courses:
@@ -82,7 +82,7 @@ def get_organizations_for_site(site):
 
 
 def get_course_keys_for_site(site):
-    if figures.settings.is_multisite():
+    if figures.helpers.is_multisite():
         orgs = organizations.models.Organization.objects.filter(sites__in=[site])
         org_courses = organizations.models.OrganizationCourse.objects.filter(
             organization__in=orgs)
@@ -97,7 +97,7 @@ def get_courses_for_site(site):
 
     This function relies on Appsembler's fork of edx-organizations
     """
-    if figures.settings.is_multisite():
+    if figures.helpers.is_multisite():
         course_keys = get_course_keys_for_site(site)
         courses = CourseOverview.objects.filter(id__in=course_keys)
     else:
@@ -106,7 +106,7 @@ def get_courses_for_site(site):
 
 
 def get_user_ids_for_site(site):
-    if figures.settings.is_multisite():
+    if figures.helpers.is_multisite():
         orgs = organizations.models.Organization.objects.filter(sites__in=[site])
         mappings = organizations.models.UserOrganizationMapping.objects.filter(
             organization__in=orgs)
@@ -117,7 +117,7 @@ def get_user_ids_for_site(site):
 
 
 def get_users_for_site(site):
-    if figures.settings.is_multisite():
+    if figures.helpers.is_multisite():
         user_ids = get_user_ids_for_site(site)
         users = get_user_model().objects.filter(id__in=user_ids)
     else:

@@ -34,7 +34,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-import figures.settings
+import figures.helpers
 import figures.sites
 
 from tests.factories import (
@@ -65,16 +65,16 @@ class TestHandlersForStandaloneMode(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.default_site = Site.objects.get()
-        self.env_tokens = {'IS_FIGURES_MULTISITE': False}
+        self.features = {'FIGURES_IS_MULTISITE': False}
         self.site = Site.objects.first()
         assert Site.objects.count() == 1
-        assert not figures.settings.is_multisite()
+        assert not figures.helpers.is_multisite()
 
     def test_get_site_for_course(self):
         """
 
         """
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             co = CourseOverviewFactory()
             site = figures.sites.get_site_for_course(str(co.id))
             assert site == Site.objects.first()
@@ -83,33 +83,33 @@ class TestHandlersForStandaloneMode(object):
     def test_get_course_keys_for_site(self, course_count):
         sites = Site.objects.all()
         assert sites.count() == 1
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             course_overviews = [CourseOverviewFactory() for i in range(course_count)]
             course_keys = figures.sites.get_course_keys_for_site(sites[0])
             expected_ids = [str(co.id) for co in course_overviews]
             assert set([str(key) for key in course_keys]) == set(expected_ids)
 
     def test_get_courses_for_site(self):
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             courses = figures.sites.get_courses_for_site(self.site)
             assert set(courses) == set(CourseOverview.objects.all())
 
     def test_get_user_ids_for_site(self):
         expected_users = [UserFactory() for i in range(3)]
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             user_ids = figures.sites.get_user_ids_for_site(self.site)
             assert set(user_ids) == set([user.id for user in expected_users])
 
     def test_get_users_for_site(self):
         expected_users = [UserFactory() for i in range(3)]
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             users = figures.sites.get_users_for_site(self.site)
             assert set([user.id for user in users]) == set(
                        [user.id for user in expected_users])
 
     def test_get_course_enrollments_for_site(self):
         expected_ce = [CourseEnrollmentFactory() for i in range(3)]
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             course_enrollments = figures.sites.get_course_enrollments_for_site(self.site)
             assert set([ce.id for ce in course_enrollments]) == set(
                        [ce.id for ce in expected_ce])
@@ -132,7 +132,7 @@ class TestHandlersForMultisiteMode(object):
         self.site = SiteFactory(domain='foo.test')
         self.organization = OrganizationFactory(sites=[self.site])
         assert Site.objects.count() == 2
-        self.env_tokens = {'IS_FIGURES_MULTISITE': True}
+        self.features = {'FIGURES_IS_MULTISITE': True}
 
     def test_get_site_for_courses(self):
         """
@@ -142,8 +142,8 @@ class TestHandlersForMultisiteMode(object):
         default site with 'example.com' for both the domain and name fields
         """
         # We want to move the patch to the class level if possible
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
+            assert figures.helpers.is_multisite()
             co = CourseOverviewFactory()
             OrganizationCourseFactory(organization=self.organization,
                                       course_id=str(co.id))
@@ -155,8 +155,8 @@ class TestHandlersForMultisiteMode(object):
         We create a course but don't add the course to OrganizationCourse
         We expect that a site cannot be found
         """
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
+            assert figures.helpers.is_multisite()
             co = CourseOverviewFactory()
             site = figures.sites.get_site_for_course(str(co.id))
             assert not site
@@ -166,15 +166,15 @@ class TestHandlersForMultisiteMode(object):
         """
         We expect no site returned for None for the course
         """
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
+            assert figures.helpers.is_multisite()
             site = figures.sites.get_site_for_course(course_id)
             assert not site
 
     @pytest.mark.parametrize('course_count', [0, 1, 2])
     def test_get_course_keys_for_site(self, course_count):
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
+            assert figures.helpers.is_multisite()
             course_overviews = [CourseOverviewFactory() for i in range(course_count)]
             for co in course_overviews:
                 OrganizationCourseFactory(organization=self.organization,
@@ -185,8 +185,8 @@ class TestHandlersForMultisiteMode(object):
 
     @pytest.mark.parametrize('course_count', [0, 1, 2])
     def test_get_courses_for_site(self, course_count):
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
+            assert figures.helpers.is_multisite()
             course_overviews = [CourseOverviewFactory() for i in range(course_count)]
             for co in course_overviews:
                 OrganizationCourseFactory(organization=self.organization,
@@ -197,8 +197,8 @@ class TestHandlersForMultisiteMode(object):
 
     @pytest.mark.parametrize('ce_count', [0, 1, 2])
     def test_get_course_enrollments_for_site(self, ce_count):
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
+            assert figures.helpers.is_multisite()
             course_overview = CourseOverviewFactory()
             OrganizationCourseFactory(organization=self.organization,
                                       course_id=str(course_overview.id))
@@ -235,17 +235,17 @@ class TestUserHandlersForMultisiteMode(object):
             UserOrganizationMappingFactory(user=user,
                                            organization=self.organization)
         assert Site.objects.count() == 2
-        self.env_tokens = {'IS_FIGURES_MULTISITE': True}
+        self.features = {'FIGURES_IS_MULTISITE': True}
 
     def test_get_user_ids_for_site(self):
         expected_users = self.users
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             user_ids = figures.sites.get_user_ids_for_site(self.site)
             assert set(user_ids) == set([user.id for user in expected_users])
 
     def test_get_users_for_site(self):
         expected_users = self.users
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             users = figures.sites.get_users_for_site(self.site)
             assert set([user.id for user in users]) == set(
                        [user.id for user in expected_users])
@@ -265,7 +265,7 @@ class TestOrganizationsLacksSiteSupport(object):
     def setup(self, db):
         self.site = SiteFactory(domain='foo.test')
         assert Site.objects.count() == 2
-        self.env_tokens = {'IS_FIGURES_MULTISITE': True}
+        self.features = {'FIGURES_IS_MULTISITE': True}
 
     def test_create_organiztion_with_site(self):
         """
@@ -279,7 +279,7 @@ class TestOrganizationsLacksSiteSupport(object):
 
     def test_org_course_missing_sites_field(self):
 
-        with mock.patch('figures.settings.env_tokens', self.env_tokens):
+        with mock.patch('figures.helpers.settings.FEATURES', self.features):
             # orgs = organizations.models.Organization.objects.all()
             # assert orgs
             # msg = 'Not supposed to have "sites" attribute'

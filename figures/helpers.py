@@ -4,6 +4,7 @@ Helper functions to make data handling and conversions easier
 
 import calendar
 import datetime
+from django.conf import settings
 from django.utils.timezone import utc
 
 from dateutil.parser import parse as dateutil_parse
@@ -11,6 +12,24 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, MONTHLY
 
 from opaque_keys.edx.keys import CourseKey
+
+
+def is_multisite():
+    """
+    A naive but reliable check on whether Open edX is using multi-site setup or not.
+
+    Override by setting ``FIGURES_IS_MULTISITE`` to true in the Open edX FEATURES.
+    """
+    return bool(settings.FEATURES.get('FIGURES_IS_MULTISITE', False))
+
+
+def log_pipeline_errors_to_db():
+    """
+    Capture pipeline errors to the figures.models.PipelineError model.
+
+    Override by setting ``FIGURES_LOG_PIPELINE_ERRORS_TO_DB`` to false in the Open edX FEATURES.
+    """
+    return bool(settings.FEATURES.get('FIGURES_LOG_PIPELINE_ERRORS_TO_DB', True))
 
 
 def as_course_key(course_id):
