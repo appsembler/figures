@@ -9,6 +9,7 @@ from dateutil.parser import parse as dateutil_parse
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.test import TestCase
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
@@ -19,6 +20,7 @@ from figures.filters import (
     CourseEnrollmentFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
+    SiteFilterSet,
     UserFilterSet,
 )
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
@@ -28,6 +30,7 @@ from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,
     SiteDailyMetricsFactory,
+    SiteFactory,
     UserFactory,
     )
 from tests.helpers import make_course_key_str
@@ -196,6 +199,54 @@ class SiteDailyMetricsFilterTest(TestCase):
         self.assertQuerysetEqual(
             f.qs,
             [o.id for o in self.site_daily_metrics if o.date_for == the_date],
+            lambda o: o.id, ordered=False)
+
+
+@pytest.mark.django_db
+class SiteFilterSetTest(TestCase):
+    """Provides minimal testing for each of the individual filter terms
+    * No filter - All sites should be returned
+    * domain filter - filters case insensitive contains
+    * name filter - filters case insensitive contains
+
+    Did not add test for filtering on mulitple filter terms
+    """
+    def setUp(self):
+        """There should be an existing site with domain and name of u'example.com'
+        """
+        assert Site.objects.count() == 1
+        self.sites = [
+            Site.objects.first(),
+            SiteFactory(domain=u'alpha.test.site', name=u'Alpha'),
+            SiteFactory(domain=u'bravo.test.site', name=u'Bravo Organization'),
+        ]
+
+    def test_filter_none(self):
+
+        f = SiteFilterSet(
+            queryset=Site.objects.filter())
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.sites],
+            lambda o: o.id,
+            ordered=False)
+
+    def test_filter_domain_alpha(self):
+        filter_term = 'ALpHA'
+        f = SiteFilterSet(
+            queryset=Site.objects.filter(domain__icontains=filter_term))
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.sites if filter_term.lower() in o.domain.lower()],
+            lambda o: o.id, ordered=False)
+
+    def test_filter_name_bravo(self):
+        filter_term = 'BRaVO'
+        f = SiteFilterSet(
+            queryset=Site.objects.filter(name__icontains=filter_term))
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.sites if filter_term.lower() in o.name.lower()],
             lambda o: o.id, ordered=False)
 
 

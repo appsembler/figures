@@ -19,6 +19,10 @@ router.register(
     views.CourseDailyMetricsViewSet,
     base_name='course-daily-metrics')
 
+router.register(
+    r'admin/sites',
+    views.SiteViewSet,
+    base_name='sites')
 
 # Wrappers around edx-platform models
 router.register(

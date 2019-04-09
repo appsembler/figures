@@ -26,6 +26,16 @@ from figures.helpers import as_course_key
 import figures.settings
 
 
+def default_site():
+    """Returns the default site instance if Django settings defines SITE_ID, else None
+
+    Tech debt note: Open edX monkeypatches django.contrib.sites to override
+    behavior for getting the current site.
+    """
+    if getattr(settings, 'SITE_ID', ''):
+        return Site.objects.get(pk=settings.SITE_ID)
+
+
 def get_site_for_course(course_id):
     """
     Given a course, return the related site or None

@@ -52,6 +52,25 @@ class TestPermissionsForStandaloneMode(object):
         permission = figures.permissions.IsSiteAdminUser().has_permission(request, None)
         assert permission is False, 'username: "{username}"'.format(username=username)
 
+    @pytest.mark.parametrize('username, allow', [
+        ('regular_user', False),
+        ('staff_user', True),
+        ('super_user', True),
+        ('superstaff_user', True),
+    ])
+    def test_is_staff_user_on_default_site(self, username, allow):
+        """Tests a set of users against the IsStaffUserOnDefaultSite permission class
+        """
+        request = APIRequestFactory().get('/')
+        request.user = get_user_model().objects.get(username=username)
+        permission = figures.permissions.IsStaffUserOnDefaultSite().has_permission(request, None)
+        assert permission == allow, 'username: "{username}"'.format(username=username)
+
+        # verify that inactive users are denied permission
+        request.user.is_active = False
+        permission = figures.permissions.IsStaffUserOnDefaultSite().has_permission(request, None)
+        assert permission is False, 'username: "{username}"'.format(username=username)
+
 
 @pytest.mark.skipif(not organizations_support_sites(),
                     reason='Organizations support sites')
@@ -126,3 +145,23 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
             UserOrganizationMappingFactory(user=request.user, organization=org2),
             with pytest.raises(figures.permissions.MultipleOrgsPerUserNotSupported):
                 figures.permissions.IsSiteAdminUser().has_permission(request, None)
+
+    @pytest.mark.parametrize('username, allow', [
+        ('regular_user', False),
+        ('staff_user', True),
+        ('super_user', True),
+        ('superstaff_user', True),
+    ])
+    def test_is_staff_user_on_default_site(self, username, allow):
+        """Tests a set of users against the IsStaffUserOnDefaultSite permission class
+        """
+
+        request = APIRequestFactory().get('/')
+        request.user = get_user_model().objects.get(username=username)
+        permission = figures.permissions.IsStaffUserOnDefaultSite().has_permission(request, None)
+        assert permission == allow, 'username: "{username}"'.format(username=username)
+
+        # verify that inactive users are denied permission
+        request.user.is_active = False
+        permission = figures.permissions.IsStaffUserOnDefaultSite().has_permission(request, None)
+        assert permission is False, 'username: "{username}"'.format(username=username)
