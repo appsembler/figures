@@ -13,8 +13,12 @@ from rest_framework.test import (
     force_authenticate,
     )
 
+from tests.helpers import django_filters_pre_v1
 from tests.views.helpers import create_test_users
 
+
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class BaseViewTest(object):
 
