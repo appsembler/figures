@@ -185,8 +185,8 @@ class SiteFilterSet(django_filters.FilterSet):
     """
     Note: The Site filter has no knowledge of a default site, nor should it
     """
-    domain = django_filters.CharFilter(lookup_type='icontains')
-    name = django_filters.CharFilter(lookup_type='icontains')
+    domain = django_filters.CharFilter(lookup_expr='icontains')
+    name = django_filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Site
