@@ -31,7 +31,7 @@ class UserGenerator(object):
             return self.username()
         else:
             self.used_names.update([username])
-            return username;
+            return username
 
     def gender(self):
         return random.choice('fm ')
@@ -46,7 +46,7 @@ class UserGenerator(object):
     def education(cls):
         edu_choices = UserProfile.LEVEL_OF_EDUCATION_CHOICES
         if random.random() < cls.WILL_USER_SET_EDU:
-            return edu_choices[random.randint(0,len(edu_choices)-1)][0]
+            return edu_choices[random.randint(0, len(edu_choices)-1)][0]
 
     def create_user(self):
         gender = self.gender()

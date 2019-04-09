@@ -1,12 +1,7 @@
-'''
-
+"""
 TODO:
 * Add self-paced flag
-'''
-
-#import datetime
-#today = datetime.datetime.now().strftime('%D')
-
+"""
 
 COURSE_OVERVIEW_DATA = [
     dict(

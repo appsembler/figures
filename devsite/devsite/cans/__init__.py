@@ -5,12 +5,9 @@ BE CAREFUL to avoid cyclical dependencies
 
 """
 
-from .users import USER_DATA
-from .course_overviews import COURSE_OVERVIEW_DATA
-from .course_enrollments import COURSE_ENROLLMENT_DATA
-from .student_modules import STUDENT_MODULE_DATA
-from .course_daily_metrics import COURSE_DAILY_METRICS_DATA
-from .site_daily_metrics import SITE_DAILY_METRICS_DATA
+from .users import USER_DATA  # noqa
+from .course_overviews import COURSE_OVERVIEW_DATA  # noqa
+from .course_daily_metrics import COURSE_DAILY_METRICS_DATA  # noqa
 
 
 COURSE_ACCESS_ROLE_DATA = [

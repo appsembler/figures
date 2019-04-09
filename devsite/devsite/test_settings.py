@@ -6,7 +6,6 @@ Settings file to run automated tests
 from __future__ import absolute_import, unicode_literals
 
 from os.path import abspath, dirname, join
-from path import Path 
 
 
 def root(*args):
@@ -58,7 +57,7 @@ INSTALLED_APPS = [
 # 'lms.djangoapps.certificates.apps.CertificatesConfig'
 # Our mock uses the package path
 # TO emulate pre-hawthorn
-#INSTALLED_APPS += ('certificates')
+#  INSTALLED_APPS += ('certificates')
 
 INSTALLED_APPS.append('lms.djangoapps.certificates')
 

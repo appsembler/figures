@@ -28,7 +28,7 @@ from figures.pipeline import site_daily_metrics as pipeline_sdm
 from devsite import cans
 
 FAKE = faker.Faker()
-LAST_DAY = days_from(datetime.datetime.now(), -2)
+LAST_DAY = days_from(datetime.datetime.now(), -2).replace(tzinfo=utc)
 
 DAYS_BACK = 180
 NO_LEARNERS_PER_COURSE = 50
@@ -98,7 +98,7 @@ def seed_users(data=None):
             user.save()
             created_users.append(user)
             if profile_rec:
-                profile = UserProfile.objects.create(
+                UserProfile.objects.create(
                     user=user,
                     name=profile_rec['fullname'],
                     gender=profile_rec.get('gender', None),
@@ -110,11 +110,10 @@ def seed_users(data=None):
 
 
 def seed_course_enrollments_for_course(course_id, users, max_days_back):
-    today = datetime.datetime.now()
 
     def enroll_date(max_days_back):
         days_back = random.randint(1, abs(max_days_back))
-        return days_from(today, days_back * -1)
+        return days_from(LAST_DAY, days_back * -1)
 
     for user in users:
         if VERBOSE:
@@ -156,15 +155,18 @@ def seed_student_modules():
     others more active. Do it in a normal distrubution
 
     """
-
     for ce in CourseEnrollment.objects.all():
+        # Added assert to check if it traps for this error:
+        # ValueError: empty range for randrange() (1554681600,1554595201, -86399)
+        assert ce.created <= LAST_DAY, "ce.created={}, LAST_DAY={}".format(
+            ce.created, LAST_DAY)
+
         for i in range(random.randint(1, 5)):
             StudentModule.objects.update_or_create(
                 student=ce.user,
                 course_id=ce.course_id,
                 created=ce.created,
-                modified=as_datetime(FAKE.date_between(
-                    ce.created, LAST_DAY)).replace(tzinfo=utc),
+                modified=as_datetime(FAKE.date_between(ce.created, LAST_DAY)),
             )
 
 
@@ -172,8 +174,6 @@ def seed_course_completions():
     """
     go over the dates
     """
-    end_date = LAST_DAY
-
     for co in CourseOverview.objects.all():
         # Note there is a performance hit for using '?'
         qs = CourseEnrollment.objects.filter(course_id=co.id)

@@ -1,4 +1,0 @@
-
-SITE_DAILY_METRICS_DATA = [
-
-]

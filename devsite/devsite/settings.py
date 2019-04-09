@@ -62,7 +62,7 @@ INSTALLED_APPS = [
 # 'lms.djangoapps.certificates.apps.CertificatesConfig'
 # Our mock uses the package path
 # TO emulate pre-hawthorn
-#INSTALLED_APPS += ('certificates')
+#   INSTALLED_APPS += ('certificates')
 INSTALLED_APPS.append('lms.djangoapps.certificates')
 
 
