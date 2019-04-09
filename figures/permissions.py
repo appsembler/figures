@@ -8,6 +8,7 @@ import django.contrib.sites.shortcuts
 import organizations
 
 import figures.settings
+import figures.sites
 
 
 class MultipleOrgsPerUserNotSupported(Exception):
@@ -85,6 +86,16 @@ def is_site_admin_user(request):
     return has_permission
 
 
+def is_staff_user_on_default_site(request):
+    """Allow access to only global staff or superusers accessing the default site
+    """
+    default_site = figures.sites.default_site()
+    if default_site and is_active_staff_or_superuser(request):
+        current_site = django.contrib.sites.shortcuts.get_current_site(request)
+        return current_site == default_site
+    return False
+
+
 class IsSiteAdminUser(BasePermission):
     """
     Allow access to only site admins if in multisite mode or staff or superuser
@@ -94,3 +105,10 @@ class IsSiteAdminUser(BasePermission):
     """
     def has_permission(self, request, view):
         return is_site_admin_user(request)
+
+
+class IsStaffUserOnDefaultSite(BasePermission):
+    """Allow access to only global staff or superusers accessing the default site
+    """
+    def has_permission(self, request, view):
+        return is_staff_user_on_default_site(request)

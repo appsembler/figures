@@ -4,6 +4,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django.contrib.sites.shortcuts
+from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -34,6 +35,7 @@ from .filters import (
     CourseEnrollmentFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
+    SiteFilterSet,
     UserFilterSet,
 )
 from .models import CourseDailyMetrics, SiteDailyMetrics
@@ -46,6 +48,7 @@ from .serializers import (
 
     LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
+    SiteSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer
 )
@@ -105,6 +108,20 @@ class CommonAuthMixin(object):
         figures.permissions.IsSiteAdminUser,
     )
 
+
+class StaffUserOnDefaultSiteAuthMixin(object):
+    '''Provides a common authorization base for the Figures API views
+    TODO: Consider moving this to figures.permissions
+    '''
+    authentication_classes = (
+        BasicAuthentication,
+        SessionAuthentication,
+        TokenAuthentication,
+    )
+    permission_classes = (
+        IsAuthenticated,
+        figures.permissions.IsStaffUserOnDefaultSite,
+    )
 
 #
 # Views for data in edX platform
@@ -170,10 +187,10 @@ class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         queryset = figures.sites.get_course_enrollments_for_site(site)
         return queryset
 
-
 #
 # Views for Figures models
 #
+
 
 class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
@@ -337,3 +354,16 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         user = get_object_or_404(self.get_queryset(), pk=pk)
         return Response(LearnerDetailsSerializer(
             instance=user, context=dict(site=site)).data)
+
+
+class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """Provides API access to the django.contrib.sites.models.Site model
+
+    Access is restricted to global (Django instance) staff
+    """
+    model = Site
+    queryset = Site.objects.all()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = SiteSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = SiteFilterSet
