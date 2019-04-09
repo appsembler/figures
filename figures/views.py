@@ -301,6 +301,7 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
+        # Make it a decorator
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
         site = django.contrib.sites.shortcuts.get_current_site(request)
@@ -344,15 +345,21 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     filter_class = UserFilterSet
 
     def get_queryset(self):
-        '''
-        '''
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         queryset = figures.sites.get_users_for_site(site)
         return queryset
 
+    def retrieve(self, request, pk, *args, **kwargs):
+        site = django.contrib.sites.shortcuts.get_current_site(request)
+        user = get_object_or_404(self.get_queryset(), pk=pk)
+        return Response(LearnerDetailsSerializer(
+            instance=user, context=dict(site=site)).data)
+
 
 class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet):
-    """
+    """Provides API access to the django.contrib.sites.models.Site model
+
+    Access is restricted to global (Django instance) staff
     """
     model = Site
     queryset = Site.objects.all()

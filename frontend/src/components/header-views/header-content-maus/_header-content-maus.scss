@@ -76,4 +76,40 @@
       color: pick-visible-color(pick-visible-color($primary-color, #fff, $base-text-color), #fff, $primary-color);
     }
   }
+
+  .bar-tooltip {
+    position: relative;
+    left: calcRem(10);
+    background-color: $base-text-color;
+    color: #fff;
+    width: calcRem(100);
+    border-radius: calcRem(2);
+    padding: calcRem(10);
+    text-align: center;
+
+    &:after {
+      top: 50%;
+    	right: 100%;
+    	border: solid transparent;
+    	content: " ";
+    	height: 0;
+    	width: 0;
+    	position: absolute;
+    	pointer-events: none;
+    	border-color: rgba(136, 183, 213, 0);
+    	border-right-color: $base-text-color;
+    	border-width: calcRem(10);
+    	margin-top: calcRem(-10);
+    }
+
+    .tooltip-value {
+      font-size: calcRem(14);
+      font-weight: bold;
+    }
+
+    p {
+      margin: 0;
+      font-size: calcRem(10);
+    }
+  }
 }

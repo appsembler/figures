@@ -91,8 +91,12 @@ class CourseEnrollmentFilterTest(TestCase):
         expected_results = CourseEnrollment.objects.filter(course_id=course_id)
         assert expected_results.count() != len(self.course_enrollments)
         f = CourseEnrollmentFilter(queryset=expected_results)
+
+        res = CourseEnrollmentFilter().filter_course_id(
+            queryset=CourseEnrollment.objects.all(),
+            course_id_str=str(course_id))
         self.assertQuerysetEqual(
-            f.qs,
+            res,
             [o.id for o in expected_results],
             lambda o: o.id,
             ordered=False)

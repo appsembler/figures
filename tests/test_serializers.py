@@ -128,8 +128,8 @@ class TestCourseDetailsSerializer(object):
         assert data['course_name'] == self.course_overview.display_name
         assert data['course_code'] == self.course_overview.number
         assert data['org'] == self.course_overview.org
-        assert parse(data['start_date']) == self.course_overview.enrollment_start
-        assert parse(data['end_date']) == self.course_overview.enrollment_end
+        assert parse(data['start_date']) == self.course_overview.start
+        assert parse(data['end_date']) == self.course_overview.end
         assert data['self_paced'] == self.course_overview.self_paced
 
     def test_get_staff_with_no_course(self):
@@ -319,8 +319,8 @@ class TestGeneralCourseDataSerializer(object):
         assert data['course_name'] == self.course_overview.display_name
         assert data['course_code'] == self.course_overview.number
         assert data['org'] == self.course_overview.org
-        assert parse(data['start_date']) == self.course_overview.enrollment_start
-        assert parse(data['end_date']) == self.course_overview.enrollment_end
+        assert parse(data['start_date']) == self.course_overview.start
+        assert parse(data['end_date']) == self.course_overview.end
         assert data['self_paced'] == self.course_overview.self_paced
 
     def test_get_metrics_with_cdm_records(self):
@@ -397,6 +397,7 @@ class TestLearnerCourseDetailsSerializer(object):
         #     'profile__country': 'CA',
         # }
         #self.user = UserFactory(**self.user_attributes)
+        self.site = Site.objects.first()
         self.certificate_date = datetime.datetime(2018, 4, 1, tzinfo=utc)
         self.course_enrollment = CourseEnrollmentFactory(
             )
@@ -426,13 +427,15 @@ class TestLearnerDetailsSerializer(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
+        self.site = Site.objects.first()
         self.user_attributes = {
             'username': 'alpha_one',
             'profile__name': 'Alpha One',
             'profile__country': 'CA',
         }
         self.user = UserFactory(**self.user_attributes)
-        self.serializer = LearnerDetailsSerializer(instance=self.user)
+        self.serializer = LearnerDetailsSerializer(
+            instance=self.user, context=dict(site=self.site))
 
     def test_has_fields(self):
         '''Tests that the serialized UserIndex data has specific keys and values
@@ -454,6 +457,13 @@ class TestLearnerDetailsSerializer(object):
         # This is to make sure that the serializer retrieves the correct nested
         # model (UserProfile) data
         assert data['name'] == 'Alpha One'
+
+    @pytest.mark.skip(reason='Not implemented')
+    def test_excludes_other_sites(self):
+        """
+        Need to make sure that only courses for the requesting site are returned
+        """
+        pass
 
 
 @pytest.mark.django_db

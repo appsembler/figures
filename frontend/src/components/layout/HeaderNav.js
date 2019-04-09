@@ -13,7 +13,7 @@ class HeaderNav extends Component {
           to="/figures"
           className={styles['header-nav__link']}
         >
-          Dashboard
+          Overview
         </NavLink>
         <NavLink
           to="/figures/mau-history"

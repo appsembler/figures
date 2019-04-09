@@ -55,6 +55,10 @@
         font-weight: bold;
       }
 
+      .name a, .name a:visited {
+        color: $primary-color;
+      }
+
       &:last-child {
         border-bottom: none;
       }

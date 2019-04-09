@@ -19,7 +19,7 @@ class MauDetailsContent extends Component {
         <li key={index} className={styles['content-row']}>
           <span className={styles['period']}>{period.period}</span>
           <span className={styles['mau-count']}>{period.value}</span>
-          <span className={cx({ 'difference': true, 'positive': (difference > 0), 'negative': (difference < 0)})}>{difference}</span>
+          <span className={cx({ 'difference': true, 'positive': (difference > 0), 'negative': (difference < 0)})}>{(difference > 0) ? "+" : ""}{difference}</span>
         </li>
       )
     });

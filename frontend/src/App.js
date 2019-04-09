@@ -26,7 +26,7 @@ class App extends Component {
       <LoadingSpinner
         displaySpinner = {!(this.props.activeApiFetches === 0)}
       >
-        <main className={styles['layout-root']}>
+        <main id="main" className={styles['layout-root']}>
           <Route render={ ({location}) => (
             <ReactCSSTransitionReplace
               transitionName = 'page'
