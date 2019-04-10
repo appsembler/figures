@@ -20,7 +20,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 from student.models import CourseEnrollment
 
 import figures.helpers
-from figures.helpers import as_course_key
+from figures.helpers import as_course_key, is_multisite
 from figures.views import GeneralCourseDataViewSet
 
 from tests.factories import (
@@ -104,6 +104,11 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             'course_id', 'course_name', 'course_code','org', 'start_date',
             'end_date', 'self_paced', 'staff', 'metrics',
         ]
+        if is_multisite():
+            self.organization = OrganizationFactory(sites=[self.site])
+            for co in self.course_overviews:
+                OrganizationCourseFactory(organization=self.organization,
+                                          course_id=str(co.id))
 
     def test_get_list(self):
         '''Tests retrieving a list of users with abbreviated details
