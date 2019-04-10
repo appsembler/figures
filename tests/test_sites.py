@@ -63,12 +63,15 @@ class TestHandlersForStandaloneMode(object):
     """
 
     @pytest.fixture(autouse=True)
-    def setup(self, db):
+    def setup(self, db, settings):
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = False
+        is_multisite = figures.helpers.is_multisite()
+        assert not is_multisite
+
         self.default_site = Site.objects.get()
         self.features = {'FIGURES_IS_MULTISITE': False}
         self.site = Site.objects.first()
         assert Site.objects.count() == 1
-        assert not figures.helpers.is_multisite()
 
     def test_get_site_for_course(self):
         """
@@ -128,7 +131,10 @@ class TestHandlersForMultisiteMode(object):
 
     """
     @pytest.fixture(autouse=True)
-    def setup(self, db):
+    def setup(self, db, settings):
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
+        is_multisite = figures.helpers.is_multisite()
+        assert is_multisite
         self.site = SiteFactory(domain='foo.test')
         self.organization = OrganizationFactory(sites=[self.site])
         assert Site.objects.count() == 2

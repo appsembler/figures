@@ -109,29 +109,28 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         ('nosite_staff', False),
         ])
     # def test_is_site_admin_user(self, figures_settings, username, allow):
-    def test_is_site_admin_user(self, monkeypatch, username, allow):
+    def test_is_site_admin_user(self, monkeypatch, settings, username, allow):
         def test_site(request):
             return self.site
         request = APIRequestFactory().get('/')
         request.META['HTTP_HOST'] = self.site.domain
         request.user = get_user_model().objects.get(username=username)
         monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site', test_site)
-        with mock.patch('figures.settings.features', self.features):
-            assert figures.helpers.is_multisite()
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
+        assert figures.helpers.is_multisite()
+        permission = figures.permissions.IsSiteAdminUser().has_permission(
+            request, None)
+        assert permission is allow, 'User "{username}" should have access'.format(
+            username=username)
 
-            permission = figures.permissions.IsSiteAdminUser().has_permission(
-                request, None)
-            assert permission is allow, 'User "{username}" should have access'.format(
-                username=username)
+        # verify that inactive users are denied permission
+        request.user.is_active = False
+        permission = figures.permissions.IsSiteAdminUser().has_permission(
+            request, None)
+        assert permission is False, 'username: "{username}"'.format(
+            username=username)
 
-            # verify that inactive users are denied permission
-            request.user.is_active = False
-            permission = figures.permissions.IsSiteAdminUser().has_permission(
-                request, None)
-            assert permission is False, 'username: "{username}"'.format(
-                username=username)
-
-    def test_multiple_user_orgs(self, monkeypatch):
+    def test_multiple_user_orgs(self, monkeypatch, settings):
         def test_site(request):
             return self.site
         username = 'alpha_site_admin'
@@ -139,12 +138,12 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         request.META['HTTP_HOST'] = self.site.domain
         request.user = get_user_model().objects.get(username=username)
         monkeypatch.setattr(django.contrib.sites.shortcuts, 'get_current_site', test_site)
-        with mock.patch('figures.settings.features', self.features):
-            assert figures.helpers.is_multisite()
-            org2 = OrganizationFactory(sites=[self.site])
-            UserOrganizationMappingFactory(user=request.user, organization=org2),
-            with pytest.raises(figures.permissions.MultipleOrgsPerUserNotSupported):
-                figures.permissions.IsSiteAdminUser().has_permission(request, None)
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
+        assert figures.helpers.is_multisite()
+        org2 = OrganizationFactory(sites=[self.site])
+        UserOrganizationMappingFactory(user=request.user, organization=org2),
+        with pytest.raises(figures.permissions.MultipleOrgsPerUserNotSupported):
+            figures.permissions.IsSiteAdminUser().has_permission(request, None)
 
     @pytest.mark.parametrize('username, allow', [
         ('regular_user', False),
