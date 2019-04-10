@@ -49,7 +49,7 @@ class BaseViewTest(object):
         Django Rest Framework ViewSetMixin class. This requires
         the action in the 'as_view' call
         '''
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             request = APIRequestFactory().get(self.request_path)
             user = get_user_model().objects.get(username=username)
             force_authenticate(request, user=user)

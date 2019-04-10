@@ -19,8 +19,8 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 from student.models import CourseEnrollment
 
-import figures.settings
-from figures.helpers import as_course_key
+import figures.helpers
+from figures.helpers import as_course_key, is_multisite
 from figures.views import GeneralCourseDataViewSet
 
 from tests.factories import (
@@ -104,6 +104,11 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             'course_id', 'course_name', 'course_code','org', 'start_date',
             'end_date', 'self_paced', 'staff', 'metrics',
         ]
+        if is_multisite():
+            self.organization = OrganizationFactory(sites=[self.site])
+            for co in self.course_overviews:
+                OrganizationCourseFactory(organization=self.organization,
+                                          course_id=str(co.id))
 
     def test_get_list(self):
         '''Tests retrieving a list of users with abbreviated details
@@ -160,8 +165,8 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
         This test is broken. Needs review of django.contrib.sites handling for
         `get_current_site`
         """
-        with mock.patch('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': True}):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': True}):
+            assert figures.helpers.is_multisite()
 
             # Stand up site specific data. Candidate for a fixture
             alpha_site = SiteFactory(domain='alpha.site')
@@ -208,8 +213,8 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
 
         This test is incomplete
         """
-        with mock.patch('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': True}):
-            assert figures.settings.is_multisite()
+        with mock.patch('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': True}):
+            assert figures.helpers.is_multisite()
 
             # Stand up other site. Candidate for a fixture
             other_site = SiteFactory(domain='other.site')

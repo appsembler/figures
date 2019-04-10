@@ -7,6 +7,11 @@ from __future__ import absolute_import, unicode_literals
 
 from os.path import abspath, dirname, join
 
+from figures.settings.lms_production import (
+    update_celerybeat_schedule,
+    update_webpack_loader,
+)
+
 
 def root(*args):
     """
@@ -103,6 +108,7 @@ REST_FRAMEWORK = {
 # It expects them from the project's settings (django.conf.settings)
 WEBPACK_LOADER = {}
 CELERYBEAT_SCHEDULE = {}
+FEATURES = {}
 
 # Declare values we need from server vars (e.g. lms.env.json)
 ENV_TOKENS = {
@@ -112,11 +118,5 @@ ENV_TOKENS = {
 }
 
 
-# Enable Figures if it is included
-# This should be the same code as used in the LMS settings
-if 'figures' in INSTALLED_APPS:
-    import figures
-    figures.update_settings(
-        WEBPACK_LOADER,
-        CELERYBEAT_SCHEDULE,
-        ENV_TOKENS.get('FIGURES', {}))
+update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
+update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)

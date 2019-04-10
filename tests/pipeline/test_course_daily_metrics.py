@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from opaque_keys.edx.locator import CourseLocator
 from student.models import CourseEnrollment, CourseAccessRole
 
-from figures.helpers import as_datetime, next_day, prev_day
+from figures.helpers import as_datetime, next_day, prev_day, is_multisite
 from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 import figures.sites
@@ -58,7 +58,7 @@ class TestGetCourseEnrollments(object):
 
 
 # Keep this
-# @mock.patch('figures.settings.env_tokens', return_value={'IS_FIGURES_MULTISITE': False})
+# @mock.patch('figures.settings.env_tokens', return_value={'FIGURES_IS_MULTISITE': False})
 @pytest.mark.django_db
 class TestCourseDailyMetricsPipelineFunctions(object):
     """
@@ -116,7 +116,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         """
 
         # Get the number of course enrollments
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             ce_count = CourseEnrollment.objects.filter(
                 course_id=self.course_overview.id).count()
             # Get course admins (non-students)
@@ -141,7 +141,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         TODO: in the setup, add student module records modified in the past and
         add filtering to the expected_count here
         """
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             recs = pipeline_cdm.get_active_learner_ids_today(
                 course_id=self.course_overview.id, date_for=self.today)
             assert recs.count() == len(self.course_enrollments)
@@ -153,8 +153,8 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         just want to be able to set up the source data with expected output and
         go.
         """
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
-            assert not figures.settings.is_multisite()
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
+            assert not is_multisite()
             course_enrollments = CourseEnrollment.objects.filter(
                 course_id=self.course_overview.id)
             actual = pipeline_cdm.get_average_progress(
@@ -174,7 +174,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         side_effect=PermissionDenied('mock-failure')
     )
     def test_get_average_progress_error(self, mock_lcg):
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             assert PipelineError.objects.count() == 0
             course_enrollments = CourseEnrollment.objects.filter(
                 course_id=self.course_overview.id)
@@ -188,7 +188,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             assert PipelineError.objects.count() == course_enrollments.count()
 
     def test_get_days_to_complete(self, ):
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             expected = dict(
                 days=self.cert_days_to_complete,
                 errors=[])
@@ -200,21 +200,21 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             assert actual == expected
 
     def test_calc_average_days_to_complete(self):
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             actual = pipeline_cdm.calc_average_days_to_complete(
                 self.cert_days_to_complete)
 
             assert actual == self.expected_avg_cert_days_to_complete
 
     def test_get_average_days_to_complete(self):
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             actual = pipeline_cdm.get_average_days_to_complete(
                 course_id=self.course_overview.id,
                 date_for=self.today)
             assert actual == self.expected_avg_cert_days_to_complete
 
     def test_get_num_learners_completed(self):
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             actual = pipeline_cdm.get_num_learners_completed(
                 course_id=self.course_overview.id,
                 date_for=self.today)
@@ -262,7 +262,7 @@ class TestCourseDailyMetricsLoader(object):
                 'date_for': date_for,
                 'active_learners_today': 0}
 
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             monkeypatch.setattr(
                 figures.pipeline.course_daily_metrics.CourseDailyMetricsLoader,
                 'get_data', get_data)
@@ -270,7 +270,7 @@ class TestCourseDailyMetricsLoader(object):
             assert cdm and created
 
     def test_load_existing(self, monkeypatch):
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             course_id = self.course_enrollments[0].course_id
             assert CourseDailyMetrics.objects.count() == 0
             cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
@@ -285,7 +285,7 @@ class TestCourseDailyMetricsLoader(object):
     def test_load_invalid_data(self, monkeypatch, average_progress):
         def mock_get_average_progress(course_id, date_for, course_enrollments):
             return average_progress
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             course_id = self.course_enrollments[0].course_id
             monkeypatch.setattr(
                 figures.pipeline.course_daily_metrics,

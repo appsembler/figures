@@ -1,0 +1,3 @@
+"""
+Settings plugins for Figures.
+"""

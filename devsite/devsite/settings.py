@@ -9,6 +9,11 @@ from __future__ import absolute_import, unicode_literals
 import os
 import sys
 
+from figures.settings.lms_production import (
+    update_celerybeat_schedule,
+    update_webpack_loader,
+)
+
 
 DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
@@ -167,11 +172,5 @@ CELERYBEAT_SCHEDULE = {}
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
 
-# Enable Figures if it is included
-# This replicates the dependencies used in the LMS in edx-platform to load Figures
-if 'figures' in INSTALLED_APPS:
-    import figures
-    figures.update_settings(
-        WEBPACK_LOADER,
-        CELERYBEAT_SCHEDULE,
-        ENV_TOKENS.get('FIGURES', {}))
+update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
+update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)

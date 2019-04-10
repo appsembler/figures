@@ -15,11 +15,15 @@ from opaque_keys.edx.keys import CourseKey
 
 from student.models import CourseEnrollment
 
+from figures.helpers import is_multisite
 from figures.views import CourseEnrollmentViewSet
 
 from tests.factories import(
     COURSE_ID_STR_TEMPLATE,
     CourseEnrollmentFactory,
+    CourseOverviewFactory,
+    OrganizationFactory,
+    OrganizationCourseFactory,
     UserFactory,
 )
 from tests.views.base import BaseViewTest
@@ -48,11 +52,18 @@ class TestCourseEnrollmentViewSet(BaseViewTest):
     def setup(self, db):
         super(TestCourseEnrollmentViewSet, self).setup(db)
         self.special_fields = ('create', 'user',)
+        self.course_overview = CourseOverviewFactory()
         self.course_enrollments = [
-            CourseEnrollmentFactory() for i in range(1,5)
+            CourseEnrollmentFactory(
+                course_id=self.course_overview.id) for i in range(1,5)
         ]
 
         self.sample_course_id = self.course_enrollments[0].course_id
+
+        if is_multisite():
+            self.organization = OrganizationFactory(sites=[self.site])
+            OrganizationCourseFactory(organization=self.organization,
+                                      course_id=str(self.course_overview.id))
 
     @pytest.mark.parametrize('query_params, filter_args', [
             ('', {}),

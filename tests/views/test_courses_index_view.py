@@ -10,9 +10,14 @@ from rest_framework.test import (
     force_authenticate,
     )
 
+from figures.helpers import is_multisite
 from figures.views import CoursesIndexViewSet
 
-from tests.factories import CourseOverviewFactory
+from tests.factories import (
+    CourseOverviewFactory,
+    OrganizationFactory,
+    OrganizationCourseFactory,
+)
 from tests.helpers import make_course_key_str
 from tests.views.base import BaseViewTest
 
@@ -43,6 +48,11 @@ class TestCoursesIndexViewSet(BaseViewTest):
     def setup(self, db):
         super(TestCoursesIndexViewSet, self).setup(db)
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
+        if is_multisite():
+            self.organization = OrganizationFactory(sites=[self.site])
+            for co in self.course_overviews:
+                OrganizationCourseFactory(organization=self.organization,
+                                          course_id=str(co.id))
 
     def test_get_all(self):
         expected_data = COURSE_DATA
