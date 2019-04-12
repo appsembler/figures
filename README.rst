@@ -12,16 +12,24 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 Notice and Development Status
 -----------------------------
 
-24 MAR 2019 - Hawthorn Pre-release
+12 APR 2019 - Hawthorn Pre-release
 ==================================
 
-**We have a Hawthorn pre-release available!**
+**Hawthorn 0.3.0 pre-release is now available!**
 
-* Figures now runs in the Hawthorn Docker devstack and also has a standalone development mode.
-* More details to come over the next week
-* Go here to get Figures installed and running in your development workspace: https://github.com/appsembler/figures/blob/hawthorn-upgrade/DEVELOPER-QUICKSTART.md
+* Figures 0.3.0 supports Hawthorn
+* Uses the new plugin capability introduced in Open edX Hawthorn
+* Includes a standalone development mode. See the `developer quickstart guide <./DEVELOPER-QUICKSTART.md/>`__
 
-If you find bugs or run into issues, please submit an issue ticket to the `Figures issue tracker <https://github.com/appsembler/figures/issues>`__ on Github.
+
+Figures on PyPI
+===============
+
+Figures is avaible on `PyPI <https://pypi.org/project/figures/>`__
+
+* 0.3.0-prerelease is the community release for Hawthorn
+* 0.1.6 is the community release for Ficus and Ginkgo
+
 
 --------
 Overview
@@ -42,9 +50,19 @@ Please refer to the Figures `design document <https://docs.google.com/document/d
 Requirements
 ------------
 
+For all Open edX releases:
+
 * Python (2.7)
+
+For Hawthorn:
+
 * Django (1.11)
-* Open edX Hawthorn
+
+For Ficus and Ginkgo:
+
+* Django (1.8)
+
+
 
 .. _installation:
 
@@ -60,7 +78,7 @@ Go `here <docs/source/devstack.rst>`__ for instructions to install and run Figur
 Production
 ==========
 
-go `here <docs/source/install.rst>`__ for instructions to install Figures in production.
+Go `here <docs/source/install.rst>`__ for instructions to install Figures in production.
 
 --------------------
 Project Architecture
@@ -75,7 +93,6 @@ Back-end
 ========
 
 The Figures back-end is a reusable Django app. It contains a set of REST API endpoints that serve a dual purpose of providing data to the front-end and to remote clients.
-
 
 -------
 Testing
@@ -129,11 +146,19 @@ How to Contribute
 
 TODO: Add details here or separate `CONTRIBUTING` file to the root of the repo
 
+
+.. _reporting_issues:
+
+----------------
+Reporting Issues
+----------------
+
+If you find bugs or run into issues, please submit an issue ticket to the `Figures issue tracker <https://github.com/appsembler/figures/issues>`__ on Github.
+
 .. _reporting_security_issues:
 
--------------------------
 Reporting Security Issues
--------------------------
+=========================
 
 Please do not report security issues in public. Please email security@appsembler.com.
 
@@ -145,4 +170,3 @@ Please do not report security issues in public. Please email security@appsembler
 .. |codecov-badge| image:: http://codecov.io/github/appsembler/figures/coverage.svg?branch=master
     :target: http://codecov.io/github/appsembler/figures?branch=master
     :alt: Codecov
-
