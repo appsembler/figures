@@ -13,8 +13,12 @@ from rest_framework.test import (
     force_authenticate,
     )
 
+from tests.helpers import django_filters_pre_v1
 from tests.views.helpers import create_test_users
 
+
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class BaseViewTest(object):
 
@@ -45,7 +49,7 @@ class BaseViewTest(object):
         Django Rest Framework ViewSetMixin class. This requires
         the action in the 'as_view' call
         '''
-        with mock.patch.dict('figures.settings.env_tokens', {'IS_FIGURES_MULTISITE': False}):
+        with mock.patch.dict('figures.helpers.settings.FEATURES', {'FIGURES_IS_MULTISITE': False}):
             request = APIRequestFactory().get(self.request_path)
             user = get_user_model().objects.get(username=username)
             force_authenticate(request, user=user)

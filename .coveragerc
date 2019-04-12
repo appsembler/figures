@@ -1,5 +1,5 @@
 [run]
 omit =
     setup.py
-    tests/mocks/*
+    tests/*
 

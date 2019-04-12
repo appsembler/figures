@@ -49,7 +49,7 @@ from django.utils.timezone import utc
 import organizations
 
 from figures import metrics
-import figures.settings
+import figures.helpers
 import figures.sites
 
 from tests.factories import (
@@ -269,13 +269,14 @@ class TestSiteMetricsGettersStandalone(object):
     TODO: Pull out the start/end date setup into a 'TimeSeriesTest' base class
     """
     @pytest.fixture(autouse=True)
-    def setup(self, db):
+    def setup(self, db, settings):
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = False
+        assert not figures.helpers.is_multisite()
         assert Site.objects.count() == 1
         self.site = Site.objects.first()
         self.data_start_date = DEFAULT_START_DATE
         self.data_end_date = DEFAULT_END_DATE
-        self.env_tokens = {'IS_FIGURES_MULTISITE': False}
-        assert not figures.settings.is_multisite()
+        self.features = {'FIGURES_IS_MULTISITE': False}
         self.site_daily_metrics = create_site_daily_metrics_data(
             site=self.site,
             start_date=self.data_start_date,
@@ -305,7 +306,7 @@ class TestSiteMetricsGettersStandalone(object):
         '''
         users = create_users_joined_over_time(
             site=self.site,
-            is_multisite=figures.settings.is_multisite(),
+            is_multisite=figures.helpers.is_multisite(),
             start_date=self.data_start_date,
             end_date=self.data_end_date)
         count = metrics.get_total_site_users_for_time_period(
@@ -323,7 +324,7 @@ class TestSiteMetricsGettersStandalone(object):
         '''
         users = create_users_joined_over_time(
             site=self.site,
-            is_multisite=figures.settings.is_multisite(),
+            is_multisite=figures.helpers.is_multisite(),
             start_date=self.data_start_date,
             end_date=self.data_end_date)
         count = metrics.get_total_site_users_joined_for_time_period(
@@ -397,7 +398,7 @@ class TestSiteMetricsGettersStandalone(object):
 
 @pytest.mark.skipif(not organizations_support_sites(),
                     reason='Organizations support sites')
-@mock.patch('figures.settings.env_tokens', return_value={'IS_FIGURES_MULTISITE': True})
+# @mock.patch('figures.settings.features', return_value={'FIGURES_IS_MULTISITE': True})
 @pytest.mark.django_db
 class TestSiteMetricsGettersMultisite(object):
     '''The purpose of this class is to test the individual time period getter
@@ -406,10 +407,12 @@ class TestSiteMetricsGettersMultisite(object):
     TODO: Pull out the start/end date setup into a 'TimeSeriesTest' base class
     '''
     @pytest.fixture(autouse=True)
-    def setup(self, db):
+    def setup(self, db, settings):
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
+        is_multisite = figures.helpers.is_multisite()
+        assert is_multisite
         self.data_start_date = DEFAULT_START_DATE
         self.data_end_date = DEFAULT_END_DATE
-        # self.env_tokens = {'IS_FIGURES_MULTISITE': True}
 
         self.alpha_site = SiteFactory(domain='alpha.site')
         self.alpha_org =  OrganizationFactory(sites=[self.alpha_site])
@@ -425,11 +428,11 @@ class TestSiteMetricsGettersMultisite(object):
             start_date=self.data_start_date,
             end_date=self.data_end_date)
 
-    def test_get_active_users_for_time_period(self, env_tokens):
+    def test_get_active_users_for_time_period(self):
         '''
 
         '''
-        assert figures.settings.is_multisite()
+        assert figures.helpers.is_multisite()
         student_module_sets = []
         for i in range(0, 3):
             data = create_student_module_test_data(
@@ -448,7 +451,7 @@ class TestSiteMetricsGettersMultisite(object):
 
         assert count == len(student_module_sets)
 
-    def test_get_total_site_users_for_time_period(self, env_tokens):
+    def test_get_total_site_users_for_time_period(self):
         '''
         TODO: add users who joined before and after the time period, and
         compare the count to the users created on or before the end date
@@ -457,7 +460,7 @@ class TestSiteMetricsGettersMultisite(object):
         '''
         users = create_users_joined_over_time(
             site=self.alpha_site,
-            is_multisite=figures.settings.is_multisite(),
+            is_multisite=figures.helpers.is_multisite(),
             start_date=self.data_start_date,
             end_date=self.data_end_date)
         count = metrics.get_total_site_users_for_time_period(
@@ -468,14 +471,14 @@ class TestSiteMetricsGettersMultisite(object):
             )
         assert count == len(users)
 
-    def test_get_total_site_users_joined_for_time_period(self, env_tokens):
+    def test_get_total_site_users_joined_for_time_period(self):
         '''
         TODO: add users who joined before and after the time period, and
         compare the count to the users created within the time period
         '''
         users = create_users_joined_over_time(
             site=self.alpha_site,
-            is_multisite=figures.settings.is_multisite(),
+            is_multisite=figures.helpers.is_multisite(),
             start_date=self.data_start_date,
             end_date=self.data_end_date)
         count = metrics.get_total_site_users_joined_for_time_period(
@@ -484,7 +487,7 @@ class TestSiteMetricsGettersMultisite(object):
             end_date=self.data_end_date)
         assert count == len(users)
 
-    def test_get_total_enrollments_for_time_period(self, env_tokens):
+    def test_get_total_enrollments_for_time_period(self):
         '''
         We're incrementing values for test data, so the last SiteDailyMetrics
         record will have the max value
@@ -496,7 +499,7 @@ class TestSiteMetricsGettersMultisite(object):
 
         assert count == self.alpha_site_daily_metrics[-1].total_enrollment_count
 
-    def test_get_total_site_courses_for_time_period(self, env_tokens):
+    def test_get_total_site_courses_for_time_period(self):
         '''
         We're incrementing values for test data, so the last SiteDailyMetrics
         record will have the max value
@@ -508,7 +511,7 @@ class TestSiteMetricsGettersMultisite(object):
 
         assert count == self.alpha_site_daily_metrics[-1].course_count
 
-    def test_get_total_course_completions_for_time_period(self, env_tokens):
+    def test_get_total_course_completions_for_time_period(self):
         '''
         We're incrementing values for test data, so the last SiteDailyMetrics
         record will have the max value
@@ -524,7 +527,7 @@ class TestSiteMetricsGettersMultisite(object):
             end_date=self.data_end_date)
         assert count == cdm[-1].num_learners_completed
 
-    def test_get_monthly_site_metrics(self, env_tokens):
+    def test_get_monthly_site_metrics(self):
         '''
         Since we are testing results for individual getters in other test
         methods in this class, our prime goal is to ensure proper structure
@@ -570,13 +573,15 @@ class TestCourseMetricsGettersStandalone(object):
     work for averaged metrics
     '''
     @pytest.fixture(autouse=True)
-    def setup(self, db):
+    def setup(self, db, settings):
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = False
+        is_multisite = figures.helpers.is_multisite()
+        assert not is_multisite
         assert Site.objects.count() == 1
         self.site = Site.objects.first()
         self.data_start_date = DEFAULT_START_DATE
         self.data_end_date = DEFAULT_END_DATE
-        self.env_tokens = {'IS_FIGURES_MULTISITE': False}
-        assert not figures.settings.is_multisite()
+        self.features = {'FIGURES_IS_MULTISITE': False}
         self.course_overview = CourseOverviewFactory()
         self.course_daily_metrics = create_course_daily_metrics_data(
             site=self.site,
@@ -629,7 +634,6 @@ class TestCourseMetricsGettersStandalone(object):
 
 @pytest.mark.skipif(not organizations_support_sites(),
                     reason='Organizations support sites')
-@mock.patch('figures.settings.env_tokens', return_value={'IS_FIGURES_MULTISITE': True})
 @pytest.mark.django_db
 class TestCourseMetricsGettersMultisite(object):
     '''
@@ -653,16 +657,16 @@ class TestCourseMetricsGettersMultisite(object):
     work for averaged metrics
     '''
     @pytest.fixture(autouse=True)
-    def setup(self, db):
+    def setup(self, db, settings):
         """
         TODO: rework this so we have a top level object as a dict, then we can
         swap the sites in and out to test inclusion and exclusion
         """
-
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
+        is_multisite = figures.helpers.is_multisite()
+        assert is_multisite
         self.data_start_date = DEFAULT_START_DATE
         self.data_end_date = DEFAULT_END_DATE
-        self.env_tokens = {'IS_FIGURES_MULTISITE': True}
-
         self.alpha_site = SiteFactory(domain='alpha.site')
         self.alpha_course_overview = CourseOverviewFactory()
         self.alpha_course_daily_metrics = create_course_daily_metrics_data(
@@ -683,7 +687,7 @@ class TestCourseMetricsGettersMultisite(object):
         data = [getattr(rec, attribute) for rec in course_daily_metrics]
         return sum(data)/val_type(len(data))
 
-    def test_get_course_enrolled_users_for_time_period(self, env_tokens):
+    def test_get_course_enrolled_users_for_time_period(self):
         '''
         Validates results against the max value for the metrics model attribute
         '''
@@ -695,7 +699,7 @@ class TestCourseMetricsGettersMultisite(object):
             course_id=self.alpha_course_overview.id)
         assert actual == expected
 
-    def test_get_course_average_progress_for_time_period(self, env_tokens):
+    def test_get_course_average_progress_for_time_period(self):
         actual = metrics.get_course_average_progress_for_time_period(
             site=self.alpha_site,
             start_date=self.data_start_date,
@@ -704,7 +708,7 @@ class TestCourseMetricsGettersMultisite(object):
         assert actual == self.get_average(self.alpha_course_daily_metrics,
             'average_progress', float)
 
-    def test_get_course_average_days_to_complete_for_time_period(self, env_tokens):
+    def test_get_course_average_days_to_complete_for_time_period(self):
         actual = metrics.get_course_average_days_to_complete_for_time_period(
             site=self.alpha_site,
             start_date=self.data_start_date,
@@ -713,7 +717,7 @@ class TestCourseMetricsGettersMultisite(object):
         assert actual == self.get_average(self.alpha_course_daily_metrics,
             'average_days_to_complete', int)
 
-    def test_get_course_num_learners_completed_for_time_period(self, env_tokens):
+    def test_get_course_num_learners_completed_for_time_period(self):
         expected = max(
             [rec.num_learners_completed for rec in self.alpha_course_daily_metrics])
         actual = metrics.get_course_num_learners_completed_for_time_period(

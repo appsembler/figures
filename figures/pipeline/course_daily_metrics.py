@@ -17,7 +17,6 @@ import logging
 from django.db import transaction
 from django.utils.timezone import utc
 
-from certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseEnrollment
@@ -29,6 +28,7 @@ from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
 import figures.pipeline.loaders
 from figures.serializers import CourseIndexSerializer
+from figures.compat import GeneratedCertificate
 import figures.sites
 
 
@@ -290,7 +290,7 @@ class CourseDailyMetricsLoader(object):
             defaults=dict(
                 enrollment_count=data['enrollment_count'],
                 active_learners_today=data['active_learners_today'],
-                average_progress=data['average_progress'],
+                average_progress=str(data['average_progress']),
                 average_days_to_complete=int(round(data['average_days_to_complete'])),
                 num_learners_completed=data['num_learners_completed'],
             )
@@ -316,7 +316,8 @@ class CourseDailyMetricsLoader(object):
         if not date_for:
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date())
-
+        else:
+            date_for = as_datetime(date_for).replace(tzinfo=utc)
         try:
             cdm = CourseDailyMetrics.objects.get(course_id=self.course_id,
                                                  date_for=date_for)

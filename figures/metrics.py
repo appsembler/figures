@@ -28,11 +28,14 @@ import math
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Max
 
-from certificates.models import GeneratedCertificate
 from courseware.courses import get_course_by_id
 from courseware.models import StudentModule
 
-from figures.compat import CourseGradeFactory, chapter_grade_values
+from figures.compat import (
+    CourseGradeFactory,
+    GeneratedCertificate,
+    chapter_grade_values,
+)
 from figures.helpers import (
     as_course_key,
     as_date,
@@ -99,7 +102,7 @@ class LearnerCourseGrades(object):
         self.course = get_course_by_id(course_key=as_course_key(course_id))
         self.course._field_data_cache = {}  # pylint: disable=protected-access
         self.course.set_grading_policy(self.course.grading_policy)
-        self.course_grade = CourseGradeFactory().create(self.learner, self.course)
+        self.course_grade = CourseGradeFactory().read(self.learner, self.course)
 
     def __str__(self):
         return u'{} - {} - {} '.format(

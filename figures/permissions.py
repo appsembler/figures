@@ -7,7 +7,7 @@ import django.contrib.sites.shortcuts
 
 import organizations
 
-import figures.settings
+import figures.helpers
 import figures.sites
 
 
@@ -59,7 +59,7 @@ def is_site_admin_user(request):
     """
     has_permission = is_active_staff_or_superuser(request)
     if not has_permission:
-        if figures.settings.is_multisite():
+        if figures.helpers.is_multisite():
             current_site = django.contrib.sites.shortcuts.get_current_site(request)
             orgs = organizations.models.Organization.objects.filter(sites__in=[current_site])
             # Should just be mappings for organizations in this site

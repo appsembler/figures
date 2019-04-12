@@ -17,7 +17,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-from figures.helpers import as_datetime, prev_day
+from figures.helpers import as_datetime, prev_day, is_multisite
 from figures.models import SiteDailyMetrics
 from figures.pipeline import site_daily_metrics as pipeline_sdm
 import figures.sites
@@ -25,9 +25,17 @@ import figures.sites
 from tests.factories import (
     CourseDailyMetricsFactory,
     CourseOverviewFactory,
+    OrganizationFactory,
+    OrganizationCourseFactory,
     SiteDailyMetricsFactory,
     UserFactory,
 )
+
+from tests.helpers import organizations_support_sites
+
+
+if organizations_support_sites():
+    from tests.factories import UserOrganizationMappingFactory
 
 
 DEFAULT_START_DATE = datetime.datetime(2018, 1, 1, 0, 0, tzinfo=utc)
@@ -84,17 +92,18 @@ class TestCourseDailyMetricsMissingCdm(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        '''
-        '''
         self.date_for = DEFAULT_END_DATE
         self.site = Site.objects.first()
         self.course_count = 4
         self.course_overviews = [CourseOverviewFactory(
             created=self.date_for) for i in range(self.course_count)]
+        if is_multisite():
+            self.organization = OrganizationFactory(sites=[self.site])
+            for co in self.course_overviews:
+                OrganizationCourseFactory(organization=self.organization,
+                                          course_id=str(co.id))
 
     def test_no_missing(self):
-        '''
-        '''
         [CourseDailyMetricsFactory(
             date_for=self.date_for,
             site=self.site,
@@ -105,8 +114,6 @@ class TestCourseDailyMetricsMissingCdm(object):
         assert course_ids == set([])
 
     def test_missing(self):
-        '''
-        '''
         [
             CourseDailyMetricsFactory(
                 date_for=self.date_for,
@@ -120,7 +127,8 @@ class TestCourseDailyMetricsMissingCdm(object):
         expected_missing = [unicode(co.id) for co in self.course_overviews[2:]]
         actual = pipeline_sdm.missing_course_daily_metrics(
             site=self.site, date_for=self.date_for)
-        assert actual == set(expected_missing)
+
+        assert set([str(obj) for obj in actual]) == set(expected_missing)
 
 
 @pytest.mark.django_db
@@ -193,6 +201,16 @@ class TestSiteDailyMetricsExtractor(object):
             date_for=prev_day(self.date_for),
             **SDM_PREV_DAY[1])
 
+        if is_multisite():
+            self.organization = OrganizationFactory(sites=[self.site])
+            for co in self.course_overviews:
+                OrganizationCourseFactory(organization=self.organization,
+                                          course_id=str(co.id))
+            if organizations_support_sites():
+                for user in self.users:
+                    UserOrganizationMappingFactory(user=user,
+                                                   organization=self.organization)
+
     def test_extract(self):
         expected_results = dict(
             cumulative_active_user_count=65,
@@ -210,6 +228,7 @@ class TestSiteDailyMetricsExtractor(object):
         actual = pipeline_sdm.SiteDailyMetricsExtractor().extract(
             site=self.site,
             date_for=self.date_for)
+
         for key, value in expected_results.iteritems():
             assert actual[key] == value, 'failed on key: "{}"'.format(key)
 

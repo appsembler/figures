@@ -30,8 +30,8 @@ class TestPipelineLogging(object):
 
     def test_logging_to_logger(self):
         assert PipelineError.objects.count() == 0
-        env_tokens = {'LOG_PIPELINE_ERRORS_TO_DB': False}
-        with mock.patch('figures.settings.env_tokens', env_tokens):
+        features = {'FIGURES_LOG_PIPELINE_ERRORS_TO_DB': False}
+        with mock.patch('figures.helpers.settings.FEATURES', features):
             logger.log_error(self.error_data)
             assert PipelineError.objects.count() == 0
 

@@ -16,11 +16,22 @@ except ImportError:
     RELEASE_LINE = None
 
 try:
-    # First try to import for ginkgo and onward
-    from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
+    # First try to import for the path as of hawthorn
+    from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 except ImportError:
-    # try the old (pre-ginkgo) location
-    from lms.djangoapps.grades.new.course_grade import CourseGradeFactory    # noqa: F401
+    try:
+        # Next try to import for the path as of ginkgo
+        from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
+    except ImportError:
+        # try the pre-ginkgo path
+        from lms.djangoapps.grades.new.course_grade import CourseGradeFactory    # noqa: F401
+
+try:
+    # First try to import for the path as of hawthorn
+    from lms.djangoapps.certificates.models import GeneratedCertificate
+except ImportError:
+    # try the pre-hawthorn path
+    from certificates.models import GeneratedCertificate    # noqa: F401
 
 
 def chapter_grade_values(chapter_grades):
@@ -38,4 +49,6 @@ def chapter_grade_values(chapter_grades):
     elif isinstance(chapter_grades, list):
         return chapter_grades
     else:
+        # TODO: improve clarity, add a message
+        # This may be what
         raise TypeError

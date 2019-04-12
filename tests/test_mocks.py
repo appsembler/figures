@@ -6,8 +6,6 @@ import datetime
 import pytest
 import pytz
 
-from certificates.models import GeneratedCertificate
-
 from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,

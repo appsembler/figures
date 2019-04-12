@@ -9,6 +9,11 @@ from __future__ import absolute_import, unicode_literals
 import os
 import sys
 
+from figures.settings.lms_production import (
+    update_celerybeat_schedule,
+    update_webpack_loader,
+)
+
 
 DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
@@ -30,7 +35,7 @@ sys.path.append(
     os.path.normpath(os.path.join(PROJECT_ROOT_DIR, 'tests/mocks'))
     )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,8 +59,17 @@ INSTALLED_APPS = (
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'student',
-    'certificates',
-)
+]
+
+# certificates app
+
+# edx-platform uses the app config
+# 'lms.djangoapps.certificates.apps.CertificatesConfig'
+# Our mock uses the package path
+# TO emulate pre-hawthorn
+#   INSTALLED_APPS += ('certificates')
+INSTALLED_APPS.append('lms.djangoapps.certificates')
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -158,11 +172,5 @@ CELERYBEAT_SCHEDULE = {}
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
 
-# Enable Figures if it is included
-# This replicates the dependencies used in the LMS in edx-platform to load Figures
-if 'figures' in INSTALLED_APPS:
-    import figures
-    figures.update_settings(
-        WEBPACK_LOADER,
-        CELERYBEAT_SCHEDULE,
-        ENV_TOKENS.get('FIGURES', {}))
+update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
+update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)

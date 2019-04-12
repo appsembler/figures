@@ -55,7 +55,7 @@ from .serializers import (
 from figures import metrics
 from figures.pagination import FiguresLimitOffsetPagination
 import figures.permissions
-import figures.settings
+import figures.helpers
 import figures.sites
 
 
@@ -276,7 +276,7 @@ class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
         site = django.contrib.sites.shortcuts.get_current_site(request)
-        if figures.settings.is_multisite():
+        if figures.helpers.is_multisite():
             if site != figures.sites.get_site_for_course(course_key):
                 # Raising NotFound instead of PermissionDenied
                 raise NotFound()
@@ -305,7 +305,7 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
         site = django.contrib.sites.shortcuts.get_current_site(request)
-        if figures.settings.is_multisite():
+        if figures.helpers.is_multisite():
             if site != figures.sites.get_site_for_course(course_key):
                 # Raising NotFound instead of PermissionDenied
                 raise NotFound()

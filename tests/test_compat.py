@@ -18,6 +18,7 @@ entries in sys.modules. Therefore, we need to use mock.patch context manager.
 
 import mock
 import pytest
+import types
 
 
 def test_release_line_with_ficus():
@@ -43,32 +44,75 @@ def test_release_line_with_ginkgo():
         assert figures.compat.RELEASE_LINE == 'ginkgo'
 
 
+# For the ficus and ginkgo tests, we need to first remove finding the hawthorn
+# module
+
+
 def test_course_grade_factory_with_ficus():
-    '''Make sure that ``figures.compat`` returns ``CourseGradeFactory`` from the
-    Ginkgo module, ``lms.djangoapps.grades.new.course_grade_factory``
-    '''
-    ficus_key = 'lms.djangoapps.grades.new.course_grade'
-    ginkgo_key = 'lms.djangoapps.grades.new.course_grade_factory'
-    with mock.patch.dict('sys.modules', {ginkgo_key: None}):
-        module = mock.Mock()
-        setattr(module, 'CourseGradeFactory', 'hi')
-        with mock.patch.dict('sys.modules', {ficus_key: module}):
-            import figures.compat
-            reload(figures.compat)
-            assert hasattr(figures.compat, 'CourseGradeFactory')
-            assert figures.compat.CourseGradeFactory == 'hi'
+    hawthorn_key = 'lms.djangoapps.grades.course_grade_factory'
+    namespaces = ['lms.djangoapps.grades.new',
+                  'lms.djangoapps.grades.new.course_grade']
+    modules = [types.ModuleType(ns) for ns in namespaces]
+    modules[0].course_grade_factory = modules[1]
+    setattr(modules[1], 'CourseGradeFactory', 'hi')
+    with mock.patch.dict('sys.modules', {hawthorn_key: None}):
+        with mock.patch.dict('sys.modules', {namespaces[0]: modules[0]}):
+            with mock.patch.dict('sys.modules', {namespaces[1]: modules[1]}):
+                import figures.compat
+                reload(figures.compat)
+                assert figures.compat.CourseGradeFactory == 'hi'
 
 
 def test_course_grade_factory_with_ginkgo():
+    hawthorn_key = 'lms.djangoapps.grades.course_grade_factory'
+    namespaces = ['lms.djangoapps.grades.new',
+                   'lms.djangoapps.grades.new.course_grade_factory']
+    modules = [types.ModuleType(ns) for ns in namespaces]
+    modules[0].course_grade_factory = modules[1]
+    setattr(modules[1], 'CourseGradeFactory', 'hi')
+    with mock.patch.dict('sys.modules', {hawthorn_key: None}):
+        with mock.patch.dict('sys.modules', {namespaces[0]: modules[0]}):
+            with mock.patch.dict('sys.modules', {namespaces[1]: modules[1]}):
+                import figures.compat
+                reload(figures.compat)
+                assert figures.compat.CourseGradeFactory == 'hi'
+
+
+def test_course_grade_factory_with_hawthorn():
+    key = 'lms.djangoapps.grades.course_grade_factory'
     module = mock.Mock()
     setattr(module, 'CourseGradeFactory', 'hi')
-    key = 'lms.djangoapps.grades.new.course_grade_factory'
-
     with mock.patch.dict('sys.modules', {key: module}):
         import figures.compat
         reload(figures.compat)
         assert hasattr(figures.compat, 'CourseGradeFactory')
         assert figures.compat.CourseGradeFactory == 'hi'
+
+
+def test_generated_certificate_pre_hawthorn():
+    hawthorn_key = 'lms.djangoapps.certificates.models'
+    pre_haw_namespaces = ['certificates', 'certificates.models']
+    modules = [types.ModuleType(ns) for ns in pre_haw_namespaces]
+    modules[0].models = modules[1]
+    setattr(modules[1], 'GeneratedCertificate', 'hi')
+    with mock.patch.dict('sys.modules', {hawthorn_key: None}):
+        with mock.patch.dict('sys.modules', {pre_haw_namespaces[0]: modules[0]}):
+            with mock.patch.dict('sys.modules', {pre_haw_namespaces[1]: modules[1]}):
+                import figures.compat
+                reload(figures.compat)
+                assert hasattr(figures.compat, 'GeneratedCertificate')
+                assert figures.compat.GeneratedCertificate == 'hi'
+
+
+def test_generated_certificate_hawthorn():
+    hawthorn_key = 'lms.djangoapps.certificates.models'
+    module = mock.Mock()
+    setattr(module, 'GeneratedCertificate', 'hi')
+    with mock.patch.dict('sys.modules', {hawthorn_key: module}):
+        import figures.compat
+        reload(figures.compat)
+        assert hasattr(figures.compat, 'GeneratedCertificate')
+        assert figures.compat.GeneratedCertificate == 'hi'
 
 
 @pytest.mark.parametrize('chapter_grades, expected', [

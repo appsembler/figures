@@ -33,7 +33,7 @@ from tests.factories import (
     SiteFactory,
     UserFactory,
     )
-from tests.helpers import make_course_key_str
+from tests.helpers import make_course_key_str, django_filters_pre_v1
 
 # Because we are testing filtering on CourseOverview fields, we want to set
 # specific values to facilitate filtering
@@ -64,6 +64,8 @@ def make_user(**kwargs):
         id=kwargs['id'], username=kwargs['username'], profile__name=kwargs['fullname'])
 
 
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class CourseEnrollmentFilterTest(TestCase):
     def setUp(self):
@@ -94,7 +96,8 @@ class CourseEnrollmentFilterTest(TestCase):
 
         res = CourseEnrollmentFilter().filter_course_id(
             queryset=CourseEnrollment.objects.all(),
-            course_id_str=str(course_id))
+            name='course_id',
+            value=str(course_id))
         self.assertQuerysetEqual(
             res,
             [o.id for o in expected_results],
@@ -102,6 +105,8 @@ class CourseEnrollmentFilterTest(TestCase):
             ordered=False)
 
 
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class CourseOverviewFilterTest(TestCase):
     '''Tests the CourseOverviewFilter filter class
@@ -148,6 +153,8 @@ class CourseOverviewFilterTest(TestCase):
             ordered=False)
 
 
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class CourseDailyMetricsFilterTest(TestCase):
     '''Tests the CourseDailyMetricsFilter filter class
@@ -177,6 +184,8 @@ class CourseDailyMetricsFilterTest(TestCase):
         pass
 
 
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class SiteDailyMetricsFilterTest(TestCase):
     '''Tests the SiteDailyMetricsFilter filter class
@@ -202,6 +211,8 @@ class SiteDailyMetricsFilterTest(TestCase):
             lambda o: o.id, ordered=False)
 
 
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class SiteFilterSetTest(TestCase):
     """Provides minimal testing for each of the individual filter terms
@@ -250,6 +261,8 @@ class SiteFilterSetTest(TestCase):
             lambda o: o.id, ordered=False)
 
 
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
 @pytest.mark.django_db
 class UserFilterSetTest(TestCase):
     '''Tests the UserFilterSet filter class
@@ -276,7 +289,8 @@ class UserFilterSetTest(TestCase):
     def test_filter_user_ids(self):
         res = UserFilterSet().filter_user_ids(
             queryset=self.User.objects.all(),
-            user_ids_str='{},{}'.format(self.users[0].id, self.users[1].id))
+            name='user_ids',
+            value='{},{}'.format(self.users[0].id, self.users[1].id))
 
         self.assertQuerysetEqual(
             res,
@@ -286,7 +300,8 @@ class UserFilterSetTest(TestCase):
     def test_filter_enrolled_in_course_id(self):
         res = UserFilterSet().filter_enrolled_in_course_id(
             queryset=self.User.objects.all(),
-            course_id_str=unicode(self.course_overview.id))
+            name='course_id',
+            value=unicode(self.course_overview.id))
 
         self.assertQuerysetEqual(
             res,

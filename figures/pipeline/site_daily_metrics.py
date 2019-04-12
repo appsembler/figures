@@ -27,6 +27,8 @@ def missing_course_daily_metrics(site, date_for):
     CourseDailyMetrics for the given date (and site after we implement multi-
     tenancy)
 
+    The type returned is CourseLocator
+
     We use this to make sure that we are not missing course data when we
     populat the SiteDailyMetrics instance for the given date
 
@@ -153,7 +155,8 @@ class SiteDailyMetricsLoader(object):
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
             )
-
+        else:
+            date_for = as_datetime(date_for).replace(tzinfo=utc)
         # if we already have a record for the date_for and force_update is False
         # then skip getting data
         if not force_update:

@@ -6,7 +6,11 @@ Settings file to run automated tests
 from __future__ import absolute_import, unicode_literals
 
 from os.path import abspath, dirname, join
-from path import Path 
+
+from figures.settings.lms_production import (
+    update_celerybeat_schedule,
+    update_webpack_loader,
+)
 
 
 def root(*args):
@@ -31,7 +35,7 @@ DATABASES = {
 }
 
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sites',
@@ -48,9 +52,38 @@ INSTALLED_APPS = (
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'student',
-    'certificates',
     'organizations',
-)
+]
+
+
+# certificates app
+
+# edx-platform uses the app config
+# 'lms.djangoapps.certificates.apps.CertificatesConfig'
+# Our mock uses the package path
+# TO emulate pre-hawthorn
+#  INSTALLED_APPS += ('certificates')
+
+INSTALLED_APPS.append('lms.djangoapps.certificates')
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            join('devsite', 'devsite', 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
 
 LOCALE_PATHS = [
     root('figures', 'conf', 'locale'),
@@ -75,6 +108,7 @@ REST_FRAMEWORK = {
 # It expects them from the project's settings (django.conf.settings)
 WEBPACK_LOADER = {}
 CELERYBEAT_SCHEDULE = {}
+FEATURES = {}
 
 # Declare values we need from server vars (e.g. lms.env.json)
 ENV_TOKENS = {
@@ -84,11 +118,5 @@ ENV_TOKENS = {
 }
 
 
-# Enable Figures if it is included
-# This should be the same code as used in the LMS settings
-if 'figures' in INSTALLED_APPS:
-    import figures
-    figures.update_settings(
-        WEBPACK_LOADER,
-        CELERYBEAT_SCHEDULE,
-        ENV_TOKENS.get('FIGURES', {}))
+update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
+update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
