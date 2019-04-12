@@ -52,6 +52,3 @@ def chapter_grade_values(chapter_grades):
         # TODO: improve clarity, add a message
         # This may be what
         raise TypeError
-
-
-# def django_filter
