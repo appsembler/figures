@@ -1,11 +1,26 @@
 Release History
 ===============
 
+## 0.3.0 Releases
+
+### 0.3.0-prerelease
+
+* Adds Hawthorn support to Figures
+* Uses the new edx-platform plugin capability
+* Standalone developer mode with mock data generation
+* Test coverage improvements
+* Bug fixes
+
+## 0.1 and 0.2 Releases
+
+* 0.1 (0.1.x/ficus-ginkgo branch) - Initial pip installable to run on Ginkgo
+* 0.2 (0.2.x/ficus-ginkgo-multisite) - Adds multisite support, bug fixes
+
 ## 0.2 Releases
 
-### 0.2.0 - In initial production release candidate testing
+### 0.2.0 - Initial production release
 
-Latest: 0.2.0rc4
+Latest: 0.2.0rc6
 
 * Adds multisite support
 * Admin interface improvements: Added filtering for sites, course_ids, and users
