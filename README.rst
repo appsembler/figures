@@ -27,7 +27,6 @@ Figures on PyPI
 
 Figures is avaible on `PyPI <https://pypi.org/project/figures/>`__
 
-* 0.3.0-prerelease is the community release for Hawthorn
 * 0.1.6 is the community release for Ficus and Ginkgo
 
 
