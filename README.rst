@@ -22,6 +22,27 @@ Notice and Development Status
 * Includes a standalone development mode. See the `developer quickstart guide <./DEVELOPER-QUICKSTART.md/>`__
 
 
+Run the following to install Figures 0.3.0 prerelease for evaluation:
+
+::
+
+	pip install https://github.com/appsembler/figures/archive/0.3.0-prerelease.zip
+
+For installing for development, such as with docker devstack:
+
+Navigate to the workspace directory (``./src/`` if installing in devstack)
+
+::
+
+	git clone -b develop https://github.com/appsembler/figures.git
+
+For Hawthorn docker devstack, shell to the lms and run:
+
+::
+
+	cd /edx/src/figures
+	pip install -e .
+
 Figures on PyPI
 ===============
 

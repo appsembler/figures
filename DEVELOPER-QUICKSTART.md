@@ -29,7 +29,7 @@ On your development machine, open a terminal (command line shell) and create or 
 In the terminal, run the following:
 
 ```
-git clone -b hawthorn-upgrade https://github.com/appsembler/figures.git
+git clone -b develop https://github.com/appsembler/figures.git
 cd figures
 pip install -r devsite/requirements/hawthorn.txt
 ```
@@ -49,7 +49,17 @@ Run the following:
 ```
 cd devsite
 ./manage.py migrate
+```
+
+Next, create a superuser. We'll use this account to log into the development site
+
+```
 ./manage.py createsuperuser
+```
+
+Last step before starting the dev server is to fill our environment with some mock data
+
+```
 ./manage.py seed_data
 ```
 

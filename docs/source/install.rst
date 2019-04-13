@@ -1,5 +1,9 @@
 .. _install:
 
+
+**NOTICE:** These instructions are for Ficus and Ginkgo and need to be updated for Hawthorn
+
+
 ==================
 Installing Figures
 ==================
@@ -22,11 +26,17 @@ Once you know that you've got your base Open edX environment working and you are
 Requirements
 ------------
 
-* Python (2.7)
-* Django (1.8)
-* Open edX (Ginkgo)
+For all Open edX releases:
 
-Currently, Figures runs on Open edX Ginkgo. A backport to Ficus is in progress and we'll support Hawthorn soon.
+* Python (2.7)
+
+For Hawthorn:
+
+* Django (1.11)
+
+For Ficus and Ginkgo:
+
+* Django (1.8)
 
 --------
 Devstack

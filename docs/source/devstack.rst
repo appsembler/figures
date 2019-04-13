@@ -1,7 +1,7 @@
 .. _devstack:
 
 
-**NOTICE:** The contents of this doc is a cut/paste from the main repo ``README`` file. It needs review and update for accuracy and clarity.
+**NOTICE:** These instructions are for Ficus and Ginkgo devstacks running Vagrant and need to be updated for Hawthorn docker devstack
 
 
 ===================
