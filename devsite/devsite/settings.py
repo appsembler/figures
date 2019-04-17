@@ -169,6 +169,8 @@ WEBPACK_LOADER = {}
 CELERYBEAT_SCHEDULE = {}
 FEATURES = {}
 
+FEATURES = {}
+
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
