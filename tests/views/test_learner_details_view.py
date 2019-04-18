@@ -29,6 +29,7 @@ Front end expects data to be returned in the following form:
 
 '''
 
+import mock
 import pytest
 
 from django.contrib.auth import get_user_model
@@ -44,15 +45,24 @@ from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key
 from figures.serializers import LearnerCourseDetailsSerializer
+from figures.sites import get_course_enrollments_for_site
 from figures.views import LearnerDetailsViewSet
+import figures.settings
 
 from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,
+    OrganizationFactory,
+    OrganizationCourseFactory,
     UserFactory,
     )
 
 from tests.views.base import BaseViewTest
+from tests.helpers import organizations_support_sites
+
+if organizations_support_sites():
+    from tests.factories import UserOrganizationMappingFactory
+
 
 USER_DATA = [
     {'id': 101, 'username': u'alpha', 'fullname': u'Alpha One',
@@ -107,6 +117,12 @@ def make_course_enrollments_for_user(user, courses, **kwargs):
     return course_enrollments
 
 
+def get_course_rec(course_id, course_list):
+    recs = [rec for rec in course_list if rec['course_id'] == str(course_id)]
+    assert len(recs) == 1
+    return recs[0]
+
+
 @pytest.mark.django_db
 class TestLearnerDetailsViewSet(BaseViewTest):
     '''Tests the UserIndexView view class
@@ -115,7 +131,7 @@ class TestLearnerDetailsViewSet(BaseViewTest):
     request_path = 'api/users/detail/'
     view_class = LearnerDetailsViewSet
     @pytest.fixture(autouse=True)
-    def setup(self, db):
+    def setup(self, db, settings):
         super(TestLearnerDetailsViewSet, self).setup(db)
         self.users = [make_user(**data) for data in USER_DATA]
         self.usernames = [data['username'] for data in USER_DATA]
@@ -131,15 +147,6 @@ class TestLearnerDetailsViewSet(BaseViewTest):
             'language_proficiencies', 'profile_image',
         ]
 
-    # def get_expected_results(self, **filter_args):
-    #     '''returns a list of dicts of the filtered user data
-
-    #     '''
-    #     return list(
-    #         get_user_model().objects.filter(**filter_args).annotate(
-    #             fullname=F('profile__name'), country=F('profile__country')
-    #             ).values(*self.expected_result_keys))
-
     def test_serializer(self):
         '''
         This test makes sure the serializer works with the test data provided
@@ -147,54 +154,68 @@ class TestLearnerDetailsViewSet(BaseViewTest):
         '''
 
         # Spot test with the first CourseEnrollment for the first user
-        queryset = CourseEnrollment.objects.filter(user=self.users[0])
+        enrollments = get_course_enrollments_for_site(self.site)
+        queryset = enrollments.filter(user=self.users[0])
         serializer = LearnerCourseDetailsSerializer(queryset[0])
         assert serializer.data
 
-    def test_get_learner_details_list(self):
-        '''Tests retrieving a list of users with abbreviated details
+    def test_get_learner_details_retrieve(self):
+        user = self.users[0]
+
+        expected_enrollments = CourseEnrollment.objects.filter(user=user)
+        request_path = self.request_path + '{}/'.format(user.id)
+        request = APIRequestFactory().get(request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get': 'retrieve'})
+        response = view(request, pk=user.id)
+        assert len(response.data['courses']) == expected_enrollments.count()
+        # TODO: check each
+
+    @pytest.mark.skipif(not organizations_support_sites(),
+                        reason='Organizations support sites')
+    def test_get_learner_details_list_multisite(self):
+        """Tests retrieving a list of users with abbreviated details
 
         The fields in each returned record are identified by
             `figures.serializers.UserIndexSerializer`
 
-        '''
-        def get_course_rec(course_id, course_list):
-            recs = [rec for rec in course_list if rec['course_id'] == str(course_id)]
-            assert len(recs) == 1
-            return recs[0]
+        """
+        env_tokens = {'FIGURES_IS_MULTISITE': True}
+        with mock.patch('figures.helpers.settings.FEATURES', env_tokens):
+            is_multisite = figures.helpers.is_multisite()
+            assert is_multisite
+            self.organization = OrganizationFactory(sites=[self.site])
+            for co in self.course_overviews:
+                OrganizationCourseFactory(organization=self.organization,
+                                          course_id=str(co.id))
 
-        request = APIRequestFactory().get(self.request_path)
-        force_authenticate(request, user=self.staff_user)
-        view = self.view_class.as_view({'get': 'list'})
-        response = view(request)
+            for user in self.users:
+                UserOrganizationMappingFactory(user=user,
+                                               organization=self.organization)
 
-        # Later, we'll elaborate on the tests. For now, some basic checks
-        assert response.status_code == 200
-        assert len(response.data) == len(self.users)
+            request = APIRequestFactory().get(self.request_path)
+            force_authenticate(request, user=self.staff_user)
+            view = self.view_class.as_view({'get': 'list'})
+            response = view(request)
 
-        User = get_user_model()
-        qs = User.objects.filter(username__in=self.usernames)
-        assert len(self.users) == qs.count()
+            # Later, we'll elaborate on the tests. For now, some basic checks
+            assert response.status_code == 200
+            assert set(response.data.keys()) == set(
+                ['count', 'next', 'previous', 'results'])
 
-        # Expect the following format for pagination
-        # {
-        #     "count": 2,
-        #     "next": null, # or a url
-        #     "previous": null, # or a url
-        #     "results": [
-        #     ...           # list of the results
-        #     ]
-        # }
-        assert set(response.data.keys()) == set(
-            ['count', 'next', 'previous', 'results',])
+            results = response.data['results']
+            assert len(results) == len(self.users)
+            enrollments = get_course_enrollments_for_site(self.site)
+            assert enrollments.count() == len(self.course_enrollments)
 
-        for rec in response.data['results']:
-            # fail if we cannot find the user in the models
-            user_model = User.objects.get(username=rec['username'])
-
-            assert set(rec.keys()) == set(self.expected_result_keys)
-
-            # check the courses
-            for course_enrollment in CourseEnrollment.objects.filter(user=user_model):
-                # Test that the course id exists in the data
-                course_rec = get_course_rec(course_enrollment.course_id, rec['courses'])
+            for rec in results:
+                assert set(rec.keys()) == set(self.expected_result_keys)
+                assert rec['courses']
+                courses = rec['courses']
+                # fail if we cannot find the user in the models
+                user = get_user_model().objects.get(username=rec['username'])
+                user_course_enrollments = enrollments.filter(user=user)
+                # Check that each course enrollment is represented
+                assert len(rec['courses']) == user_course_enrollments.count()
+                for ce in user_course_enrollments:
+                    assert get_course_rec(ce.course_id, rec['courses'])

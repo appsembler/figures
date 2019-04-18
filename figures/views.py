@@ -349,11 +349,10 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         queryset = figures.sites.get_users_for_site(site)
         return queryset
 
-    def retrieve(self, request, pk, *args, **kwargs):
-        site = django.contrib.sites.shortcuts.get_current_site(request)
-        user = get_object_or_404(self.get_queryset(), pk=pk)
-        return Response(LearnerDetailsSerializer(
-            instance=user, context=dict(site=site)).data)
+    def get_serializer_context(self):
+        context = super(LearnerDetailsViewSet, self).get_serializer_context()
+        context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
+        return context
 
 
 class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet):
