@@ -337,3 +337,10 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         user = get_object_or_404(self.get_queryset(), pk=pk)
         return Response(LearnerDetailsSerializer(
             instance=user, context=dict(site=site)).data)
+
+    def list(self, request, *args, **kwargs):
+        site = django.contrib.sites.shortcuts.get_current_site(request)
+        page = self.paginate_queryset(self.get_queryset())
+        serializer = LearnerDetailsSerializer(
+            page, context=dict(site=site), many=True)
+        return self.get_paginated_response(serializer.data)
