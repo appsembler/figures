@@ -62,7 +62,7 @@ from tests.factories import (
     StudentModuleFactory,
     UserFactory,
     )
-from tests.helpers import organizations_support_sites
+from tests.helpers import add_user_to_site, organizations_support_sites
 
 # TODO:
 
@@ -73,19 +73,6 @@ from tests.helpers import organizations_support_sites
 DEFAULT_START_DATE = datetime.datetime(2018, 1, 1, 0, 0, tzinfo=utc)
 DEFAULT_END_DATE = datetime.datetime(2018, 3, 1, 0, 0, tzinfo=utc)
 
-
-def add_user_to_site(user, site):
-    orgs = figures.sites.get_organizations_for_site(site)
-    assert orgs.count() == 1, 'requires a single org for the site. Found {}'.format(
-        orgs.count())
-    if not organizations.models.UserOrganizationMapping.objects.filter(
-        user=user, organization=orgs.first()).exists():
-        obj, created = organizations.models.UserOrganizationMapping.objects.get_or_create(
-            user=user,
-            organization=orgs[0],
-            # defaults=dict(is_active=True, is_amc_admin=False),
-        )
-        return obj, created
 
 def add_course_to_site(course_id, site):
     orgs = figures.sites.get_organizations_for_site(site)
