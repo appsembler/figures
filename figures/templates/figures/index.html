@@ -1,3 +1,4 @@
+
 {% extends "main_django.html" %}
 
 {% block title %}
@@ -7,6 +8,7 @@
 {% load render_bundle from webpack_loader %}
 
 {% block body %}
+  <div>This is a test</div>
   <div id="view-context-values"
     data-cms-search-api-url={{ figures_api_url }}
     data-cms-search-api-url-ssl={{ figures_api_url_ssl }}
