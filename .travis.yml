@@ -21,6 +21,8 @@ script:
 
 env:
   - TOXENV=py27-openedx_ginkgo
+  - TOXENV=py27-openedx_hawthorn
+  - TOXENV=py27-appsembler_hawthorn
 
 deploy:
   provider: pypi
