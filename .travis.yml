@@ -21,6 +21,7 @@ script:
 
 env:
   - TOXENV=py27-openedx_ginkgo
+  - TOXENV=flake8
 
 deploy:
   provider: pypi
