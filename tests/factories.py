@@ -20,7 +20,7 @@ from factory.django import DjangoModelFactory
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-# from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
@@ -40,21 +40,6 @@ from tests.helpers import organizations_support_sites
 
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
-
-
-
-# class SiteConfigurationFactory(factory.DjangoModelFactory):
-#     class Meta(object):
-#         model = SiteConfiguration
-
-#     site = factory.SubFactory(SiteFactory)
-#     enabled = True
-#     values = {
-#         'PLATFORM_NAME': factory.SelfAttribute('site.name'),
-#         'SITE_NAME': factory.SelfAttribute('site.domain'),
-#     }
-#     sass_variables = {}
-#     page_elements = {}
 
 
 class SiteFactory(DjangoModelFactory):
@@ -156,7 +141,7 @@ if organizations_support_sites():
         is_amc_admin = False
 
 
-class CourseOverviewFactory(DjangoModelFactory):
+class CourseOverviewFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseOverview
 
@@ -165,17 +150,17 @@ class CourseOverviewFactory(DjangoModelFactory):
         COURSE_ID_STR_TEMPLATE.format(n)))
     display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
     org = 'StarFleetAcademy'
-    number = '2161'
+    version = CourseOverview.VERSION
     display_org_with_default = factory.LazyAttribute(lambda o: o.org)
-    created = fuzzy.FuzzyDateTime(datetime.datetime(
+    created = factory.fuzzy.FuzzyDateTime(datetime.datetime(
         2018, 2, 1, tzinfo=factory.compat.UTC))
-    enrollment_start = fuzzy.FuzzyDateTime(datetime.datetime(
+    enrollment_start = factory.fuzzy.FuzzyDateTime(datetime.datetime(
         2018, 3, 1, tzinfo=factory.compat.UTC))
-    enrollment_end = fuzzy.FuzzyDateTime(datetime.datetime(
+    enrollment_end = factory.fuzzy.FuzzyDateTime(datetime.datetime(
         2018, 3, 15, tzinfo=factory.compat.UTC))
-    start = fuzzy.FuzzyDateTime(datetime.datetime(
+    start = factory.fuzzy.FuzzyDateTime(datetime.datetime(
         2018, 4, 1, tzinfo=factory.compat.UTC))
-    end = fuzzy.FuzzyDateTime(datetime.datetime(
+    end = factory.fuzzy.FuzzyDateTime(datetime.datetime(
         2018, 6, 1, tzinfo=factory.compat.UTC))
     self_paced = False
 
@@ -220,16 +205,42 @@ class StudentModuleFactory(DjangoModelFactory):
 
 
 class CourseEnrollmentFactory(DjangoModelFactory):
-    class Meta:
+    class Meta(object):
         model = CourseEnrollment
 
-    user = factory.SubFactory(
-        UserFactory,
-    )
-    course_id = factory.SelfAttribute('course_overview.id')
-    course_overview = factory.SubFactory(CourseOverviewFactory)
+    user = factory.SubFactory(UserFactory)
+
     created = factory.Sequence(lambda n:
         (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
+
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        manager = cls._get_manager(model_class)
+        course_kwargs = {}
+        for key in kwargs.keys():
+            if key.startswith('course__'):
+                course_kwargs[key.split('__')[1]] = kwargs.pop(key)
+
+        if 'course' not in kwargs:
+            course_id = kwargs.get('course_id')
+            course_overview = None
+            if course_id is not None:
+                if isinstance(course_id, basestring):
+                    course_id = CourseKey.from_string(course_id)
+                    course_kwargs.setdefault('id', course_id)
+
+                try:
+                    course_overview = CourseOverview.get_from_id(course_id)
+                except CourseOverview.DoesNotExist:
+                    pass
+
+            if course_overview is None:
+                course_overview = CourseOverviewFactory(**course_kwargs)
+            kwargs['course'] = course_overview
+
+        return manager.create(*args, **kwargs)
+
 
 class CourseAccessRoleFactory(DjangoModelFactory):
     class Meta:
@@ -286,4 +297,3 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)
     total_enrollment_count = factory.Sequence(lambda n: n)
-    #site = factory.RelatedFactory(SiteFactory, 'site')
