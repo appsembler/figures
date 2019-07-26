@@ -99,23 +99,54 @@ class CourseEnrollment(models.Model):
     * If the learner is active
     '''
 
-    user = models.ForeignKey(User)
-    course_id = CourseKeyField(max_length=255, db_index=True)
-    created = models.DateTimeField(null=True)
+    MODEL_TAGS = ['course', 'is_active', 'mode']
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    course = models.ForeignKey(
+        CourseOverview,
+        db_constraint=False,
+        on_delete=models.DO_NOTHING,
+    )
+
+    @property
+    def course_id(self):
+        return self._course_id
+
+    @course_id.setter
+    def course_id(self, value):
+        if isinstance(value, basestring):
+            self._course_id = CourseKey.from_string(value)
+        else:
+            self._course_id = value
+
+    created = models.DateTimeField(auto_now_add=True, null=True, db_index=True)
 
     # If is_active is False, then the student is not considered to be enrolled
     # in the course (is_enrolled() will return False)
     is_active = models.BooleanField(default=True)
 
+    # Represents the modes that are possible. We'll update this later with a
+    # list of possible values.
     mode = models.CharField(default=CourseMode.DEFAULT_MODE_SLUG, max_length=100)
 
     objects = CourseEnrollmentManager()
 
-    class Meta(object):
-        unique_together = (('user', 'course_id'),)
-        ordering = ('user', 'course_id')
+    # # cache key format e.g enrollment.<username>.<course_key>.mode = 'honor'
+    # COURSE_ENROLLMENT_CACHE_KEY = u"enrollment.{}.{}.mode"  # TODO Can this be removed?  It doesn't seem to be used.
 
-    course_overview = models.ForeignKey(CourseOverview)
+    # MODE_CACHE_NAMESPACE = u'CourseEnrollment.mode_and_active'
+
+    class Meta(object):
+        unique_together = (('user', 'course'),)
+        ordering = ('user', 'course')
+
+    def __init__(self, *args, **kwargs):
+        super(CourseEnrollment, self).__init__(*args, **kwargs)
+
+        # Private variable for storing course_overview to minimize calls to the database.
+        # When the property .course_overview is accessed for the first time, this variable will be set.
+        self._course_overview = None
 
 
 class CourseAccessRole(models.Model):
