@@ -2,7 +2,7 @@
 # Work in progress makefile to simplify Figures development
 #
 
-.PHONY: help clean_tests clean_webpack_buld clean_python_build build_python lint pip_install test twine_check twine_push_test
+.PHONY: help clean_tests clean_webpack_buld clean_python_build build_python lint pip_install test twine_check twine_push_test delete_mock_migrations reset_mock_migrations
 
 help:
 	@echo "Targets:"
@@ -14,9 +14,11 @@ help:
 	@echo " - lint"
 	@echo " - pip_install"
 	@echo " - test"
-	@echo " -twine_check"
-	@echo " -twine_push_test"
-	@echo " -twine_push_prod"
+	@echo " - twine_check"
+	@echo " - twine_push_test"
+	@echo " - twine_push_prod"
+	@echo " - delete_mock_migrations"
+	@echo " - update_mock_migrations"
 
 clean_python:
 	find tests -type f -name "*.pyc" -exec rm -f {} \;
@@ -61,12 +63,20 @@ twine_push_test:
 twine_push_prod:
 	twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
 
-reset_mock_migrations:
-	# Run this command if you want to regenerate all the model supporting mocks
-	# TODO: delete existing migrations and the devsite sqlite database
+delete_mock_migrations:
+	# Run this if you need to delete existing tests mock migrations
+	# You might need to do this to address migration dependency issues
+	find tests/mocks -type f -path "*/migrations/0001_initial.py" -print -exec rm -f {} \;
 
-	cd devsite
-	./manage.py makemigrations certificates
-	./manage.py makemigrations courseware
-	./manage.py makemigrations course_overviews
+update_mock_migrations:
+	# Run this command if you want to update mock migrations
+	# You likely need to do this if you change model fields in the mocks
+	# NOTE: Apps are explicity identified in this make target
+	# Only apps with models need to be included
+	# If you get an error running this, then try deleting existing mock migrations first
+	cd devsite && \
+	./manage.py makemigrations certificates && \
+	./manage.py makemigrations courseware && \
+	./manage.py makemigrations course_overviews && \
 	./manage.py makemigrations student
+
