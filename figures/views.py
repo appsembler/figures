@@ -30,7 +30,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 )
 from student.models import CourseEnrollment
 
-from .filters import (
+from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
@@ -38,14 +38,13 @@ from .filters import (
     SiteFilterSet,
     UserFilterSet,
 )
-from .models import CourseDailyMetrics, SiteDailyMetrics
-from .serializers import (
+from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.serializers import (
     CourseDailyMetricsSerializer,
     CourseDetailsSerializer,
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
-
     LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
     SiteSerializer,

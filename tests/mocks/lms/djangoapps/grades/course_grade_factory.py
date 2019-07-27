@@ -1,6 +1,6 @@
 
 
-from .course_grade import CourseGrade
+from lms.djangoapps.grades.course_grade import CourseGrade
 
 
 class MockCourseData(object):

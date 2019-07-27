@@ -7,7 +7,7 @@ from random import randint, random
 
 from figures.helpers import days_from, prev_day
 
-from .course_overviews import COURSE_OVERVIEW_DATA
+from devsite.cans.course_overviews import COURSE_OVERVIEW_DATA
 
 
 def gen_avg_progress(prev_days_value):
