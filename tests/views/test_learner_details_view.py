@@ -272,7 +272,6 @@ class TestLearnerDetailsViewSetMultisite(BaseViewTest):
                                     user=self.my_site_users[1]),
         ]
 
-        # TODO: 
         self.caller = UserFactory()
         UserOrganizationMappingFactory(user=self.caller,
                                        organization=self.my_site_org,
