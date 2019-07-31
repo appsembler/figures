@@ -67,6 +67,7 @@ def seed_course_overviews(data=None):
                 created=as_datetime(rec['created']).replace(tzinfo=utc),
                 enrollment_start=as_datetime(rec['enrollment_start']).replace(tzinfo=utc),
                 enrollment_end=as_datetime(rec['enrollment_end']).replace(tzinfo=utc),
+                version=CourseOverview.VERSION,
             )
         )
 
@@ -119,8 +120,7 @@ def seed_course_enrollments_for_course(course_id, users, max_days_back):
         if VERBOSE:
             print('seeding course enrollment for user {}'.format(user.username))
         CourseEnrollment.objects.update_or_create(
-            course_id=as_course_key(course_id),
-            course_overview=CourseOverview.objects.get(id=course_id),
+            course=CourseOverview.objects.get(id=course_id),
             user=user,
             created=as_datetime(enroll_date(max_days_back)).replace(tzinfo=utc),
             )

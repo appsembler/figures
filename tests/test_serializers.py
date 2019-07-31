@@ -146,7 +146,7 @@ class TestCourseEnrollmentSerializer(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.model =  CourseEnrollment
-        self.special_fields = set(['course_id', 'created', 'user', 'course_overview' ])
+        self.special_fields = set(['course', 'created', 'user', 'course_overview' ])
         self.expected_results_keys = set([o.name for o in self.model._meta.fields])
         field_names = (o.name for o in self.model._meta.fields
             if o.name not in self.date_fields )
@@ -159,7 +159,11 @@ class TestCourseEnrollmentSerializer(object):
         CourseEnrollment model fields and relationships we need to capture.
         '''
         data = self.serializer.data
-        assert data['course_id'] == str(self.model_obj.course_id)
+
+        assert data['course']['id'] == str(self.model_obj.course.id)
+        assert data['course']['display_name'] == self.model_obj.course.display_name
+        assert data['course']['org'] == self.model_obj.course.org
+
         assert dateutil_parse(data['created']) == self.model_obj.created
         assert data['user']['fullname'] == self.model_obj.user.profile.name
 
