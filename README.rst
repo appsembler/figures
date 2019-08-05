@@ -12,21 +12,25 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 Notice and Development Status
 -----------------------------
 
-12 APR 2019 - Hawthorn Pre-release
-==================================
+05 Aug 2019 - Hawthorn Pre-release 2
+====================================
 
-**Hawthorn 0.3.0 pre-release is now available!**
+**Hawthorn 0.3.0 pre-release 2 is available**
 
 * Figures 0.3.0 supports Hawthorn
 * Uses the new plugin capability introduced in Open edX Hawthorn
 * Includes a standalone development mode. See the `developer quickstart guide <./DEVELOPER-QUICKSTART.md/>`__
 
 
-Run the following to install Figures 0.3.0 prerelease for evaluation:
+Pre-release 2 addresses Hawthorn upgrade compatibility issues not identified in Pre-release 1
+
+
+
+Run the following to install Figures 0.3.0 prerelease 2 for evaluation:
 
 ::
 
-	pip install https://github.com/appsembler/figures/archive/0.3.0-prerelease.zip
+	pip install https://github.com/appsembler/figures/archive/0.3.0-prerelease2.zip
 
 For installing for development, such as with docker devstack:
 
