@@ -27,6 +27,7 @@ from figures.serializers import (
     SerializeableCountryField,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
+    UserReportSerializer,
 )
 
 from tests.factories import (
@@ -502,3 +503,40 @@ class TestUserIndexSerializer(object):
         # This is to make sure that the serializer retrieves the correct nested
         # model (UserProfile) data
         assert data['fullname'] == 'Alpha One'
+
+
+@pytest.mark.django_db
+class TestUserReportSerializer(object):
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.expected_fields = [
+            'user_id', 'username', 'full_name', 'email', 'email_domain',
+            'country', 'is_active', 'date_registered', 'last_login',
+        ]
+
+    @pytest.mark.parametrize('last_login, country', [
+        (None, None),
+        (datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC), None),
+        (datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC), 'CA')
+        ])
+    def test_one(self, last_login, country):
+        """
+        Performs basic testing on the serializer for a single user
+        """
+        user = UserFactory(last_login=last_login, profile__country=country)
+        serializer = UserReportSerializer(instance=user)
+        data = serializer.data
+        assert set(data.keys()) == set(self.expected_fields)
+        if data['last_login']:
+            assert parse(data['last_login']) == user.last_login
+        else:
+            assert not user.last_login
+
+    def test_get_many(self):
+        """
+        Performs basic testing on the serializer for multiple users
+        """
+        users = [UserFactory() for i in xrange(0,4)]
+        serializer = UserReportSerializer(users, many=True)
+        data = serializer.data
+        assert len(data) == len(users)

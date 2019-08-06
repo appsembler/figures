@@ -731,3 +731,31 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
                             user.profile, user, None)
         else:
             return None
+
+
+# CSV report serializers
+
+
+class UserReportSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='id')
+    full_name = serializers.CharField(source='profile.name', default=None)
+    date_registered = serializers.DateTimeField(source='date_joined')
+    email_domain = serializers.SerializerMethodField()
+    country = SerializeableCountryField(
+        source='profile.country',
+        required=False, allow_blank=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = [
+            'user_id', 'username', 'full_name', 'email', 'email_domain',
+            'country', 'is_active', 'date_registered', 'last_login',
+        ]
+        read_only_fields = fields
+
+    def get_email_domain(self, obj):
+        try:
+            email_domain = obj.email.split('@')[1]
+        except Exception:
+            email_domain = ''
+        return email_domain
