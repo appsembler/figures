@@ -519,7 +519,7 @@ class TestUserReportSerializer(object):
         (datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC), None),
         (datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC), 'CA')
         ])
-    def test_one(self, last_login, country):
+    def test_get_one(self, last_login, country):
         """
         Performs basic testing on the serializer for a single user
         """
