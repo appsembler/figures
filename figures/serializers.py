@@ -562,9 +562,9 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
             }
     """
 
-    course_name = serializers.CharField(source='course_overview.display_name')
-    course_code = serializers.CharField(source='course_overview.number')
-    course_id = serializers.CharField(source='course_overview.id')
+    course_name = serializers.CharField(source='course.display_name')
+    course_code = serializers.CharField(source='course.number')
+    course_id = serializers.CharField(source='course.id')
     date_enrolled = serializers.DateTimeField(source='created', format="%Y-%m-%d")
     progress_data = serializers.SerializerMethodField()
     enrollment_id = serializers.IntegerField(source='id')

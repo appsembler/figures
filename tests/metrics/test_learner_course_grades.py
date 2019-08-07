@@ -26,12 +26,11 @@ from lms.djangoapps.grades.course_grade import (
 @pytest.mark.django_db
 class TestLearnerCourseGrades(object):
 
-
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.course_enrollment = CourseEnrollmentFactory()
-        self.lcg = LearnerCourseGrades(
-            self.user.id, self.course_overview.id)
+        self.lcg = LearnerCourseGrades(self.course_enrollment.user.id,
+                                       self.course_enrollment.course.id)
 
         # set up our sections
         # This is a quick job. We can do it cleaner
@@ -59,19 +58,10 @@ class TestLearnerCourseGrades(object):
                     )
             )
 
-    @property
-    def user(self):
-        return self.course_enrollment.user
-
-    @property
-    def course_overview(self):
-        return self.course_enrollment.course_overview
-
     def test_str_rep(self):
         '''Test the string representation, __str__
         '''
         assert self.lcg.__str__()
-
 
     def test_chapter_grades(self):
         '''Tests the 'chapter_grades' property
@@ -125,7 +115,6 @@ class TestLearnerCourseGrades(object):
         section = MockSubsectionGrade(
             tw_earned=tw_earned, tw_possible=tw_possible)
         assert self.lcg.is_section_graded(section) == check
-
 
     #
     # The following two tests test retrieving sections from chapter grades

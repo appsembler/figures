@@ -29,6 +29,9 @@ from django.db import models
 
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 
+from figures.helpers import as_course_key
+
+
 class CourseOverview(models.Model):
     '''
     Provides a mock model for the edx-platform 'CourseOverview' model
@@ -44,6 +47,16 @@ class CourseOverview(models.Model):
     # Faking id, picking arbitrary length
     # Actual field is of type opaque_keys.edx.keys.CourseKey
     #id = models.CharField(db_index=True, primary_key=True, max_length=255)
+
+    class Meta(object):
+        app_label = 'course_overviews'
+
+    # IMPORTANT: Bump this whenever you modify this model and/or add a migration.
+    VERSION = 6
+
+    # Cache entry versioning.
+    version = models.IntegerField()
+
     id = CourseKeyField(db_index=True, primary_key=True, max_length=255)
     display_name = models.TextField(null=True)
     org = models.TextField(max_length=255, default='outdated_entry')
@@ -69,3 +82,7 @@ class CourseOverview(models.Model):
     @property
     def display_order_with_default(self):
         return self.org
+
+    @classmethod
+    def get_from_id(cls, course_id):
+        return cls.objects.get(id=as_course_key(course_id))
