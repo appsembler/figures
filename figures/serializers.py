@@ -789,6 +789,13 @@ class LegacyEnrollmentReportSerializer(serializers.ModelSerializer):
 
     def get_final_score(self, obj):
         """
-        TODO: Add data per builder field "grade_data.percent" in Appsembler reporting
+        TODO: Add data per builder field "grade_data.percent" from Appsembler Reporting
+        Steps:
+        1. Submit serializers for PR
+        2. Update pipeline and make sure final score is stored in Figures models.
+           Add a field in the LearnerCourseGradeMetrics for our first iteration.
+           Post this PR
+        3. Update the serializer to retrieve the final score from Figures models.
+           Post this PR
         """
         return None
