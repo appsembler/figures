@@ -28,6 +28,7 @@ from figures.serializers import (
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
     UserReportSerializer,
+    LegacyEnrollmentReportSerializer,
 )
 
 from tests.factories import (
@@ -540,3 +541,26 @@ class TestUserReportSerializer(object):
         serializer = UserReportSerializer(users, many=True)
         data = serializer.data
         assert len(data) == len(users)
+
+
+@pytest.mark.django_db
+class TestLegacyEnrollmentReportSerializer(object):
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.expected_fields = [
+            'course_id', 'course_name', 'enrollment_id', 'user_id', 'username',
+            'full_name', 'country', 'email', 'is_active', 'last_login',
+            'date_registered', 'course_enrollment_date', 'final_score'
+        ]
+
+    def test_get_one(self):
+        enrollment = CourseEnrollmentFactory()
+        serializer = LegacyEnrollmentReportSerializer(instance=enrollment)
+        data = serializer.data
+        assert set(data.keys()) == set(self.expected_fields)
+
+    def test_get_many(self):
+        enrollments = [CourseEnrollmentFactory() for i in xrange(0, 4)]
+        serializer = LegacyEnrollmentReportSerializer(enrollments, many=True)
+        data = serializer.data
+        assert len(data) == len(enrollments)

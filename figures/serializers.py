@@ -759,3 +759,36 @@ class UserReportSerializer(serializers.ModelSerializer):
         except Exception:
             email_domain = ''
         return email_domain
+
+
+class LegacyEnrollmentReportSerializer(serializers.ModelSerializer):
+
+    enrollment_id = serializers.IntegerField(source='id')
+    course_id = serializers.CharField(source='course.id')
+    course_name = serializers.CharField(source='course.display_name')
+    user_id = serializers.IntegerField(source='user.id')
+    username = serializers.CharField(source='user.username')
+    full_name = serializers.CharField(source='user.profile.name')
+    country = SerializeableCountryField(source='user.profile.country',
+                                        required=False, allow_blank=True)
+    email = serializers.CharField(source='user.email')
+    is_active = serializers.BooleanField(source='user.is_active')
+    last_login = serializers.DateTimeField(source='user.last_login')
+    date_registered = serializers.DateTimeField(source='user.date_joined')
+    course_enrollment_date = serializers.DateTimeField(source='created')
+    final_score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseEnrollment
+        fields = [
+            'course_id', 'course_name', 'enrollment_id', 'user_id', 'username',
+            'full_name', 'country', 'email', 'is_active', 'last_login',
+            'date_registered', 'course_enrollment_date', 'final_score'
+        ]
+        read_only_fields = fields
+
+    def get_final_score(self, obj):
+        """
+        TODO: Add data per builder field "grade_data.percent" in Appsembler reporting
+        """
+        return None
