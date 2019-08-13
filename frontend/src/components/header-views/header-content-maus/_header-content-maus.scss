@@ -58,7 +58,7 @@
     }
   }
 
-  .mau-history-link {
+  .mau-history-link, .mau-history-link:not(.btn) {
     flex-shrink: 0;
     flex-grow: 0;
     text-transform: uppercase;
