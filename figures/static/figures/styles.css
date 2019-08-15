@@ -237,14 +237,14 @@
   display: flex;
   align-items: center; }
 
-a.header-nav__link__2xDOlv0N {
+a.header-nav__link__2xDOlv0N, a.header-nav__link__2xDOlv0N:not(.btn__3ubQcWhz) {
   margin-right: 3rem;
   font-size: 1.4rem;
   font-weight: 600;
   color: #fff;
   text-decoration: none;
   position: relative; }
-  a.header-nav__link__2xDOlv0N:after {
+  a.header-nav__link__2xDOlv0N:after, a.header-nav__link__2xDOlv0N:not(.btn__3ubQcWhz):after {
     position: absolute;
     bottom: -1rem;
     height: 0.2rem;
@@ -253,13 +253,13 @@ a.header-nav__link__2xDOlv0N {
     background-color: #fff;
     content: '';
     transition: all 0.2s ease-in-out; }
-  a.header-nav__link__2xDOlv0N:hover {
+  a.header-nav__link__2xDOlv0N:hover, a.header-nav__link__2xDOlv0N:not(.btn__3ubQcWhz):hover {
     color: #fff; }
-    a.header-nav__link__2xDOlv0N:hover:after {
+    a.header-nav__link__2xDOlv0N:hover:after, a.header-nav__link__2xDOlv0N:not(.btn__3ubQcWhz):hover:after {
       width: 100%; }
-  a.header-nav__link__2xDOlv0N:focus {
+  a.header-nav__link__2xDOlv0N:focus, a.header-nav__link__2xDOlv0N:not(.btn__3ubQcWhz):focus {
     color: #fff; }
-  a.header-nav__link__2xDOlv0N.active__3sw7ADBX {
+  a.header-nav__link__2xDOlv0N.active__3sw7ADBX, a.header-nav__link__2xDOlv0N:not(.btn__3ubQcWhz).active__3sw7ADBX {
     font-weight: 900;
     opacity: 0.6; }
 @charset "UTF-8";
@@ -754,7 +754,7 @@ textarea.input__2lx3TsF4, input[type="text"].input__2lx3TsF4, input[type="url"].
     margin-right: 1rem;
     font-weight: regular; }
 
-.header-content-maus__n4bSS6At .mau-history-link__16rPYXnf {
+.header-content-maus__n4bSS6At .mau-history-link__16rPYXnf, .header-content-maus__n4bSS6At .mau-history-link__16rPYXnf:not(.btn__qB9Yxie3) {
   flex-shrink: 0;
   flex-grow: 0;
   text-transform: uppercase;
@@ -766,7 +766,7 @@ textarea.input__2lx3TsF4, input[type="text"].input__2lx3TsF4, input[type="url"].
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out; }
-  .header-content-maus__n4bSS6At .mau-history-link__16rPYXnf:hover {
+  .header-content-maus__n4bSS6At .mau-history-link__16rPYXnf:hover, .header-content-maus__n4bSS6At .mau-history-link__16rPYXnf:not(.btn__qB9Yxie3):hover {
     background-color: #fff;
     color: #0090c1; }
 

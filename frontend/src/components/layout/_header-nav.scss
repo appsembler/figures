@@ -7,7 +7,7 @@
   align-items: center;
 }
 
-a.header-nav__link {
+a.header-nav__link, a.header-nav__link:not(.btn) {
   margin-right: calcRem(30);
   font-size: $base-font-size;
   font-weight: 600;
