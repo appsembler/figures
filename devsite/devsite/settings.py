@@ -58,7 +58,9 @@ INSTALLED_APPS = [
     # Also note the paths set in edx-figures/pytest.ini
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
+    'openedx.core.djangoapps.course_groups',
     'student',
+    'organizations',
 ]
 
 # certificates app
@@ -69,7 +71,6 @@ INSTALLED_APPS = [
 # TO emulate pre-hawthorn
 #   INSTALLED_APPS += ('certificates')
 INSTALLED_APPS.append('lms.djangoapps.certificates')
-
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -169,11 +170,19 @@ WEBPACK_LOADER = {}
 CELERYBEAT_SCHEDULE = {}
 FEATURES = {}
 
-FEATURES = {}
+# TODO: Make conditional
+INSTALLED_APPS.append('appsembler_reporting')
+FEATURES.update({
+    'FIGURES_INCLUDE_SUPERUSER_FIELD_IN_USER_REPORT': True,
+})
 
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
+
+ENV_TOKENS.update({
+    'APPSEMBLER_REPORTING': {}
+    })
 
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)

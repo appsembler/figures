@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     # Also note the paths set in edx-figures/pytest.ini
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
+    'openedx.core.djangoapps.course_groups',
     'student',
     'organizations',
 ]
@@ -108,7 +109,15 @@ REST_FRAMEWORK = {
 # It expects them from the project's settings (django.conf.settings)
 WEBPACK_LOADER = {}
 CELERYBEAT_SCHEDULE = {}
+
 FEATURES = {}
+
+# TODO: Make conditional
+INSTALLED_APPS.append('appsembler_reporting')
+FEATURES.update({
+    'FIGURES_INCLUDE_SUPERUSER_FIELD_IN_USER_REPORT': True,
+})
+
 
 # Declare values we need from server vars (e.g. lms.env.json)
 ENV_TOKENS = {
@@ -116,6 +125,7 @@ ENV_TOKENS = {
         'WEBPACK_STATS_FILE': '../tests/test-webpack-stats.json',
     }
 }
+
 
 
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)

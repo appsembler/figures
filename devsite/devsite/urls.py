@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^figures/', include('figures.urls', namespace='figures')),
+    url(r'^reporting/', include('appsembler_reporting.urls', namespace='appsembler-reporting')),
 ]
