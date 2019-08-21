@@ -21,9 +21,16 @@ class UserProfile(models.Model):
     '''
     The production model is student.models.UserProfile
     '''
-    user = models.OneToOneField(User, unique=True, db_index=True, related_name='profile')
+    user = models.OneToOneField(User, unique=True, db_index=True,
+                                related_name='profile', on_delete=models.CASCADE)
     name = models.CharField(blank=True, max_length=255, db_index=True)
-    country = CountryField(blank=True, null=True)
+    meta = models.TextField(blank=True)  # JSON dictionary for future expansion
+    courseware = models.CharField(blank=True, max_length=255, default='course.xml')
+
+    # Location is no longer used, but is held here for backwards compatibility
+    # for users imported from our first class.
+    language = models.CharField(blank=True, max_length=255, db_index=True)
+    location = models.CharField(blank=True, max_length=255, db_index=True)
 
     # Optional demographic data we started capturing from Fall 2012
     this_year = datetime.now(UTC).year
@@ -61,7 +68,12 @@ class UserProfile(models.Model):
         blank=True, null=True, max_length=6, db_index=True,
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
-
+    mailing_address = models.TextField(blank=True, null=True)
+    city = models.TextField(blank=True, null=True)
+    country = CountryField(blank=True, null=True)
+    goals = models.TextField(blank=True, null=True)
+    allow_certificate = models.BooleanField(default=1)
+    bio = models.CharField(blank=True, null=True, max_length=3000, db_index=False)
     profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
 
     @property

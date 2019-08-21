@@ -21,6 +21,10 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
+from openedx.core.djangoapps.course_groups.models import (
+    CourseUserGroup,
+    CohortMembership,
+)
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
@@ -71,6 +75,7 @@ class UserFactory(DjangoModelFactory):
 
     username = factory.Sequence(lambda n: 'user{}'.format(n))
     password = factory.PostGenerationMethodCall('set_password', 'password')
+    email = factory.LazyAttribute(lambda a: '{0}@example.com'.format(a.username))
     is_active = True
     is_staff = False
     is_superuser = False
@@ -297,3 +302,30 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)
     total_enrollment_count = factory.Sequence(lambda n: n)
+
+
+class CourseUserGroupFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseUserGroup
+    name = factory.Sequence(lambda n: "CourseTeam #%s" % n)
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
+    group_type = CourseUserGroup.COHORT
+
+    @factory.post_generation
+    def users(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for user in extracted:
+                self.users.add(user)
+
+
+class CohortMembershipFactory(DjangoModelFactory):
+    class Meta:
+        model = CohortMembership
+
+    course_user_group = factory.SubFactory(CourseUserGroupFactory)
+    user = factory.SubFactory(UserFactory)
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
