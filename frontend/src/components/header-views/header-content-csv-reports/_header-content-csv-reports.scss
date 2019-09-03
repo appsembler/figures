@@ -1,0 +1,44 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/header-views/header-common';
+
+.header-content-reports-list {
+  display: flex;
+  align-items: flex-end;
+  padding: calcRem(50) 0 calcRem(30);
+
+  .title-container {
+    flex-shrink: 1;
+    flex-grow: 1;
+
+    .title-text {
+      font-weight: 900;
+      color: pick-visible-color($primary-color, #fff, $base-text-color);
+      font-size: calcRem(48);
+      line-height: 120%;
+    }
+
+    .subtitle-text {
+      font-weight: normal;
+      color: pick-visible-color($primary-color, #fff, $base-text-color);
+      font-size: calcRem(18);
+      line-height: 150%;
+      margin-top: calcRem(10);
+    }
+
+    .title-decoration {
+      display: block;
+      width: calcRem(100);
+      height: calcRem(2);
+      background-color: pick-visible-color($primary-color, #fff, $base-text-color);
+      margin: calcRem(20) 0 0;
+    }
+  }
+
+  .options-container {
+    flex-shrink: 0;
+    flex-grow: 0;
+    margin-left: auto;
+  }
+}
