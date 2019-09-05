@@ -86,6 +86,43 @@ class UserProfile(models.Model):
 
 
 class CourseEnrollmentManager(models.Manager):
+
+    def num_enrolled_in_exclude_admins(self, course_id):
+        """
+        Returns the count of active enrollments in a course excluding instructors, staff and CCX coaches.
+
+        Arguments:
+            course_id (CourseLocator): course_id to return enrollments (count).
+
+        Returns:
+            int: Count of enrollments excluding staff, instructors and CCX coaches.
+
+        """
+        # To avoid circular imports.
+        from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
+        course_locator = course_id
+
+        # This will break, but leaving for completeness until we need to remove it
+        # TODO Raise exception if we get this
+        if getattr(course_id, 'ccx', None):
+            raise Exception('CCX is not supported')
+
+        staff = CourseStaffRole(course_locator).users_with_role()
+        admins = CourseInstructorRole(course_locator).users_with_role()
+        coaches = CourseCcxCoachRole(course_locator).users_with_role()
+        # import pdb; pdb.set_trace()
+        qs = super(CourseEnrollmentManager, self).get_queryset()
+        q2 = qs.filter(course_id=course_id, is_active=1)
+        q3 = q2.exclude(user__in=staff).exclude(user__in=admins).exclude(user__in=coaches)
+        # return super(CourseEnrollmentManager, self).get_queryset().filter(
+        #     course_id=course_id,
+        #     is_active=1,
+        # ).exclude(user__in=staff).exclude(user__in=admins).exclude(user__in=coaches).count()
+        # import pdb; pdb.set_trace()
+        return q3.count()
+
+# super(CourseEnrollmentManager, self).get_queryset().filter(course_id=course_id, is_active=1)
+
     def enrollment_counts(self, course_id):
 
         query = super(CourseEnrollmentManager, self).get_queryset().filter(
