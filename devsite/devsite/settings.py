@@ -170,19 +170,51 @@ WEBPACK_LOADER = {}
 CELERYBEAT_SCHEDULE = {}
 FEATURES = {}
 
+
+# The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
+# We have an empty dict here to replicate behavior in the LMS
+ENV_TOKENS = {}
+
+
+# Enable "plugin" settings. Support Appsembler Reporting in devsite
+
+# TODO: For devsite, emulate behavior of edx-platofrm plugins:
+# https://github.com/edx/edx-platform/tree/master/openedx/core/djangoapps/plugins
+
+# Test strategy: Run settings creation in alternate sequences
+# Example: first Figures, then plugin. Then test system. Next restart with the
+# plugin then Figures. Then test system
+
 # TODO: Make conditional
 INSTALLED_APPS.append('appsembler_reporting')
 FEATURES.update({
     'FIGURES_INCLUDE_SUPERUSER_FIELD_IN_USER_REPORT': True,
 })
 
+<<<<<<< HEAD
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
 
+=======
+>>>>>>> Updated settings for testing Appsembler Reporting
 ENV_TOKENS.update({
     'APPSEMBLER_REPORTING': {}
     })
 
+
+# Update Figures settings
+
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
+
+# Hack start up tasks
+
+# from appsembler_reporting.settings.lms_production import plugins_settings
+
+# current_module = sys.modules[__name__]
+def set_appsembler_reporting()
+    from django.conf import settings
+    plugin_settings(settings)
+
+
