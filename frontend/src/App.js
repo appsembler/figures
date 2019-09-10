@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { fetchCoursesIndex, fetchUserIndex, fetchGeneralData } from 'base/redux/actions/Actions';
+import { fetchCoursesIndex, fetchUserIndex, fetchGeneralData, fetchAllCsvReportsData } from 'base/redux/actions/Actions';
 import ReactCSSTransitionReplace from 'react-css-transition-replace';
 import LoadingSpinner from 'base/containers/loading-spinner/LoadingSpinner';
 import DashboardContent from 'base/views/DashboardContent';
@@ -20,6 +20,7 @@ class App extends Component {
     this.props.fetchCoursesIndex();
     this.props.fetchUserIndex();
     this.props.fetchGeneralData();
+    this.props.fetchAllCsvReportsData();
   }
 
   render() {
@@ -62,6 +63,7 @@ const mapDispatchToProps = dispatch => ({
   fetchCoursesIndex: () => dispatch(fetchCoursesIndex()),
   fetchUserIndex: () => dispatch(fetchUserIndex()),
   fetchGeneralData: () => dispatch(fetchGeneralData()),
+  fetchAllCsvReportsData: () => dispatch(fetchAllCsvReportsData()),
 })
 
 export default connect(

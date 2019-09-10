@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import Immutable from 'immutable';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 import Select from 'react-select';
 import styles from './_csv-reports-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import HeaderContentCsvReports from 'base/components/header-views/header-content-csv-reports/HeaderContentCsvReports';
+import apiConfig from 'base/apiConfig';
 
 import classNames from 'classnames/bind';
 let cx = classNames.bind(styles);
@@ -40,31 +42,31 @@ const monthNames = {
 const UserReports = [
   {
     report_name: 'User Report',
-    generated_at: '2018-01-23T01:23:45.123456Z',
+    report_timestamp: '2018-01-23T01:23:45.123456Z',
     report_url: '#',
     report_type: 'User Report'
   },
   {
     report_name: 'User Report',
-    generated_at: '2018-02-22T01:23:45.123456Z',
+    report_timestamp: '2018-02-22T01:23:45.123456Z',
     report_url: '#',
     report_type: 'User Report'
   },
   {
     report_name: 'User Report',
-    generated_at: '2018-02-21T01:23:45.123456Z',
+    report_timestamp: '2018-02-21T01:23:45.123456Z',
     report_url: '#',
     report_type: 'User Report'
   },
   {
     report_name: 'User Report',
-    generated_at: '2019-02-22T01:23:45.123456Z',
+    report_timestamp: '2019-02-22T01:23:45.123456Z',
     report_url: '#',
     report_type: 'User Report'
   },
   {
     report_name: 'User Report',
-    generated_at: '2019-02-21T01:23:45.123456Z',
+    report_timestamp: '2019-02-21T01:23:45.123456Z',
     report_url: '#',
     report_type: 'User Report'
   }
@@ -73,31 +75,31 @@ const UserReports = [
 const GradeReports = [
   {
     report_name: 'Grade Report',
-    generated_at: '2018-01-23T01:23:45.123456Z',
+    report_timestamp: '2018-01-23T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Grade Report'
   },
   {
     report_name: 'Grade Report',
-    generated_at: '2018-02-22T01:23:45.123456Z',
+    report_timestamp: '2018-02-22T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Grade Report'
   },
   {
     report_name: 'Users Report',
-    generated_at: '2018-02-21T01:23:45.123456Z',
+    report_timestamp: '2018-02-21T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Grade Report'
   },
   {
     report_name: 'Grade Report',
-    generated_at: '2019-02-22T01:23:45.123456Z',
+    report_timestamp: '2019-02-22T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Grade Report'
   },
   {
     report_name: 'Users Report',
-    generated_at: '2019-02-21T01:23:45.123456Z',
+    report_timestamp: '2019-02-21T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Grade Report'
   }
@@ -106,31 +108,31 @@ const GradeReports = [
 const CourseMetricsReports = [
   {
     report_name: 'Course Metrics Report',
-    generated_at: '2018-01-23T01:23:45.123456Z',
+    report_timestamp: '2018-01-23T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Course Metrics Report'
   },
   {
     report_name: 'Course Metrics Report',
-    generated_at: '2018-02-22T01:23:45.123456Z',
+    report_timestamp: '2018-02-22T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Course Metrics Report'
   },
   {
     report_name: 'Course Metrics Report',
-    generated_at: '2018-02-21T01:23:45.123456Z',
+    report_timestamp: '2018-02-21T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Course Metrics Report'
   },
   {
     report_name: 'Course Metrics Report',
-    generated_at: '2019-02-22T01:23:45.123456Z',
+    report_timestamp: '2019-02-22T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Course Metrics Report'
   },
   {
     report_name: 'Course Metrics Report',
-    generated_at: '2019-02-21T01:23:45.123456Z',
+    report_timestamp: '2019-02-21T01:23:45.123456Z',
     report_url: '#',
     report_type: 'Course Metrics Report'
   }
@@ -143,9 +145,9 @@ class CsvReports extends Component {
 
     this.state = {
       fetchedAutoReports: Immutable.fromJS({
-        'user-reports': [],
-        'grade-reports': [],
-        'course-metrics-reports': []
+        'user-reports': this.props.csvReportsData['csvUserReports'],
+        'grade-reports': this.props.csvReportsData['csvGradeReports'],
+        'course-metrics-reports': this.props.csvReportsData['csvCourseMetrics']
       }),
       displayedAutoReports: Immutable.fromJS([]),
       filterOptions: Immutable.fromJS({
@@ -156,6 +158,8 @@ class CsvReports extends Component {
       autoReportsYearFilter: 0,
       selectedAutoReports: 'user-reports',
     };
+
+    console.log('View state:', this.state);
 
     this.initialReportsFetch = this.initialReportsFetch.bind(this);
     this.setDisplayedAutoReports = this.setDisplayedAutoReports.bind(this);
@@ -183,7 +187,7 @@ class CsvReports extends Component {
     const tempReports = this.state.fetchedAutoReports.get(this.state.selectedAutoReports);
     let filteredReports = Immutable.fromJS([]);
     tempReports.forEach((report, index) => {
-      const generatedDate = new Date(report.get('generated_at'));
+      const generatedDate = new Date(report.get('report_timestamp'));
       if ((this.state.autoReportsYearFilter !== 0) && (generatedDate.getFullYear() !== this.state.autoReportsYearFilter)) {
         return
       }
@@ -202,7 +206,7 @@ class CsvReports extends Component {
     let filterMonths = Immutable.fromJS([]);
     // go through reports and find all the unique months and years of reports
     this.state.fetchedAutoReports.get('user-reports').forEach((report, index) => {
-      const generatedDate = new Date(report.get('generated_at'));
+      const generatedDate = new Date(report.get('report_timestamp'));
       if (!filterYears.includes(generatedDate.getFullYear())) {
         filterYears = filterYears.push(generatedDate.getFullYear());
       };
@@ -256,6 +260,8 @@ class CsvReports extends Component {
 
   render() {
 
+    console.log('Redux state:', this.props.csvReportsData);
+
     const displayedAutoReportsRender = this.state.displayedAutoReports.map((report, index) => {
       return (
         <li key={index} className={styles['report']}>
@@ -268,7 +274,7 @@ class CsvReports extends Component {
             </Link>
           </div>
           <div className={styles['report-timestamp']}>
-            {parseReportDate(report.get('generated_at'))}
+            {parseReportDate(report.get('report_timestamp'))}
           </div>
           <div className={styles['report-buttons']}>
             <Link
@@ -358,4 +364,14 @@ class CsvReports extends Component {
   }
 }
 
-export default CsvReports;
+const mapStateToProps = (state, ownProps) => ({
+  csvReportsData: state.csvReportsIndex,
+})
+
+const mapDispatchToProps = dispatch => ({
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(CsvReports);
