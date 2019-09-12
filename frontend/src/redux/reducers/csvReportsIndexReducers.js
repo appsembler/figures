@@ -13,17 +13,17 @@ const cxvReportsIndex = (state = initialState, action) => {
     case LOAD_CSV_USER_REPORTS_DATA:
       return Object.assign({}, state, {
         receivedAt: action.receivedAt,
-        csvUserReports: Immutable.List(action.fetchedData)
+        csvUserReports: Immutable.fromJS(action.fetchedData)
       })
     case LOAD_CSV_GRADE_REPORTS_DATA:
       return Object.assign({}, state, {
         receivedAt: action.receivedAt,
-        csvGradeReports: Immutable.List(action.fetchedData)
+        csvGradeReports: Immutable.fromJS(action.fetchedData)
       })
     case LOAD_CSV_COURSE_METRICS_REPORTS_DATA:
       return Object.assign({}, state, {
         receivedAt: action.receivedAt,
-        csvCourseMetrics: Immutable.List(action.fetchedData)
+        csvCourseMetrics: Immutable.fromJS(action.fetchedData)
       })
     default:
       return state
