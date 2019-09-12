@@ -154,6 +154,10 @@ class CsvReports extends Component {
     this.initialReportsFetch();
   }
 
+  componentWillReceiveProps() {
+    this.initialReportsFetch();
+  }
+
   render() {
 
     const displayedAutoReportsRender = this.state.displayedAutoReports.map((report, index) => {
