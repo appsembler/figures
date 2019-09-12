@@ -151,7 +151,7 @@ export function fetchCsvUserReports() {
     dispatch(addActiveApiFetch())
     return fetch(apiConfig.reportingCsvReportsApi + '?report_type=LEARNER_DEMOGRAPHICS', { credentials: "same-origin" })
       .then(response => response.json())
-      .then (json => dispatch(loadCsvUserReportsData(json['results'])))
+      .then (json => dispatch(loadCsvUserReportsData(json)))
       .then(dispatch(removeActiveApiFetch()))
   }
 }
@@ -167,7 +167,7 @@ export function fetchCsvGradeReports() {
     dispatch(addActiveApiFetch())
     return fetch(apiConfig.reportingCsvReportsApi + '?report_type=ENROLLMENT_GRADES', { credentials: "same-origin" })
       .then(response => response.json())
-      .then (json => dispatch(loadCsvGradeReportsData(json['results'])))
+      .then (json => dispatch(loadCsvGradeReportsData(json)))
       .then(dispatch(removeActiveApiFetch()))
   }
 }
@@ -183,7 +183,7 @@ export function fetchCsvCourseMetricsReports() {
     dispatch(addActiveApiFetch())
     return fetch(apiConfig.reportingCsvReportsApi + '?report_type=REPORT_COURSE_METRICS', { credentials: "same-origin" })
       .then(response => response.json())
-      .then (json => dispatch(loadCsvCourseMetricsReportsData(json['results'])))
+      .then (json => dispatch(loadCsvCourseMetricsReportsData(json)))
       .then(dispatch(removeActiveApiFetch()))
   }
 }

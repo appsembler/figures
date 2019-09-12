@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Immutable from 'immutable';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Select from 'react-select';
 import styles from './_csv-reports-content.scss';
@@ -38,107 +37,6 @@ const monthNames = {
   12: 'December',
 }
 
-//some dummy data for testing before we hook up real APIs
-const UserReports = [
-  {
-    report_name: 'User Report',
-    report_timestamp: '2018-01-23T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'User Report'
-  },
-  {
-    report_name: 'User Report',
-    report_timestamp: '2018-02-22T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'User Report'
-  },
-  {
-    report_name: 'User Report',
-    report_timestamp: '2018-02-21T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'User Report'
-  },
-  {
-    report_name: 'User Report',
-    report_timestamp: '2019-02-22T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'User Report'
-  },
-  {
-    report_name: 'User Report',
-    report_timestamp: '2019-02-21T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'User Report'
-  }
-]
-
-const GradeReports = [
-  {
-    report_name: 'Grade Report',
-    report_timestamp: '2018-01-23T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Grade Report'
-  },
-  {
-    report_name: 'Grade Report',
-    report_timestamp: '2018-02-22T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Grade Report'
-  },
-  {
-    report_name: 'Users Report',
-    report_timestamp: '2018-02-21T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Grade Report'
-  },
-  {
-    report_name: 'Grade Report',
-    report_timestamp: '2019-02-22T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Grade Report'
-  },
-  {
-    report_name: 'Users Report',
-    report_timestamp: '2019-02-21T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Grade Report'
-  }
-]
-
-const CourseMetricsReports = [
-  {
-    report_name: 'Course Metrics Report',
-    report_timestamp: '2018-01-23T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Course Metrics Report'
-  },
-  {
-    report_name: 'Course Metrics Report',
-    report_timestamp: '2018-02-22T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Course Metrics Report'
-  },
-  {
-    report_name: 'Course Metrics Report',
-    report_timestamp: '2018-02-21T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Course Metrics Report'
-  },
-  {
-    report_name: 'Course Metrics Report',
-    report_timestamp: '2019-02-22T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Course Metrics Report'
-  },
-  {
-    report_name: 'Course Metrics Report',
-    report_timestamp: '2019-02-21T01:23:45.123456Z',
-    report_url: '#',
-    report_type: 'Course Metrics Report'
-  }
-]
-
-
 class CsvReports extends Component {
   constructor(props) {
     super(props);
@@ -159,8 +57,6 @@ class CsvReports extends Component {
       selectedAutoReports: 'user-reports',
     };
 
-    console.log('View state:', this.state);
-
     this.initialReportsFetch = this.initialReportsFetch.bind(this);
     this.setDisplayedAutoReports = this.setDisplayedAutoReports.bind(this);
     this.setAutoReportMonthFilter = this.setAutoReportMonthFilter.bind(this);
@@ -171,9 +67,9 @@ class CsvReports extends Component {
 
   initialReportsFetch = () => {
     const tempReports = Immutable.fromJS({
-      'user-reports': UserReports,
-      'grade-reports': GradeReports,
-      'course-metrics-reports': CourseMetricsReports
+      'user-reports': this.props.csvReportsData['csvUserReports'],
+      'grade-reports': this.props.csvReportsData['csvGradeReports'],
+      'course-metrics-reports': this.props.csvReportsData['csvCourseMetrics'],
     });
     this.setState({
       fetchedAutoReports: tempReports,
@@ -260,29 +156,29 @@ class CsvReports extends Component {
 
   render() {
 
-    console.log('Redux state:', this.props.csvReportsData);
-
     const displayedAutoReportsRender = this.state.displayedAutoReports.map((report, index) => {
       return (
         <li key={index} className={styles['report']}>
           <div className={styles['report-name']}>
-            <Link
-              to={'/figures/report/' + report.get('report_url')}
+            <a
+              href={report.get('report_url')}
               className={styles['view-report-button']}
+              target="_blank"
             >
               {report.get('report_name')}
-            </Link>
+            </a>
           </div>
           <div className={styles['report-timestamp']}>
             {parseReportDate(report.get('report_timestamp'))}
           </div>
           <div className={styles['report-buttons']}>
-            <Link
-              to={'/figures/report/' + report.get('report_url')}
+            <a
+              href={report.get('report_url')}
               className={styles['view-report-button']}
+              target="_blank"
             >
               View report
-            </Link>
+            </a>
           </div>
         </li>
       )
