@@ -42,11 +42,6 @@ class CsvReports extends Component {
     super(props);
 
     this.state = {
-      fetchedAutoReports: Immutable.fromJS({
-        'user-reports': this.props.csvReportsData['csvUserReports'],
-        'grade-reports': this.props.csvReportsData['csvGradeReports'],
-        'course-metrics-reports': this.props.csvReportsData['csvCourseMetrics']
-      }),
       displayedAutoReports: Immutable.fromJS([]),
       filterOptions: Immutable.fromJS({
         'years': [{value: 0, label: 'No filter'}],
@@ -54,10 +49,9 @@ class CsvReports extends Component {
       }),
       autoReportsMonthFilter: 0,
       autoReportsYearFilter: 0,
-      selectedAutoReports: 'user-reports',
+      selectedAutoReports: 'csvUserReports',
     };
 
-    this.initialReportsFetch = this.initialReportsFetch.bind(this);
     this.setDisplayedAutoReports = this.setDisplayedAutoReports.bind(this);
     this.setAutoReportMonthFilter = this.setAutoReportMonthFilter.bind(this);
     this.setAutoReportYearFilter = this.setAutoReportYearFilter.bind(this);
@@ -65,22 +59,8 @@ class CsvReports extends Component {
     this.setSelectedAutoReports = this.setSelectedAutoReports.bind(this);
   }
 
-  initialReportsFetch = () => {
-    const tempReports = Immutable.fromJS({
-      'user-reports': this.props.csvReportsData['csvUserReports'],
-      'grade-reports': this.props.csvReportsData['csvGradeReports'],
-      'course-metrics-reports': this.props.csvReportsData['csvCourseMetrics'],
-    });
-    this.setState({
-      fetchedAutoReports: tempReports,
-    }, () => {
-      this.setDisplayedAutoReports();
-      this.getFilterOptions();
-    })
-  }
-
   setDisplayedAutoReports = () => {
-    const tempReports = this.state.fetchedAutoReports.get(this.state.selectedAutoReports);
+    const tempReports = this.props.csvReportsData[this.state.selectedAutoReports];
     let filteredReports = Immutable.fromJS([]);
     tempReports.forEach((report, index) => {
       const generatedDate = new Date(report.get('report_timestamp'));
@@ -101,7 +81,7 @@ class CsvReports extends Component {
     let filterYears = Immutable.fromJS([]);
     let filterMonths = Immutable.fromJS([]);
     // go through reports and find all the unique months and years of reports
-    this.state.fetchedAutoReports.get('user-reports').forEach((report, index) => {
+    this.props.csvReportsData['csvUserReports'].forEach((report, index) => {
       const generatedDate = new Date(report.get('report_timestamp'));
       if (!filterYears.includes(generatedDate.getFullYear())) {
         filterYears = filterYears.push(generatedDate.getFullYear());
@@ -151,11 +131,13 @@ class CsvReports extends Component {
   }
 
   componentDidMount() {
-    this.initialReportsFetch();
+    this.setDisplayedAutoReports();
+    this.getFilterOptions();
   }
 
   componentWillReceiveProps() {
-    this.initialReportsFetch();
+    this.setDisplayedAutoReports();
+    this.getFilterOptions();
   }
 
   render() {
@@ -226,20 +208,20 @@ class CsvReports extends Component {
             </div>
             <div className={styles['report-tab-select']}>
               <button
-                className={cx({ 'report-selector': true, 'active': (this.state.selectedAutoReports === 'user-reports')})}
-                onClick={() => this.setSelectedAutoReports('user-reports')}
+                className={cx({ 'report-selector': true, 'active': (this.state.selectedAutoReports === 'csvUserReports')})}
+                onClick={() => this.setSelectedAutoReports('csvUserReports')}
               >
                 User Reports
               </button>
               <button
-                className={cx({ 'report-selector': true, 'active': (this.state.selectedAutoReports === 'grade-reports')})}
-                onClick={() => this.setSelectedAutoReports('grade-reports')}
+                className={cx({ 'report-selector': true, 'active': (this.state.selectedAutoReports === 'csvGradeReports')})}
+                onClick={() => this.setSelectedAutoReports('csvGradeReports')}
               >
                 Grade Reports
               </button>
               <button
-                className={cx({ 'report-selector': true, 'active': (this.state.selectedAutoReports === 'course-metrics-reports')})}
-                onClick={() => this.setSelectedAutoReports('course-metrics-reports')}
+                className={cx({ 'report-selector': true, 'active': (this.state.selectedAutoReports === 'csvCourseMetrics')})}
+                onClick={() => this.setSelectedAutoReports('csvCourseMetrics')}
               >
                 Course Metrics Reports
               </button>
