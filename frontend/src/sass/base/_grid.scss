@@ -21,6 +21,10 @@
   grid-template-columns: repeat(4, 1fr);
   grid-gap: calcRem(20);
   grid-auto-flow: dense;
+
+  @media (max-width: $tablet-breakpoint) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .grid-element {

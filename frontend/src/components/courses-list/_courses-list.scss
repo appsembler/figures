@@ -6,6 +6,10 @@
   margin: calcRem(20) 0;
   grid-column-end: span 4;
 
+  @media (max-width: $tablet-breakpoint) {
+    grid-column-end: span 2;
+  }
+
   .header {
     display: flex;
     margin-bottom: calcRem(20);
