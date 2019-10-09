@@ -112,4 +112,9 @@
       font-size: calcRem(10);
     }
   }
+
+  .graph-container {
+    margin-left: calcRem(-20);
+    margin-right: calcRem(-20);
+  }
 }
