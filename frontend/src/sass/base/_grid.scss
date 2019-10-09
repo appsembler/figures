@@ -5,6 +5,7 @@
   max-width: $max-grid-width;
   margin: 0 auto;
   padding: 0 calcRem(20);
+  box-sizing: border-box;
 }
 
 .layout-root {
