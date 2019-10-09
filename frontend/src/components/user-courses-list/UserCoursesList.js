@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './_user-courses-list.scss';
 import classNames from 'classnames/bind';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import { faCheck } from '@fortawesome/fontawesome-free-solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
 let cx = classNames.bind(styles);
 

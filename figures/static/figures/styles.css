@@ -798,6 +798,10 @@ textarea.input__2lx3TsF4, input[type="text"].input__2lx3TsF4, input[type="url"].
   .header-content-maus__n4bSS6At .bar-tooltip__DK96Xbuc p {
     margin: 0;
     font-size: 1rem; }
+
+.header-content-maus__n4bSS6At .graph-container__1Qu8rL_d {
+  margin-left: -2rem;
+  margin-right: -2rem; }
 @charset "UTF-8";
 /*
  * Picks a colour from two options based on which one is more visible
