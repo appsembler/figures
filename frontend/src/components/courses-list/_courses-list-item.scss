@@ -8,6 +8,7 @@
   padding: calcRem(20);
   transition: all 0.3s ease-in-out;
   display: flex;
+  text-decoration: none;
 
   &:hover {
     box-shadow: 0 calcRem(6) calcRem(12) 0 rgba(0,0,0,0.25);
@@ -122,6 +123,21 @@
         color: #fff;
         background: $primary-color;
       }
+    }
+  }
+
+  @media (max-width: $tablet-breakpoint) {
+    display: block;
+
+    .sections-separator {
+      width: 100%;
+      height: calcRem(1);
+      margin: calcRem(20) 0;
+    }
+
+    .general-info-section, .stats-section, .button-section {
+      width: 100%;
+      justify-content: flex-start;
     }
   }
 }
