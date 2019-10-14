@@ -88,8 +88,6 @@ class TestCourseDailyMetricsView(BaseViewTest):
 
         TODO: Add more date ranges
         '''
-        first_day='2018-02-01'
-        last_day='2018-02-28'
         endpoint = '{}?date_0={}&date_1={}'.format(
             self.request_path, first_day, last_day)
 
