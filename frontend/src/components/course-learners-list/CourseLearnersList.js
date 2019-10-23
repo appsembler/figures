@@ -6,8 +6,8 @@ import moment from 'moment';
 import countriesWithCodes from 'base/data/countriesData';
 import styles from './_course-learners-list.scss';
 import classNames from 'classnames/bind';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import { faCheck } from '@fortawesome/fontawesome-free-solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
 let cx = classNames.bind(styles);
 

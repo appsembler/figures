@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import classNames from 'classnames/bind';
 import styles from './_header-content-maus.scss';
 import { ResponsiveContainer, AreaChart, Area, Tooltip } from 'recharts';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import { faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/fontawesome-free-solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons';
 
 let cx = classNames.bind(styles);
 
