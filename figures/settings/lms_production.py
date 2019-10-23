@@ -58,3 +58,7 @@ def plugin_settings(settings):
     settings.ENV_TOKENS.setdefault('FIGURES', {})
     update_webpack_loader(settings.WEBPACK_LOADER, settings.ENV_TOKENS['FIGURES'])
     update_celerybeat_schedule(settings.CELERYBEAT_SCHEDULE, settings.ENV_TOKENS['FIGURES'])
+
+    settings.CELERY_IMPORTS += (
+        "figures.tasks",
+    )
