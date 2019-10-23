@@ -74,7 +74,8 @@ class TestUpdateSettings(object):
             FEATURES={},
             ENV_TOKENS={
                 'FIGURES': figures_env_tokens,
-            }
+            },
+            CELERY_IMPORTS=[],
         )
         plugin_settings(settings)
 
