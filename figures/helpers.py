@@ -43,7 +43,7 @@ def as_course_key(course_id):
     '''
     if isinstance(course_id, CourseKey):
         return course_id
-    elif isinstance(course_id, basestring):
+    elif isinstance(course_id, basestring):  # noqa: F821
         return CourseKey.from_string(course_id)
     else:
         raise TypeError('Unable to convert course id with type "{}"'.format(
@@ -65,7 +65,7 @@ def as_datetime(val):
             day=val.day,
             ).replace(tzinfo=utc)
 
-    elif isinstance(val, basestring):
+    elif isinstance(val, basestring):  # noqa: F821
         return dateutil_parse(val).replace(tzinfo=utc)
     else:
         raise TypeError(
@@ -84,7 +84,7 @@ def as_date(val):
         return val.date()
     elif isinstance(val, datetime.date):
         return val
-    elif isinstance(val, basestring):
+    elif isinstance(val, basestring):  # noqa: F821
         return dateutil_parse(val).date()
     else:
         raise TypeError(

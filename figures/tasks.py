@@ -169,7 +169,7 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
     courses = CourseOverview.objects.all()
     cdm_tasks = [
         populate_single_cdm.s(
-            course_id=unicode(course.id),
+            course_id=unicode(course.id),  # noqa: F821
             date_for=date_for,
             force_update=force_update) for course in courses if include_course(course)
     ]
