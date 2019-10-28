@@ -40,7 +40,10 @@ now we'll run [pytest](https://docs.pytest.org/) to make sure that the tests pas
 pytest
 ```
 
-## 4. Set up Figures standalone server
+## 4. Build front end assets
+
+
+## 5. Set up Figures standalone server
 
 Navigate to your Figures workspace (you will be here if you just completed the previous step)
 
@@ -65,7 +68,7 @@ Last step before starting the dev server is to fill our environment with some mo
 
 The `seed_data` command populates the dev server with mock data then builds metrics on the mock data, backfilling historical data (experimental feature)
 
-## 5. Starting Figures devsite
+## 6. Starting Figures devsite
 
 Navigate to your Figures workspace (you will be here if you just completed the previous step)
 
@@ -85,7 +88,7 @@ Enter the credentials you used to create the superuser in step 4.
 
 Now you can click on the Figures link on the page to go to the Figures dashboard.
 
-## 6. Navigating around Figures
+## 7. Navigating around Figures
 
 _Section incomplete_
 
@@ -95,7 +98,7 @@ Pages of interest:
 * http://127.0.0.1:8000/figures/api/
 * http://127.0.0.1:8000/admin/figures/
 
-## 7. Running the pipeline manually
+## 8. Running the pipeline manually
 
 The Figures pipeline will automatically run once a day in a running Open edX Hawthorn instance. The default time os 02:00 UTC and can be configured in the server vars (`lms.env.json`).
 
@@ -109,28 +112,19 @@ Make sure you have your development virtualenv running. Then navigate to the `de
 
 This will run the pipeline immediately instead of being queued to celery.
 
-## 8. Building the front end
+## 9. Building the front end assets
 
-_Section incomplete_
+You will need yarn installed.
 
-The frontend assets come pre-built for the Hawthorn prerelease. If you modify the front end code then you will either need to re-compile the frontend assets or run the Webpack development server. This section describes how to build the front end, which is also needed to deploy your modifications in a production environment.
+Go to the `frontend` directory and run `yarn`. This will install dependencies
 
-You will need NPM installed to build the front end assets. 
+Run `yarn build` to compile the front end assets.
 
-From your project root, run the following:
 
-```
-cd frontend
-npm install
-npm run build
-```
-
-_TODO: provide example of adding custom layout settings_
-
-## 7. Running the frontend Webpack server
+## 10. Running the frontend Webpack server
 
 _TODO: Add this section_
 
-## 8. Installing Figures on Hawthorn Docker Devstack
+## 11. Installing Figures on Hawthorn Docker Devstack
 
 _TODO: Add this section_
