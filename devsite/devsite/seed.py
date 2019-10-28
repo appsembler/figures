@@ -50,10 +50,31 @@ def days_back_list(days_back):
     return [day for day in rrule(DAILY, dtstart=start_date, until=end_date)]
 
 
+def generate_course_overview(index, **vals):
+
+    org=vals.get('org', 'ORG-{}'.format(index))
+
+    rec = dict(
+        # id='course-v1:StarFleetAcademy+SFA01+2161',
+        display_name=vals.get('display_name', FAKE.sentence(nb_words=2)),
+        org=org,
+        display_org_with_default=org,
+        number=vals.get('number', 'NUM-{}'.format(index)),
+        created='2018-07-01',
+        enrollment_start='2018-08-01',
+        enrollment_end='2018-12-31',
+        )
+    run = '000{}'.format(index)
+    rec['id'] = 'course-v1:{0}+{1}+{2}'.format(org, rec['number'], run)
+    return rec
+
 def seed_course_overviews(data=None):
 
     if not data:
         data = cans.COURSE_OVERVIEW_DATA
+        # append with randomly generated course overviews to test pagination
+        new_courses = [generate_course_overview(i, org='FOO') for i in xrange(20)]
+        data += new_courses
 
     for rec in data:
         course_id = rec['id']
