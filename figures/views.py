@@ -263,7 +263,10 @@ class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = CourseOverview
-    pagination_class = FiguresLimitOffsetPagination
+
+    # The "kilo paginator"  is a tempoarary hack to return all course to not
+    # have to change the front end until Figures "Level 2"
+    pagination_class = FiguresKiloPagination
     serializer_class = GeneralCourseDataSerializer
 
     def get_queryset(self):
