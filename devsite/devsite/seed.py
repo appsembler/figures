@@ -52,7 +52,7 @@ def days_back_list(days_back):
 
 def generate_course_overview(index, **vals):
 
-    org=vals.get('org', 'ORG-{}'.format(index))
+    org = vals.get('org', 'ORG-{}'.format(index))
 
     rec = dict(
         # id='course-v1:StarFleetAcademy+SFA01+2161',
@@ -67,6 +67,7 @@ def generate_course_overview(index, **vals):
     run = '000{}'.format(index)
     rec['id'] = 'course-v1:{0}+{1}+{2}'.format(org, rec['number'], run)
     return rec
+
 
 def seed_course_overviews(data=None):
 
