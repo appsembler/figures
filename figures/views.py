@@ -52,7 +52,10 @@ from figures.serializers import (
     GeneralUserDataSerializer
 )
 from figures import metrics
-from figures.pagination import FiguresLimitOffsetPagination
+from figures.pagination import (
+    FiguresLimitOffsetPagination,
+    FiguresKiloPagination,
+)
 import figures.permissions
 import figures.helpers
 import figures.sites
