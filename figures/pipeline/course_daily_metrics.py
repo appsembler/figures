@@ -12,6 +12,7 @@ Future: add a remote mode to pull data via REST API
 # TODO: Move extractors to figures.pipeline.extract module
 """
 import datetime
+from decimal import Decimal
 import logging
 
 from django.db import transaction
@@ -113,6 +114,8 @@ def get_average_progress(course_id, date_for, course_enrollments):
     if len(progress):
         progress_percent = [rec['progress_percent'] for rec in progress]
         average_progress = float(sum(progress_percent)) / float(len(progress_percent))
+        average_progress = float(Decimal(average_progress).quantize(Decimal('.00')))
+
     else:
         average_progress = 0.0
 
