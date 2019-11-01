@@ -191,13 +191,10 @@ FEATURES.update({
     'FIGURES_INCLUDE_SUPERUSER_FIELD_IN_USER_REPORT': True,
 })
 
-<<<<<<< HEAD
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
 
-=======
->>>>>>> Updated settings for testing Appsembler Reporting
 ENV_TOKENS.update({
     'APPSEMBLER_REPORTING': {}
     })
