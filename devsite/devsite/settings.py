@@ -210,7 +210,7 @@ update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
 # from appsembler_reporting.settings.lms_production import plugins_settings
 
 # current_module = sys.modules[__name__]
-def set_appsembler_reporting()
+def set_appsembler_reporting():
     from django.conf import settings
     plugin_settings(settings)
 
