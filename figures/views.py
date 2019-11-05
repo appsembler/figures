@@ -294,7 +294,10 @@ class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     '''
     model = CourseOverview
-    pagination_class = FiguresLimitOffsetPagination
+
+    # The "kilo paginator"  is a tempoarary hack to return all course to not
+    # have to change the front end until Figures "Level 2"
+    pagination_class = FiguresKiloPagination
     serializer_class = CourseDetailsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseOverviewFilter
