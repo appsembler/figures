@@ -127,6 +127,16 @@ ENV_TOKENS = {
 }
 
 
+ENV_TOKENS['APPSEMBLER_REPORTING'] = {
+    'DEFAULT_REPORT_ENCODING': 'utf-8',
+    'REPORT_ROW_BUILDERS': {
+        'learners': 'appsembler_reporting.reportgen.builders.DemographicReportRowBuilder',
+        'grades': 'appsembler_reporting.reportgen.builders.GradeReportRowBuilder',
+        'course-metrics': 'appsembler_reporting.reportgen.builders.CourseMetricsReportRowBuilder',
+    },
+    'INCLUDE_SUPERUSER_FIELD_IN_USER_REPORT' : False,
+}
+
 
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
