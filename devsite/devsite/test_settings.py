@@ -7,10 +7,7 @@ from __future__ import absolute_import, unicode_literals
 
 from os.path import abspath, dirname, join
 
-from figures.settings.lms_production import (
-    update_celerybeat_schedule,
-    update_webpack_loader,
-)
+from figures.settings.lms_production import update_celerybeat_schedule
 
 
 def root(*args):
@@ -106,17 +103,20 @@ REST_FRAMEWORK = {
 }
 
 # It expects them from the project's settings (django.conf.settings)
-WEBPACK_LOADER = {}
+WEBPACK_LOADER = {
+    'FIGURES_APP': {
+        'BUNDLE_DIR_NAME': 'figures/',
+        'STATS_FILE': 'tests/test-webpack-stats.json',
+    }
+}
 CELERYBEAT_SCHEDULE = {}
 FEATURES = {}
 
 # Declare values we need from server vars (e.g. lms.env.json)
 ENV_TOKENS = {
-    'FIGURES': {
-        'WEBPACK_STATS_FILE': '../tests/test-webpack-stats.json',
-    }
+    # 'FIGURES': {
+    #     'WEBPACK_STATS_FILE': '../tests/test-webpack-stats.json',
+    # }
 }
 
-
-update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
