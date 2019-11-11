@@ -137,6 +137,16 @@ ENV_TOKENS['APPSEMBLER_REPORTING'] = {
     'INCLUDE_SUPERUSER_FIELD_IN_USER_REPORT' : False,
 }
 
+GRADES_DOWNLOAD = {
+    "BUCKET": "staging-tahoe-grade-bucket",
+    "ROOT_PATH": "grades",
+    "STORAGE_CLASS": "storages.backends.s3boto.S3BotoStorage",
+    "STORAGE_KWARGS": {},
+    "STORAGE_TYPE": "S3"
+}
+
+AWS_ACCESS_KEY_ID = 'blah-blah-blah'
+AWS_SECRET_ACCESS_KEY = 'blah-blah-blah-123'
 
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
