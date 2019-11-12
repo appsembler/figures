@@ -737,6 +737,3 @@ class MauSiteMonthMetricsSerializer(serializers.Serializer):
     month_for = serializers.DateField()
     count = serializers.IntegerField()
     domain = serializers.CharField()
-
-    # def to_representation(self, obj):
-        
