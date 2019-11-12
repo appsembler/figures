@@ -24,23 +24,27 @@ def sm_test_data(db):
     month_for = 10
     created_date = datetime(year_for, month_for, 1).replace(tzinfo=utc)
     modified_date = datetime(year_for, month_for, 10).replace(tzinfo=utc)
-    site = SiteFactory()
-    org = OrganizationFactory(sites=[site])
     co = CourseOverviewFactory()
+    site = SiteFactory()
     sm = [StudentModuleFactory(
         course_id=co.id,
         created=created_date,
         modified=modified_date,
         ) for i in range(5)]
-    OrganizationCourseFactory(organization=org, course_id=str(co.id))
+
     if organizations_support_sites():
+        org = OrganizationFactory(sites=[site])
+        OrganizationCourseFactory(organization=org, course_id=str(co.id))
         for rec in sm:
             UserOrganizationMappingFactory(user=rec.student,
                                            organization=org)
+    else:
+        org = OrganizationFactory()
+
     return dict(
-        student_modules=sm,
-        organization=org,
         site=site,
+        organization=org,
+        student_modules=sm,
         year_for=year_for,
         month_for=month_for
     )
