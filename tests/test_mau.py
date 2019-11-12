@@ -4,10 +4,7 @@ import pytest
 
 from django.utils.timezone import utc
 
-from figures.sites import (
-    get_student_modules_for_course_in_site,
-    get_student_modules_for_site,
-)
+from figures.sites import get_student_modules_for_site
 from figures.mau import get_mau_from_student_modules
 
 from tests.factories import (
@@ -16,7 +13,6 @@ from tests.factories import (
     OrganizationCourseFactory,
     StudentModuleFactory,
     SiteFactory,
-    UserFactory,
 )
 from tests.helpers import organizations_support_sites
 
