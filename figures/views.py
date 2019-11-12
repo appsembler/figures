@@ -1,6 +1,9 @@
 '''
 
 '''
+
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django.contrib.sites.shortcuts
@@ -46,6 +49,7 @@ from figures.serializers import (
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
+    MauSiteMonthMetricsSerializer,
     SiteDailyMetricsSerializer,
     SiteSerializer,
     UserIndexSerializer,
@@ -59,6 +63,7 @@ from figures.pagination import (
 import figures.permissions
 import figures.helpers
 import figures.sites
+from figures.mau import get_mau_from_student_modules
 
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
@@ -361,6 +366,23 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         context = super(LearnerDetailsViewSet, self).get_serializer_context()
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
         return context
+
+
+class MauSiteMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
+
+    serializer_class = MauSiteMonthMetricsSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        student_modules = figures.sites.get_student_modules_for_site(site)
+        today = datetime.utcnow()
+        users = get_mau_from_student_modules(
+            student_modules, today.year, today.month)
+        data = dict(count=users.count(),
+                    month_for=today.date(),
+                    domain=site.domain)
+        serializer = self.serializer_class(data)
+        return Response(serializer.data)
 
 
 class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet):
