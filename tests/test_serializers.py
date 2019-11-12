@@ -24,6 +24,7 @@ from figures.serializers import (
     GeneralUserDataSerializer,
     LearnerCourseDetailsSerializer,
     LearnerDetailsSerializer,
+    MauSiteMonthMetricsSerializer,
     SerializeableCountryField,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
@@ -502,3 +503,26 @@ class TestUserIndexSerializer(object):
         # This is to make sure that the serializer retrieves the correct nested
         # model (UserProfile) data
         assert data['fullname'] == 'Alpha One'
+
+
+@pytest.mark.django_db
+class TestMauSiteMonthMetricsSerializer(object):
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        pass
+
+    def test_serialize(self):
+
+        in_data = dict(
+            month_for=datetime.date(2019, 10, 29),
+            count=42,
+            domain=u'wookie.example.com'
+        )
+
+        serializer = MauSiteMonthMetricsSerializer(in_data)
+        out_data = serializer.data
+        assert set(out_data.keys()) == set(in_data.keys())
+        assert out_data['count'] == in_data['count']
+        assert dateutil_parse(out_data['month_for']).date() == in_data['month_for']
+        assert out_data['domain'] == in_data['domain']
