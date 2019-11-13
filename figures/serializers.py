@@ -737,3 +737,10 @@ class MauSiteMonthMetricsSerializer(serializers.Serializer):
     month_for = serializers.DateField()
     count = serializers.IntegerField()
     domain = serializers.CharField()
+
+
+class MauCourseMonthMetricsSerializer(serializers.Serializer):
+    month_for = serializers.DateField()
+    count = serializers.IntegerField()
+    course_id = serializers.CharField()
+    domain = serializers.CharField()

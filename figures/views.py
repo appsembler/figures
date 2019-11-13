@@ -31,6 +31,7 @@ from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
+from courseware.models import StudentModule
 from student.models import CourseEnrollment
 
 from figures.filters import (
@@ -49,6 +50,7 @@ from figures.serializers import (
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
+    MauCourseMonthMetricsSerializer,
     MauSiteMonthMetricsSerializer,
     SiteDailyMetricsSerializer,
     SiteSerializer,
@@ -63,7 +65,10 @@ from figures.pagination import (
 import figures.permissions
 import figures.helpers
 import figures.sites
-from figures.mau import get_mau_from_student_modules
+from figures.mau import (
+    get_mau_from_student_modules,
+    get_mau_from_student_modules,
+)
 
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
@@ -382,6 +387,50 @@ class MauSiteMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
                     month_for=today.date(),
                     domain=site.domain)
         serializer = self.serializer_class(data)
+        return Response(serializer.data)
+
+
+class MauCourseMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
+
+    serializer_class = MauCourseMonthMetricsSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        course_id_str = kwargs.get('pk', '')
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+
+        if figures.helpers.is_multisite():
+            if site != figures.sites.get_site_for_course(course_key):
+                # Raising NotFound instead of PermissionDenied
+                raise NotFound()
+        student_modules = figures.sites.get_student_modules_for_course_in_site(
+            site, course_key)
+        today = datetime.utcnow()
+        users = get_mau_from_student_modules(
+            student_modules, today.year, today.month)
+        data = dict(count=users.count(),
+                    month_for=today.date(),
+                    course_id=course_id_str,
+                    domain=site.domain)
+        serializer = self.serializer_class(data)
+        return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        course_overviews = figures.sites.get_courses_for_site(site)
+        today = datetime.utcnow()
+        data = []
+        for co in course_overviews:
+            sm = figures.sites.get_student_modules_for_course_in_site(site=site,
+                                                                      course_id=co.id)
+            users = get_mau_from_student_modules(sm,
+                                                 today.year,
+                                                 today.month)
+            data.append(dict(count=users.count(),
+                             month_for=today.date(),
+                             course_id=str(co.id),
+                             domain=site.domain))
+        serializer = self.serializer_class(data, many=True)
         return Response(serializer.data)
 
 
