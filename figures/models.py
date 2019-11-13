@@ -13,6 +13,14 @@ from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 
 
+def default_site():
+    """
+    Wrapper aroung `django.conf.settings.SITE_ID` so we do not have to create a
+    new migration if we change how we get the default site ID
+    """
+    return settings.SITE_ID
+
+
 @python_2_unicode_compatible
 class CourseDailyMetrics(TimeStampedModel):
     """Metrics data specific to an individual course
@@ -201,3 +209,51 @@ class PipelineError(TimeStampedModel):
 
     def __str__(self):
         return "{}, {}, {}".format(self.id, self.created, self.error_type)
+
+
+class BaseMonthlyMetricsModel(TimeStampedModel):
+    site = models.ForeignKey(Site, default=default_site)
+    date_for = models.DateField()
+
+    class Meta:
+        abstract = True
+        ordering = ['-date_for']
+
+    @property
+    def year(self):
+        return self.date_for.year
+
+    @property
+    def month(self):
+        return self.date_for.month
+
+    # def __str__(self):
+    #     return '{}, {}, {}, {}'.format(self.id,
+    #                                    self.site.domain,
+    #                                    self.date_for,
+    #                                    self.mau)
+
+
+@python_2_unicode_compatible
+class SiteMauMonthlyMetrics(BaseMonthlyMetricsModel):
+
+    mau = models.IntegerField()
+
+    def __str__(self):
+        return '{}, {}, {}, {}'.format(self.id,
+                                       self.site.domain,
+                                       self.date_for,
+                                       self.mau)
+
+
+@python_2_unicode_compatible
+class CourseMauMonthlyMetrics(BaseMonthlyMetricsModel):
+    course_id = models.CharField(max_length=255)
+    mau = models.IntegerField()
+
+    def __str__(self):
+        return '{}, {}, {}, {}, {}'.format(self.id,
+                                           self.site.domain,
+                                           self.course_id,
+                                           self.date_for,
+                                           self.mau)
