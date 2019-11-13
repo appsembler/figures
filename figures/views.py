@@ -31,7 +31,6 @@ from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-from courseware.models import StudentModule
 from student.models import CourseEnrollment
 
 from figures.filters import (
@@ -65,10 +64,7 @@ from figures.pagination import (
 import figures.permissions
 import figures.helpers
 import figures.sites
-from figures.mau import (
-    get_mau_from_student_modules,
-    get_mau_from_student_modules,
-)
+from figures.mau import get_mau_from_student_modules
 
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
