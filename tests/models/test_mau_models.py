@@ -31,6 +31,33 @@ class TestCourseMauMonthlyMetrics(object):
         assert obj.year == date_for.year
         assert obj.month == date_for.month
 
+    def test_save_metrics(self):
+        date_for = date(2019, 10, 29)
+        course_id = str(self.course_overview.id)
+        data = dict(mau=42)
+        obj, created = CourseMauMonthlyMetrics.save_metrics(site=self.site,
+                                                            course_id=course_id,
+                                                            date_for=date_for,
+                                                            data=data)
+        assert obj and created
+
+        obj2, created = CourseMauMonthlyMetrics.save_metrics(site=self.site,
+                                                             course_id=course_id,
+                                                             date_for=date_for,
+                                                             data=data)
+        assert obj2 and not created
+        assert obj2 == obj
+
+        data['mau'] = 104
+        obj3, created = CourseMauMonthlyMetrics.save_metrics(site=self.site,
+                                                             course_id=course_id,
+                                                             date_for=date_for,
+                                                             data=data,
+                                                             overwrite=True)
+
+        assert obj3 == obj2
+        assert obj3.mau == data['mau']
+
 
 @pytest.mark.django_db
 class TestSiteMauMonthlyMetrics(object):

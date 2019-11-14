@@ -272,6 +272,29 @@ class CourseMauMonthlyMetrics(BaseMonthlyMetricsModel):
     class Meta:
         unique_together = ('site', 'course_id', 'date_for',)
 
+    @classmethod
+    def save_metrics(cls, site, course_id, date_for, data, overwrite=False):
+        """
+        Convenience method to save metrics data with option to
+        overwrite an existing record
+        """
+        if not overwrite:
+            try:
+                obj = CourseMauMonthlyMetrics.objects.get(site=site,
+                                                          course_id=course_id,
+                                                          date_for=date_for)
+                return (obj, False,)
+            except CourseMauMonthlyMetrics.DoesNotExist:
+                pass
+
+        return CourseMauMonthlyMetrics.objects.update_or_create(
+            site=site,
+            course_id=course_id,
+            date_for=date_for,
+            defaults=dict(
+                mau=data['mau']
+            ))
+
     def __str__(self):
         return '{}, {}, {}, {}, {}'.format(self.id,
                                            self.site.domain,
