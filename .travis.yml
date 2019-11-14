@@ -7,7 +7,7 @@ node_js:
 
 # command to install dependencies
 install:
-  - pip install -r devsite/requirements/hawthorn.txt
+  - pip install -r devsite/requirements/hawthorn_appsembler.txt
   - pip install pytest-cov flake8 tox
   - cd frontend && npm install && cd ..
 
@@ -20,8 +20,6 @@ script:
   - tox
 
 env:
-  - TOXENV=py27-openedx_ginkgo
-  - TOXENV=py27-openedx_hawthorn
   - TOXENV=py27-appsembler_hawthorn
   - TOXENV=flake8
 
