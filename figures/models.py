@@ -228,10 +228,23 @@ class BaseMonthlyMetricsModel(TimeStampedModel):
         return self.date_for.month
 
 
+class SiteMauMonthlyMetricsManager(models.Manager):
+    """Custom model manager for SiteMauMonthlyMetrics model
+    """
+    def latest_for_site_month(self, site, year, month):
+        """Return the latest record for the given site, month, and year
+        If no record found, returns 'None'
+        """
+        return self.filter(site=site,
+                           date_for__year=year,
+                           date_for__month=month).order_by('-modified').first()
+
+
 @python_2_unicode_compatible
 class SiteMauMonthlyMetrics(BaseMonthlyMetricsModel):
 
     mau = models.IntegerField()
+    objects = SiteMauMonthlyMetricsManager()
 
     class Meta:
         unique_together = ('site', 'date_for',)
@@ -250,12 +263,11 @@ class SiteMauMonthlyMetrics(BaseMonthlyMetricsModel):
             except SiteMauMonthlyMetrics.DoesNotExist:
                 pass
 
-        return SiteMauMonthlyMetrics.objects.update_or_create(
-            site=site,
-            date_for=date_for,
-            defaults=dict(
-                mau=data['mau']
-            ))
+        return SiteMauMonthlyMetrics.objects.update_or_create(site=site,
+                                                              date_for=date_for,
+                                                              defaults=dict(
+                                                                  mau=data['mau']
+                                                              ))
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(self.id,
@@ -264,10 +276,24 @@ class SiteMauMonthlyMetrics(BaseMonthlyMetricsModel):
                                        self.mau)
 
 
+class CourseMauMonthlyMetricsManager(models.Manager):
+    """Custom model manager for CourseMauMonthlyMetrics model
+    """
+    def latest_for_course_month(self, site, course_id, year, month):
+        """Return the latest record for the given site, course_id, month and year
+        If no record found, returns 'None'
+        """
+        return self.filter(site=site,
+                           course_id=course_id,
+                           date_for__year=year,
+                           date_for__month=month).order_by('-modified').first()
+
+
 @python_2_unicode_compatible
 class CourseMauMonthlyMetrics(BaseMonthlyMetricsModel):
     course_id = models.CharField(max_length=255)
     mau = models.IntegerField()
+    objects = CourseMauMonthlyMetricsManager()
 
     class Meta:
         unique_together = ('site', 'course_id', 'date_for',)
@@ -287,13 +313,12 @@ class CourseMauMonthlyMetrics(BaseMonthlyMetricsModel):
             except CourseMauMonthlyMetrics.DoesNotExist:
                 pass
 
-        return CourseMauMonthlyMetrics.objects.update_or_create(
-            site=site,
-            course_id=course_id,
-            date_for=date_for,
-            defaults=dict(
-                mau=data['mau']
-            ))
+        return CourseMauMonthlyMetrics.objects.update_or_create(site=site,
+                                                                course_id=course_id,
+                                                                date_for=date_for,
+                                                                defaults=dict(
+                                                                    mau=data['mau']
+                                                                ))
 
     def __str__(self):
         return '{}, {}, {}, {}, {}'.format(self.id,

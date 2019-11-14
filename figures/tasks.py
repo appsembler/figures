@@ -16,11 +16,13 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key, as_date
+from figures.mau import store_mau_metrics
 from figures.models import PipelineError
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
 import figures.sites
 from figures.pipeline.logger import log_error_to_db
+
 
 logger = get_task_logger(__name__)
 
@@ -186,3 +188,33 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
             date_for))
 
     return results
+
+
+@shared_task
+def collect_mau_live_metrics_for_site(site_id, overwrite=False):
+    """
+    Collect (save) MAU metrics for the specified site
+    TODO: Check results of 'store_mau_metrics' to log unexpected
+    results
+    """
+    store_mau_metrics(site=Site.object.get(site_id),
+                      overwrite=overwrite)
+
+
+@shared_task
+def collect_mau_live_metrics(site_ids=None, overwrite=False):
+    """
+
+    """
+    for site_id in figures.sites.site_id_iterator(site_ids or Site.objects.all()):
+        collect_mau_live_metrics_for_site(site_id=site_id,
+                                          overwrite=overwrite)
+
+
+@shared_task
+def run_month_end_jobs():
+    """
+    Call this at the end of the month
+    Call our end of month metrics collectors here
+    """
+    collect_mau_live_metrics()

@@ -41,6 +41,29 @@ class CourseNotInSiteError(CrossSiteResourceError):
     pass
 
 
+def site_to_id(site):
+    """
+    Helper to cast site or site id to id
+    This is helpful for celery tasks that require primitives for
+    function parameters
+    """
+    if isinstance(site, Site):
+        return site.id
+    else:
+        return site
+
+
+def site_id_iterator(sites_or_site_ids):
+    """
+    Convenience method to iterate over site or site id iterables.
+
+    This is helpful for iterating over site objects or site ids for
+    Celery tasks
+    """
+    for obj in sites_or_site_ids:
+        yield site_to_id(obj)
+
+
 def default_site():
     """Returns the default site instance if Django settings defines SITE_ID, else None
 
@@ -147,10 +170,11 @@ def get_course_enrollments_for_site(site):
 
 def get_student_modules_for_course_in_site(site, course_id):
     if figures.helpers.is_multisite():
+        site_id = site.id
         check_site = get_site_for_course(course_id)
-        if not check_site or site.id != check_site.id:
+        if not check_site or site_id != check_site.id:
             CourseNotInSiteError('course "{}"" does not belong to site "{}"'.format(
-                course_id, site.id))
+                course_id, site_id))
     return StudentModule.objects.filter(course_id=course_id)
 
 
