@@ -197,7 +197,7 @@ def collect_mau_live_metrics_for_site(site_id, overwrite=False):
     TODO: Check results of 'store_mau_metrics' to log unexpected
     results
     """
-    store_mau_metrics(site=Site.object.get(site_id),
+    store_mau_metrics(site=Site.objects.get(id=site_id),
                       overwrite=overwrite)
 
 
