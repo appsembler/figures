@@ -96,7 +96,7 @@ def test_populate_daily_metrics_multisite(transactional_db, monkeypatch):
         figures.tasks.populate_daily_metrics(date_for=date_for)
 
 
-def test_collect_mau_live_metrics_for_site(transactional_db, monkeypatch):
+def test_collect_mau_metrics_for_site(transactional_db, monkeypatch):
     expected_site = SiteFactory()
 
     def mock_store_mau_metrics(site, overwrite=False):
@@ -104,10 +104,10 @@ def test_collect_mau_live_metrics_for_site(transactional_db, monkeypatch):
 
     monkeypatch.setattr('figures.tasks.store_mau_metrics', mock_store_mau_metrics)
 
-    figures.tasks.collect_mau_live_metrics_for_site(expected_site.id)
+    figures.tasks.collect_mau_metrics_for_site(expected_site.id)
 
 
-def test_collect_mau_live_metrics(transactional_db, monkeypatch):
+def test_collect_mau_metrics(transactional_db, monkeypatch):
     """
     Very minimal test
     """
@@ -121,6 +121,6 @@ def test_collect_mau_live_metrics(transactional_db, monkeypatch):
 
     monkeypatch.setattr('figures.tasks.store_mau_metrics', mock_store_mau_metrics)
 
-    figures.tasks.collect_mau_live_metrics()
+    figures.tasks.collect_mau_metrics()
 
     assert set([site.id for site in sites_visited]) == set([site.id for site in sites])

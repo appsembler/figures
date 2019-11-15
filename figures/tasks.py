@@ -191,7 +191,7 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
 
 
 @shared_task
-def collect_mau_live_metrics_for_site(site_id, overwrite=False):
+def collect_mau_metrics_for_site(site_id, overwrite=False):
     """
     Collect (save) MAU metrics for the specified site
     TODO: Check results of 'store_mau_metrics' to log unexpected
@@ -202,18 +202,21 @@ def collect_mau_live_metrics_for_site(site_id, overwrite=False):
 
 
 @shared_task
-def collect_mau_live_metrics(site_ids=None, overwrite=False):
+def collect_mau_metrics(site_ids=None, overwrite=False, **kwargs):
+    """
+    
     """
 
-    """
     for site_id in figures.sites.site_id_iterator(site_ids or Site.objects.all()):
-        collect_mau_live_metrics_for_site(site_id=site_id,
-                                          overwrite=overwrite)
+        collect_mau_metrics_for_site(site_id=site_id,
+                                     overwrite=overwrite)
 
 
 @shared_task
 def run_month_end_jobs():
     """
+    Placeholder task function. We may need to do a daily and
+    check if we are at the end of the month
     Call this at the end of the month
     Call our end of month metrics collectors here
     """
