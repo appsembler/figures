@@ -370,10 +370,27 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
 
 class MauLiveSiteMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
+    """
+    Retrieve live MAU site metrics for the site called
 
+    TODO: Potential future improvement is to display single site if the
+    caller is a site admin for the given site and for all sites (paginated?)
+    if the caller is a host (provider) level user
+    """
     serializer_class = MauSiteMetricsSerializer
 
-    def retrieve(self, request, *args, **kwargs):
+    def get_queryset(self):
+        """
+        Stub method because ViewSet requires one, even though we are not
+        retrieving querysets directly (we use the query in figures.sites)
+        """
+        pass
+
+    def list(self, request, *args, **kwargs):
+        """
+        We use list instead of retrieve because retrieve requires a resource
+        identifier, like a PK
+        """
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         student_modules = figures.sites.get_student_modules_for_site(site)
         today = datetime.utcnow()
@@ -387,14 +404,14 @@ class MauLiveSiteMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
 
 
 class MauLiveCourseMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
-
     serializer_class = MauCourseMetricsSerializer
 
     def get_queryset(self):
+        """
+        Stub method because ViewSet requires one, even though we are not
+        retrieving querysets directly (we use the query in figures.sites)
+        """
         pass
-        # site = django.contrib.sites.shortcuts.get_current_site(self.request)
-        # queryset = figures.sites.get_users_for_site(site)
-        # return queryset
 
     def retrieve(self, request, *args, **kwargs):
         course_id_str = kwargs.get('pk', '')

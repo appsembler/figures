@@ -20,14 +20,14 @@ router.register(
     base_name='course-daily-metrics')
 
 router.register(
-    r'mau-site-metrics',
-    views.MauSiteMetricsViewSet,
-    base_name='mau-site-metrics')
+    r'mau-live-course-metrics',
+    views.MauLiveCourseMetricsViewSet,
+    base_name='mau-live-course-metrics')
 
 router.register(
-    r'mau-course-metrics',
-    views.MauCourseMetricsViewSet,
-    base_name='mau-course-metrics')
+    r'mau-live-site-metrics',
+    views.MauLiveSiteMetricsViewSet,
+    base_name='mau-live-site-metrics')
 
 router.register(
     r'admin/sites',
