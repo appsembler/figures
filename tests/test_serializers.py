@@ -24,7 +24,8 @@ from figures.serializers import (
     GeneralUserDataSerializer,
     LearnerCourseDetailsSerializer,
     LearnerDetailsSerializer,
-    MauSiteMonthMetricsSerializer,
+    MauCourseMetricsSerializer,
+    MauSiteMetricsSerializer,
     SerializeableCountryField,
     SiteDailyMetricsSerializer,
     UserIndexSerializer,
@@ -38,6 +39,7 @@ from tests.factories import (
     GeneratedCertificateFactory,
     SiteDailyMetricsFactory,
     UserFactory,
+    SiteFactory,
     )
 
 
@@ -506,21 +508,47 @@ class TestUserIndexSerializer(object):
 
 
 @pytest.mark.django_db
-class TestMauSiteMonthMetricsSerializer(object):
+class TestMauCourseMetricsSerializer(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
         pass
 
     def test_serialize(self):
-
+        site = SiteFactory()
+        course_overview = CourseOverviewFactory()
         in_data = dict(
             month_for=datetime.date(2019, 10, 29),
             count=42,
+            course_id=str(course_overview.id),
             domain=u'wookie.example.com'
         )
 
-        serializer = MauSiteMonthMetricsSerializer(in_data)
+        serializer = MauCourseMetricsSerializer(in_data)
+        out_data = serializer.data
+        assert set(out_data.keys()) == set(in_data.keys())
+        assert out_data['count'] == in_data['count']
+        assert dateutil_parse(out_data['month_for']).date() == in_data['month_for']
+        assert out_data['domain'] == in_data['domain']
+        assert out_data['course_id'] == in_data['course_id']
+
+
+@pytest.mark.django_db
+class TestMauSiteMetricsSerializer(object):
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        pass
+
+    def test_serialize(self):
+        site = SiteFactory()
+        in_data = dict(
+            month_for=datetime.date(2019, 10, 29),
+            count=42,
+            domain=site.domain,
+        )
+
+        serializer = MauSiteMetricsSerializer(in_data)
         out_data = serializer.data
         assert set(out_data.keys()) == set(in_data.keys())
         assert out_data['count'] == in_data['count']

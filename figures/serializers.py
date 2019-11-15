@@ -733,13 +733,13 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
             return None
 
 
-class MauSiteMonthMetricsSerializer(serializers.Serializer):
+class MauSiteMetricsSerializer(serializers.Serializer):
     month_for = serializers.DateField()
     count = serializers.IntegerField()
     domain = serializers.CharField()
 
 
-class MauCourseMonthMetricsSerializer(serializers.Serializer):
+class MauCourseMetricsSerializer(serializers.Serializer):
     month_for = serializers.DateField()
     count = serializers.IntegerField()
     course_id = serializers.CharField()
