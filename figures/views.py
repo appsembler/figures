@@ -49,8 +49,8 @@ from figures.serializers import (
     CourseIndexSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
-    MauCourseMonthMetricsSerializer,
-    MauSiteMonthMetricsSerializer,
+    MauCourseMetricsSerializer,
+    MauSiteMetricsSerializer,
     SiteDailyMetricsSerializer,
     SiteSerializer,
     UserIndexSerializer,
@@ -369,9 +369,9 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return context
 
 
-class MauSiteMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
+class MauLiveSiteMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
 
-    serializer_class = MauSiteMonthMetricsSerializer
+    serializer_class = MauSiteMetricsSerializer
 
     def retrieve(self, request, *args, **kwargs):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
@@ -386,9 +386,15 @@ class MauSiteMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
         return Response(serializer.data)
 
 
-class MauCourseMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
+class MauLiveCourseMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
 
-    serializer_class = MauCourseMonthMetricsSerializer
+    serializer_class = MauCourseMetricsSerializer
+
+    def get_queryset(self):
+        pass
+        # site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        # queryset = figures.sites.get_users_for_site(site)
+        # return queryset
 
     def retrieve(self, request, *args, **kwargs):
         course_id_str = kwargs.get('pk', '')

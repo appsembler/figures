@@ -204,7 +204,7 @@ def collect_mau_metrics_for_site(site_id, overwrite=False):
 @shared_task
 def collect_mau_metrics(site_ids=None, overwrite=False, **kwargs):
     """
-    
+    Collect MAU metrics for either all sites or the specified sites
     """
 
     for site_id in figures.sites.site_id_iterator(site_ids or Site.objects.all()):
@@ -220,4 +220,4 @@ def run_month_end_jobs():
     Call this at the end of the month
     Call our end of month metrics collectors here
     """
-    collect_mau_live_metrics()
+    collect_mau_metrics()

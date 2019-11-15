@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from figures.helpers import is_multisite
-from figures.views import MauSiteMetricsViewSet, MauCourseMetricsViewSet
+from figures.views import MauLiveSiteMetricsViewSet, MauLiveCourseMetricsViewSet
 
 from tests.factories import UserFactory
 
@@ -20,13 +20,13 @@ if organizations_support_sites():
 
 
 @pytest.mark.django_db
-class TestMauSiteMetricsViewSet(BaseViewTest):
+class TestMauLiveSiteMetricsViewSet(BaseViewTest):
     request_path = 'api/mau-site-metrics'
-    view_class = MauSiteMetricsViewSet
+    view_class = MauLiveSiteMetricsViewSet
 
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
-        super(TestMauSiteMetricsViewSet, self).setup(db)
+        super(TestMauLiveSiteMetricsViewSet, self).setup(db)
 
         settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         is_ms = is_multisite()
@@ -56,13 +56,13 @@ class TestMauSiteMetricsViewSet(BaseViewTest):
 
 
 @pytest.mark.django_db
-class TestMauCourseMetricsViewSet(BaseViewTest):
+class TestMauLiveCourseMetricsViewSet(BaseViewTest):
     request_path = 'api/mau-course-metrics'
-    view_class = MauCourseMetricsViewSet
+    view_class = MauLiveCourseMetricsViewSet
 
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
-        super(TestMauCourseMetricsViewSet, self).setup(db)
+        super(TestMauLiveCourseMetricsViewSet, self).setup(db)
 
         settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         is_ms = is_multisite()
