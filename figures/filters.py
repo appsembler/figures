@@ -23,7 +23,12 @@ from openedx.core.djangoapps.content.course_overviews.models import (
 from student.models import CourseEnrollment
 
 from figures.pipeline.course_daily_metrics import get_enrolled_in_exclude_admins
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    SiteDailyMetrics,
+    CourseMauMetrics,
+    SiteMauMetrics,
+)
 
 
 def char_method_filter(method):
@@ -178,6 +183,39 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
 
     class Meta:
         model = SiteDailyMetrics
+        fields = ['date_for', 'date']
+
+
+class CourseMauMetricsFilter(django_filters.FilterSet):
+    """Provides filtering for CourseMauMetrics model objects
+
+
+    Use ``date_for`` to retrieve a specific date
+    Use ``date_0`` and ``date_1`` for retrieving values in a date range, inclusive
+    each of these can be used singly to get:
+    * ``date_0`` to get records greater than or equal
+    * ``date_1`` to get records less than or equal
+    """
+    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    class Meta:
+        model = CourseMauMetrics
+        fields = ['date_for', 'date', 'course_id', ]
+
+
+class SiteMauMetricsFilter(django_filters.FilterSet):
+    """Provides filtering for SiteDailyMetrics model objects
+
+    Use ``date_for`` for retrieving a specific date
+    Use ``date_0`` and ``date_1`` for retrieving values in a date range, inclusive
+    each of these can be used singly to get:
+    * ``date_0`` to get records greater than or equal
+    * ``date_1`` to get records less than or equal
+    """
+    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    class Meta:
+        model = SiteMauMetrics
         fields = ['date_for', 'date']
 
 

@@ -36,12 +36,19 @@ from student.models import CourseEnrollment
 from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
+    CourseMauMetricsFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
     SiteFilterSet,
+    SiteMauMetricsFilter,
     UserFilterSet,
 )
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    CourseMauMetrics,
+    SiteDailyMetrics,
+    SiteMauMetrics,
+)
 from figures.serializers import (
     CourseDailyMetricsSerializer,
     CourseDetailsSerializer,
@@ -451,6 +458,42 @@ class MauLiveCourseMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
                              domain=site.domain))
         serializer = self.serializer_class(data, many=True)
         return Response(serializer.data)
+
+
+class SiteMauMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+
+    model = SiteMauMetrics
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = SiteMauMetricsFilter
+
+    def get_queryset(self):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = SiteMauMetrics.objects.filter(site=site)
+        return queryset
+
+
+class CourseMauMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    model = CourseMauMetrics
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = CourseMauMetricsFilter
+
+    def get_queryset(self):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = CourseMauMetrics.objects.filter(site=site)
+        return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
+        # Make it a decorator
+        course_id_str = kwargs.get('pk', '')
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        site = django.contrib.sites.shortcuts.get_current_site(request)
+        if figures.helpers.is_multisite():
+            if site != figures.sites.get_site_for_course(course_key):
+                # Raising NotFound instead of PermissionDenied
+                raise NotFound()
+        course_overview = get_object_or_404(CourseOverview, pk=course_key)
+        return Response(CourseDetailsSerializer(course_overview).data)
 
 
 class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet):

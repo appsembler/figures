@@ -32,8 +32,10 @@ from figures.compat import GeneratedCertificate
 from figures.helpers import as_course_key
 from figures.models import (
     CourseDailyMetrics,
+    CourseMauMetrics,
     LearnerCourseGradeMetrics,
     SiteDailyMetrics,
+    SiteMauMetrics,
 )
 
 from tests.helpers import organizations_support_sites
@@ -227,7 +229,7 @@ class CourseEnrollmentFactory(DjangoModelFactory):
             course_overview = None
             if course_id is not None:
                 if isinstance(course_id, basestring):
-                    course_id = CourseKey.from_string(course_id)
+                    course_id = as_course_key(course_id)
                     course_kwargs.setdefault('id', course_id)
 
                 try:
@@ -297,3 +299,27 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)
     total_enrollment_count = factory.Sequence(lambda n: n)
+
+
+class CourseMauMetricsFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseMauMetrics
+
+    site = factory.SubFactory(SiteFactory)
+    date_for = factory.Sequence(lambda n: (
+        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(
+            tzinfo=utc).date())
+    course_id = factory.Sequence(lambda n: 
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    mau = factory.Sequence(lambda n: n*10)
+
+
+class SiteMauMetricsFactory(DjangoModelFactory):
+    class Meta:
+        model = SiteMauMetrics
+
+    site = factory.SubFactory(SiteFactory)
+    date_for = factory.Sequence(lambda n: (
+        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(
+            tzinfo=utc).date())
+    mau = factory.Sequence(lambda n: n*10)
