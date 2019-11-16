@@ -32,7 +32,7 @@ class TestMauLiveSiteMetricsViewSet(BaseViewTest):
         is_ms = is_multisite()
         assert is_ms
 
-    def test_site_metrics_happy_case(self, monkeypatch, sm_test_data):
+    def test_site_metrics_list(self, monkeypatch, sm_test_data):
 
         site = sm_test_data['site']
         org = sm_test_data['organization']
@@ -49,7 +49,7 @@ class TestMauLiveSiteMetricsViewSet(BaseViewTest):
                             'get_current_site',
                             lambda req: site)
         force_authenticate(request, user=caller)
-        view = self.view_class.as_view({'get': 'retrieve'})
+        view = self.view_class.as_view({'get': 'list'})
         response = view(request)
 
         assert response.status_code == status.HTTP_200_OK

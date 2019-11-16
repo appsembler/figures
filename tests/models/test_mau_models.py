@@ -2,7 +2,7 @@
 from datetime import date
 import pytest
 
-from figures.models import CourseMauMonthlyMetrics, SiteMauMonthlyMetrics
+from figures.models import CourseMauMetrics, SiteMauMetrics
 from tests.factories import CourseOverviewFactory, SiteFactory
 
 
@@ -21,9 +21,9 @@ class TestCourseMauMonthlyMetrics(object):
                    date_for=date_for,
                    mau=42,
         )
-        obj, created = CourseMauMonthlyMetrics.objects.get_or_create(**rec)
+        obj, created = CourseMauMetrics.objects.get_or_create(**rec)
         assert obj and created
-        obj2, created = CourseMauMonthlyMetrics.objects.get_or_create(**rec)
+        obj2, created = CourseMauMetrics.objects.get_or_create(**rec)
         assert obj2 and not created
         assert obj2 == obj
         assert obj.year == date_for.year
@@ -33,13 +33,13 @@ class TestCourseMauMonthlyMetrics(object):
         date_for = date(2019, 10, 29)
         course_id = str(self.course_overview.id)
         data = dict(mau=42)
-        obj, created = CourseMauMonthlyMetrics.save_metrics(site=self.site,
+        obj, created = CourseMauMetrics.save_metrics(site=self.site,
                                                             course_id=course_id,
                                                             date_for=date_for,
                                                             data=data)
         assert obj and created
 
-        obj2, created = CourseMauMonthlyMetrics.save_metrics(site=self.site,
+        obj2, created = CourseMauMetrics.save_metrics(site=self.site,
                                                              course_id=course_id,
                                                              date_for=date_for,
                                                              data=data)
@@ -47,7 +47,7 @@ class TestCourseMauMonthlyMetrics(object):
         assert obj2 == obj
 
         data['mau'] = 104
-        obj3, created = CourseMauMonthlyMetrics.save_metrics(site=self.site,
+        obj3, created = CourseMauMetrics.save_metrics(site=self.site,
                                                              course_id=course_id,
                                                              date_for=date_for,
                                                              data=data,
@@ -59,19 +59,19 @@ class TestCourseMauMonthlyMetrics(object):
         date_for = date(2019, 10, 29)
         course_id = str(self.course_overview.id)
         data = dict(mau=42)
-        obj = CourseMauMonthlyMetrics.objects.latest_for_course_month(site=self.site,
+        obj = CourseMauMetrics.objects.latest_for_course_month(site=self.site,
                                                                       course_id=course_id,
                                                                       year=date_for.year,
                                                                       month=date_for.month)
         assert not obj
-        obj2, created = CourseMauMonthlyMetrics.save_metrics(site=self.site,
+        obj2, created = CourseMauMetrics.save_metrics(site=self.site,
                                                              course_id=course_id,
                                                              date_for=date_for,
                                                              data=data)
 
         # This is just basic. We need to test with multiple records with
         # different modified timestamps to make sure we get the latest
-        obj3 = CourseMauMonthlyMetrics.objects.latest_for_course_month(site=self.site,
+        obj3 = CourseMauMetrics.objects.latest_for_course_month(site=self.site,
                                                                        course_id=course_id,
                                                                        year=date_for.year,
                                                                        month=date_for.month)
@@ -79,7 +79,7 @@ class TestCourseMauMonthlyMetrics(object):
 
 
 @pytest.mark.django_db
-class TestSiteMauMonthlyMetrics(object):
+class TestSiteMauMetrics(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
@@ -91,9 +91,9 @@ class TestSiteMauMonthlyMetrics(object):
                    date_for=date_for,
                    mau=42,
         )
-        obj, created = SiteMauMonthlyMetrics.objects.get_or_create(**rec)
+        obj, created = SiteMauMetrics.objects.get_or_create(**rec)
         assert obj and created
-        obj2, created = SiteMauMonthlyMetrics.objects.get_or_create(**rec)
+        obj2, created = SiteMauMetrics.objects.get_or_create(**rec)
         assert obj2 and not created
         assert obj2 == obj
         assert obj.year == date_for.year
@@ -102,19 +102,19 @@ class TestSiteMauMonthlyMetrics(object):
     def test_save_metrics(self):
         date_for = date(2019, 10, 29)
         data = dict(mau=42)
-        obj, created = SiteMauMonthlyMetrics.save_metrics(site=self.site,
+        obj, created = SiteMauMetrics.save_metrics(site=self.site,
                                                           date_for=date_for,
                                                           data=data)
         assert obj and created
 
-        obj2, created = SiteMauMonthlyMetrics.save_metrics(site=self.site,
+        obj2, created = SiteMauMetrics.save_metrics(site=self.site,
                                                            date_for=date_for,
                                                            data=data)
         assert obj2 and not created
         assert obj2 == obj
 
         data['mau'] = 104
-        obj3, created = SiteMauMonthlyMetrics.save_metrics(site=self.site,
+        obj3, created = SiteMauMetrics.save_metrics(site=self.site,
                                                            date_for=date_for,
                                                            data=data,
                                                            overwrite=True)
@@ -124,18 +124,18 @@ class TestSiteMauMonthlyMetrics(object):
     def test_latest_for_site_month(self):
         date_for = date(2019, 10, 29)
         data = dict(mau=42)
-        obj = SiteMauMonthlyMetrics.objects.latest_for_site_month(site=self.site,
+        obj = SiteMauMetrics.objects.latest_for_site_month(site=self.site,
                                                                   year=date_for.year,
                                                                   month=date_for.month)
         assert not obj
 
-        obj2, created = SiteMauMonthlyMetrics.save_metrics(site=self.site,
+        obj2, created = SiteMauMetrics.save_metrics(site=self.site,
                                                            date_for=date_for,
                                                            data=data)
 
         # This is just basic. We need to test with multiple records with
         # different modified timestamps to make sure we get the latest
-        obj3 = SiteMauMonthlyMetrics.objects.latest_for_site_month(site=self.site,
+        obj3 = SiteMauMetrics.objects.latest_for_site_month(site=self.site,
                                                                    year=date_for.year,
                                                                    month=date_for.month)
         assert obj3 and obj3 == obj2

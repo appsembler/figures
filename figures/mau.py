@@ -5,7 +5,7 @@ This module provides MAU metrics retrieval functionality
 # from datetime import datetime
 from datetime import datetime
 
-from figures.models import CourseMauMonthlyMetrics, SiteMauMonthlyMetrics
+from figures.models import CourseMauMetrics, SiteMauMetrics
 from figures.sites import (
     get_course_keys_for_site,
     get_student_modules_for_site,
@@ -75,10 +75,10 @@ def store_mau_metrics(site, overwrite=False):
                                             month=today.month)
 
     # store site data
-    site_mau_obj, created = SiteMauMonthlyMetrics.save_metrics(site=site,
-                                                               date_for=today.date(),
-                                                               data=dict(mau=site_mau.count()),
-                                                               overwrite=overwrite)
+    site_mau_obj, created = SiteMauMetrics.save_metrics(site=site,
+                                                        date_for=today.date(),
+                                                        data=dict(mau=site_mau.count()),
+                                                        overwrite=overwrite)
     course_mau_objects = []
     for course_key in get_course_keys_for_site(site):
         course_student_modules = student_modules.filter(course_id=course_key)
@@ -86,7 +86,7 @@ def store_mau_metrics(site, overwrite=False):
             student_modules=course_student_modules,
             year=today.year,
             month=today.month)
-        course_mau_obj, created = CourseMauMonthlyMetrics.save_metrics(
+        course_mau_obj, created = CourseMauMetrics.save_metrics(
                 site=site,
                 course_id=str(course_key),
                 date_for=today.date(),

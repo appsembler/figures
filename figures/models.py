@@ -211,7 +211,7 @@ class PipelineError(TimeStampedModel):
         return "{}, {}, {}".format(self.id, self.created, self.error_type)
 
 
-class BaseMonthlyMetricsModel(TimeStampedModel):
+class BaseDateMetricsModel(TimeStampedModel):
     site = models.ForeignKey(Site, default=default_site)
     date_for = models.DateField()
 
@@ -228,8 +228,8 @@ class BaseMonthlyMetricsModel(TimeStampedModel):
         return self.date_for.month
 
 
-class SiteMauMonthlyMetricsManager(models.Manager):
-    """Custom model manager for SiteMauMonthlyMetrics model
+class SiteMauMetricsManager(models.Manager):
+    """Custom model manager for SiteMauMMetrics model
     """
     def latest_for_site_month(self, site, year, month):
         """Return the latest record for the given site, month, and year
@@ -241,10 +241,10 @@ class SiteMauMonthlyMetricsManager(models.Manager):
 
 
 @python_2_unicode_compatible
-class SiteMauMonthlyMetrics(BaseMonthlyMetricsModel):
+class SiteMauMetrics(BaseDateMetricsModel):
 
     mau = models.IntegerField()
-    objects = SiteMauMonthlyMetricsManager()
+    objects = SiteMauMetricsManager()
 
     class Meta:
         unique_together = ('site', 'date_for',)
@@ -257,17 +257,15 @@ class SiteMauMonthlyMetrics(BaseMonthlyMetricsModel):
         """
         if not overwrite:
             try:
-                obj = SiteMauMonthlyMetrics.objects.get(site=site,
-                                                        date_for=date_for)
+                obj = SiteMauMetrics.objects.get(site=site, date_for=date_for)
                 return (obj, False,)
-            except SiteMauMonthlyMetrics.DoesNotExist:
+            except SiteMauMetrics.DoesNotExist:
                 pass
 
-        return SiteMauMonthlyMetrics.objects.update_or_create(site=site,
-                                                              date_for=date_for,
-                                                              defaults=dict(
-                                                                  mau=data['mau']
-                                                              ))
+        return SiteMauMetrics.objects.update_or_create(site=site,
+                                                       date_for=date_for,
+                                                       defaults=dict(
+                                                            mau=data['mau']))
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(self.id,
@@ -276,8 +274,8 @@ class SiteMauMonthlyMetrics(BaseMonthlyMetricsModel):
                                        self.mau)
 
 
-class CourseMauMonthlyMetricsManager(models.Manager):
-    """Custom model manager for CourseMauMonthlyMetrics model
+class CourseMauMetricsManager(models.Manager):
+    """Custom model manager for CourseMauMetrics model
     """
     def latest_for_course_month(self, site, course_id, year, month):
         """Return the latest record for the given site, course_id, month and year
@@ -290,10 +288,10 @@ class CourseMauMonthlyMetricsManager(models.Manager):
 
 
 @python_2_unicode_compatible
-class CourseMauMonthlyMetrics(BaseMonthlyMetricsModel):
+class CourseMauMetrics(BaseDateMetricsModel):
     course_id = models.CharField(max_length=255)
     mau = models.IntegerField()
-    objects = CourseMauMonthlyMetricsManager()
+    objects = CourseMauMetricsManager()
 
     class Meta:
         unique_together = ('site', 'course_id', 'date_for',)
@@ -306,19 +304,18 @@ class CourseMauMonthlyMetrics(BaseMonthlyMetricsModel):
         """
         if not overwrite:
             try:
-                obj = CourseMauMonthlyMetrics.objects.get(site=site,
-                                                          course_id=course_id,
-                                                          date_for=date_for)
+                obj = CourseMauMetrics.objects.get(site=site,
+                                                   course_id=course_id,
+                                                   date_for=date_for)
                 return (obj, False,)
-            except CourseMauMonthlyMetrics.DoesNotExist:
+            except CourseMauMetrics.DoesNotExist:
                 pass
 
-        return CourseMauMonthlyMetrics.objects.update_or_create(site=site,
-                                                                course_id=course_id,
-                                                                date_for=date_for,
-                                                                defaults=dict(
-                                                                    mau=data['mau']
-                                                                ))
+        return CourseMauMetrics.objects.update_or_create(site=site,
+                                                         course_id=course_id,
+                                                         date_for=date_for,
+                                                         defaults=dict(
+                                                            mau=data['mau']))
 
     def __str__(self):
         return '{}, {}, {}, {}, {}'.format(self.id,
