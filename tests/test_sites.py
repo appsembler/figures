@@ -227,7 +227,6 @@ class TestHandlersForMultisiteMode(object):
         # StudentModule for course not in organization
         StudentModuleFactory(course_id=course_overviews[2].id)
 
-
         sm = figures.sites.get_student_modules_for_course_in_site(
             site=self.site, course_id=course_overviews[0].id)
 
@@ -235,6 +234,7 @@ class TestHandlersForMultisiteMode(object):
 
         sm = figures.sites.get_student_modules_for_site(site=self.site)
         assert sm.count() == len(sm_expected) + 1
+
 
 @pytest.mark.skipif(not organizations_support_sites(),
                     reason='Organizations support sites')
@@ -312,6 +312,16 @@ class TestOrganizationsLacksSiteSupport(object):
         with mock.patch('figures.helpers.settings.FEATURES', self.features):
             # orgs = organizations.models.Organization.objects.all()
             # assert orgs
-            # msg = 'Not supposed to have "sites" attribute'
+            msg = 'Not supposed to have "sites" attribute'
             assert not hasattr(
                 organizations.models.Organization, 'sites'), msg
+
+
+@pytest.mark.django_db
+def test_site_iterator():
+    sites = [SiteFactory() for i in range(5)]
+    collected_ids = []
+    for site_id in figures.sites.site_id_iterator(sites):
+        collected_ids.append(site_id)
+
+    assert set(collected_ids) == set([site.id for site in sites])

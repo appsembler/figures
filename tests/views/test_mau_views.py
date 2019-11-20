@@ -6,7 +6,12 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from figures.helpers import is_multisite
-from figures.views import MauSiteMetricsViewSet, MauCourseMetricsViewSet
+from figures.views import (
+    CourseMauLiveMetricsViewSet,
+    CourseMauMetricsViewSet,
+    SiteMauLiveMetricsViewSet,
+    SiteMauMetricsViewSet,
+)
 
 from tests.factories import UserFactory
 
@@ -20,19 +25,19 @@ if organizations_support_sites():
 
 
 @pytest.mark.django_db
-class TestMauSiteMetricsViewSet(BaseViewTest):
-    request_path = 'api/mau-site-metrics'
-    view_class = MauSiteMetricsViewSet
+class TestSiteMauLiveMetricsViewSet(BaseViewTest):
+    request_path = 'api/site-mau-live-metrics'
+    view_class = SiteMauLiveMetricsViewSet
 
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
-        super(TestMauSiteMetricsViewSet, self).setup(db)
+        super(TestSiteMauLiveMetricsViewSet, self).setup(db)
 
         settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         is_ms = is_multisite()
         assert is_ms
 
-    def test_site_metrics_happy_case(self, monkeypatch, sm_test_data):
+    def test_list(self, monkeypatch, sm_test_data):
 
         site = sm_test_data['site']
         org = sm_test_data['organization']
@@ -49,26 +54,26 @@ class TestMauSiteMetricsViewSet(BaseViewTest):
                             'get_current_site',
                             lambda req: site)
         force_authenticate(request, user=caller)
-        view = self.view_class.as_view({'get': 'retrieve'})
+        view = self.view_class.as_view({'get': 'list'})
         response = view(request)
 
         assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
-class TestMauCourseMetricsViewSet(BaseViewTest):
-    request_path = 'api/mau-course-metrics'
-    view_class = MauCourseMetricsViewSet
+class TestCourseMauLiveMetricsViewSet(BaseViewTest):
+    request_path = 'api/course-mau-live-metrics'
+    view_class = CourseMauLiveMetricsViewSet
 
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
-        super(TestMauCourseMetricsViewSet, self).setup(db)
+        super(TestCourseMauLiveMetricsViewSet, self).setup(db)
 
         settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         is_ms = is_multisite()
         assert is_ms
 
-    def test_course_metrics_retrieve(self, monkeypatch, sm_test_data):
+    def test_retrieve(self, monkeypatch, sm_test_data):
         monkeypatch.setattr(django.contrib.sites.shortcuts,
                             'get_current_site',
                             lambda req: site)
@@ -95,7 +100,7 @@ class TestMauCourseMetricsViewSet(BaseViewTest):
         assert response.status_code == status.HTTP_200_OK
         # TODO: Assert data are correct
 
-    def test_course_metrics_list(self, monkeypatch, sm_test_data):
+    def test_list(self, monkeypatch, sm_test_data):
         monkeypatch.setattr(django.contrib.sites.shortcuts,
                             'get_current_site',
                             lambda req: site)
@@ -120,3 +125,75 @@ class TestMauCourseMetricsViewSet(BaseViewTest):
         response = view(request)
         assert response.status_code == status.HTTP_200_OK
         # TODO: Assert data are correct
+
+
+@pytest.mark.django_db
+class TestSiteMauMetricsViewSet(BaseViewTest):
+    request_path = 'api/site-mau-metrics'
+    view_class = SiteMauMetricsViewSet
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db, settings):
+        super(TestSiteMauMetricsViewSet, self).setup(db)
+
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
+        is_ms = is_multisite()
+        assert is_ms
+
+    def test_site_metrics_list(self, monkeypatch, sm_test_data):
+
+        site = sm_test_data['site']
+        org = sm_test_data['organization']
+        if organizations_support_sites():
+            caller = UserFactory()
+            UserOrganizationMappingFactory(user=caller,
+                                           organization=org,
+                                           is_amc_admin=True)
+        else:
+            caller = UserFactory(is_staff=True)
+        request = APIRequestFactory().get(self.request_path)
+        request.META['HTTP_HOST'] = site.domain
+        monkeypatch.setattr(django.contrib.sites.shortcuts,
+                            'get_current_site',
+                            lambda req: site)
+        force_authenticate(request, user=caller)
+        view = self.view_class.as_view({'get': 'list'})
+        response = view(request)
+
+        assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestCourseMauMetricsViewSet(BaseViewTest):
+    request_path = 'api/course-mau-metrics'
+    view_class = CourseMauMetricsViewSet
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db, settings):
+        super(TestCourseMauMetricsViewSet, self).setup(db)
+
+        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
+        is_ms = is_multisite()
+        assert is_ms
+
+    def test_site_metrics_list(self, monkeypatch, sm_test_data):
+
+        site = sm_test_data['site']
+        org = sm_test_data['organization']
+        if organizations_support_sites():
+            caller = UserFactory()
+            UserOrganizationMappingFactory(user=caller,
+                                           organization=org,
+                                           is_amc_admin=True)
+        else:
+            caller = UserFactory(is_staff=True)
+        request = APIRequestFactory().get(self.request_path)
+        request.META['HTTP_HOST'] = site.domain
+        monkeypatch.setattr(django.contrib.sites.shortcuts,
+                            'get_current_site',
+                            lambda req: site)
+        force_authenticate(request, user=caller)
+        view = self.view_class.as_view({'get': 'list'})
+        response = view(request)
+
+        assert response.status_code == status.HTTP_200_OK

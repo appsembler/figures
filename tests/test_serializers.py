@@ -15,18 +15,26 @@ from django.utils.timezone import utc
 
 from student.models import CourseEnrollment
 
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    CourseMauMetrics,
+    SiteDailyMetrics,
+    SiteMauMetrics,
+)
 from figures.serializers import (
     CourseDailyMetricsSerializer,
     CourseDetailsSerializer,
     CourseEnrollmentSerializer,
+    CourseMauMetricsSerializer,
+    CourseMauLiveMetricsSerializer,
     GeneralCourseDataSerializer,
     GeneralUserDataSerializer,
     LearnerCourseDetailsSerializer,
     LearnerDetailsSerializer,
-    MauSiteMonthMetricsSerializer,
     SerializeableCountryField,
     SiteDailyMetricsSerializer,
+    SiteMauMetricsSerializer,
+    SiteMauLiveMetricsSerializer,
     UserIndexSerializer,
 )
 
@@ -34,10 +42,13 @@ from tests.factories import (
     CourseAccessRoleFactory,
     CourseDailyMetricsFactory,
     CourseEnrollmentFactory,
+    CourseMauMetricsFactory,
     CourseOverviewFactory,
     GeneratedCertificateFactory,
     SiteDailyMetricsFactory,
+    SiteMauMetricsFactory,
     UserFactory,
+    SiteFactory,
     )
 
 
@@ -506,13 +517,83 @@ class TestUserIndexSerializer(object):
 
 
 @pytest.mark.django_db
-class TestMauSiteMonthMetricsSerializer(object):
+class TestCourseMauMetricsSerializer(object):
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.model = CourseMauMetrics
+        self.obj = CourseMauMetricsFactory(mau=42)
+        self.serializer_class = CourseMauMetricsSerializer
+
+    def test_serialize(self):
+        serializer = self.serializer_class(self.obj)
+        data = serializer.data
+        assert data['mau'] == self.obj.mau
+        assert data['domain'] == self.obj.site.domain
+        assert data['course_id'] == self.obj.course_id
+        assert dateutil_parse(data['date_for']).date() == self.obj.date_for 
+
+
+@pytest.mark.django_db
+class TestSiteMauMetricsSerializer(object):
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.model = SiteMauMetrics
+        self.obj = SiteMauMetricsFactory(mau=42)
+        self.serializer_class = SiteMauMetricsSerializer
+
+    def test_serialize(self):
+        serializer = self.serializer_class(self.obj)
+        data = serializer.data
+        assert data['mau'] == self.obj.mau
+        assert data['domain'] == self.obj.site.domain
+        assert dateutil_parse(data['date_for']).date() == self.obj.date_for 
+
+
+
+@pytest.mark.django_db
+class TestCourseMauLiveMetricsSerializer(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
         pass
 
     def test_serialize(self):
+        site = SiteFactory()
+        course_overview = CourseOverviewFactory()
+        in_data = dict(
+            month_for=datetime.date(2019, 10, 29),
+            count=42,
+            course_id=str(course_overview.id),
+            domain=u'wookie.example.com'
+        )
+
+        serializer = CourseMauLiveMetricsSerializer(in_data)
+        out_data = serializer.data
+        assert set(out_data.keys()) == set(in_data.keys())
+        assert out_data['count'] == in_data['count']
+        assert dateutil_parse(out_data['month_for']).date() == in_data['month_for']
+        assert out_data['domain'] == in_data['domain']
+        assert out_data['course_id'] == in_data['course_id']
+
+
+@pytest.mark.django_db
+class TestSiteMauLiveMetricsSerializer(object):
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        pass
+
+    def test_serialize(self):
+        site = SiteFactory()
+        in_data = dict(
+            month_for=datetime.date(2019, 10, 29),
+            count=42,
+            domain=site.domain,
+        )
+
+        serializer = SiteMauLiveMetricsSerializer(in_data)
 
         in_data = dict(
             month_for=datetime.date(2019, 10, 29),
@@ -520,7 +601,7 @@ class TestMauSiteMonthMetricsSerializer(object):
             domain=u'wookie.example.com'
         )
 
-        serializer = MauSiteMonthMetricsSerializer(in_data)
+        serializer = SiteMauLiveMetricsSerializer(in_data)
         out_data = serializer.data
         assert set(out_data.keys()) == set(in_data.keys())
         assert out_data['count'] == in_data['count']

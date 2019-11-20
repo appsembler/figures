@@ -20,16 +20,25 @@ from figures.filters import (
     CourseEnrollmentFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
+    CourseMauMetricsFilter,
+    SiteMauMetricsFilter,
     SiteFilterSet,
     UserFilterSet,
 )
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    SiteDailyMetrics,
+    CourseMauMetrics,
+    SiteMauMetrics,
+)
 
 from tests.factories import (
     CourseDailyMetricsFactory,
     CourseEnrollmentFactory,
+    CourseMauMetricsFactory,
     CourseOverviewFactory,
     SiteDailyMetricsFactory,
+    SiteMauMetricsFactory,
     SiteFactory,
     UserFactory,
     )
@@ -208,6 +217,64 @@ class SiteDailyMetricsFilterTest(TestCase):
         self.assertQuerysetEqual(
             f.qs,
             [o.id for o in self.site_daily_metrics if o.date_for == the_date],
+            lambda o: o.id, ordered=False)
+
+
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
+@pytest.mark.django_db
+class CourseMauMetricsFilterTest(TestCase):
+    '''Tests the CourseMauMetricsFilter filter class
+    '''
+    def setUp(self):
+        self.models = [
+            CourseMauMetricsFactory() for i in range(1, 10)
+        ]
+
+    def tearDown(self):
+        pass
+
+    def test_get_by_date(self):
+        the_date_str = '2018-01-02'
+        the_date = dateutil_parse(the_date_str).date()
+
+        f = CourseMauMetricsFilter(
+            queryset=CourseMauMetrics.objects.filter(date_for=the_date))
+
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.models if o.date_for == the_date],
+            lambda o: o.id, ordered=False)
+
+    @pytest.mark.skip("Not implemented yet")
+    def test_get_by_course_id(self):
+        pass
+
+
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
+@pytest.mark.django_db
+class SiteMauMetricsFilterTest(TestCase):
+    '''Tests the SiteDailyMetricsFilter filter class
+    '''
+    def setUp(self):
+        self.models = [
+            SiteMauMetricsFactory() for i in range(1, 10)
+        ]
+
+    def tearDown(self):
+        pass
+
+    def test_get_by_date(self):
+        the_date_str = '2018-01-02'
+        the_date = dateutil_parse(the_date_str).date()
+
+        f = SiteMauMetricsFilter(
+            queryset=SiteMauMetrics.objects.filter(date_for=the_date))
+
+        self.assertQuerysetEqual(
+            f.qs,
+            [o.id for o in self.models if o.date_for == the_date],
             lambda o: o.id, ordered=False)
 
 
