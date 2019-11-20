@@ -44,7 +44,9 @@ from figures.metrics import (
     )
 from figures.models import (
     CourseDailyMetrics,
+    CourseMauMetrics,
     SiteDailyMetrics,
+    SiteMauMetrics,
     LearnerCourseGradeMetrics,
     PipelineError,
     )
@@ -733,13 +735,31 @@ class LearnerDetailsSerializer(serializers.ModelSerializer):
             return None
 
 
-class MauSiteMonthMetricsSerializer(serializers.Serializer):
+class CourseMauMetricsSerializer(serializers.ModelSerializer):
+    domain = serializers.CharField(source='site.domain')
+
+    class Meta:
+        model = CourseMauMetrics
+        exclude = ()
+        fields = ['mau', 'date_for', 'domain', 'course_id']
+
+
+class SiteMauMetricsSerializer(serializers.ModelSerializer):
+    domain = serializers.CharField(source='site.domain')
+
+    class Meta:
+        model = SiteMauMetrics
+        fields = ['mau', 'date_for', 'domain']
+
+
+class SiteMauLiveMetricsSerializer(serializers.Serializer):
+
     month_for = serializers.DateField()
     count = serializers.IntegerField()
     domain = serializers.CharField()
 
 
-class MauCourseMonthMetricsSerializer(serializers.Serializer):
+class CourseMauLiveMetricsSerializer(serializers.Serializer):
     month_for = serializers.DateField()
     count = serializers.IntegerField()
     course_id = serializers.CharField()
