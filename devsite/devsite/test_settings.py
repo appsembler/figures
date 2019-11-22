@@ -6,7 +6,7 @@ Settings file to run automated tests
 from __future__ import absolute_import, unicode_literals
 
 from os.path import abspath, dirname, join
-
+import sys
 from figures.settings.lms_production import update_celerybeat_schedule
 
 
@@ -16,6 +16,8 @@ def root(*args):
     """
     return join(abspath(dirname(__file__)), *args)
 
+
+sys.path.append(root('mocks', 'hawthorn'))
 
 # Set the default Site (django.contrib.sites.models.Site)
 SITE_ID = 1
