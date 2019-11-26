@@ -30,7 +30,7 @@ router.register(
     base_name='site-mau-metrics')
 
 router.register(
-    r'course-mau-live-course-metrics',
+    r'course-mau-live-metrics',
     views.CourseMauLiveMetricsViewSet,
     base_name='course-mau-live-metrics')
 
