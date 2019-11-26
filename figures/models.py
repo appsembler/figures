@@ -63,6 +63,22 @@ class CourseDailyMetrics(TimeStampedModel):
         return "id:{}, date_for:{}, course_id:{}".format(
             self.id, self.date_for, self.course_id)
 
+    @classmethod
+    def latest_previous_record(cls, site, course_id, date_for=None):
+        """
+        Get the most recent record before the given date
+
+        This is a convenience method to retrieve the most recent record before
+        the date given in the `date_for` argument
+        If `date_for` is provided, then the latest date before `date_for` is
+        found
+        """
+        filter_args = dict(site=site, course_id=course_id)
+
+        if date_for:
+            filter_args['date_for__lt'] = date_for
+        return cls.objects.filter(**filter_args).order_by('-date_for').first()
+
 
 @python_2_unicode_compatible
 class SiteDailyMetrics(TimeStampedModel):
@@ -97,6 +113,22 @@ class SiteDailyMetrics(TimeStampedModel):
     def __str__(self):
         return "id:{}, date_for:{}, site:{}".format(
             self.id, self.date_for, self.site.domain)
+
+    @classmethod
+    def latest_previous_record(cls, site, date_for=None):
+        """
+        Get the most recent record before the given date
+
+        This is a convenience method to retrieve the most recent record before
+        the date given in the `date_for` argument
+        If `date_for` is provided, then the latest date before `date_for` is
+        found
+        """
+        filter_args = dict(site=site)
+
+        if date_for:
+            filter_args['date_for__lt'] = date_for
+        return cls.objects.filter(**filter_args).order_by('-date_for').first()
 
 
 class LearnerCourseGradeMetricsManager(models.Manager):

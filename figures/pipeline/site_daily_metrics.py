@@ -67,17 +67,17 @@ def get_site_active_users_for_date(site, date_for):
 
 
 def get_previous_cumulative_active_user_count(site, date_for):
-    ''' Returns the cumulative site-wide active user count for the previous day
+    ''' Returns the previous cumulative site-wide active user count
 
-    This is a simple helper function that returns the cumulative active user
-    count for the day before the given date. Returns 0 if there is no
-    record for the previous day
+    It finds the most recent record before `date_for`. If a record is found,
+    returns the `cumulative_active_user_count` of that records.
+
+    Returns 0 if there is no record for the previous day
     '''
-    try:
-        return SiteDailyMetrics.objects.get(
-            site=site,
-            date_for=prev_day(date_for)).cumulative_active_user_count or 0
-    except SiteDailyMetrics.DoesNotExist:
+    rec = SiteDailyMetrics.latest_previous_record(site=site, date_for=date_for)
+    if rec:
+        return rec.cumulative_active_user_count or 0
+    else:
         return 0
 
 

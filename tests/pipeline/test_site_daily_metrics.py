@@ -15,7 +15,7 @@ from django.utils.timezone import utc
 
 from courseware.models import StudentModule
 
-from figures.helpers import as_datetime, prev_day, is_multisite
+from figures.helpers import as_datetime, prev_day, days_from, is_multisite
 from figures.models import SiteDailyMetrics
 from figures.pipeline import site_daily_metrics as pipeline_sdm
 import figures.sites
@@ -63,7 +63,7 @@ CDM_INPUT_TEST_DATA = [
 ]
 
 # Previous day's SiteDailyMetrics data
-SDM_PREV_DAY = [
+SDM_DATA = [
     None,
     dict(
         cumulative_active_user_count=50,
@@ -163,8 +163,8 @@ class TestSiteDailyMetricsPipelineFunctions(object):
         assert users.count() == get_user_model().objects.count()
 
     @pytest.mark.parametrize('prev_day_data, expected', [
-        (SDM_PREV_DAY[0], 0,),
-        (SDM_PREV_DAY[1], SDM_PREV_DAY[1]['cumulative_active_user_count'],),
+        (SDM_DATA[0], 0,),
+        (SDM_DATA[1], SDM_DATA[1]['cumulative_active_user_count'],),
     ])
     def test_get_previous_cumulative_active_user_count(self, prev_day_data, expected):
         if prev_day_data:
@@ -176,6 +176,17 @@ class TestSiteDailyMetricsPipelineFunctions(object):
             site=self.site,
             date_for=self.date_for)
         assert actual == expected
+
+    def test_get_previous_cumulative_active_user_count_not_yesterday(self):
+        prior_date = days_from(self.date_for, -5)
+        prior_sdm = SiteDailyMetricsFactory(site=self.site,
+                                            date_for=prior_date,
+                                            **SDM_DATA[1])
+        actual = pipeline_sdm.get_previous_cumulative_active_user_count(
+            site=self.site,
+            date_for=self.date_for)
+        assert prior_sdm.cumulative_active_user_count > 0
+        assert actual == prior_sdm.cumulative_active_user_count
 
     def test_get_total_enrollment_count(self):
         expected = SDM_EXPECTED_RESULTS['total_enrollment_count']
@@ -208,7 +219,7 @@ class TestSiteDailyMetricsExtractor(object):
         self.prev_day_sdm = SiteDailyMetricsFactory(
             site=self.site,
             date_for=prev_day(self.date_for),
-            **SDM_PREV_DAY[1])
+            **SDM_DATA[1])
 
         if is_multisite():
             self.organization = OrganizationFactory(sites=[self.site])
