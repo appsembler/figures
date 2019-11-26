@@ -349,7 +349,7 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     base. The only difference between them is the serializer
     '''
     model = get_user_model()
-    pagination_class = FiguresLimitOffsetPagination
+    pagination_class = FiguresKiloPagination
     serializer_class = GeneralUserDataSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = UserFilterSet
