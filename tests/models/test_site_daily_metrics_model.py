@@ -75,3 +75,28 @@ class TestSiteDailyMetrics(object):
         assert SiteDailyMetrics.objects.count() == 1
         # Verify we deleted the correct metrics object
         assert obj == SiteDailyMetrics.objects.first()
+
+    def test_latest_previous_record(self):
+        site = SiteFactory()
+
+        # Create a set of records with non-continuous dates
+        dates = [
+            datetime.date(2019, 10, 1),
+            datetime.date(2019, 10, 2),
+            datetime.date(2019, 10, 5),
+            datetime.date(2019, 10, 29),
+            datetime.date(2019, 11, 3),
+        ]
+        for rec_date in dates:
+            SiteDailyMetricsFactory(site=site, date_for=rec_date)
+
+        rec = SiteDailyMetrics.latest_previous_record(site=site)
+        assert rec.date_for == dates[-1]
+
+        rec2 = SiteDailyMetrics.latest_previous_record(site=site,
+                                                       date_for=dates[-1])
+        assert rec2.date_for == dates[-2]
+
+        rec3 = SiteDailyMetrics.latest_previous_record(site=site,
+                                                       date_for=dates[0])
+        assert not rec3
