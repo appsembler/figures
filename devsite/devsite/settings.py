@@ -32,7 +32,7 @@ SITE_ID = 1
 
 # Adds the mock edx-platform modules to the Python module search path
 sys.path.append(
-    os.path.normpath(os.path.join(PROJECT_ROOT_DIR, 'tests/mocks'))
+    os.path.normpath(os.path.join(PROJECT_ROOT_DIR, 'mocks/hawthorn'))
     )
 
 INSTALLED_APPS = [
