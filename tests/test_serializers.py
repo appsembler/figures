@@ -463,11 +463,12 @@ class TestLearnerDetailsSerializer(object):
         because we can't guarentee order. See:
             https://docs.python.org/2/library/stdtypes.html#dict.items
         '''
-        expected_fields = set(['id', 'username', 'name', 'country', 'is_active',
-            'profile_image', 'courses', 'year_of_birth', 'gender', 'email',
-            'level_of_education', 'language_proficiencies', 'date_joined',])
+        expected_fields = set([
+        'id', 'username', 'name', 'email', 'country', 'is_active', 'year_of_birth',
+        'level_of_education', 'gender', 'date_joined', 'bio', 'courses',
+        'language_proficiencies', 'profile_image'
+        ])
         data = self.serializer.data
-
         assert set(data.keys()) == expected_fields
         
         # This is to make sure that the serializer retrieves the correct nested

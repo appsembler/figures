@@ -285,9 +285,9 @@ class TestLearnerDetailsViewSetMultisite(BaseViewTest):
                                        organization=self.other_site_org)
 
         self.expected_result_keys = [
-            'id', 'username', 'name', 'country', 'is_active', 'gender', 'email',
-            'date_joined', 'year_of_birth', 'level_of_education', 'courses',
-            'language_proficiencies', 'profile_image',
+            'id', 'username', 'name', 'email', 'country', 'is_active',
+            'year_of_birth', 'level_of_education', 'gender', 'date_joined',
+            'bio', 'courses', 'language_proficiencies', 'profile_image'
         ]
 
     def test_serializer(self):
@@ -317,7 +317,6 @@ class TestLearnerDetailsViewSetMultisite(BaseViewTest):
         view = self.view_class.as_view({'get': 'retrieve'})
         response = view(request, pk=user.id)
         assert len(response.data['courses']) == expected_enrollments.count()
-
 
     def test_get_learner_details_list(self):
         """Tests retrieving a list of users with abbreviated details
