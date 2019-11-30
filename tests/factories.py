@@ -313,7 +313,7 @@ class CourseMauMetricsFactory(DjangoModelFactory):
     date_for = factory.Sequence(lambda n: (
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(
             tzinfo=utc).date())
-    course_id = factory.Sequence(lambda n: 
+    course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     mau = factory.Sequence(lambda n: n*10)
 
@@ -352,5 +352,4 @@ class CohortMembershipFactory(DjangoModelFactory):
 
     course_user_group = factory.SubFactory(CourseUserGroupFactory)
     user = factory.SubFactory(UserFactory)
-    course_id = factory.Sequence(lambda n: as_course_key(
-        COURSE_ID_STR_TEMPLATE.format(n)))
+    course_id = factory.SelfAttribute('course_user_group.course_id')
