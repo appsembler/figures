@@ -102,7 +102,10 @@ class LearnerCourseGrades(object):
         self.course = get_course_by_id(course_key=as_course_key(course_id))
         self.course._field_data_cache = {}  # pylint: disable=protected-access
         self.course.set_grading_policy(self.course.grading_policy)
-        self.course_grade = CourseGradeFactory().read(self.learner, self.course)
+
+        # This method is 'read' in Hawthorn
+        # TODO: Make conditional
+        self.course_grade = CourseGradeFactory().create(self.learner, self.course)
 
     def __str__(self):
         return u'{} - {} - {} '.format(
