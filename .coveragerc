@@ -3,4 +3,3 @@ omit =
     setup.py
     tests/*
     mocks/*
-
