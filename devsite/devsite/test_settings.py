@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # Also note the paths set in edx-figures/pytest.ini
     'courseware',
     'openedx.core.djangoapps.content.course_overviews',
+    'openedx.core.djangoapps.course_groups',
     'student',
     'organizations',
 ]

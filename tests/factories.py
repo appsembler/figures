@@ -20,7 +20,10 @@ from factory.django import DjangoModelFactory
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-
+from openedx.core.djangoapps.course_groups.models import (
+    CourseUserGroup,
+    CohortMembership,
+)
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
 from courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
@@ -73,6 +76,7 @@ class UserFactory(DjangoModelFactory):
 
     username = factory.Sequence(lambda n: 'user{}'.format(n))
     password = factory.PostGenerationMethodCall('set_password', 'password')
+    email = factory.LazyAttribute(lambda a: '{0}@example.com'.format(a.username))
     is_active = True
     is_staff = False
     is_superuser = False
@@ -309,7 +313,7 @@ class CourseMauMetricsFactory(DjangoModelFactory):
     date_for = factory.Sequence(lambda n: (
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(
             tzinfo=utc).date())
-    course_id = factory.Sequence(lambda n: 
+    course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     mau = factory.Sequence(lambda n: n*10)
 
@@ -323,3 +327,29 @@ class SiteMauMetricsFactory(DjangoModelFactory):
         datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(
             tzinfo=utc).date())
     mau = factory.Sequence(lambda n: n*10)
+
+
+class CourseUserGroupFactory(DjangoModelFactory):
+    class Meta:
+        model = CourseUserGroup
+    name = factory.Sequence(lambda n: "CourseTeam #%s" % n)
+    course_id = factory.Sequence(lambda n: as_course_key(
+        COURSE_ID_STR_TEMPLATE.format(n)))
+    group_type = CourseUserGroup.COHORT
+
+    @factory.post_generation
+    def users(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for user in extracted:
+                self.users.add(user)
+
+
+class CohortMembershipFactory(DjangoModelFactory):
+    class Meta:
+        model = CohortMembership
+
+    course_user_group = factory.SubFactory(CourseUserGroupFactory)
+    user = factory.SubFactory(UserFactory)
+    course_id = factory.SelfAttribute('course_user_group.course_id')

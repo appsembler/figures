@@ -92,3 +92,16 @@ class CourseGrade(object):
         self.letter_grade = letter_grade or None
         self.chapter_grades = kwargs.get('chapter_grades',
             create_chapter_grades())
+
+    @property
+    def summary(self):
+        """
+        Returns the grade summary as calculated by the course's grader.
+        DEPRECATED: To be removed as part of TNL-5291.
+        """
+        # TODO(TNL-5291) Remove usages of this deprecated property.
+        # grade_summary = self.grader_result
+        grade_summary = {}
+        grade_summary['percent'] = self.percent
+        grade_summary['grade'] = self.letter_grade
+        return grade_summary

@@ -21,9 +21,16 @@ class UserProfile(models.Model):
     '''
     The production model is student.models.UserProfile
     '''
-    user = models.OneToOneField(User, unique=True, db_index=True, related_name='profile')
+    user = models.OneToOneField(User, unique=True, db_index=True,
+                                related_name='profile', on_delete=models.CASCADE)
     name = models.CharField(blank=True, max_length=255, db_index=True)
-    country = CountryField(blank=True, null=True)
+    meta = models.TextField(blank=True)  # JSON dictionary for future expansion
+    courseware = models.CharField(blank=True, max_length=255, default='course.xml')
+
+    # Location is no longer used, but is held here for backwards compatibility
+    # for users imported from our first class.
+    language = models.CharField(blank=True, max_length=255, db_index=True)
+    location = models.CharField(blank=True, max_length=255, db_index=True)
 
     # Optional demographic data we started capturing from Fall 2012
     this_year = datetime.now(UTC).year
@@ -61,7 +68,12 @@ class UserProfile(models.Model):
         blank=True, null=True, max_length=6, db_index=True,
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
-
+    mailing_address = models.TextField(blank=True, null=True)
+    city = models.TextField(blank=True, null=True)
+    country = CountryField(blank=True, null=True)
+    goals = models.TextField(blank=True, null=True)
+    allow_certificate = models.BooleanField(default=1)
+    bio = models.CharField(blank=True, null=True, max_length=3000, db_index=False)
     profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
 
     @property
@@ -74,6 +86,35 @@ class UserProfile(models.Model):
 
 
 class CourseEnrollmentManager(models.Manager):
+
+    def num_enrolled_in_exclude_admins(self, course_id):
+        """
+        Returns the count of active enrollments in a course excluding instructors, staff and CCX coaches.
+
+        Arguments:
+            course_id (CourseLocator): course_id to return enrollments (count).
+
+        Returns:
+            int: Count of enrollments excluding staff, instructors and CCX coaches.
+
+        """
+        # To avoid circular imports.
+        from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
+        course_locator = course_id
+
+        if getattr(course_id, 'ccx', None):
+            # We don't use CCX, so raising exception rather than support it
+            raise Exception('CCX is not supported')
+
+        staff = CourseStaffRole(course_locator).users_with_role()
+        admins = CourseInstructorRole(course_locator).users_with_role()
+        coaches = CourseCcxCoachRole(course_locator).users_with_role()
+
+        qs = super(CourseEnrollmentManager, self).get_queryset()
+        q2 = qs.filter(course_id=course_id, is_active=1)
+        q3 = q2.exclude(user__in=staff).exclude(user__in=admins).exclude(user__in=coaches)
+        return q3.count()
+
     def enrollment_counts(self, course_id):
 
         query = super(CourseEnrollmentManager, self).get_queryset().filter(
