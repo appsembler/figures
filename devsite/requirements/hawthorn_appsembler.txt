@@ -59,15 +59,15 @@ git+https://github.com/appsembler/edx-organizations.git@0.4.12-appsembler4
 ## Test dependencies
 ##
 
-coverage==4.5.1
+coverage==4.5.4
 factory-boy==2.5.1
-flake8==3.7.7
-pylint==1.8.2
-pylint-django==0.9.1
+flake8==3.7.9
+pylint==1.9.5
+pylint-django==0.11.1
 pytest==3.1.3
 pytest-django==3.1.2
 pytest-mock==1.7.1
 pytest-pythonpath==0.7.2
 pytest-cov==2.6.0
-tox==3.7.0
+tox==3.14.2
 freezegun==0.3.12
