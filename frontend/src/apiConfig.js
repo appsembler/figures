@@ -8,6 +8,7 @@ const apiConfig = {
   coursesDetailed: '/figures/api/courses/detail/',
   learnersGeneral: '/figures/api/users/general/',
   learnersDetailed: '/figures/api/users/detail/',
+  reportingCsvReportsApi: '/reporting/api/csv-reports/',
 }
 
 export default apiConfig;

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { fetchCoursesIndex, fetchUserIndex, fetchGeneralData } from 'base/redux/actions/Actions';
+import { fetchCoursesIndex, fetchUserIndex, fetchGeneralData, fetchAllCsvReportsData } from 'base/redux/actions/Actions';
 import ReactCSSTransitionReplace from 'react-css-transition-replace';
 import LoadingSpinner from 'base/containers/loading-spinner/LoadingSpinner';
 import DashboardContent from 'base/views/DashboardContent';
@@ -9,6 +9,7 @@ import MauDetailsContent from 'base/views/MauDetailsContent';
 import SingleCourseContent from 'base/views/SingleCourseContent';
 import SingleUserContent from 'base/views/SingleUserContent';
 import ReportsList from 'base/views/ReportsList';
+import CsvReports from 'base/views/CsvReports';
 import SingleReportContent from 'base/views/SingleReportContent';
 import 'base/sass/base/_base-overrides.scss';
 import styles from 'base/sass/base/_grid.scss';
@@ -19,6 +20,7 @@ class App extends Component {
     this.props.fetchCoursesIndex();
     this.props.fetchUserIndex();
     this.props.fetchGeneralData();
+    this.props.fetchAllCsvReportsData();
   }
 
   render() {
@@ -38,6 +40,7 @@ class App extends Component {
                   <Route exact path="/figures" component={DashboardContent} />
                   <Route exact path="/figures/mau-history" component={MauDetailsContent} />
                   <Route exact path="/figures/reports" component={ReportsList} />
+                  <Route exact path="/figures/csv-reports" component={CsvReports} />
                   <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseId={match.params.courseId} />}/>
                   <Route path="/figures/user/:userId" render={({ match }) => <SingleUserContent userId={match.params.userId} />}/>
                   <Route path="/figures/report/:reportId" render={({ match }) => <SingleReportContent reportId={match.params.reportId} />}/>
@@ -60,6 +63,7 @@ const mapDispatchToProps = dispatch => ({
   fetchCoursesIndex: () => dispatch(fetchCoursesIndex()),
   fetchUserIndex: () => dispatch(fetchUserIndex()),
   fetchGeneralData: () => dispatch(fetchGeneralData()),
+  fetchAllCsvReportsData: () => dispatch(fetchAllCsvReportsData()),
 })
 
 export default connect(

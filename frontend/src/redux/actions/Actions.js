@@ -130,3 +130,60 @@ export function fetchGeneralData() {
       .then(dispatch(removeActiveApiFetch()))
   }
 }
+
+export function fetchAllCsvReportsData() {
+  return dispatch => {
+    dispatch(fetchCsvUserReports());
+    dispatch(fetchCsvGradeReports());
+    dispatch(fetchCsvCourseMetricsReports());
+    return
+  }
+}
+
+export const loadCsvUserReportsData = ( ReportsData ) => ({
+  type: types.LOAD_CSV_USER_REPORTS_DATA,
+  fetchedData: ReportsData,
+  receivedAt: Date.now()
+})
+
+export function fetchCsvUserReports() {
+  return dispatch => {
+    dispatch(addActiveApiFetch())
+    return fetch(apiConfig.reportingCsvReportsApi + '?report_type=LEARNER_DEMOGRAPHICS', { credentials: "same-origin" })
+      .then(response => response.json())
+      .then (json => dispatch(loadCsvUserReportsData(json)))
+      .then(dispatch(removeActiveApiFetch()))
+  }
+}
+
+export const loadCsvGradeReportsData = ( ReportsData ) => ({
+  type: types.LOAD_CSV_GRADE_REPORTS_DATA,
+  fetchedData: ReportsData,
+  receivedAt: Date.now()
+})
+
+export function fetchCsvGradeReports() {
+  return dispatch => {
+    dispatch(addActiveApiFetch())
+    return fetch(apiConfig.reportingCsvReportsApi + '?report_type=ENROLLMENT_GRADES', { credentials: "same-origin" })
+      .then(response => response.json())
+      .then (json => dispatch(loadCsvGradeReportsData(json)))
+      .then(dispatch(removeActiveApiFetch()))
+  }
+}
+
+export const loadCsvCourseMetricsReportsData = ( ReportsData ) => ({
+  type: types.LOAD_CSV_COURSE_METRICS_REPORTS_DATA,
+  fetchedData: ReportsData,
+  receivedAt: Date.now()
+})
+
+export function fetchCsvCourseMetricsReports() {
+  return dispatch => {
+    dispatch(addActiveApiFetch())
+    return fetch(apiConfig.reportingCsvReportsApi + '?report_type=REPORT_COURSE_METRICS', { credentials: "same-origin" })
+      .then(response => response.json())
+      .then (json => dispatch(loadCsvCourseMetricsReportsData(json)))
+      .then(dispatch(removeActiveApiFetch()))
+  }
+}
