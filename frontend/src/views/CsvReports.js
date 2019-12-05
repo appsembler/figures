@@ -5,7 +5,6 @@ import Select from 'react-select';
 import styles from './_csv-reports-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import HeaderContentCsvReports from 'base/components/header-views/header-content-csv-reports/HeaderContentCsvReports';
-import apiConfig from 'base/apiConfig';
 
 import classNames from 'classnames/bind';
 let cx = classNames.bind(styles);
