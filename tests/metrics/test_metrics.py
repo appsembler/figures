@@ -283,6 +283,33 @@ class TestSiteMetricsGettersStandalone(object):
                                                  end_date=self.data_end_date)
         assert count == len(student_module_sets)
 
+    def test_get_active_users_for_month(self):
+        date_before = datetime.date(2019, 8, 30)
+        dates_in = [
+            datetime.date(2019, 9, 1),
+            datetime.date(2019, 9, 15),
+            datetime.date(2019, 9, 30)
+        ]
+        start_date = dates_in[0]
+        end_date = dates_in[-1]
+        date_after = datetime.date(2019, 10, 1)
+        sm_out = [
+            StudentModuleFactory(modified=figures.helpers.as_datetime(date_before)),
+            StudentModuleFactory(modified=figures.helpers.as_datetime(date_after)),
+        ]
+        sm_in = []
+        for date_rec in dates_in:
+            sm_in.append(StudentModuleFactory(modified=figures.helpers.as_datetime(date_rec)))
+
+        # We do this to make sure that we have a duplicate we don't count in the total
+        sm_in.append(StudentModuleFactory(student=sm_in[0].student,
+                                          modified=figures.helpers.as_datetime(dates_in[-1])))
+
+        count = get_active_users_for_time_period(site=self.site,
+                                                 start_date=start_date,
+                                                 end_date=end_date)
+        assert count == len(sm_in) -1
+
     def test_get_total_site_users_for_time_period(self):
         '''
         TODO: add users who joined before and after the time period, and
