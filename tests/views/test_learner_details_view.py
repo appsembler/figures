@@ -154,9 +154,9 @@ class TestLearnerDetailsViewSetStandalone(BaseViewTest):
         ]
 
         self.expected_result_keys = [
-            'id', 'username', 'name', 'country', 'is_active', 'gender', 'email',
-            'date_joined', 'year_of_birth', 'level_of_education', 'courses',
-            'language_proficiencies', 'profile_image',
+            'id', 'username', 'name', 'email', 'country', 'is_active',
+            'year_of_birth', 'level_of_education', 'gender', 'date_joined',
+            'bio', 'courses', 'language_proficiencies', 'profile_image'
         ]
 
     def test_serializer(self):
