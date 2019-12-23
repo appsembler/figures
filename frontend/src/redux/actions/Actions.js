@@ -1,16 +1,7 @@
 import fetch from 'cross-fetch';
 import * as types from './ActionTypes';
 import apiConfig from 'base/apiConfig';
-
-// set number of active API data fetching processes in Redux
-
-export const addActiveApiFetch = () => ({
-  type: types.ADD_ACTIVE_API_FETCH
-})
-
-export const removeActiveApiFetch = () => ({
-  type: types.REMOVE_ACTIVE_API_FETCH
-})
+import { trackPromise } from 'react-promise-tracker';
 
 // course index data related Redux actions
 
@@ -22,11 +13,11 @@ export const loadCoursesIndex = ( coursesData ) => ({
 
 export function fetchCoursesIndex () {
   return dispatch => {
-    dispatch(addActiveApiFetch())
-    return fetch(apiConfig.coursesGeneral, { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => dispatch(loadCoursesIndex(json['results'])))
-      .then(dispatch(removeActiveApiFetch()));
+    return trackPromise(
+      fetch(apiConfig.coursesGeneral, { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => dispatch(loadCoursesIndex(json['results'])))
+    )
   }
 }
 
@@ -41,11 +32,11 @@ export const loadUserIndex = ( coursesData ) => ({
 
 export function fetchUserIndex () {
   return dispatch => {
-    dispatch(addActiveApiFetch())
-    return fetch(apiConfig.learnersGeneral, { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => dispatch(loadUserIndex(json.results)))
-      .then(dispatch(removeActiveApiFetch()));
+    return trackPromise(
+      fetch(apiConfig.learnersGeneral, { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => dispatch(loadUserIndex(json.results)))
+    )
   }
 }
 
@@ -90,9 +81,11 @@ export const loadReport = ( reportId, reportData ) => ({
 export function fetchReport(reportId) {
   return dispatch => {
     dispatch(requestReport(reportId))
-    return fetch(testSingleReportApiURL, { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => dispatch(loadReport(reportId, json)))
+    return trackPromise(
+      fetch(testSingleReportApiURL, { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => dispatch(loadReport(reportId, json)))
+    )
   }
 }
 
@@ -109,9 +102,11 @@ export const loadReportsList = ( reportsData ) => ({
 export function fetchReportsList(userId) {
   return dispatch => {
     dispatch(requestReportsList())
-    return fetch(testReportsListApiURL, { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => dispatch(loadReportsList(json)))
+    return trackPromise(
+      fetch(testReportsListApiURL, { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => dispatch(loadReportsList(json)))
+    )
   }
 }
 
@@ -123,10 +118,10 @@ export const loadGeneralData = ( generalData ) => ({
 
 export function fetchGeneralData() {
   return dispatch => {
-    dispatch(addActiveApiFetch())
-    return fetch(apiConfig.generalSiteMetrics, { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => dispatch(loadGeneralData(json)))
-      .then(dispatch(removeActiveApiFetch()))
+    return trackPromise(
+      fetch(apiConfig.generalSiteMetrics, { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => dispatch(loadGeneralData(json)))
+    )
   }
 }
