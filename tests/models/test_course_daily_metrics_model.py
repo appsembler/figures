@@ -18,7 +18,11 @@ from opaque_keys.edx.locator import CourseLocator
 
 from figures.models import CourseDailyMetrics
 
-from tests.factories import SiteFactory
+from tests.factories import (
+    CourseDailyMetricsFactory,
+    CourseOverviewFactory,
+    SiteFactory,
+)
 
 
 @pytest.mark.django_db
@@ -231,3 +235,36 @@ class TestCourseDailyMetrics(object):
         and that the course_id is also not an empty string
         '''
         pass
+
+    def test_latest_previous_record(self):
+        course_overview = CourseOverviewFactory()
+
+        # Create a set of records with non-continuous dates
+        dates = [
+            datetime.date(2019, 10, 1),
+            datetime.date(2019, 10, 2),
+            datetime.date(2019, 10, 5),
+            datetime.date(2019, 10, 29),
+            datetime.date(2019, 11, 3),
+        ]
+        for rec_date in dates:
+            cdms = CourseDailyMetricsFactory(site=self.site,
+                                             course_id = course_overview.id,
+                                             date_for=rec_date)
+
+        rec = CourseDailyMetrics.latest_previous_record(
+            site=self.site,
+            course_id=course_overview.id)
+        assert rec.date_for == dates[-1]
+
+        rec2 = CourseDailyMetrics.latest_previous_record(
+            site=self.site,
+            course_id=course_overview.id,
+            date_for=dates[-1])
+        assert rec2.date_for == dates[-2]
+
+        rec3 = CourseDailyMetrics.latest_previous_record(
+            site=self.site,
+            course_id=course_overview.id,
+            date_for=dates[0])
+        assert not rec3

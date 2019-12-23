@@ -20,10 +20,48 @@ import organizations
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
+from courseware.models import StudentModule
 from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key
 import figures.helpers
+
+
+class CrossSiteResourceError(Exception):
+    """
+    Raised when a cross site resource access is attempted
+    """
+    pass
+
+
+class CourseNotInSiteError(CrossSiteResourceError):
+    """
+    Raise when an attempt to access a course not in the specified site
+    """
+    pass
+
+
+def site_to_id(site):
+    """
+    Helper to cast site or site id to id
+    This is helpful for celery tasks that require primitives for
+    function parameters
+    """
+    if isinstance(site, Site):
+        return site.id
+    else:
+        return site
+
+
+def site_id_iterator(sites_or_site_ids):
+    """
+    Convenience method to iterate over site or site id iterables.
+
+    This is helpful for iterating over site objects or site ids for
+    Celery tasks
+    """
+    for obj in sites_or_site_ids:
+        yield site_to_id(obj)
 
 
 def default_site():
@@ -128,3 +166,18 @@ def get_users_for_site(site):
 def get_course_enrollments_for_site(site):
     course_keys = get_course_keys_for_site(site)
     return CourseEnrollment.objects.filter(course_id__in=course_keys)
+
+
+def get_student_modules_for_course_in_site(site, course_id):
+    if figures.helpers.is_multisite():
+        site_id = site.id
+        check_site = get_site_for_course(course_id)
+        if not check_site or site_id != check_site.id:
+            CourseNotInSiteError('course "{}"" does not belong to site "{}"'.format(
+                course_id, site_id))
+    return StudentModule.objects.filter(course_id=course_id)
+
+
+def get_student_modules_for_site(site):
+    course_ids = get_course_keys_for_site(site)
+    return StudentModule.objects.filter(course_id__in=course_ids)

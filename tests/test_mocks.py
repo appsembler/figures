@@ -1,14 +1,14 @@
-'''
+"""
 This module tests the mocks and test factories
-'''
+"""
 
-import datetime
 import pytest
-import pytz
 
 from tests.factories import (
+    CohortMembershipFactory,
     CourseEnrollmentFactory,
     CourseOverviewFactory,
+    CourseUserGroupFactory,
     GeneratedCertificateFactory,
     StudentModuleFactory,
     )
@@ -16,46 +16,43 @@ from tests.factories import (
 
 @pytest.mark.django_db
 class TestCourseEnrollment(object):
-
-    @pytest.fixture(autouse=True)
-    def setup(self, db):
-        pass
-
-
     def test_create_default_factory(self):
-        cert =  CourseEnrollmentFactory()
+        obj = CourseEnrollmentFactory()
+        assert obj
 
 
 @pytest.mark.django_db
 class TestCourseOverview(object):
-    @pytest.fixture(autouse=True)
-    def setup(self, db):
-        pass
-
     def test_create_default_factory(self):
-        course_overview = CourseOverviewFactory()
+        obj = CourseOverviewFactory()
+        assert obj
 
 
 @pytest.mark.django_db
 class TestGeneratedCertificate(object):
-
-    @pytest.fixture(autouse=True)
-    def setup(self, db):
-        pass
-
     def test_create_default_factory(self):
-        cert =  GeneratedCertificateFactory()
-        assert cert
+        obj = GeneratedCertificateFactory()
+        assert obj
 
 
 @pytest.mark.django_db
 class TestStudentModule(object):
-    @pytest.fixture(autouse=True)
-    def setup(self, db):
-        pass
-
     def test_create_student_module_factory(self):
         obj = StudentModuleFactory()
+        assert obj
+
+
+@pytest.mark.django_db
+class TestCourseUserGroup(object):
+    def test_create_course_user_group_factory(self):
+        obj = CourseUserGroupFactory()
+        assert obj
+
+
+@pytest.mark.django_db
+class TestCohortMembership(object):
+    def test_create_cohort_membership_factory(self):
+        obj = CohortMembershipFactory()
         assert obj
 
 # TODO: Add test for UserProfile

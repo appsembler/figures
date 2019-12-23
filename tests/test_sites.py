@@ -43,6 +43,7 @@ from tests.factories import (
     OrganizationFactory,
     OrganizationCourseFactory,
     SiteFactory,
+    StudentModuleFactory,
     UserFactory,
 )
 from tests.helpers import organizations_support_sites
@@ -203,6 +204,37 @@ class TestHandlersForMultisiteMode(object):
         assert set([ce.id for ce in course_enrollments]) == set(
                    [ce.id for ce in expected_ce])
 
+    def test_get_student_modules_for_course_in_site(self):
+        course_overviews = [CourseOverviewFactory() for i in range(3)]
+
+        for co in course_overviews[:-1]:
+            OrganizationCourseFactory(organization=self.organization,
+                                      course_id=str(co.id))
+
+        assert get_user_model().objects.count() == 0
+        user = UserFactory()
+        UserOrganizationMappingFactory(user=user,
+                                       organization=self.organization)
+
+        sm_count = 2
+        sm_expected = [StudentModuleFactory(course_id=course_overviews[0].id,
+                                            student=user
+                                            ) for i in range(sm_count)]
+
+        # StudentModule for other course
+        StudentModuleFactory(course_id=course_overviews[1].id)
+
+        # StudentModule for course not in organization
+        StudentModuleFactory(course_id=course_overviews[2].id)
+
+        sm = figures.sites.get_student_modules_for_course_in_site(
+            site=self.site, course_id=course_overviews[0].id)
+
+        assert sm.count() == len(sm_expected)
+
+        sm = figures.sites.get_student_modules_for_site(site=self.site)
+        assert sm.count() == len(sm_expected) + 1
+
 
 @pytest.mark.skipif(not organizations_support_sites(),
                     reason='Organizations support sites')
@@ -280,6 +312,16 @@ class TestOrganizationsLacksSiteSupport(object):
         with mock.patch('figures.helpers.settings.FEATURES', self.features):
             # orgs = organizations.models.Organization.objects.all()
             # assert orgs
-            # msg = 'Not supposed to have "sites" attribute'
+            msg = 'Not supposed to have "sites" attribute'
             assert not hasattr(
                 organizations.models.Organization, 'sites'), msg
+
+
+@pytest.mark.django_db
+def test_site_iterator():
+    sites = [SiteFactory() for i in range(5)]
+    collected_ids = []
+    for site_id in figures.sites.site_id_iterator(sites):
+        collected_ids.append(site_id)
+
+    assert set(collected_ids) == set([site.id for site in sites])

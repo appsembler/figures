@@ -2,9 +2,12 @@
 
 """
 
-import pytest
-
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+
+from openedx.core.djangoapps.content.course_overviews.models import (
+    CourseOverview,
+)
 
 from figures.helpers import as_date
 from figures.models import (
@@ -13,6 +16,7 @@ from figures.models import (
     SiteDailyMetrics,
     )
 import figures.tasks
+import figures.mau
 
 from tests.factories import (
     CourseDailyMetricsFactory,
@@ -20,11 +24,6 @@ from tests.factories import (
     SiteFactory,
     SiteDailyMetricsFactory,
     )
-
-
-@pytest.fixture()
-def extracted_data():
-    return dict()
 
 
 def test_populate_single_cdm(transactional_db, monkeypatch):
@@ -64,14 +63,17 @@ def test_populate_site_daily_metrics(transactional_db, monkeypatch):
 
 def test_populate_daily_metrics_error(transactional_db, monkeypatch):
     date_for = '2019-01-02'
+    error_message = dict(message=[u'expected failure'])
+    assert not CourseOverview.objects.count()
 
     def mock_get_courses(site):
-        return [CourseOverviewFactory()]
+        CourseOverviewFactory()
+        return CourseOverview.objects.all()
 
     def mock_pop_single_cdm_fails(**kwargs):
         # TODO: test with different exceptions
         # At least one with and without `message_dict`
-        raise ValidationError(message={'message': 'expected failure'})
+        raise ValidationError(message=error_message)
 
     assert SiteDailyMetrics.objects.count() == 0
     assert CourseDailyMetrics.objects.count() == 0
@@ -79,11 +81,11 @@ def test_populate_daily_metrics_error(transactional_db, monkeypatch):
         figures.sites, 'get_courses_for_site', mock_get_courses)
     monkeypatch.setattr(
         figures.tasks, 'populate_single_cdm', mock_pop_single_cdm_fails)
-
     assert PipelineError.objects.count() == 0
-    with pytest.raises(Exception):
-        figures.tasks.populate_daily_metrics(date_for=date_for)
+    figures.tasks.populate_daily_metrics(date_for=date_for)
     assert PipelineError.objects.count() == 1
+    error_data = PipelineError.objects.first().error_data
+    assert error_data['message_dict']['message'] == error_message['message']
 
 
 def test_populate_daily_metrics_multisite(transactional_db, monkeypatch):
@@ -97,3 +99,33 @@ def test_populate_daily_metrics_multisite(transactional_db, monkeypatch):
         ))
 
         figures.tasks.populate_daily_metrics(date_for=date_for)
+
+
+def test_collect_mau_metrics_for_site(transactional_db, monkeypatch):
+    expected_site = SiteFactory()
+
+    def mock_store_mau_metrics(site, overwrite=False):
+        assert site
+
+    monkeypatch.setattr('figures.tasks.store_mau_metrics', mock_store_mau_metrics)
+
+    figures.tasks.collect_mau_metrics_for_site(expected_site.id)
+
+
+def test_collect_mau_metrics(transactional_db, monkeypatch):
+    """
+    Very minimal test
+    """
+    assert Site.objects.count() == 1
+    sites = [Site.objects.first()]
+    sites += [SiteFactory() for i in range(3)]
+    sites_visited = []
+
+    def mock_store_mau_metrics(site, overwrite=False):
+        sites_visited.append(site)
+
+    monkeypatch.setattr('figures.tasks.store_mau_metrics', mock_store_mau_metrics)
+
+    figures.tasks.collect_mau_metrics()
+
+    assert set([site.id for site in sites_visited]) == set([site.id for site in sites])

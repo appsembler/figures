@@ -231,11 +231,15 @@ def get_active_users_for_time_period(site, start_date, end_date, course_ids=None
 
     This is determined by finding the unique user ids for StudentModule records
     modified in a time period
+
+    We don't do this only because it raises timezone warnings
+        modified__range=(as_date(start_date), as_date(end_date)),
     """
     # Get list of learners for the site
+
     user_ids = figures.sites.get_user_ids_for_site(site)
     filter_args = dict(
-        created__gt=as_datetime(prev_day(start_date)),
+        modified__gt=as_datetime(prev_day(start_date)),
         modified__lt=as_datetime(next_day(end_date)),
         student_id__in=user_ids,
     )
