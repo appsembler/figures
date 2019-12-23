@@ -18,7 +18,6 @@ from tests.factories import UserFactory
 from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
 
-# from tests.test_mau import sm_test_data  # noqa: F401
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
@@ -32,10 +31,6 @@ class TestSiteMauLiveMetricsViewSet(BaseViewTest):
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
         super(TestSiteMauLiveMetricsViewSet, self).setup(db)
-
-        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
-        is_ms = is_multisite()
-        assert is_ms
 
     def test_list(self, monkeypatch, sm_test_data):
 
@@ -68,10 +63,6 @@ class TestCourseMauLiveMetricsViewSet(BaseViewTest):
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
         super(TestCourseMauLiveMetricsViewSet, self).setup(db)
-
-        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
-        is_ms = is_multisite()
-        assert is_ms
 
     def test_retrieve(self, monkeypatch, sm_test_data):
         monkeypatch.setattr(django.contrib.sites.shortcuts,
@@ -136,10 +127,6 @@ class TestSiteMauMetricsViewSet(BaseViewTest):
     def setup(self, db, settings):
         super(TestSiteMauMetricsViewSet, self).setup(db)
 
-        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
-        is_ms = is_multisite()
-        assert is_ms
-
     def test_site_metrics_list(self, monkeypatch, sm_test_data):
 
         site = sm_test_data['site']
@@ -171,10 +158,6 @@ class TestCourseMauMetricsViewSet(BaseViewTest):
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
         super(TestCourseMauMetricsViewSet, self).setup(db)
-
-        settings.FEATURES['FIGURES_IS_MULTISITE'] = True
-        is_ms = is_multisite()
-        assert is_ms
 
     def test_site_metrics_list(self, monkeypatch, sm_test_data):
 

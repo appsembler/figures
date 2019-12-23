@@ -93,7 +93,13 @@ class AutoCompleteCourseSelect extends Component {
     })
 
     const renderSuggestion = suggestion => (
-      <Link className={styles['suggestion-link']} to={'/figures/course/' + suggestion.courseId} onClick={this.modalTrigger}><span className={styles['suggestion-link__course-id']}>{suggestion.courseNumber}</span><span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span></Link>
+      <Link className={styles['suggestion-link']} to={'/figures/course/' + suggestion.courseId} onClick={this.modalTrigger}>
+        <div className={styles['suggestion-link__link-upper']}>
+          <span className={styles['suggestion-link__course-number']}>{suggestion.courseNumber}</span>
+          <span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span>
+        </div>
+        <span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span>
+      </Link>
     );
 
 

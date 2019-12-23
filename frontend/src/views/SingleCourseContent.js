@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
-import { addActiveApiFetch, removeActiveApiFetch } from 'base/redux/actions/Actions';
+import { trackPromise } from 'react-promise-tracker';
 import classNames from 'classnames/bind';
 import styles from './_single-course-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
@@ -30,19 +30,22 @@ class SingleCourseContent extends Component {
   }
 
   fetchCourseData = () => {
-    this.props.addActiveApiFetch();
-    fetch((apiConfig.coursesDetailed + this.props.courseId + '/'), { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => this.setState({
-        courseData: Immutable.fromJS(json)
-      }, () => this.props.removeActiveApiFetch()))
+    trackPromise(
+      fetch((apiConfig.coursesDetailed + this.props.courseId + '/'), { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => this.setState({
+          courseData: Immutable.fromJS(json)
+        })
+      )
+    )
   }
 
   fetchLearnersData = () => {
-    this.props.addActiveApiFetch();
-    fetch((this.state.apiFetchMoreLearnersUrl === null) ? (apiConfig.learnersDetailed + '?enrolled_in_course_id=' + this.props.courseId) : this.state.apiFetchMoreLearnersUrl, { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => this.setLearnersData(json['results'], json['next']))
+    trackPromise(
+      fetch((this.state.apiFetchMoreLearnersUrl === null) ? (apiConfig.learnersDetailed + '?enrolled_in_course_id=' + this.props.courseId) : this.state.apiFetchMoreLearnersUrl, { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => this.setLearnersData(json['results'], json['next']))
+    )
   }
 
   setLearnersData = (results, paginationNext) => {
@@ -51,7 +54,7 @@ class SingleCourseContent extends Component {
       allLearnersLoaded: paginationNext === null,
       learnersList: tempLearners,
       apiFetchMoreLearnersUrl: paginationNext
-    }, () => this.props.removeActiveApiFetch())
+    })
   }
 
   componentDidMount() {
@@ -72,6 +75,10 @@ class SingleCourseContent extends Component {
             learnersEnrolled = {this.state.courseData.getIn(['learners_enrolled'])}
           />
         </HeaderAreaLayout>
+        <div className={cx({ 'container': true, 'course-quick-links': true})}>
+          <span className={styles['course-quick-links__line']}></span>
+          <a href={"/courses/" + this.props.courseId} target="_blank" className={styles['course-quick-links__link']}>Open this course in LMS</a>
+        </div>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
             cardTitle='Number of enrolled learners'
@@ -114,8 +121,7 @@ const mapStateToProps = (state, ownProps) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  addActiveApiFetch: () => dispatch(addActiveApiFetch()),
-  removeActiveApiFetch: () => dispatch(removeActiveApiFetch()),
+
 })
 
 export default connect(

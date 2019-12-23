@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styles from './_stat-bar-graph.scss';
-import { ResponsiveContainer, BarChart, Bar, Tooltip, CartesianGrid, YAxis } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, Tooltip, CartesianGrid, YAxis, XAxis } from 'recharts';
 
 
 class CustomTooltip extends Component {
@@ -34,6 +34,10 @@ class StatBarGraph extends Component {
       }
     }
 
+    const xAxisTickFormatter = (value) => {
+      return `${value}`;
+    }
+
     return (
       <ResponsiveContainer className={styles['stat-bar-graph']} width="100%" height={this.props.graphHeight}>
         <BarChart
@@ -51,6 +55,7 @@ class StatBarGraph extends Component {
           />
           <Bar className={styles['stat-bar']} dataKey='value' stroke='none' />
           <YAxis className="test" tickFormatter={yAxisTickFormatter} />
+          <XAxis className="test" dataKey='period' tickFormatter={xAxisTickFormatter} />
         </BarChart>
       </ResponsiveContainer>
     );
