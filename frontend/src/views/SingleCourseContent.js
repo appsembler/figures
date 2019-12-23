@@ -75,6 +75,10 @@ class SingleCourseContent extends Component {
             learnersEnrolled = {this.state.courseData.getIn(['learners_enrolled'])}
           />
         </HeaderAreaLayout>
+        <div className={cx({ 'container': true, 'course-quick-links': true})}>
+          <span className={styles['course-quick-links__line']}></span>
+          <a href={"/courses/" + this.props.courseId} target="_blank" className={styles['course-quick-links__link']}>Open this course in LMS</a>
+        </div>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
             cardTitle='Number of enrolled learners'
