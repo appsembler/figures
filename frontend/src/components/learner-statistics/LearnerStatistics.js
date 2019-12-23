@@ -157,9 +157,9 @@ class LearnerStatistics extends Component {
 
   render() {
     const dropdownOptions = List([
-      { value: 'gender', label: 'By gender' },
       { value: 'country', label: 'By country' },
       { value: 'education', label: 'By education level' },
+      { value: 'gender', label: 'By gender' },
     ])
 
     return (
@@ -191,7 +191,7 @@ class LearnerStatistics extends Component {
 
 LearnerStatistics.defaultProps = {
   listTitle: 'Learner statistics:',
-  breakdownType: 'gender',
+  breakdownType: 'country',
 }
 
 LearnerStatistics.propTypes = {
