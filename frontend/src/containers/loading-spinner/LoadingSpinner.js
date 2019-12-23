@@ -6,6 +6,8 @@ import classNames from 'classnames/bind';
 
 let cx = classNames.bind(styles);
 
+const appsemblerBlue = '#0090c1';
+
 const LoadingSpinner = props => {
 
   const { promiseInProgress } = usePromiseTracker();
@@ -16,7 +18,7 @@ const LoadingSpinner = props => {
         <div className={styles['spinner-container']}>
           <div className={styles['spinner-container__content']}>
             <HashLoader
-              color={'#0090c1'}
+              color={appsemblerBlue}
             />
             <span>Loading your data...</span>
           </div>
