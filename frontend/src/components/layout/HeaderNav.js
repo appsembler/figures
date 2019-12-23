@@ -21,7 +21,7 @@ class HeaderNav extends Component {
         >
           MAU History
         </NavLink>
-        {(process.env.ENABLE_CSV_REPORTS == "enabled") && (
+        {(process.env.ENABLE_CSV_REPORTS === "enabled") && (
           <NavLink
             to="/figures/csv-reports"
             className={styles['header-nav__link']}

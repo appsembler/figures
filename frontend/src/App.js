@@ -20,7 +20,7 @@ class App extends Component {
     this.props.fetchCoursesIndex();
     this.props.fetchUserIndex();
     this.props.fetchGeneralData();
-    this.props.fetchAllCsvReportsData();
+    (process.env.ENABLE_CSV_REPORTS === "enabled") && this.props.fetchAllCsvReportsData();
   }
 
   render() {
@@ -40,10 +40,11 @@ class App extends Component {
                   <Route exact path="/figures" component={DashboardContent} />
                   <Route exact path="/figures/mau-history" component={MauDetailsContent} />
                   <Route exact path="/figures/reports" component={ReportsList} />
-                  {(process.env.ENABLE_CSV_REPORTS == "enabled") && <Route exact path="/figures/csv-reports" component={CsvReports} />}
+                  {(process.env.ENABLE_CSV_REPORTS === "enabled") && <Route exact path="/figures/csv-reports" component={CsvReports} />}
                   <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseId={match.params.courseId} />}/>
                   <Route path="/figures/user/:userId" render={({ match }) => <SingleUserContent userId={match.params.userId} />}/>
                   <Route path="/figures/report/:reportId" render={({ match }) => <SingleReportContent reportId={match.params.reportId} />}/>
+                  <Route component={DashboardContent} />
                 </Switch>
               </div>
             </ReactCSSTransitionReplace>
