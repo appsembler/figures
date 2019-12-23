@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
-import { addActiveApiFetch, removeActiveApiFetch } from 'base/redux/actions/Actions';
+import { trackPromise } from 'react-promise-tracker';
 import classNames from 'classnames/bind';
 import styles from './_single-user-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
@@ -44,12 +44,13 @@ class SingleUserContent extends Component {
   }
 
   fetchUserData = () => {
-    this.props.addActiveApiFetch();
-    fetch((apiConfig.learnersDetailed + this.props.userId + '/'), { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => this.setState({
-        userData: Immutable.fromJS(json)
-      }, () => this.props.removeActiveApiFetch()))
+    trackPromise(
+      fetch((apiConfig.learnersDetailed + this.props.userId + '/'), { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => this.setState({
+          userData: Immutable.fromJS(json)
+        }))
+    )
   }
 
   componentDidMount() {
@@ -125,8 +126,7 @@ const mapStateToProps = (state, ownProps) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  addActiveApiFetch: () => dispatch(addActiveApiFetch()),
-  removeActiveApiFetch: () => dispatch(removeActiveApiFetch()),
+
 })
 
 export default connect(

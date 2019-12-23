@@ -13,6 +13,7 @@ import SingleReportContent from 'base/views/SingleReportContent';
 import 'base/sass/base/_base-overrides.scss';
 import styles from 'base/sass/base/_grid.scss';
 
+
 class App extends Component {
 
   componentDidMount() {
@@ -22,10 +23,9 @@ class App extends Component {
   }
 
   render() {
+
     return (
-      <LoadingSpinner
-        displaySpinner = {!(this.props.activeApiFetches === 0)}
-      >
+      <LoadingSpinner>
         <main id="main" className={styles['layout-root']}>
           <Route render={ ({location}) => (
             <ReactCSSTransitionReplace
