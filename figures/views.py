@@ -1,6 +1,6 @@
-'''
+"""Figures views
+"""
 
-'''
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django.contrib.sites.shortcuts
@@ -33,23 +33,34 @@ from student.models import CourseEnrollment
 from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
+    CourseMauMetricsFilter,
     CourseOverviewFilter,
     SiteDailyMetricsFilter,
     SiteFilterSet,
+    SiteMauMetricsFilter,
     UserFilterSet,
 )
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    CourseMauMetrics,
+    SiteDailyMetrics,
+    SiteMauMetrics,
+)
 from figures.serializers import (
     CourseDailyMetricsSerializer,
     CourseDetailsSerializer,
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
+    CourseMauMetricsSerializer,
+    CourseMauLiveMetricsSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
+    SiteMauMetricsSerializer,
+    SiteMauLiveMetricsSerializer,
     SiteSerializer,
     UserIndexSerializer,
-    GeneralUserDataSerializer
+    GeneralUserDataSerializer,
 )
 from figures import metrics
 from figures.pagination import (
@@ -59,6 +70,10 @@ from figures.pagination import (
 import figures.permissions
 import figures.helpers
 import figures.sites
+from figures.mau import (
+    retrieve_live_course_mau_data,
+    retrieve_live_site_mau_data,
+)
 
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
@@ -334,7 +349,7 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     base. The only difference between them is the serializer
     '''
     model = get_user_model()
-    pagination_class = FiguresLimitOffsetPagination
+    pagination_class = FiguresKiloPagination
     serializer_class = GeneralUserDataSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = UserFilterSet
@@ -361,6 +376,92 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         context = super(LearnerDetailsViewSet, self).get_serializer_context()
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
         return context
+
+
+class CourseMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
+    serializer_class = CourseMauLiveMetricsSerializer
+
+    def get_queryset(self):
+        """
+        Stub method because ViewSet requires one, even though we are not
+        retrieving querysets directly (we use the query in figures.sites)
+        """
+        pass
+
+    def retrieve(self, request, *args, **kwargs):
+        course_id_str = kwargs.get('pk', '')
+        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+
+        if figures.helpers.is_multisite():
+            if site != figures.sites.get_site_for_course(course_key):
+                # Raising NotFound instead of PermissionDenied
+                raise NotFound()
+        data = retrieve_live_course_mau_data(site, course_key)
+        serializer = self.serializer_class(data)
+        return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        course_overviews = figures.sites.get_courses_for_site(site)
+        data = []
+        for co in course_overviews:
+            data.append(retrieve_live_course_mau_data(site, co.id))
+        serializer = self.serializer_class(data, many=True)
+        return Response(serializer.data)
+
+
+class SiteMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
+    """
+    Retrieve live MAU site metrics for the site called
+
+    TODO: Potential future improvement is to display single site if the
+    caller is a site admin for the given site and for all sites (paginated?)
+    if the caller is a host (provider) level user
+    """
+    serializer_class = SiteMauLiveMetricsSerializer
+
+    def get_queryset(self):
+        """
+        Stub method because ViewSet requires one, even though we are not
+        retrieving querysets directly (we use the query in figures.sites)
+        """
+        pass
+
+    def list(self, request, *args, **kwargs):
+        """
+        We use list instead of retrieve because retrieve requires a resource
+        identifier, like a PK
+        """
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        data = retrieve_live_site_mau_data(site)
+        serializer = self.serializer_class(data)
+        return Response(serializer.data)
+
+
+class CourseMauMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    model = CourseMauMetrics
+    serializer_class = CourseMauMetricsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = CourseMauMetricsFilter
+
+    def get_queryset(self):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = CourseMauMetrics.objects.filter(site=site)
+        return queryset
+
+
+class SiteMauMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+
+    model = SiteMauMetrics
+    serializer_class = SiteMauMetricsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = SiteMauMetricsFilter
+
+    def get_queryset(self):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = SiteMauMetrics.objects.filter(site=site)
+        return queryset
 
 
 class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet):

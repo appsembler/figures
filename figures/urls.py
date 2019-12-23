@@ -10,14 +10,35 @@ from figures import views
 router = routers.DefaultRouter()
 
 router.register(
+    r'course-daily-metrics',
+    views.CourseDailyMetricsViewSet,
+    base_name='course-daily-metrics')
+
+router.register(
     r'site-daily-metrics',
     views.SiteDailyMetricsViewSet,
     base_name='site-daily-metrics')
 
 router.register(
-    r'course-daily-metrics',
-    views.CourseDailyMetricsViewSet,
-    base_name='course-daily-metrics')
+    r'course-mau-metrics',
+    views.CourseMauMetricsViewSet,
+    base_name='course-mau-metrics')
+
+router.register(
+    r'site-mau-metrics',
+    views.SiteMauMetricsViewSet,
+    base_name='site-mau-metrics')
+
+router.register(
+    r'course-mau-live-metrics',
+    views.CourseMauLiveMetricsViewSet,
+    base_name='course-mau-live-metrics')
+
+router.register(
+    r'site-mau-live-metrics',
+    views.SiteMauLiveMetricsViewSet,
+    base_name='site-mau-live-metrics')
+
 
 router.register(
     r'admin/sites',

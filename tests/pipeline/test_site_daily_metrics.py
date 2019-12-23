@@ -13,11 +13,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
+from courseware.models import StudentModule
 
-from figures.helpers import as_datetime, prev_day, is_multisite
+from figures.helpers import as_datetime, prev_day, days_from, is_multisite
 from figures.models import SiteDailyMetrics
 from figures.pipeline import site_daily_metrics as pipeline_sdm
 import figures.sites
@@ -28,6 +26,7 @@ from tests.factories import (
     OrganizationFactory,
     OrganizationCourseFactory,
     SiteDailyMetricsFactory,
+    StudentModuleFactory,
     UserFactory,
 )
 
@@ -64,7 +63,7 @@ CDM_INPUT_TEST_DATA = [
 ]
 
 # Previous day's SiteDailyMetrics data
-SDM_PREV_DAY = [
+SDM_DATA = [
     None,
     dict(
         cumulative_active_user_count=50,
@@ -132,7 +131,7 @@ class TestCourseDailyMetricsMissingCdm(object):
 
 
 @pytest.mark.django_db
-class TestCourseDailyMetricsPipelineFunctions(object):
+class TestSiteDailyMetricsPipelineFunctions(object):
     '''
     Run tests on standalone methods in pipeline.site_daily_metrics
     '''
@@ -146,16 +145,26 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             **cdm
             ) for cdm in CDM_INPUT_TEST_DATA]
 
-    def test_get_active_user_count_for_date(self):
-        expected = SDM_EXPECTED_RESULTS['todays_active_user_count']
-        actual = pipeline_sdm.get_active_user_count_for_date(
-            site=self.site,
-            date_for=self.date_for)
-        assert actual == expected
+    def test_get_active_user_count_for_date(self, monkeypatch):
+        assert not get_user_model().objects.count()
+        assert not StudentModule.objects.count()
+        modified = as_datetime(self.date_for)
+
+        def mock_student_modules_for_site(site):
+            for user in [UserFactory() for i in range(2)]:
+                StudentModuleFactory(student=user, modified=modified)
+                StudentModuleFactory(student=user, modified=modified)
+            return StudentModule.objects.all()
+
+        monkeypatch.setattr(pipeline_sdm, 'get_student_modules_for_site',
+                            mock_student_modules_for_site)
+        users = pipeline_sdm.get_site_active_users_for_date(site=self.site,
+                                                            date_for=self.date_for)
+        assert users.count() == get_user_model().objects.count()
 
     @pytest.mark.parametrize('prev_day_data, expected', [
-        (SDM_PREV_DAY[0], 0,),
-        (SDM_PREV_DAY[1], SDM_PREV_DAY[1]['cumulative_active_user_count'],),
+        (SDM_DATA[0], 0,),
+        (SDM_DATA[1], SDM_DATA[1]['cumulative_active_user_count'],),
     ])
     def test_get_previous_cumulative_active_user_count(self, prev_day_data, expected):
         if prev_day_data:
@@ -167,6 +176,17 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             site=self.site,
             date_for=self.date_for)
         assert actual == expected
+
+    def test_get_previous_cumulative_active_user_count_not_yesterday(self):
+        prior_date = days_from(self.date_for, -5)
+        prior_sdm = SiteDailyMetricsFactory(site=self.site,
+                                            date_for=prior_date,
+                                            **SDM_DATA[1])
+        actual = pipeline_sdm.get_previous_cumulative_active_user_count(
+            site=self.site,
+            date_for=self.date_for)
+        assert prior_sdm.cumulative_active_user_count > 0
+        assert actual == prior_sdm.cumulative_active_user_count
 
     def test_get_total_enrollment_count(self):
         expected = SDM_EXPECTED_RESULTS['total_enrollment_count']
@@ -199,7 +219,7 @@ class TestSiteDailyMetricsExtractor(object):
         self.prev_day_sdm = SiteDailyMetricsFactory(
             site=self.site,
             date_for=prev_day(self.date_for),
-            **SDM_PREV_DAY[1])
+            **SDM_DATA[1])
 
         if is_multisite():
             self.organization = OrganizationFactory(sites=[self.site])
@@ -211,14 +231,27 @@ class TestSiteDailyMetricsExtractor(object):
                     UserOrganizationMappingFactory(user=user,
                                                    organization=self.organization)
 
-    def test_extract(self):
+    def test_extract(self, monkeypatch):
         expected_results = dict(
-            cumulative_active_user_count=65,
-            todays_active_user_count=15,
+            cumulative_active_user_count=52,  # previous cumulative is 50
+            todays_active_user_count=2,
             total_user_count=len(self.users),
             course_count=len(CDM_INPUT_TEST_DATA),
             total_enrollment_count=150,
         )
+
+        assert not StudentModule.objects.count()
+        modified = as_datetime(self.date_for)
+
+        def mock_student_modules_for_site(site):
+            users = [UserFactory() for i in range(2)]
+            for user in users:
+                StudentModuleFactory(student=user, modified=modified)
+                StudentModuleFactory(student=user, modified=modified)
+            return StudentModule.objects.filter(student__in=users)
+
+        monkeypatch.setattr(pipeline_sdm, 'get_student_modules_for_site',
+                            mock_student_modules_for_site)
 
         for course in figures.sites.get_courses_for_site(self.site):
             assert course.created.date() < self.date_for
@@ -266,10 +299,6 @@ class TestSiteDailyMetricsLoader(object):
         for key, value in self.FIELD_VALUES.iteritems():
             assert getattr(sdm, key) == value, 'failed on key: "{}"'.format(key)
 
-
+    @pytest.mark.skip('Test stub')
     def test_no_course_overviews(self):
-        """
-
-        """
-        assert SiteDailyMetrics.objects.count() == 0
-        loader = pipeline_sdm.SiteDailyMetricsLoader
+        pass

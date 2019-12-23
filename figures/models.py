@@ -13,6 +13,14 @@ from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 
 
+def default_site():
+    """
+    Wrapper aroung `django.conf.settings.SITE_ID` so we do not have to create a
+    new migration if we change how we get the default site ID
+    """
+    return settings.SITE_ID
+
+
 @python_2_unicode_compatible
 class CourseDailyMetrics(TimeStampedModel):
     """Metrics data specific to an individual course
@@ -55,6 +63,22 @@ class CourseDailyMetrics(TimeStampedModel):
         return "id:{}, date_for:{}, course_id:{}".format(
             self.id, self.date_for, self.course_id)
 
+    @classmethod
+    def latest_previous_record(cls, site, course_id, date_for=None):
+        """
+        Get the most recent record before the given date
+
+        This is a convenience method to retrieve the most recent record before
+        the date given in the `date_for` argument
+        If `date_for` is provided, then the latest date before `date_for` is
+        found
+        """
+        filter_args = dict(site=site, course_id=course_id)
+
+        if date_for:
+            filter_args['date_for__lt'] = date_for
+        return cls.objects.filter(**filter_args).order_by('-date_for').first()
+
 
 @python_2_unicode_compatible
 class SiteDailyMetrics(TimeStampedModel):
@@ -89,6 +113,22 @@ class SiteDailyMetrics(TimeStampedModel):
     def __str__(self):
         return "id:{}, date_for:{}, site:{}".format(
             self.id, self.date_for, self.site.domain)
+
+    @classmethod
+    def latest_previous_record(cls, site, date_for=None):
+        """
+        Get the most recent record before the given date
+
+        This is a convenience method to retrieve the most recent record before
+        the date given in the `date_for` argument
+        If `date_for` is provided, then the latest date before `date_for` is
+        found
+        """
+        filter_args = dict(site=site)
+
+        if date_for:
+            filter_args['date_for__lt'] = date_for
+        return cls.objects.filter(**filter_args).order_by('-date_for').first()
 
 
 class LearnerCourseGradeMetricsManager(models.Manager):
@@ -201,3 +241,117 @@ class PipelineError(TimeStampedModel):
 
     def __str__(self):
         return "{}, {}, {}".format(self.id, self.created, self.error_type)
+
+
+class BaseDateMetricsModel(TimeStampedModel):
+    site = models.ForeignKey(Site, default=default_site)
+    date_for = models.DateField()
+
+    class Meta:
+        abstract = True
+        ordering = ['-date_for']
+
+    @property
+    def year(self):
+        return self.date_for.year
+
+    @property
+    def month(self):
+        return self.date_for.month
+
+
+class SiteMauMetricsManager(models.Manager):
+    """Custom model manager for SiteMauMMetrics model
+    """
+    def latest_for_site_month(self, site, year, month):
+        """Return the latest record for the given site, month, and year
+        If no record found, returns 'None'
+        """
+        return self.filter(site=site,
+                           date_for__year=year,
+                           date_for__month=month).order_by('-modified').first()
+
+
+@python_2_unicode_compatible
+class SiteMauMetrics(BaseDateMetricsModel):
+
+    mau = models.IntegerField()
+    objects = SiteMauMetricsManager()
+
+    class Meta:
+        unique_together = ('site', 'date_for',)
+
+    @classmethod
+    def save_metrics(cls, site, date_for, data, overwrite=False):
+        """
+        Convenience method to save metrics data with option to
+        overwrite an existing record
+        """
+        if not overwrite:
+            try:
+                obj = SiteMauMetrics.objects.get(site=site, date_for=date_for)
+                return (obj, False,)
+            except SiteMauMetrics.DoesNotExist:
+                pass
+
+        return SiteMauMetrics.objects.update_or_create(site=site,
+                                                       date_for=date_for,
+                                                       defaults=dict(
+                                                            mau=data['mau']))
+
+    def __str__(self):
+        return '{}, {}, {}, {}'.format(self.id,
+                                       self.site.domain,
+                                       self.date_for,
+                                       self.mau)
+
+
+class CourseMauMetricsManager(models.Manager):
+    """Custom model manager for CourseMauMetrics model
+    """
+    def latest_for_course_month(self, site, course_id, year, month):
+        """Return the latest record for the given site, course_id, month and year
+        If no record found, returns 'None'
+        """
+        return self.filter(site=site,
+                           course_id=course_id,
+                           date_for__year=year,
+                           date_for__month=month).order_by('-modified').first()
+
+
+@python_2_unicode_compatible
+class CourseMauMetrics(BaseDateMetricsModel):
+    course_id = models.CharField(max_length=255)
+    mau = models.IntegerField()
+    objects = CourseMauMetricsManager()
+
+    class Meta:
+        unique_together = ('site', 'course_id', 'date_for',)
+
+    @classmethod
+    def save_metrics(cls, site, course_id, date_for, data, overwrite=False):
+        """
+        Convenience method to save metrics data with option to
+        overwrite an existing record
+        """
+        if not overwrite:
+            try:
+                obj = CourseMauMetrics.objects.get(site=site,
+                                                   course_id=course_id,
+                                                   date_for=date_for)
+                return (obj, False,)
+            except CourseMauMetrics.DoesNotExist:
+                pass
+
+        return CourseMauMetrics.objects.update_or_create(site=site,
+                                                         course_id=course_id,
+                                                         date_for=date_for,
+                                                         defaults=dict(
+                                                            mau=data['mau']))
+
+    def __str__(self):
+        return '{}, {}, {}, {}, {}'.format(self.id,
+                                           self.site.domain,
+                                           self.course_id,
+                                           self.date_for,
+                                           self.mau)

@@ -71,6 +71,7 @@ class TestLearnerCourseGradeMetricsAdmin(object):
             LearnerCourseGradeMetrics, self.admin_site)
         monkeypatch.setattr(figures.admin, 'reverse', mock_reverse)
         data = admin_obj.user_link(lcg_metrics[0])
-        assert data == '<a href="{url}"></a>'.format(url=mock_uri)
+        assert data == '<a href="{url}">{email}</a>'.format(url=mock_uri,
+                                                            email=lcg_metrics[0].user.email)
         data = admin_obj.user_link(LearnerCourseGradeMetricsFactory(user=None))
         assert data == 'no user in this record'

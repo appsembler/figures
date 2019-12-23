@@ -13,7 +13,11 @@ from django.db.models import Sum
 
 from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
-import figures.sites
+from figures.sites import (
+    get_courses_for_site,
+    get_users_for_site,
+    get_student_modules_for_site,
+)
 
 
 #
@@ -38,7 +42,7 @@ def missing_course_daily_metrics(site, date_for):
         CourseDailyMetrics.objects.filter(site=site, date_for=date_for)
     ]
 
-    site_course_overviews = figures.sites.get_courses_for_site(site)
+    site_course_overviews = get_courses_for_site(site)
     course_overviews = site_course_overviews.filter(
         created__lt=as_datetime(next_day(date_for))).exclude(id__in=cdm_course_keys)
 
@@ -49,34 +53,31 @@ def missing_course_daily_metrics(site, date_for):
 # Standalone methods to extract data/aggregate data for use in SiteDailyMetrics
 #
 
-def get_active_user_count_for_date(site, date_for, course_daily_metrics=None):
+def get_site_active_users_for_date(site, date_for):
     '''
+    Get the active users ids for the given site and date
 
-    Do we have course daily metrics for the date_for?
-    If so, we can use the data there,
-    else, we need to calculate it or raise that we don't have data we need
+    We do this by filtering StudentModule for courses in the site, then
+    for StudentModule records filtered for the date, then we get the distinct
+    user ids
     '''
-    aggregates = CourseDailyMetrics.objects.filter(
-        site=site, date_for=date_for).aggregate(Sum('active_learners_today'))
-    if aggregates and 'active_learners_today__sum' in aggregates:
-        todays_active_user_count = aggregates['active_learners_today__sum'] or 0
-    else:
-        todays_active_user_count = 0
-    return todays_active_user_count
+    student_modules = get_student_modules_for_site(site)
+    return student_modules.filter(modified__date=date_for).values_list(
+        'student__id', flat=True).distinct()
 
 
 def get_previous_cumulative_active_user_count(site, date_for):
-    ''' Returns the cumulative site-wide active user count for the previous day
+    ''' Returns the previous cumulative site-wide active user count
 
-    This is a simple helper function that returns the cumulative active user
-    count for the day before the given date. Returns 0 if there is no
-    record for the previous day
+    It finds the most recent record before `date_for`. If a record is found,
+    returns the `cumulative_active_user_count` of that records.
+
+    Returns 0 if there is no record for the previous day
     '''
-    try:
-        return SiteDailyMetrics.objects.get(
-            site=site,
-            date_for=prev_day(date_for)).cumulative_active_user_count or 0
-    except SiteDailyMetrics.DoesNotExist:
+    rec = SiteDailyMetrics.latest_previous_record(site=site, date_for=date_for)
+    if rec:
+        return rec.cumulative_active_user_count or 0
+    else:
         return 0
 
 
@@ -117,14 +118,15 @@ class SiteDailyMetricsExtractor(object):
 
         data = dict()
 
-        site_users = figures.sites.get_users_for_site(site)
+        site_users = get_users_for_site(site)
         user_count = site_users.filter(
             date_joined__lt=as_datetime(next_day(date_for))).count()
-        site_courses = figures.sites.get_courses_for_site(site)
+        site_courses = get_courses_for_site(site)
         course_count = site_courses.filter(
             created__lt=as_datetime(next_day(date_for))).count()
 
-        todays_active_user_count = get_active_user_count_for_date(site, date_for)
+        todays_active_users = get_site_active_users_for_date(site, date_for)
+        todays_active_user_count = todays_active_users.count()
         data['todays_active_user_count'] = todays_active_user_count
         data['cumulative_active_user_count'] = get_previous_cumulative_active_user_count(
             site, date_for) + todays_active_user_count
