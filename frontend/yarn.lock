@@ -7399,6 +7399,11 @@ react-lifecycles-compat@^3.0.0, react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
+react-promise-tracker@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/react-promise-tracker/-/react-promise-tracker-2.0.5.tgz#01b7cb2819f530ed829232e717c78bf77d39e4bb"
+  integrity sha512-86k2vXybbBFMRpSCaQUCd4JVL7jXUhmqFer0X4zv6P8Bht4+xfqPOTU/brr5IzbbKQrNCr0EEJ8RuYTqH0sj8A==
+
 react-redux@^5.0.7:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.1.2.tgz#b19cf9e21d694422727bf798e934a916c4080f57"
