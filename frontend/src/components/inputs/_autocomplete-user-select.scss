@@ -107,26 +107,22 @@ textarea, input[type="text"], input[type="url"], input[type="email"], input[type
   }
 
   .suggestion-link {
-    display: flex;
-    align-items: baseline;
+    display: block;
     text-decoration: none;
 
     &__user-username {
-      flex-grow: 1;
-      flex-shrink: 0;
+      display: block;
       font-weight: bold;
       color: $primary-color;
       font-size: calcRem(12);
       min-width: calcRem(5);
-      margin-right: calcRem(10);
+      margin-bottom: calcRem(5);
     }
 
     &__user-name {
+      display: block;
       color: $base-text-color;
       font-size: $base-font-size;
-      flex-grow: 1;
-      flex-shrink: 1;
-      width: 100%;
 
     }
   }
