@@ -107,27 +107,37 @@ textarea, input[type="text"], input[type="url"], input[type="email"], input[type
   }
 
   .suggestion-link {
-    display: flex;
+    display: block;
     align-items: baseline;
     text-decoration: none;
 
-    &__course-id {
-      flex-grow: 1;
-      flex-shrink: 0;
+    &__link-upper {
+      display: flex;
+      align-items: center;
+      margin-bottom: calcRem(5);
+    }
+
+    &__course-number {
+      display: block;
       font-weight: bold;
       color: $primary-color;
       font-size: calcRem(12);
-      min-width: calcRem(5);
-      margin-right: calcRem(10);
+      margin-right: calcRem(4);
+      padding: calcRem(2) calcRem(5) calcRem(2) 0;
+      border-right: 1px solid #ccc;
+    }
+
+    &__course-id {
+      display: block;
+      font-style: italic;
+      color: lighten($base-text-color, 15%);
+      font-size: calcRem(11);
     }
 
     &__course-name {
+      display: block;
       color: $base-text-color;
       font-size: $base-font-size;
-      flex-grow: 1;
-      flex-shrink: 1;
-      width: 100%;
-
     }
   }
 }

@@ -54,7 +54,7 @@ class BaseStatCard extends Component {
             {this.props.singleValue ? (
               <span className={styles['current-data']}>{this.props.mainValue}</span>
             ) : (
-              <span className={styles['current-data']}>{(this.props.dataType === 'percentage') ? (this.props.mainValue)*100 : (this.props.mainValue)}{(this.props.dataType === 'percentage') && '%'}</span>
+              <span className={styles['current-data']}>{(this.props.dataType === 'percentage') ? ((this.props.mainValue)*100).toFixed(2) : (this.props.mainValue)}{(this.props.dataType === 'percentage') && '%'}</span>
             )}
             {(this.props.compareToPrevious && !this.props.singleValue) && (
               <div className={styles['previous-comparison']}>
