@@ -38,8 +38,6 @@ class StatBarGraph extends Component {
       return `${value}`;
     }
 
-    console.log("Data:", this.props.data);
-
     return (
       <ResponsiveContainer className={styles['stat-bar-graph']} width="100%" height={this.props.graphHeight}>
         <BarChart
