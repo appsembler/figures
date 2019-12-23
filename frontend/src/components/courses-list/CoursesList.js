@@ -22,7 +22,7 @@ class CoursesList extends Component {
   changeSorting = (parameter) => {
     let coursesList = this.state.coursesList;
     if (parameter === 'alphabetically') {
-      coursesList = coursesList.sortBy(item => item.getIn(['course_name'])).reverse()
+      coursesList = coursesList.sortBy(item => item.getIn(['course_name']))
     } else if (parameter === 'learners-enrolled') {
       coursesList = coursesList.sortBy(item => item.getIn(['learners_enrolled', 'current_month'])).reverse()
     } else if (parameter === 'average-progress') {
