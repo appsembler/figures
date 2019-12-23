@@ -121,6 +121,6 @@
   },
   "devDependencies": {
     "css-loader": "^3.2.0",
-    "webpack-dev-server": "2.9.4"
+    "webpack-dev-server": "3.1.11"
   }
 }
