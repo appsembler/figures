@@ -5,6 +5,8 @@
 import mock
 import pytest
 
+from tests.helpers import OPENEDX_RELEASE, GINKGO
+
 
 class AwsSettingsType(object):
     AWS = u'aws'
@@ -14,6 +16,8 @@ class ProdSettingsType(object):
     PRODUCTION = u'production'
 
 
+@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
+                    reason='Plugins not supported in Ginkgo')
 @pytest.mark.parametrize('klass, expected_val', [
     (AwsSettingsType, AwsSettingsType.AWS),
     (ProdSettingsType, ProdSettingsType.PRODUCTION),
