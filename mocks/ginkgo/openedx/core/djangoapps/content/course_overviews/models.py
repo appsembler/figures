@@ -69,3 +69,7 @@ class CourseOverview(models.Model):
     @property
     def display_order_with_default(self):
         return self.org
+
+    @classmethod
+    def get_from_id(cls, course_id):
+        return CourseOverview.objects.get(id=course_id)
