@@ -15,11 +15,11 @@ from django.contrib.sites.models import Site
 from django.db.utils import IntegrityError
 from django.utils.timezone import utc
 
-from lms.djangoapps.certificates.models import GeneratedCertificate
 from courseware.models import StudentModule
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 
+from figures.compat import RELEASE_LINE, GeneratedCertificate
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 from figures.helpers import as_course_key, as_datetime, days_from, prev_day
 from figures.pipeline import course_daily_metrics as pipeline_cdm
@@ -79,9 +79,7 @@ def seed_course_overviews(data=None):
 
     for rec in data:
         course_id = rec['id']
-        CourseOverview.objects.update_or_create(
-            id=as_course_key(course_id),
-            defaults=dict(
+        defaults = dict(
                 display_name=rec['display_name'],
                 org=rec['org'],
                 display_org_with_default=rec['org'],
@@ -89,8 +87,12 @@ def seed_course_overviews(data=None):
                 created=as_datetime(rec['created']).replace(tzinfo=utc),
                 enrollment_start=as_datetime(rec['enrollment_start']).replace(tzinfo=utc),
                 enrollment_end=as_datetime(rec['enrollment_end']).replace(tzinfo=utc),
-                version=CourseOverview.VERSION,
             )
+        if RELEASE_LINE != 'ginkgo':
+            defaults['version'] = CourseOverview.VERSION,
+        CourseOverview.objects.update_or_create(
+            id=as_course_key(course_id),
+            defaults=defaults,
         )
 
 
@@ -141,8 +143,9 @@ def seed_course_enrollments_for_course(course_id, users, max_days_back):
     for user in users:
         if VERBOSE:
             print('seeding course enrollment for user {}'.format(user.username))
+
         CourseEnrollment.objects.update_or_create(
-            course=CourseOverview.objects.get(id=course_id),
+            course_id=course_id,
             user=user,
             created=as_datetime(enroll_date(max_days_back)).replace(tzinfo=utc),
             )
