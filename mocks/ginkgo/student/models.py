@@ -111,12 +111,26 @@ class CourseEnrollment(models.Model):
 
     objects = CourseEnrollmentManager()
 
+
     class Meta(object):
         unique_together = (('user', 'course_id'),)
         ordering = ('user', 'course_id')
 
-    course_overview = models.ForeignKey(CourseOverview)
+    def __init__(self, *args, **kwargs):
+        super(CourseEnrollment, self).__init__(*args, **kwargs)
 
+        # Private variable for storing course_overview to minimize calls to the database.
+        # When the property .course_overview is accessed for the first time, this variable will be set.
+        self._course_overview = None
+
+    @property
+    def course_overview(self):
+        if not self._course_overview:
+            try:
+                self._course_overview = CourseOverview.get_from_id(self.course_id)
+            except (CourseOverview.DoesNotExist, IOError):
+                self._course_overview = None
+        return self._course_overview
 
 class CourseAccessRole(models.Model):
     user = models.ForeignKey(User)

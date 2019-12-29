@@ -11,7 +11,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('course_overviews', '__first__'),
     ]
 
     operations = [
@@ -33,7 +32,6 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(null=True)),
                 ('is_active', models.BooleanField(default=True)),
                 ('mode', models.CharField(default=b'audit', max_length=100)),
-                ('course_overview', models.ForeignKey(to='course_overviews.CourseOverview')),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
