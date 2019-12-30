@@ -11,7 +11,11 @@
 
 celery==3.1.18
 
-python-dateutil==2.1
+# Faker is used to seed mock data in devsite
+Faker==1.0.4
+# Ginkgo requires python-dateutil==2.1
+# But this would require we use Faker version 0.5.3 or earlier
+python-dateutil==2.4
 path.py==8.2.1
 
 # Yes, this is old but is the one specified by Ginkgo edx-platform
@@ -62,3 +66,5 @@ pytest-django==3.1.2
 pytest-mock==1.7.1
 pytest-pythonpath==0.7.2
 pytest-cov==2.6.0
+tox==3.7.0
+freezegun==0.3.12
