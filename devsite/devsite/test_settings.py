@@ -5,9 +5,14 @@ Settings file to run automated tests
 
 from __future__ import absolute_import, unicode_literals
 
+import os
 from os.path import abspath, dirname, join
 import sys
-from figures.settings.lms_production import update_celerybeat_schedule
+
+from figures.settings.lms_production import (
+    update_celerybeat_schedule,
+    update_webpack_loader,
+)
 
 
 def root(*args):
@@ -17,7 +22,15 @@ def root(*args):
     return join(abspath(dirname(__file__)), *args)
 
 
-sys.path.append(root('mocks', 'hawthorn'))
+OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
+
+if OPENEDX_RELEASE == 'GINKGO':
+    MOCKS_DIR = 'ginkgo'
+else:
+    MOCKS_DIR = 'hawthorn'
+
+sys.path.append(root('mocks', MOCKS_DIR))
+
 
 # Set the default Site (django.contrib.sites.models.Site)
 SITE_ID = 1
@@ -55,16 +68,10 @@ INSTALLED_APPS = [
     'organizations',
 ]
 
-
-# certificates app
-
-# edx-platform uses the app config
-# 'lms.djangoapps.certificates.apps.CertificatesConfig'
-# Our mock uses the package path
-# TO emulate pre-hawthorn
-#  INSTALLED_APPS += ('certificates')
-
-INSTALLED_APPS.append('lms.djangoapps.certificates')
+if OPENEDX_RELEASE == 'GINKGO':
+    INSTALLED_APPS.append('certificates')
+else:
+    INSTALLED_APPS.append('lms.djangoapps.certificates')
 
 TEMPLATES = [
     {
@@ -105,21 +112,15 @@ REST_FRAMEWORK = {
     ]
 }
 
-# It expects them from the project's settings (django.conf.settings)
-WEBPACK_LOADER = {
-    'FIGURES_APP': {
-        'BUNDLE_DIR_NAME': 'figures/',
-        'STATS_FILE': 'tests/test-webpack-stats.json',
-    }
-}
+# Webpack loader is required to load Figure's front-end
+WEBPACK_LOADER = {}
+
 CELERYBEAT_SCHEDULE = {}
 FEATURES = {}
 
-# Declare values we need from server vars (e.g. lms.env.json)
-ENV_TOKENS = {
-    # 'FIGURES': {
-    #     'WEBPACK_STATS_FILE': '../tests/test-webpack-stats.json',
-    # }
-}
+# The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
+# We have an empty dict here to replicate behavior in the LMS
+ENV_TOKENS = {}
 
+update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)

@@ -10,10 +10,16 @@ import os
 import sys
 
 from figures.settings.lms_production import (
-    update_celerybeat_schedule,
     update_webpack_loader,
+    update_celerybeat_schedule,
 )
 
+OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
+
+if OPENEDX_RELEASE == 'GINKGO':
+    MOCKS_DIR = 'mocks/ginkgo'
+else:
+    MOCKS_DIR = 'mocks/hawthorn'
 
 DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
@@ -31,9 +37,7 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 # Adds the mock edx-platform modules to the Python module search path
-sys.path.append(
-    os.path.normpath(os.path.join(PROJECT_ROOT_DIR, 'mocks/hawthorn'))
-    )
+sys.path.append(os.path.normpath(os.path.join(PROJECT_ROOT_DIR, MOCKS_DIR)))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -64,12 +68,10 @@ INSTALLED_APPS = [
 
 # certificates app
 
-# edx-platform uses the app config
-# 'lms.djangoapps.certificates.apps.CertificatesConfig'
-# Our mock uses the package path
-# TO emulate pre-hawthorn
-#   INSTALLED_APPS += ('certificates')
-INSTALLED_APPS.append('lms.djangoapps.certificates')
+if OPENEDX_RELEASE == 'GINKGO':
+    INSTALLED_APPS.append('certificates')
+else:
+    INSTALLED_APPS.append('lms.djangoapps.certificates')
 
 
 MIDDLEWARE_CLASSES = (
