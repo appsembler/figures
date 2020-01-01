@@ -34,6 +34,18 @@ except ImportError:
     from certificates.models import GeneratedCertificate    # noqa: F401
 
 
+def course_grade(learner, course):
+    """
+    Compatibility function to retrieve course grades
+
+    Returns the course grade for the specified learner and course
+    """
+    if RELEASE_LINE == 'ginkgo':
+        return CourseGradeFactory().create(learner, course)
+    else:  # Assume Hawthorn or greater
+        return CourseGradeFactory().read(learner, course)
+
+
 def chapter_grade_values(chapter_grades):
     '''
 

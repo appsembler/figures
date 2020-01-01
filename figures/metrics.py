@@ -32,9 +32,9 @@ from courseware.courses import get_course_by_id
 from courseware.models import StudentModule
 
 from figures.compat import (
-    CourseGradeFactory,
     GeneratedCertificate,
     chapter_grade_values,
+    course_grade,
 )
 from figures.helpers import (
     as_course_key,
@@ -93,7 +93,8 @@ class LearnerCourseGrades(object):
     def __init__(self, user_id, course_id, **kwargs):
         """
 
-        If CourseGradeFactory is unable to retrieve the course blocks, raises
+        If figures.compat.course_grade is unable to retrieve the course blocks,
+        raises:
 
             django.core.exceptions.PermissionDenied(
                 "User does not have access to this course")
@@ -102,10 +103,7 @@ class LearnerCourseGrades(object):
         self.course = get_course_by_id(course_key=as_course_key(course_id))
         self.course._field_data_cache = {}  # pylint: disable=protected-access
         self.course.set_grading_policy(self.course.grading_policy)
-
-        # This method is 'read' in Hawthorn
-        # TODO: Make conditional
-        self.course_grade = CourseGradeFactory().create(self.learner, self.course)
+        self.course_grade = course_grade(self.learner, self.course)
 
     def __str__(self):
         return u'{} - {} - {} '.format(
