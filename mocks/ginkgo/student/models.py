@@ -61,7 +61,12 @@ class UserProfile(models.Model):
         blank=True, null=True, max_length=6, db_index=True,
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
-
+    mailing_address = models.TextField(blank=True, null=True)
+    city = models.TextField(blank=True, null=True)
+    country = CountryField(blank=True, null=True)
+    goals = models.TextField(blank=True, null=True)
+    allow_certificate = models.BooleanField(default=1)
+    bio = models.CharField(blank=True, null=True, max_length=3000, db_index=False)
     profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
 
     @property
