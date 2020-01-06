@@ -93,6 +93,7 @@ def test_generated_certificate_pre_hawthorn():
         assert figures.compat.GeneratedCertificate is mock
 
 
+@patch('openedx.core.release.RELEASE_LINE', 'hawthorn')
 def test_generated_certificate_hawthorn():
     hawthorn_key = 'lms.djangoapps.certificates.models'
     with patch_module(hawthorn_key, {'GeneratedCertificate': 'hi'}):
