@@ -26,12 +26,11 @@ except ImportError:
         # try the pre-ginkgo path
         from lms.djangoapps.grades.new.course_grade import CourseGradeFactory    # noqa: F401
 
-try:
-    # First try to import for the path as of hawthorn
-    from lms.djangoapps.certificates.models import GeneratedCertificate
-except ImportError:
-    # try the pre-hawthorn path
-    from certificates.models import GeneratedCertificate    # noqa: F401
+
+if RELEASE_LINE == 'ginkgo':
+    from certificates.models import GeneratedCertificate  # noqa: F401
+else:
+    from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa: F401
 
 
 def course_grade(learner, course):
