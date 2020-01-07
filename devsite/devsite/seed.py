@@ -89,7 +89,7 @@ def seed_course_overviews(data=None):
                 enrollment_end=as_datetime(rec['enrollment_end']).replace(tzinfo=utc),
             )
         if RELEASE_LINE != 'ginkgo':
-            defaults['version'] = CourseOverview.VERSION,
+            defaults['version'] = CourseOverview.VERSION
         CourseOverview.objects.update_or_create(
             id=as_course_key(course_id),
             defaults=defaults,
