@@ -126,7 +126,9 @@ WSGI_APPLICATION = 'devsite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(DEVSITE_BASE_DIR, 'figures-db.sqlite3'),
+        'NAME': os.path.join(DEVSITE_BASE_DIR,
+                             'figures-{release}-db.sqlite3'.format(
+                                release=OPENEDX_RELEASE.lower())),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
