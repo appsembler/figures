@@ -143,11 +143,11 @@ export const loadCsvUserReportsData = ( ReportsData ) => ({
 
 export function fetchCsvUserReports() {
   return dispatch => {
-    dispatch(addActiveApiFetch())
-    return fetch(apiConfig.reportingCsvReportsApi + '?report_type=LEARNER_DEMOGRAPHICS', { credentials: "same-origin" })
-      .then(response => response.json())
-      .then (json => dispatch(loadCsvUserReportsData(json)))
-      .then(dispatch(removeActiveApiFetch()))
+    return trackPromise(
+      fetch(apiConfig.reportingCsvReportsApi + '?report_type=LEARNER_DEMOGRAPHICS', { credentials: "same-origin" })
+        .then(response => response.json())
+        .then (json => dispatch(loadCsvUserReportsData(json)))
+    )
   }
 }
 
@@ -159,11 +159,11 @@ export const loadCsvGradeReportsData = ( ReportsData ) => ({
 
 export function fetchCsvGradeReports() {
   return dispatch => {
-    dispatch(addActiveApiFetch())
-    return fetch(apiConfig.reportingCsvReportsApi + '?report_type=ENROLLMENT_GRADES', { credentials: "same-origin" })
-      .then(response => response.json())
-      .then (json => dispatch(loadCsvGradeReportsData(json)))
-      .then(dispatch(removeActiveApiFetch()))
+    return trackPromise(
+      fetch(apiConfig.reportingCsvReportsApi + '?report_type=ENROLLMENT_GRADES', { credentials: "same-origin" })
+        .then(response => response.json())
+        .then (json => dispatch(loadCsvGradeReportsData(json)))
+    )
   }
 }
 
@@ -175,10 +175,10 @@ export const loadCsvCourseMetricsReportsData = ( ReportsData ) => ({
 
 export function fetchCsvCourseMetricsReports() {
   return dispatch => {
-    dispatch(addActiveApiFetch())
-    return fetch(apiConfig.reportingCsvReportsApi + '?report_type=REPORT_COURSE_METRICS', { credentials: "same-origin" })
-      .then(response => response.json())
-      .then (json => dispatch(loadCsvCourseMetricsReportsData(json)))
-      .then(dispatch(removeActiveApiFetch()))
+    return trackPromise(
+      fetch(apiConfig.reportingCsvReportsApi + '?report_type=REPORT_COURSE_METRICS', { credentials: "same-origin" })
+        .then(response => response.json())
+        .then (json => dispatch(loadCsvCourseMetricsReportsData(json)))
+    )
   }
 }
