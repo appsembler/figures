@@ -5,7 +5,7 @@
 
 This document guides you through getting Figures setup on your development machine.
 
-Requirements are that you have Python 2.7.x installed on your development machine. Hawthorn devstack uses 2.7.12. It is also highly recommended that you install [virtualenv](https://virtualenv.pypa.io/).
+Requirements are that you have Python 2.7.x installed on your development machine. It is also highly recommended that you install [virtualenv](https://virtualenv.pypa.io/).
 
 ## 2. Create a virtualenv
 
@@ -60,13 +60,44 @@ Next, create a superuser. We'll use this account to log into the development sit
 ./manage.py createsuperuser
 ```
 
-Last step before starting the dev server is to fill our environment with some mock data
+Next, seed the devsite database with mock data. Run the following:
 
 ```
 ./manage.py seed_data
 ```
 
 The `seed_data` command populates the dev server with mock data then builds metrics on the mock data, backfilling historical data (experimental feature)
+
+Finally, Figures front end assets need to be build from the front end sources. If you have (Yarn)[https://yarnpkg.com/lang/en/] installed, then you can run the following.
+
+First navigate to the `figures/frontend` directory.
+
+
+Then download JavaScript dependencies:
+
+```
+yarn
+```
+
+Then compile Figures front end assets:
+
+```
+yarn build
+```
+
+Alternately, you can run NPM:
+
+To download JavaScript dependencies:
+```
+npm install
+```
+
+To compile Figures front end assets:
+
+```
+npm run-script build
+```
+
 
 ## 6. Starting Figures devsite
 
@@ -111,6 +142,12 @@ Make sure you have your development virtualenv running. Then navigate to the `de
 ```
 
 This will run the pipeline immediately instead of being queued to celery.
+
+*NOTE* The above is just for running the pipeline in Figures standalone mode with the included devsite. If you are working with Figures in Open edX (either devstack or fullstack), run the following:
+
+```
+./manage.py lms populate_figures_metrics --no-delay
+```
 
 ## 9. Building the front end assets
 
