@@ -77,6 +77,7 @@ function getClientEnvironment(publicUrl) {
         // This should only be used as an escape hatch. Normally you would put
         // images into the `src` and `import` them in code to get their paths.
         PUBLIC_URL: publicUrl,
+        ENABLE_CSV_REPORTS: process.env.ENABLE_CSV_REPORTS || 'disabled',
       }
     );
   // Stringify all values so we can feed into Webpack DefinePlugin
