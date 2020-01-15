@@ -42,6 +42,22 @@ pytest
 
 ## 4. Build front end assets
 
+Figures front end assets need to be build from the front end sources. Make sure you have (Yarn)[https://yarnpkg.com/lang/en/] installed. Then do the following:
+
+Navigate to the `figures/frontend` directory.
+
+
+Then download JavaScript dependencies:
+
+```
+yarn
+```
+
+Then compile Figures front end assets:
+
+```
+yarn build
+```
 
 ## 5. Set up Figures standalone server
 
@@ -67,37 +83,6 @@ Next, seed the devsite database with mock data. Run the following:
 ```
 
 The `seed_data` command populates the dev server with mock data then builds metrics on the mock data, backfilling historical data (experimental feature)
-
-Finally, Figures front end assets need to be build from the front end sources. If you have (Yarn)[https://yarnpkg.com/lang/en/] installed, then you can run the following.
-
-First navigate to the `figures/frontend` directory.
-
-
-Then download JavaScript dependencies:
-
-```
-yarn
-```
-
-Then compile Figures front end assets:
-
-```
-yarn build
-```
-
-Alternately, you can run NPM:
-
-To download JavaScript dependencies:
-```
-npm install
-```
-
-To compile Figures front end assets:
-
-```
-npm run-script build
-```
-
 
 ## 6. Starting Figures devsite
 

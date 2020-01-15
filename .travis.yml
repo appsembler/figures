@@ -9,11 +9,11 @@ node_js:
 install:
   - pip install -r devsite/requirements/hawthorn_community.txt
   - pip install pytest-cov flake8 tox
-  - cd frontend && npm install && cd ..
+  - cd frontend && yarn && cd ..
 
 # command to run tests
 script:
-  - cd frontend && npm run-script build && cd ..
+  - cd frontend && yarn && cd ..
   - flake8 figures
   - py.test --cov=./
   - bash <(curl -s https://codecov.io/bash)
