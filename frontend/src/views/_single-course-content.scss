@@ -15,7 +15,7 @@
     background-color: #ccc;
   }
 
-  &__link {
+  &__link, &__link:not(.btn), &__link:visited:not(.btn) {
     display: inline-block;
     padding: calcRem(8) calcRem(12);
     font-size: $base-font-size;
