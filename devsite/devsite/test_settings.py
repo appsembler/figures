@@ -11,7 +11,8 @@ import sys
 
 from figures.settings.lms_production import (
     update_celerybeat_schedule,
-    update_webpack_loader,
+    # TODO: https://appsembler.atlassian.net/browse/RED-673
+    # update_webpack_loader,
 )
 
 
@@ -113,8 +114,12 @@ REST_FRAMEWORK = {
 }
 
 # Webpack loader is required to load Figure's front-end
-WEBPACK_LOADER = {}
-
+WEBPACK_LOADER = {
+    'FIGURES_APP': {
+        'BUNDLE_DIR_NAME': 'figures/',
+        'STATS_FILE': 'tests/test-webpack-stats.json',
+    }
+}
 CELERYBEAT_SCHEDULE = {}
 FEATURES = {}
 
@@ -122,5 +127,6 @@ FEATURES = {}
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
 
-update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
+# TODO: https://appsembler.atlassian.net/browse/RED-673
+# update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
