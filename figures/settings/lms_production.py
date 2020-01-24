@@ -29,7 +29,7 @@ def update_celerybeat_schedule(celerybeat_schedule_settings, figures_env_tokens)
         celerybeat_schedule_settings['figures-populate-daily-metrics'] = {
             'task': 'figures.tasks.populate_daily_metrics',
             'schedule': crontab(
-                hour=figures_env_tokens.get('DAILY_METRICS_IMPORT_HOUR', 2),
+                hour=figures_env_tokens.get('DAILY_METRICS_IMPORT_HOUR', 21),
                 minute=figures_env_tokens.get('DAILY_METRICS_IMPORT_MINUTE', 0),
                 ),
             }
