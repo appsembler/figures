@@ -31,7 +31,7 @@ django-extensions==1.5.9
 djangorestframework==3.2.3
 django-countries==4.0
 django-filter==0.11.0
-django-webpack-loader==0.5.0
+django-webpack-loader==0.4.1
 # appsembler/gingko/master users 0.4.1
 
 django-model-utils==2.3.1
