@@ -8,7 +8,6 @@ load-plugins = edx_lint.pylint,pylint_django,pylint_celery
 
 disable =
     # TODO: Enable those errors incrementally by removing them
-    model-missing-unicode,  # TODO: Remove
     abstract-method,  # TODO: Remove
     attribute-defined-outside-init,  # TODO: Remove
     bad-whitespace,  # TODO: Remove
