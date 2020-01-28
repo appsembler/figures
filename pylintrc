@@ -270,7 +270,6 @@ enable =
 	deprecated-pragma,
 disable = 
 	# TODO: Enable those errors incrementally by removing them
-	model-missing-unicode,  # TODO: Remove
 	abstract-method,  # TODO: Remove
 	attribute-defined-outside-init,  # TODO: Remove
 	bad-whitespace,  # TODO: Remove
@@ -463,4 +462,4 @@ int-import-graph =
 [EXCEPTIONS]
 overgeneral-exceptions = Exception
 
-# 401df6724426b5e0f9b5631fb336623c5de6988a
+# 6b6524f5692ea76a413065c89a2ed471299c7664
