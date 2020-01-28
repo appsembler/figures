@@ -1,0 +1,105 @@
+# pylintrc tweaks for use with edx_lint.
+[MASTER]
+ignore = migrations
+load-plugins = edx_lint.pylint,pylint_django,pylint_celery
+
+[MESSAGES CONTROL]
+# TODO: Remove the all of this section once the removables are done.
+
+disable =
+    # TODO: Enable those errors incrementally by removing them
+    model-missing-unicode,  # TODO: Remove
+    abstract-method,  # TODO: Remove
+    attribute-defined-outside-init,  # TODO: Remove
+    bad-whitespace,  # TODO: Remove
+    broad-except,  # TODO: Remove
+    empty-docstring,  # TODO: Remove
+    function-redefined,  # TODO: Remove
+    import-error,  # TODO: Remove
+    inconsistent-return-statements,  # TODO: Remove
+    len-as-condition,  # TODO: Remove
+    missing-docstring,  # TODO: Remove
+    no-member,  # TODO: Remove
+    pointless-string-statement,  # TODO: Remove
+    redefined-builtin,  # TODO: Remove
+    simplifiable-if-statement,  # TODO: Remove
+    unused-argument,  # TODO: Remove
+    unused-import,  # TODO: Remove
+    unused-variable,  # TODO: Remove
+
+    # Those are the default we should leave them as-is
+    bad-continuation,
+    invalid-name,
+    misplaced-comparison-constant,
+    file-ignored,
+    bad-indentation,
+    lowercase-l-suffix,
+    unused-wildcard-import,
+    global-statement,
+    no-else-return,
+    # These are disabled by pylint by default
+    apply-builtin,
+    backtick,
+    basestring-builtin,
+    buffer-builtin,
+    cmp-builtin,
+    cmp-method,
+    coerce-builtin,
+    coerce-method,
+    delslice-method,
+    dict-iter-method,
+    dict-view-method,
+    duplicate-code,
+    execfile-builtin,
+    file-builtin,
+    filter-builtin-not-iterating,
+    fixme,
+    getslice-method,
+    hex-method,
+    import-star-module-level,
+    indexing-exception,
+    input-builtin,
+    intern-builtin,
+    locally-disabled,
+    locally-enabled,
+    logging-format-interpolation,
+    long-builtin,
+    long-suffix,
+    map-builtin-not-iterating,
+    metaclass-assignment,
+    next-method-called,
+    no-absolute-import,
+    no-init,
+    no-self-use,
+    nonzero-method,
+    oct-method,
+    old-division,
+    old-ne-operator,
+    old-octal-literal,
+    old-raise-syntax,
+    parameter-unpacking,
+    print-statement,
+    raising-string,
+    range-builtin-not-iterating,
+    raw_input-builtin,
+    reduce-builtin,
+    reload-builtin,
+    round-builtin,
+    setslice-method,
+    standarderror-builtin,
+    suppressed-message,
+    too-few-public-methods,
+    too-many-ancestors,
+    too-many-arguments,
+    too-many-branches,
+    too-many-instance-attributes,
+    too-many-lines,
+    too-many-locals,
+    too-many-public-methods,
+    too-many-return-statements,
+    unichr-builtin,
+    unicode-builtin,
+    unpacking-in-except,
+    using-cmp-argument,
+    xrange-builtin,
+    zip-builtin-not-iterating,
