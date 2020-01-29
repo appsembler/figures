@@ -33,7 +33,7 @@ from openedx.core.djangoapps.user_api.accounts.serializers import (
 
 from student.models import CourseAccessRole, CourseEnrollment
 
-from figures.compat import GeneratedCertificate
+from figures.compat import RELEASE_LINE, GeneratedCertificate
 from figures.helpers import as_course_key
 from figures.metrics import (
     get_course_enrolled_users_for_time_period,
@@ -130,13 +130,33 @@ class CourseOverviewSerializer(serializers.ModelSerializer):
 class CourseEnrollmentSerializer(serializers.ModelSerializer):
     """Provides CourseOverview model based serialization
 
+
+        {
+            "id": 1442,
+            "course": {
+                "id": "course-v1:StarFleetAcademy+SFA01+2161",
+                "display_name": "Intro to Astronomy",
+                "org": "StarFleetAcademy"
+            },
+            "user": {
+                "id": 1843,
+                "username": "aimee53",
+                "fullname": "Amy Lowery"
+            },
+            "created": "2019-07-14T16:28:55.136752Z",
+            "is_active": true,
+            "mode": "audit"
+        },
+
     """
-    course = CourseOverviewSerializer(read_only=True)
+    # course = CourseOverviewSerializer(read_only=True)
+    course_id = serializers.CharField()
     user = UserIndexSerializer(read_only=True)
 
     class Meta:
         model = CourseEnrollment
         editable = False
+        fields = ('id', 'user', 'created', 'is_active', 'mode', 'course_id')
         exclude = ()
 
 
@@ -563,10 +583,15 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
               }
             }
     """
+    if RELEASE_LINE == 'ginkgo':
+        course_name = serializers.CharField(source='course_overview.display_name')
+        course_code = serializers.CharField(source='course_overview.number')
+        course_id = serializers.CharField()
+    else:
+        course_name = serializers.CharField(source='course.display_name')
+        course_code = serializers.CharField(source='course.number')
+        course_id = serializers.CharField(source='course.id')
 
-    course_name = serializers.CharField(source='course.display_name')
-    course_code = serializers.CharField(source='course.number')
-    course_id = serializers.CharField(source='course.id')
     date_enrolled = serializers.DateTimeField(source='created', format="%Y-%m-%d")
     progress_data = serializers.SerializerMethodField()
     enrollment_id = serializers.IntegerField(source='id')

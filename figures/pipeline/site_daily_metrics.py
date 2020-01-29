@@ -62,7 +62,13 @@ def get_site_active_users_for_date(site, date_for):
     user ids
     '''
     student_modules = get_student_modules_for_site(site)
-    return student_modules.filter(modified__date=date_for).values_list(
+
+    # For Ginkgo backward compatibility, Django 1.8 does not support
+    # `modified__date=<some_value>` in filters. Therefore, we need to match
+    # each date field
+    return student_modules.filter(modified__year=date_for.year,
+                                  modified__month=date_for.month,
+                                  modified__day=date_for.day).values_list(
         'student__id', flat=True).distinct()
 
 
