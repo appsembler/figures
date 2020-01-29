@@ -51,6 +51,8 @@ from tests.factories import (
     SiteFactory,
     )
 
+from tests.helpers import platform_release
+
 
 class TestSerializableCountryField(object):
 
@@ -158,8 +160,10 @@ class TestCourseEnrollmentSerializer(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.model =  CourseEnrollment
-        self.special_fields = set(['course', 'created', 'user', 'course_overview' ])
-        self.expected_results_keys = set([o.name for o in self.model._meta.fields])
+        # self.special_fields = set(['course', 'created', 'user', 'course_overview' ])
+        self.special_fields = set(['created', 'user', 'course_id' ])
+        self.expected_results_keys = set(
+            ['id', 'user', 'created', 'is_active', 'mode', 'course_id' ])
         field_names = (o.name for o in self.model._meta.fields
             if o.name not in self.date_fields )
         self.model_obj = CourseEnrollmentFactory()
@@ -172,9 +176,10 @@ class TestCourseEnrollmentSerializer(object):
         '''
         data = self.serializer.data
 
-        assert data['course']['id'] == str(self.model_obj.course.id)
-        assert data['course']['display_name'] == self.model_obj.course.display_name
-        assert data['course']['org'] == self.model_obj.course.org
+        assert data['course_id'] == str(self.model_obj.course_id)
+        # assert data['course']['id'] == str(self.model_obj.course.id)
+        # assert data['course']['display_name'] == self.model_obj.course.display_name
+        # assert data['course']['org'] == self.model_obj.course.org
 
         assert dateutil_parse(data['created']) == self.model_obj.created
         assert data['user']['fullname'] == self.model_obj.user.profile.name

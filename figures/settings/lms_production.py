@@ -13,6 +13,7 @@ def update_webpack_loader(webpack_loader_settings, figures_env_tokens):
     figures_app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Define our webpack asset bundling constants
+    # TODO: https://appsembler.atlassian.net/browse/RED-673
     webpack_stats_file = figures_env_tokens.get('WEBPACK_STATS_FILE', 'webpack-stats.json')
     webpack_stats_full_path = os.path.abspath(os.path.join(figures_app_dir, webpack_stats_file))
     webpack_loader_settings.update(FIGURES_APP={

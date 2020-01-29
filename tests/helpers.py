@@ -1,10 +1,23 @@
 """Helper methods for Figures testing
 """
 
+import os
 from dateutil.rrule import rrule, DAILY
 from packaging import version
 
 from organizations.models import Organization
+
+
+# Ginkgo is the earliest supported platform
+GINKGO = 'GINKGO'
+HAWTHORN = 'HAWTHORN'
+
+
+def platform_release():
+    return os.environ.get('OPENEDX_RELEASE', HAWTHORN)
+
+
+OPENEDX_RELEASE = platform_release()
 
 
 def make_course_key_str(org, number, run='test-run'):
