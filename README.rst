@@ -8,53 +8,14 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
------------------------------
-Notice and Development Status
------------------------------
 
-05 Aug 2019 - Hawthorn Pre-release 2
+29 Jan 2020 - Figures release 0.3.4
 ====================================
 
-**Hawthorn 0.3.0 pre-release 2 is available**
-
-* Figures 0.3.0 supports Hawthorn
-* Uses the new plugin capability introduced in Open edX Hawthorn
+* Hawthorn support since release 0.3.0
+* This release includes bug fixes, UI improvements, and backport support for Ginkgo
 * Includes a standalone development mode. See the `developer quickstart guide <./DEVELOPER-QUICKSTART.md/>`__
 
-
-Pre-release 2 addresses Hawthorn upgrade compatibility issues not identified in Pre-release 1
-
-
-
-Run the following to install Figures 0.3.0 prerelease 2 for evaluation:
-
-::
-
-	pip install https://github.com/appsembler/figures/archive/0.3.0-prerelease2.zip
-
-For installing for development, such as with docker devstack:
-
-Navigate to the workspace directory (``./src/`` if installing in devstack)
-
-::
-
-	git clone -b develop https://github.com/appsembler/figures.git
-
-For Hawthorn docker devstack, shell to the lms and run:
-
-::
-
-	cd /edx/src/figures
-	pip install -e .
-
-Figures on PyPI
-===============
-
-Figures is avaible on `PyPI <https://pypi.org/project/figures/>`__
-
-* 0.1.6 is the community release for Ficus and Ginkgo
-
-Release 0.3.0 will be available on PyPI after release candidate testing
 
 --------
 Overview
@@ -83,7 +44,7 @@ For Hawthorn:
 
 * Django (1.11)
 
-For Ficus and Ginkgo:
+For Ginkgo:
 
 * Django (1.8)
 
@@ -94,6 +55,9 @@ For Ficus and Ginkgo:
 ------------
 Installation
 ------------
+
+*NOTICE: Installation instructions are out of date and backlogged for update*
+
 
 Devstack
 ========
