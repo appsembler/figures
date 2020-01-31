@@ -8,6 +8,7 @@ value from openedx.core.release.RELEASE_LINE. This will be the release name as
 a lowercase string, such as 'ginkgo' or 'hawthorn'
 
 '''
+# pylint: disable=ungrouped-imports
 
 try:
     from openedx.core.release import RELEASE_LINE

@@ -211,6 +211,7 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
         )
 
 
+@python_2_unicode_compatible
 class PipelineError(TimeStampedModel):
     """
     Captures errors when running Figures pipeline.
