@@ -16,11 +16,11 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from student.models import CourseEnrollment
 
 from figures.helpers import as_course_key, as_date
-from figures.mau import store_mau_metrics
 from figures.models import PipelineError
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
 import figures.sites
+from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.logger import log_error_to_db
 
 
@@ -136,7 +136,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
 
 
 #
-# Experimental tasks
+# Daily Metrics Experimental Tasks
 #
 
 
@@ -190,34 +190,59 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
     return results
 
 
+#
+# MAU Metrics
+#
+
+
 @shared_task
-def collect_mau_metrics_for_site(site_id, overwrite=False):
+def populate_course_mau(site_id, course_id, month_for=None, force_update=False):
+    """Populates the MAU for the given site, course, and month
+    """
+    if month_for:
+        month_for = as_date(month_for)
+    else:
+        month_for = datetime.datetime.utcnow().date()
+    site = Site.objects.get(id=site_id)
+    start_time = time.time()
+    # import pdb; pdb.set_trace()
+    obj, created = collect_course_mau(site=site,
+                                      courselike=course_id,
+                                      month_for=month_for,
+                                      overwrite=force_update)
+    if not obj:
+        msg = 'populate_course_mau failed for course {course_id}'.format(
+            str(course_id))
+        logger.error(msg)
+    elapsed_time = time.time() - start_time
+    logger.info('populate_course_mau Elapsed time (seconds)={}. cdm_obj={}'.format(
+        elapsed_time, obj))
+
+
+@shared_task
+def populate_mau_metrics_for_site(site_id, month_for=None, force_update=False):
     """
     Collect (save) MAU metrics for the specified site
-    TODO: Check results of 'store_mau_metrics' to log unexpected
-    results
+
+    Iterates over all courses in the site to collect MAU counts
+    TODO: Decide how sites would be excluded and create filter
+    TODO: Check results of 'store_mau_metrics' to log unexpected results
     """
-    store_mau_metrics(site=Site.objects.get(id=site_id),
-                      overwrite=overwrite)
+    site = Site.objects.get(id=site_id)
+    for course_key in figures.sites.get_course_keys_for_site(site):
+        populate_course_mau(site_id=site_id,
+                            course_id=str(course_key),
+                            month_for=month_for,
+                            force_update=force_update)
 
 
 @shared_task
-def collect_mau_metrics(site_ids=None, overwrite=False, **kwargs):
+def populate_all_mau():
     """
-    Collect MAU metrics for either all sites or the specified sites
-    """
+    Top level task to kick off MAU collection
 
-    for site_id in figures.sites.site_id_iterator(site_ids or Site.objects.all()):
-        collect_mau_metrics_for_site(site_id=site_id,
-                                     overwrite=overwrite)
-
-
-@shared_task
-def run_month_end_jobs():
+    Initially, run it every day to observe monthly active user accumulation for
+    the month and evaluate the results
     """
-    Placeholder task function. We may need to do a daily and
-    check if we are at the end of the month
-    Call this at the end of the month
-    Call our end of month metrics collectors here
-    """
-    collect_mau_metrics()
+    for site in Site.objects.all():
+        populate_mau_metrics_for_site(site_id=site.id, force_update=False)
