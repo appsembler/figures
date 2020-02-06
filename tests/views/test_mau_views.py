@@ -30,6 +30,8 @@ class TestSiteMauLiveMetricsViewSet(BaseViewTest):
 
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
+        if organizations_support_sites():
+            settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         super(TestSiteMauLiveMetricsViewSet, self).setup(db)
 
     def test_list(self, monkeypatch, sm_test_data):
