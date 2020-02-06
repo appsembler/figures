@@ -248,6 +248,10 @@ class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 class GeneralSiteMetricsView(CommonAuthMixin, APIView):
     """Viewset intended for Figures Web UI
 
+    DEPRECATED. This view is deprecated
+
+    TODO: Determine when we remove this class
+
     Initial version assumes a single site.
     Multi-tenancy will add a Site foreign key to the SiteDailyMetrics model
     and list the most recent data for all sites (or filtered sites)
@@ -379,28 +383,12 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
         return context
 
-    @list_route()
-    def registered_learners(self, request):
-        # serializer = UserRegistrationMetrics
-        # return Response(serliazer.data)
-
-        import pdb; pdb.set_trace()
-        data = dict(
-            registered_learners=42,
-        )
-        return Response(data)
-
-
-#
-# Indidual metrics views for historical metrics
-#
-
 
 class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     """Serves sitewide metrics
 
     TODO:
-    * Make months_back be a query param
+    * Make months_back be a query param.
     * Create a decorator to do the duplicate work in these methods
     * Improve test coverage
     * Create viewsets for `SiteMetricsViewSet`, `UserMetricsViewSet`
@@ -409,27 +397,24 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     ## Dev note
     Does it benefit to make serializers for these calls?
     Do we want to create a SiteMonthlyMetrics model?
+    If we do, then we can also use django-filter on the model
     Tradeoff: Additional storage cost to reduced request time
     Perhaps we make this a server setting
     """
-    filter_backends = (DjangoFilterBackend, )
-    # filter_class = SiteMonthlyMetricsFilterSet
+    def list(self, request):
+        """
+        Returns site metrics data for current month
+        """
 
-    def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
-        queryset = figures.sites.get_users_for_site(site)
-        return queryset
+        data = metrics.get_current_month_site_metrics(site)
+        return Response(data)
 
-    def get_serializer_context(self):
-        context = super(UserMetricsViewSet, self).get_serializer_context()
-        context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
-        return context
-
-    # @list_route()
+    @list_route()
     def registered_users(self, request):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         date_for = datetime.utcnow().date()
-        months_back=6
+        months_back = 6
 
         registered_users = metrics.get_monthly_history_metric(
             func=metrics.get_total_site_users_for_time_period,
@@ -444,7 +429,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     def new_users(self, request):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         date_for = datetime.utcnow().date()
-        months_back=6
+        months_back = 6
 
         new_users = metrics.get_monthly_history_metric(
             func=metrics.get_total_site_users_joined_for_time_period,
@@ -459,7 +444,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     def course_completions(self, request):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         date_for = datetime.utcnow().date()
-        months_back=6
+        months_back = 6
 
         course_completions = metrics.get_monthly_history_metric(
             func=metrics.get_total_site_users_for_time_period,
@@ -474,7 +459,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     def course_enrollments(self, request):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         date_for = datetime.utcnow().date()
-        months_back=6
+        months_back = 6
 
         course_enrollments = metrics.get_monthly_history_metric(
             func=metrics.get_total_enrollments_for_time_period,
@@ -489,7 +474,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     def site_courses(self, request):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         date_for = datetime.utcnow().date()
-        months_back=6
+        months_back = 6
 
         site_courses = metrics.get_monthly_history_metric(
             func=metrics.get_total_site_courses_for_time_period,
@@ -504,7 +489,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     def active_users(self, request):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         date_for = datetime.utcnow().date()
-        months_back=6
+        months_back = 6
 
         active_users = metrics.get_monthly_history_metric(
             func=metrics.get_active_users_for_time_period,
