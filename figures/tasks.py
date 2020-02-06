@@ -205,7 +205,6 @@ def populate_course_mau(site_id, course_id, month_for=None, force_update=False):
         month_for = datetime.datetime.utcnow().date()
     site = Site.objects.get(id=site_id)
     start_time = time.time()
-    # import pdb; pdb.set_trace()
     obj, created = collect_course_mau(site=site,
                                       courselike=course_id,
                                       month_for=month_for,

@@ -165,7 +165,7 @@ class TestExtractMauData(object):
 @pytest.mark.django_db
 class TestTransformMauData(object):
     """
-    Test retrieving StudentModule records from edx-platform
+    Test getting MAU count. This is the 'transform' step in ETL
     """
     def test_simple_case(self, simple_mau_test_data):
         mau_ids = Mock()
