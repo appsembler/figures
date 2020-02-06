@@ -1,4 +1,5 @@
 
+from mock import patch
 import pytest
 
 import django.contrib.sites.shortcuts
@@ -24,6 +25,9 @@ if organizations_support_sites():
 
 
 @pytest.mark.django_db
+@patch.dict('figures.helpers.settings.FEATURES', {
+    'FIGURES_IS_MULTISITE': organizations_support_sites(),
+})
 class TestSiteMauLiveMetricsViewSet(BaseViewTest):
     request_path = 'api/site-mau-live-metrics'
     view_class = SiteMauLiveMetricsViewSet
