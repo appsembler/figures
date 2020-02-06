@@ -264,7 +264,7 @@ def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
     """
     def calc_from_user_model():
         filter_args = dict(
-            date_joined__lt=next_day(end_date),
+            date_joined__lt=as_datetime(next_day(end_date)),
         )
         users = figures.sites.get_users_for_site(site)
         return users.filter(**filter_args).count()
@@ -280,10 +280,10 @@ def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
         else:
             return 0
 
-    if kwargs.get('calc_raw'):
-        return calc_from_user_model()
-    else:
+    if kwargs.get('calc_from_sdm'):
         return calc_from_site_daily_metrics()
+    else:
+        return calc_from_user_model()
 
 
 def get_total_site_users_joined_for_time_period(site, start_date, end_date, course_ids=None):
@@ -293,8 +293,8 @@ def get_total_site_users_joined_for_time_period(site, start_date, end_date, cour
     """
     def calc_from_user_model():
         filter_args = dict(
-            date_joined__gt=prev_day(start_date),
-            date_joined__lt=next_day(end_date),
+            date_joined__gt=as_datetime(prev_day(start_date)),
+            date_joined__lt=as_datetime(next_day(end_date)),
         )
         users = figures.sites.get_users_for_site(site)
         return users.filter(**filter_args).values('id').distinct().count()
