@@ -211,7 +211,7 @@ def populate_course_mau(site_id, course_id, month_for=None, force_update=False):
                                       overwrite=force_update)
     if not obj:
         msg = 'populate_course_mau failed for course {course_id}'.format(
-            str(course_id))
+            course_id=str(course_id))
         logger.error(msg)
     elapsed_time = time.time() - start_time
     logger.info('populate_course_mau Elapsed time (seconds)={}. cdm_obj={}'.format(
