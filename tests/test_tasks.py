@@ -2,6 +2,7 @@
 
 """
 
+from datetime import date
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 
@@ -9,7 +10,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 
-from figures.helpers import as_date
+from figures.helpers import as_course_key, as_date
 from figures.models import (
     CourseDailyMetrics,
     PipelineError,
@@ -20,6 +21,7 @@ import figures.mau
 
 from tests.factories import (
     CourseDailyMetricsFactory,
+    CourseMauMetricsFactory,
     CourseOverviewFactory,
     SiteFactory,
     SiteDailyMetricsFactory,
@@ -101,31 +103,76 @@ def test_populate_daily_metrics_multisite(transactional_db, monkeypatch):
         figures.tasks.populate_daily_metrics(date_for=date_for)
 
 
-def test_collect_mau_metrics_for_site(transactional_db, monkeypatch):
+def test_populate_course_mau(transactional_db, monkeypatch):
     expected_site = SiteFactory()
+    course = CourseOverviewFactory()
 
-    def mock_store_mau_metrics(site, overwrite=False):
-        assert site
+    def mock_collect_course_mau(site, courselike, month_for=None, overwrite=False):
+        assert site == expected_site
+        assert courselike
+        assert isinstance(month_for, date)
+        return CourseMauMetricsFactory(), True
 
-    monkeypatch.setattr('figures.tasks.store_mau_metrics', mock_store_mau_metrics)
+    monkeypatch.setattr('figures.tasks.collect_course_mau',
+                        mock_collect_course_mau)
 
-    figures.tasks.collect_mau_metrics_for_site(expected_site.id)
+    figures.tasks.populate_course_mau(site_id=expected_site.id,
+                                      course_id=str(course.id))
+    # TODO: Create own test function
+    figures.tasks.populate_course_mau(site_id=expected_site.id,
+                                      course_id=str(course.id),
+                                      month_for=None)
+    figures.tasks.populate_course_mau(site_id=expected_site.id,
+                                      course_id=str(course.id),
+                                      month_for='2020-1-1')
 
 
-def test_collect_mau_metrics(transactional_db, monkeypatch):
-    """
-    Very minimal test
-    """
+def test_populate_mau_metrics_for_site(transactional_db, monkeypatch):
+    expected_site = SiteFactory()
+    courses = [CourseOverviewFactory() for i in range(3)]
+
+    # Shoudl we track call for each course?
+    def mock_populate_course_mau(site_id, course_id, month_for, force_update=False):
+        assert site_id == Site.objects.get(id=site_id).id
+        assert course_id
+
+    def mock_get_course_keys_for_site(site):
+        assert site == expected_site
+        return [as_course_key(course.id) for course in courses]
+
+    monkeypatch.setattr('figures.sites.get_course_keys_for_site',
+                        mock_get_course_keys_for_site)
+    monkeypatch.setattr('figures.tasks.populate_course_mau',
+                        mock_populate_course_mau)
+
+    figures.tasks.populate_mau_metrics_for_site(site_id=expected_site.id)
+
+
+def test_populate_all_mau_single_site(transactional_db, monkeypatch):
+    assert Site.objects.count() == 1
+    expected_site = Site.objects.first()
+
+    def mock_populate_mau_metrics_for_site(site_id, force_update=False):
+        assert site_id == expected_site.id
+
+    monkeypatch.setattr('figures.tasks.populate_mau_metrics_for_site',
+                        mock_populate_mau_metrics_for_site)
+
+    figures.tasks.populate_all_mau()
+
+
+def test_populate_all_mau_multiple_site(transactional_db, monkeypatch):
     assert Site.objects.count() == 1
     sites = [Site.objects.first()]
     sites += [SiteFactory() for i in range(3)]
     sites_visited = []
 
-    def mock_store_mau_metrics(site, overwrite=False):
-        sites_visited.append(site)
+    def mock_populate_mau_metrics_for_site(site_id, force_update=False):
+        sites_visited.append(site_id)
 
-    monkeypatch.setattr('figures.tasks.store_mau_metrics', mock_store_mau_metrics)
+    monkeypatch.setattr('figures.tasks.populate_mau_metrics_for_site',
+                        mock_populate_mau_metrics_for_site)
 
-    figures.tasks.collect_mau_metrics()
+    figures.tasks.populate_all_mau()
 
-    assert set([site.id for site in sites_visited]) == set([site.id for site in sites])
+    assert set(sites_visited) == set([site.id for site in sites])

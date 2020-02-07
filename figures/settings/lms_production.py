@@ -35,6 +35,15 @@ def update_celerybeat_schedule(celerybeat_schedule_settings, figures_env_tokens)
                 ),
             }
 
+    if figures_env_tokens.get('ENABLE_DAILY_MAU_COLLECTION', True):
+        celerybeat_schedule_settings['figures-daily-mau'] = {
+            'task': 'figures.tasks.populate_all_mau',
+            'schedule': crontab(
+                hour=figures_env_tokens.get('DAILY_MAU_IMPORT_HOUR', 0),
+                minute=figures_env_tokens.get('DAILY_MAU_IMPORT_MINUTE', 0),
+                ),
+            }
+
 
 def plugin_settings(settings):
     """
