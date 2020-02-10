@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames/bind';
 import { connect } from 'react-redux';
+import { trackPromise } from 'react-promise-tracker';
 import Immutable from 'immutable';
 import styles from './_dashboard-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
@@ -23,11 +24,13 @@ class DashboardContent extends Component {
   }
 
   fetchCoursesList = () => {
-    fetch(apiConfig.coursesDetailed, { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => this.setState({
-        coursesDetailed: Immutable.fromJS(json['results'])
-      }))
+    trackPromise(
+      fetch(apiConfig.coursesDetailed, { credentials: "same-origin" })
+        .then(response => response.json())
+        .then(json => this.setState({
+          coursesDetailed: Immutable.fromJS(json['results'])
+        }))
+    )
   }
 
   componentDidMount() {
