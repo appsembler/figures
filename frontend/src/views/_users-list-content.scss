@@ -1,0 +1,64 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/mixins';
+@import '~base/sass/base/stat-cards';
+
+.users-content {
+
+}
+
+.users-list {
+  padding: calcRem(25) 0;
+  border-top: 1px solid #ccc;
+}
+
+.user-list-item {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr 2fr;
+  grid-column-gap: calcRem(20);
+  border-bottom: 1px solid #ccc;
+  padding: calcRem(20) 0;
+  font-size: calcRem(14);
+  align-items: center;
+
+  &.list-header {
+    font-size: calcRem(12);
+  }
+
+  .user-fullname-link {
+    color: $primary-color;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .user-fullname, .username {
+
+  }
+
+  .is-active, .number-of-courses {
+    text-align: center;
+  }
+
+  .action-container {
+    text-align: right;
+  }
+
+  .user-action {
+    font-size: calcRem(14);
+    padding: calcRem(8) calcRem(15);
+    font-weight: normal;
+    color: $primary-color;
+    border: calcRem(1) solid $primary-color;
+    background: transparent;
+    cursor: pointer;
+    border-radius: calcRem(30);
+    transition: all 0.3s ease-in-out;
+    text-decoration: none;
+
+    &:hover {
+      color: #fff;
+      background: $primary-color;
+    }
+  }
+}
