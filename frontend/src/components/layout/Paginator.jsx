@@ -45,7 +45,7 @@ class Paginator extends React.Component {
       }
     }
     var renderEllipsis = true;
-    for (var i = 0; i < this.props.pages; i++) {
+    for (let i = 0; i < this.props.pages; i++) {
       const page = i + 1;
       const buttonClass = (page !== this.state.currentPage) ? styles['number-item'] : styles['number-item-active'];
       if (this.props.pages > this.props.ellipsisPageLimit) {
@@ -163,7 +163,11 @@ Paginator.defaultProps = {
 };
 
 Paginator.propTypes = {
-
+  pages: PropTypes.number,
+  pageSwitchFunction: PropTypes.func,
+  changePerPageFunction: PropTypes.func,
+  perPage: PropTypes.number,
+  currentPage: PropTypes.number,
 };
 
 export default Paginator;
