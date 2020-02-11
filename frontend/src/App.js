@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { fetchCoursesIndex, fetchUserIndex, fetchGeneralData, fetchAllCsvReportsData } from 'base/redux/actions/Actions';
+import { fetchGeneralData, fetchAllCsvReportsData } from 'base/redux/actions/Actions';
 import ReactCSSTransitionReplace from 'react-css-transition-replace';
 import LoadingSpinner from 'base/containers/loading-spinner/LoadingSpinner';
 import DashboardContent from 'base/views/DashboardContent';
@@ -18,8 +18,6 @@ import styles from 'base/sass/base/_grid.scss';
 class App extends Component {
 
   componentDidMount() {
-    this.props.fetchCoursesIndex();
-    this.props.fetchUserIndex();
     this.props.fetchGeneralData();
     (process.env.ENABLE_CSV_REPORTS === "enabled") && this.props.fetchAllCsvReportsData();
   }
@@ -61,8 +59,6 @@ const mapStateToProps = (state, ownProps) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  fetchCoursesIndex: () => dispatch(fetchCoursesIndex()),
-  fetchUserIndex: () => dispatch(fetchUserIndex()),
   fetchGeneralData: () => dispatch(fetchGeneralData()),
   fetchAllCsvReportsData: () => dispatch(fetchAllCsvReportsData()),
 })
