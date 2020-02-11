@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { Link } from 'react-router-dom';
@@ -7,17 +6,11 @@ import styles from './_autocomplete-user-select.scss';
 import classNames from 'classnames/bind';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import apiConfig from 'base/apiConfig';
 
 let cx = classNames.bind(styles);
 
-var usersList = [
-];
-
-const getSuggestions = value => {
-  const inputValue = value.trim().toLowerCase();
-  const inputLength = inputValue.length;
-  return inputLength === usersList ? [] : usersList.filter(user => ((user.userName.toLowerCase().slice(0, inputLength) === inputValue) || (user.userUsername.toLowerCase().slice(0, inputLength) === inputValue))).toArray();
-};
+const WAIT_INTERVAL = 1000;
 
 const getSuggestionValue = suggestion => suggestion.userName;
 
@@ -32,6 +25,7 @@ class AutoCompleteUserSelect extends Component {
     };
 
     this.onChange = this.onChange.bind(this);
+    this.doSearch = this.doSearch.bind(this);
     this.modalTrigger = this.modalTrigger.bind(this);
     this.storeInputReference = this.storeInputReference.bind(this);
   }
@@ -46,10 +40,24 @@ class AutoCompleteUserSelect extends Component {
   }
 
   onChange = (event, { newValue }) => {
+    clearTimeout(this.timer);
+
     this.setState({
       value: newValue
     });
+
+    this.timer = setTimeout(this.doSearch, WAIT_INTERVAL);
   };
+
+  doSearch = () => {
+    const requestUrl = apiConfig.figuresUsersIndexApi + '?username=' + this.state.value;
+    fetch((requestUrl), { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => this.setState({
+        suggestions: json['results'],
+      })
+    )
+  }
 
   onSuggestionsClearRequested = () => {
 
@@ -63,10 +71,8 @@ class AutoCompleteUserSelect extends Component {
     });
   }
 
-  onSuggestionsFetchRequested = ({ value }) => {
-    this.setState({
-      suggestions: getSuggestions(value)
-    });
+  onSuggestionsFetchRequested = () => {
+
   };
 
   storeInputReference = autosuggest => {
@@ -74,6 +80,16 @@ class AutoCompleteUserSelect extends Component {
       this.input = autosuggest.input;
     }
   };
+
+  componentWillMount() {
+    this.timer = null;
+    fetch((apiConfig.figuresUsersIndexApi), { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => this.setState({
+        suggestions: json['results'],
+      })
+    )
+  }
 
   render() {
     const { value, suggestions } = this.state;
@@ -84,16 +100,8 @@ class AutoCompleteUserSelect extends Component {
       onChange: this.onChange
     };
 
-    usersList = this.props.usersIndex.map((item, index) => {
-      return {
-        userId: item['id'],
-        userName: item['fullname'] ? item['fullname'] : item['username'],
-        userUsername: item['username']
-      }
-    })
-
     const renderSuggestion = suggestion => (
-      <Link className={styles['suggestion-link']} to={'/figures/user/' + suggestion.userId} onClick={this.modalTrigger}><span className={styles['suggestion-link__user-username']}>{suggestion.userUsername}</span><span className={styles['suggestion-link__user-name']}>{suggestion.userName}</span></Link>
+      <Link className={styles['suggestion-link']} to={'/figures/user/' + suggestion['id']} onClick={this.modalTrigger}><span className={styles['suggestion-link__user-username']}>{suggestion['username']}</span><span className={styles['suggestion-link__user-name']}>{suggestion['fullname']}</span></Link>
     );
 
 
@@ -125,7 +133,7 @@ class AutoCompleteUserSelect extends Component {
 AutoCompleteUserSelect.defaultProps = {
   negativeStyleButton: false,
   buttonText: 'Select a user',
-  inputPlaceholder: 'Select or start typing',
+  inputPlaceholder: 'Start typing to search...',
 }
 
 AutoCompleteUserSelect.propTypes = {
@@ -134,10 +142,4 @@ AutoCompleteUserSelect.propTypes = {
   inputPlaceholder: PropTypes.string
 };
 
-const mapStateToProps = (state, ownProps) => ({
-  usersIndex: state.usersIndex.usersIndex,
-})
-
-export default connect(
-  mapStateToProps
-)(AutoCompleteUserSelect)
+export default AutoCompleteUserSelect
