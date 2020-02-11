@@ -206,9 +206,9 @@ def populate_course_mau(site_id, course_id, month_for=None, force_update=False):
     site = Site.objects.get(id=site_id)
     start_time = time.time()
     obj, _created = collect_course_mau(site=site,
-                                      courselike=course_id,
-                                      month_for=month_for,
-                                      overwrite=force_update)
+                                       courselike=course_id,
+                                       month_for=month_for,
+                                       overwrite=force_update)
     if not obj:
         msg = 'populate_course_mau failed for course {course_id}'.format(
             course_id=str(course_id))

@@ -75,9 +75,9 @@ def store_mau_metrics(site, overwrite=False):
 
     # store site data
     site_mau_obj, _created = SiteMauMetrics.save_metrics(site=site,
-                                                        date_for=today.date(),
-                                                        data=dict(mau=site_mau.count()),
-                                                        overwrite=overwrite)
+                                                         date_for=today.date(),
+                                                         data=dict(mau=site_mau.count()),
+                                                         overwrite=overwrite)
     course_mau_objects = []
     for course_key in get_course_keys_for_site(site):
         course_student_modules = student_modules.filter(course_id=course_key)
