@@ -54,7 +54,7 @@ class SiteDailyMetricsAdmin(admin.ModelAdmin):
 class LearnerCourseGradeMetricsAdmin(admin.ModelAdmin):
     """Defines the admin interface for the LearnerCourseGradeMetrics model
     """
-    list_display = ('id', 'date_for',  'site', 'user_link', 'course_id',
+    list_display = ('id', 'date_for', 'site', 'user_link', 'course_id',
                     'progress_percent', 'points_possible', 'points_earned',
                     'sections_worked', 'sections_possible')
     list_filter = (

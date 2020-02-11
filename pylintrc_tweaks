@@ -10,7 +10,6 @@ disable =
     # TODO: Enable those errors incrementally by removing them
     abstract-method,  # TODO: Remove
     attribute-defined-outside-init,  # TODO: Remove
-    bad-whitespace,  # TODO: Remove
     broad-except,  # TODO: Remove
     empty-docstring,  # TODO: Remove
     function-redefined,  # TODO: Remove
@@ -19,12 +18,8 @@ disable =
     len-as-condition,  # TODO: Remove
     missing-docstring,  # TODO: Remove
     no-member,  # TODO: Remove
-    pointless-string-statement,  # TODO: Remove
     redefined-builtin,  # TODO: Remove
-    simplifiable-if-statement,  # TODO: Remove
     unused-argument,  # TODO: Remove
-    unused-import,  # TODO: Remove
-    unused-variable,  # TODO: Remove
 
     # Those are the default we should leave them as-is
     bad-continuation,

@@ -132,12 +132,11 @@ class LearnerCourseGrades(object):
     def is_section_graded(self, section):
         # just being defensive, might not need to check if
         # all_total exists and if all_total.possible exists
-        if (hasattr(section, 'all_total') and
-                hasattr(section.all_total, 'possible') and
-                section.all_total.possible > 0):
-            return True
-        else:
-            return False
+        return bool(
+            hasattr(section, 'all_total')
+            and hasattr(section.all_total, 'possible')
+            and section.all_total.possible > 0
+        )
 
     def sections(self, only_graded=False, **kwargs):
         """
@@ -210,20 +209,18 @@ class LearnerCourseGrades(object):
             progress_percent=lcg.progress_percent(course_progress_details))
 
 
-"""
-Support methods for Course and Sitewide aggregate metrics
-
-Note the common theme in many of these methods in filtering on a date range
-Also note that some methods have two inner methods. One to retrieve raw data
-from the original model, the other to retrieve from the Figures metrics model
-The purpose of this is to be able to switch back and forth in development
-The metrics model may not be populated in devstack, but we want to exercize
-the code.
-Retrieving from the Figures metrics models should be much faster
-
-We may refactor these into a base class with the contructor params of
-start_date, end_date, site
-"""
+# Support Methods for Both Course and Site-wide Aggregate Metrics
+#
+# Note the common theme in many of these methods in filtering on a date range
+# Also note that some methods have two inner methods. One to retrieve raw data
+# from the original model, the other to retrieve from the Figures metrics model
+# The purpose of this is to be able to switch back and forth in development
+# The metrics model may not be populated in devstack, but we want to exercize
+# the code.
+# Retrieving from the Figures metrics models should be much faster
+#
+# We may refactor these into a base class with the contructor params of
+# start_date, end_date, site
 
 
 def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):
