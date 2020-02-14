@@ -8,6 +8,13 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+Figures master branch is working toward release 0.3.5.
+
+TBD Feb 2020 - Figures release 0.3.5
+====================================
+
+Items planned for this release:
+* Site Monthly Metrics pipeline and API
 
 29 Jan 2020 - Figures release 0.3.4
 ====================================

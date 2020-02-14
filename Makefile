@@ -48,7 +48,7 @@ pylint:  ## lint
 	pylint --load-plugins pylint_django ./figures
 
 coverage:  ## Run coverage, without the built-in virtualenv
-	@. ve/bin/activate; coverage run --source figures -m py.test; coverage report -m
+	coverage run --source figures -m py.test; coverage report -m
 
 ginkgo.pytest:  ## Run Pytest for the Ginkgo environment
 	OPENEDX_RELEASE=GINKGO pytest -c pytest-ginkgo.ini
