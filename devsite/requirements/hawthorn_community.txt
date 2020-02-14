@@ -28,7 +28,7 @@ Django==1.11.15
 # edx-platform hawthorn does not use django-extensions
 django-extensions==1.5.9
 
-djangorestframework==3.6.3
+djangorestframework==3.9.1
 django-countries==4.6.1
 django-filter==1.0.4
 django-webpack-loader==0.6.0
