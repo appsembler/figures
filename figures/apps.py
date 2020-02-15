@@ -45,7 +45,7 @@ class FiguresConfig(AppConfig):
             PluginURLs.CONFIG: {
                 ProjectType.LMS: {
                     PluginURLs.NAMESPACE: u'figures',
-                    PluginURLs.REGEX: u'figures/',
+                    PluginURLs.REGEX: u'^figures/',
                 }
             },
 
