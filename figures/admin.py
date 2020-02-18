@@ -85,3 +85,14 @@ class PipelineErrorAdmin(admin.ModelAdmin):
         ('course_id', AllValuesDropdownFilter),
         ('user', RelatedOnlyFieldListFilter),
         'error_type')
+
+
+@admin.register(figures.models.CourseMauMetrics)
+class CourseMauMetricsAdmin(admin.ModelAdmin):
+    """Defines the admin interface for the CourseMauMetrics model
+    """
+    list_display = ('id', 'date_for', 'site', 'course_id', 'mau')
+    list_filter = (
+        ('site', RelatedOnlyDropdownFilter),
+        ('course_id', AllValuesDropdownFilter),
+        'date_for')
