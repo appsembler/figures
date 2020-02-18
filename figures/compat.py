@@ -8,7 +8,7 @@ value from openedx.core.release.RELEASE_LINE. This will be the release name as
 a lowercase string, such as 'ginkgo' or 'hawthorn'
 
 '''
-# pylint: disable=ungrouped-imports
+# pylint: disable=ungrouped-imports,useless-suppression
 
 try:
     from openedx.core.release import RELEASE_LINE
@@ -29,7 +29,7 @@ except ImportError:
 
 
 if RELEASE_LINE == 'ginkgo':
-    from certificates.models import GeneratedCertificate  # noqa: F401
+    from certificates.models import GeneratedCertificate  # noqa: F401 pylint: disable=unused-import
 else:
     from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa: F401
 

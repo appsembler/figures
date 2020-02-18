@@ -51,7 +51,7 @@ def populate_single_cdm(course_id, date_for=None, force_update=False):
 
     start_time = time.time()
 
-    cdm_obj, created = CourseDailyMetricsLoader(
+    cdm_obj, _created = CourseDailyMetricsLoader(
         course_id).load(date_for=date_for, force_update=force_update)
     elapsed_time = time.time() - start_time
     logger.info('done. Elapsed time (seconds)={}. cdm_obj={}'.format(
@@ -205,10 +205,10 @@ def populate_course_mau(site_id, course_id, month_for=None, force_update=False):
         month_for = datetime.datetime.utcnow().date()
     site = Site.objects.get(id=site_id)
     start_time = time.time()
-    obj, created = collect_course_mau(site=site,
-                                      courselike=course_id,
-                                      month_for=month_for,
-                                      overwrite=force_update)
+    obj, _created = collect_course_mau(site=site,
+                                       courselike=course_id,
+                                       month_for=month_for,
+                                       overwrite=force_update)
     if not obj:
         msg = 'populate_course_mau failed for course {course_id}'.format(
             course_id=str(course_id))

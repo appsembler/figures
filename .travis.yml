@@ -22,7 +22,6 @@ script:
 env:
   - TOXENV=py27-hawthorn_community
   - TOXENV=py27-hawthorn_multisite
-  - TOXENV=flake8
   - TOXENV=lint
   - TOXENV=edx_lint_check
 
