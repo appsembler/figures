@@ -13,6 +13,7 @@ from figures.models import (
     SiteDailyMetrics,
     LearnerCourseGradeMetrics,
     PipelineError,
+    CourseMauMetrics,
     )
 
 from tests.factories import (
@@ -36,8 +37,9 @@ class TestModelAdminRepresentations(object):
             (SiteDailyMetrics, figures.admin.SiteDailyMetricsAdmin),
             (LearnerCourseGradeMetrics, figures.admin.LearnerCourseGradeMetricsAdmin),
             (PipelineError, figures.admin.PipelineErrorAdmin),
+            (CourseMauMetrics, figures.admin.CourseMauMetricsAdmin),
         ])
-    def test_course_daily_metrics_admin(self, model_class, model_admin_class):
+    def test_metrics_model_admin(self, model_class, model_admin_class):
         obj = model_admin_class(model_class, self.admin_site)
         assert obj.list_display
 
