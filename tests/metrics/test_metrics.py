@@ -325,8 +325,7 @@ class TestSiteMetricsGettersStandalone(object):
         count = get_total_site_users_for_time_period(
             site=self.site,
             start_date=self.data_start_date,
-            end_date=self.data_end_date,
-            calc_raw=True)
+            end_date=self.data_end_date)
         assert count == len(users)
 
     def test_get_total_site_users_joined_for_time_period(self):
@@ -471,8 +470,7 @@ class TestSiteMetricsGettersMultisite(object):
             end_date=self.data_end_date)
         count = get_total_site_users_for_time_period(site=self.alpha_site,
                                                      start_date=self.data_start_date,
-                                                     end_date=self.data_end_date,
-                                                     calc_raw=True)
+                                                     end_date=self.data_end_date)
         assert count == len(users)
 
     def test_get_total_site_users_joined_for_time_period(self):
