@@ -364,6 +364,7 @@ class TestGeneralUserDataSerializer(object):
         self.a_datetime = datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC)
         self.user_attributes = {
             'username': 'alpha_one',
+            'email': 'alpha_one@example.com',
             'profile__name': 'Alpha One',
             'profile__country': 'CA',
             'profile__gender': 'o',
@@ -376,7 +377,7 @@ class TestGeneralUserDataSerializer(object):
         self.serializer = GeneralUserDataSerializer(instance=self.user)
 
         self.expected_fields = [
-            'id', 'username', 'fullname','country', 'is_active', 'gender',
+            'id', 'username', 'email', 'fullname','country', 'is_active', 'gender',
             'date_joined', 'year_of_birth', 'level_of_education', 'courses',
             'language_proficiencies',
         ]
@@ -398,6 +399,7 @@ class TestGeneralUserDataSerializer(object):
         # This is to make sure that the serializer retrieves the correct nested
         # model (UserProfile) data
         assert data['username'] == 'alpha_one'
+        assert data['email'] == 'alpha_one@example.com'
         assert data['fullname'] == 'Alpha One'
         assert data['country'] == 'CA'
         assert data['gender'] == 'o'

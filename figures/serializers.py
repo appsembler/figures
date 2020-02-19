@@ -503,6 +503,7 @@ class GeneralUserDataSerializer(serializers.Serializer):
 
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
+    email = serializers.CharField(read_only=True)
     fullname = serializers.CharField(
         source='profile.name', default=None, read_only=True)
 
