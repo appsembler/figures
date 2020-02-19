@@ -111,7 +111,8 @@ def prev_day(val):
 
 
 def days_in_month(month_for):
-    return calendar.monthrange(month_for.year, month_for.month)[1]
+    _, num_days_in_month = calendar.monthrange(month_for.year, month_for.month)
+    return num_days_in_month
 
 
 # TODO: Consider changing name to 'months_back_iterator' or similar
