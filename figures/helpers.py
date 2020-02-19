@@ -110,6 +110,11 @@ def prev_day(val):
     return days_from(val, -1)
 
 
+def days_in_month(month_for):
+    _, num_days_in_month = calendar.monthrange(month_for.year, month_for.month)
+    return num_days_in_month
+
+
 # TODO: Consider changing name to 'months_back_iterator' or similar
 # TODO: implement or removed include_month_for
 def previous_months_iterator(month_for, months_back, include_month_for=False):
@@ -128,5 +133,5 @@ def previous_months_iterator(month_for, months_back, include_month_for=False):
         start_month = month_for - relativedelta(months=months_back)
 
     for dt in rrule(freq=MONTHLY, dtstart=start_month, until=month_for):
-        last_day_of_month = calendar.monthrange(dt.year, dt.month)[1]
+        last_day_of_month = days_in_month(month_for=dt)
         yield (dt.year, dt.month, last_day_of_month)

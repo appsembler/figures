@@ -1,6 +1,7 @@
 """Figures views
 """
 
+from datetime import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django.contrib.sites.shortcuts
@@ -15,6 +16,7 @@ from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
+from rest_framework.decorators import list_route
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import DjangoFilterBackend
@@ -244,11 +246,16 @@ class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
 
 class GeneralSiteMetricsView(CommonAuthMixin, APIView):
-    '''
+    """Viewset intended for Figures Web UI
+
+    DEPRECATED. This view is deprecated
+
+    TODO: Determine when we remove this class
+
     Initial version assumes a single site.
     Multi-tenancy will add a Site foreign key to the SiteDailyMetrics model
     and list the most recent data for all sites (or filtered sites)
-    '''
+    """
 
     pagination_class = FiguresLimitOffsetPagination
 
@@ -277,9 +284,8 @@ class GeneralSiteMetricsView(CommonAuthMixin, APIView):
 
 
 class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
-    '''
-
-    '''
+    """Viewset intended for Figures Web UI
+    """
     model = CourseOverview
 
     # The "kilo paginator"  is a tempoarary hack to return all course to not
@@ -376,6 +382,128 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         context = super(LearnerDetailsViewSet, self).get_serializer_context()
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
         return context
+
+
+class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
+    """Serves sitewide metrics
+
+    TODO:
+    * Make months_back be a query param.
+    * Create a decorator to do the duplicate work in these methods
+    * Improve test coverage
+    * Create viewsets for `SiteMetricsViewSet`, `UserMetricsViewSet`
+    #   `CourseMetricsViewSet` for retrieving live data for each context
+
+    ## Dev note
+    Does it benefit to make serializers for these calls?
+    Do we want to create a SiteMonthlyMetrics model?
+    If we do, then we can also use django-filter on the model
+    Tradeoff: Additional storage cost to reduced request time
+    Perhaps we make this a server setting
+    """
+    def list(self, request):
+        """
+        Returns site metrics data for current month
+        """
+
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        data = metrics.get_current_month_site_metrics(site)
+        return Response(data)
+
+    @list_route()
+    def registered_users(self, request):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        date_for = datetime.utcnow().date()
+        months_back = 6
+
+        registered_users = metrics.get_monthly_history_metric(
+            func=metrics.get_total_site_users_for_time_period,
+            site=site,
+            date_for=date_for,
+            months_back=months_back,
+        )
+        data = dict(registered_users=registered_users)
+        return Response(data)
+
+    @list_route()
+    def new_users(self, request):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        date_for = datetime.utcnow().date()
+        months_back = 6
+
+        new_users = metrics.get_monthly_history_metric(
+            func=metrics.get_total_site_users_joined_for_time_period,
+            site=site,
+            date_for=date_for,
+            months_back=months_back,
+        )
+        data = dict(new_users=new_users)
+        return Response(data)
+
+    @list_route()
+    def course_completions(self, request):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        date_for = datetime.utcnow().date()
+        months_back = 6
+
+        course_completions = metrics.get_monthly_history_metric(
+            func=metrics.get_total_site_users_for_time_period,
+            site=site,
+            date_for=date_for,
+            months_back=months_back,
+        )
+        data = dict(course_completions=course_completions)
+        return Response(data)
+
+    @list_route()
+    def course_enrollments(self, request):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        date_for = datetime.utcnow().date()
+        months_back = 6
+
+        course_enrollments = metrics.get_monthly_history_metric(
+            func=metrics.get_total_enrollments_for_time_period,
+            site=site,
+            date_for=date_for,
+            months_back=months_back,
+        )
+        data = dict(course_enrollments=course_enrollments)
+        return Response(data)
+
+    @list_route()
+    def site_courses(self, request):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        date_for = datetime.utcnow().date()
+        months_back = 6
+
+        site_courses = metrics.get_monthly_history_metric(
+            func=metrics.get_total_site_courses_for_time_period,
+            site=site,
+            date_for=date_for,
+            months_back=months_back,
+        )
+        data = dict(site_courses=site_courses)
+        return Response(data)
+
+    @list_route()
+    def active_users(self, request):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        date_for = datetime.utcnow().date()
+        months_back = 6
+
+        active_users = metrics.get_monthly_history_metric(
+            func=metrics.get_active_users_for_time_period,
+            site=site,
+            date_for=date_for,
+            months_back=months_back,
+        )
+        data = dict(active_users=active_users)
+        return Response(data)
+
+
+#
+# MAU metrics views
+#
 
 
 class CourseMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):

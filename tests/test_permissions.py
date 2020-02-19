@@ -1,14 +1,10 @@
-'''Test the permission classes we define in Figures
+"""Test the permission classes we define in Figures
+"""
 
-'''
-
-import mock
 import pytest
 
 from django.contrib.auth import get_user_model
-
 import django.contrib.sites.shortcuts
-
 from rest_framework.test import APIRequestFactory
 
 import figures.permissions
@@ -50,7 +46,7 @@ class TestPermissionsForStandaloneMode(object):
         # verify that inactive users are denied permission
         request.user.is_active = False
         permission = figures.permissions.IsSiteAdminUser().has_permission(request, None)
-        assert permission is False, 'username: "{username}"'.format(username=username)
+        assert permission == False, 'username: "{username}"'.format(username=username)
 
     @pytest.mark.parametrize('username, allow', [
         ('regular_user', False),
@@ -69,7 +65,7 @@ class TestPermissionsForStandaloneMode(object):
         # verify that inactive users are denied permission
         request.user.is_active = False
         permission = figures.permissions.IsStaffUserOnDefaultSite().has_permission(request, None)
-        assert permission is False, 'username: "{username}"'.format(username=username)
+        assert permission == False, 'username: "{username}"'.format(username=username)
 
 
 @pytest.mark.skipif(not organizations_support_sites(),
@@ -98,7 +94,6 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         self.callers += create_test_users()
         self.features = {'FIGURES_IS_MULTISITE': True}
 
-    # @mock.patch('figures.settings')
     @pytest.mark.parametrize('username, allow', [
         ('regular_user', False),
         ('staff_user', True),
@@ -108,7 +103,6 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         ('alpha_site_admin', True),
         ('nosite_staff', False),
         ])
-    # def test_is_site_admin_user(self, figures_settings, username, allow):
     def test_is_site_admin_user(self, monkeypatch, settings, username, allow):
         def test_site(request):
             return self.site
@@ -120,20 +114,32 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         assert figures.helpers.is_multisite()
         permission = figures.permissions.IsSiteAdminUser().has_permission(
             request, None)
-        assert permission is allow, 'User "{username}" should have access'.format(
+        assert permission == allow, 'User "{username}" should have access'.format(
             username=username)
 
         # verify that inactive users are denied permission
         request.user.is_active = False
         permission = figures.permissions.IsSiteAdminUser().has_permission(
             request, None)
-        assert permission is False, 'username: "{username}"'.format(
+        assert permission == False, 'username: "{username}"'.format(
             username=username)
 
-    def test_multiple_user_orgs(self, monkeypatch, settings):
+    @pytest.mark.parametrize('username, allow', [
+        ('regular_user', False),
+        ('staff_user', True),
+        ('super_user', True),
+        ('superstaff_user', True),
+        ('alpha_nonadmin', False),
+        ('alpha_site_admin', True),
+        ('nosite_staff', False),
+        ])
+    def test_multiple_user_orgs(self, monkeypatch, settings, username, allow):
+        """
+        We updated `figures.permissions` so that a user can belong to multiple
+        organizations
+        """
         def test_site(request):
             return self.site
-        username = 'alpha_site_admin'
         request = APIRequestFactory().get('/')
         request.META['HTTP_HOST'] = self.site.domain
         request.user = get_user_model().objects.get(username=username)
@@ -141,9 +147,10 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         assert figures.helpers.is_multisite()
         org2 = OrganizationFactory(sites=[self.site])
-        UserOrganizationMappingFactory(user=request.user, organization=org2),
-        with pytest.raises(figures.permissions.MultipleOrgsPerUserNotSupported):
-            figures.permissions.IsSiteAdminUser().has_permission(request, None)
+        UserOrganizationMappingFactory(user=request.user, organization=org2)
+        permission = figures.permissions.IsSiteAdminUser().has_permission(request, None)
+        assert permission == allow, 'User "{username}" should have access'.format(
+            username=username)
 
     @pytest.mark.parametrize('username, allow', [
         ('regular_user', False),
@@ -163,4 +170,4 @@ class TestSiteAdminPermissionsForMultisiteMode(object):
         # verify that inactive users are denied permission
         request.user.is_active = False
         permission = figures.permissions.IsStaffUserOnDefaultSite().has_permission(request, None)
-        assert permission is False, 'username: "{username}"'.format(username=username)
+        assert permission == False, 'username: "{username}"'.format(username=username)

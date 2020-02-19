@@ -40,6 +40,7 @@ from figures.helpers import (
     as_course_key,
     as_date,
     as_datetime,
+    days_in_month,
     next_day,
     prev_day,
     previous_months_iterator,
@@ -261,7 +262,7 @@ def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
     """
     def calc_from_user_model():
         filter_args = dict(
-            date_joined__lt=next_day(end_date),
+            date_joined__lt=as_datetime(next_day(end_date)),
         )
         users = figures.sites.get_users_for_site(site)
         return users.filter(**filter_args).count()
@@ -277,10 +278,10 @@ def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
         else:
             return 0
 
-    if kwargs.get('calc_raw'):
-        return calc_from_user_model()
-    else:
+    if kwargs.get('calc_from_sdm'):
         return calc_from_site_daily_metrics()
+    else:
+        return calc_from_user_model()
 
 
 def get_total_site_users_joined_for_time_period(site, start_date, end_date, course_ids=None):
@@ -290,8 +291,8 @@ def get_total_site_users_joined_for_time_period(site, start_date, end_date, cour
     """
     def calc_from_user_model():
         filter_args = dict(
-            date_joined__gt=prev_day(start_date),
-            date_joined__lt=next_day(end_date),
+            date_joined__gt=as_datetime(prev_day(start_date)),
+            date_joined__lt=as_datetime(next_day(end_date)),
         )
         users = figures.sites.get_users_for_site(site)
         return users.filter(**filter_args).values('id').distinct().count()
@@ -495,6 +496,44 @@ def get_monthly_history_metric(func, site, date_for, months_back,
     return dict(
         current_month=current_month,
         history=history,)
+
+
+def get_current_month_site_metrics(site, **kwargs):
+    """
+    TODO: put the metric names and functions in a dict and iterate. This then
+    will let up dynamically retrieve fields for the monthly metrics this function
+    returns
+    """
+    date_for = datetime.datetime.utcnow().date()
+    start_date = datetime.date(year=date_for.year, month=date_for.month, day=1)
+    end_date = datetime.date(year=date_for.year,
+                             month=date_for.month,
+                             day=days_in_month(date_for))
+
+    active_users = get_active_users_for_time_period(site=site,
+                                                    start_date=start_date,
+                                                    end_date=end_date)
+    registered_users = get_total_site_users_for_time_period(site=site,
+                                                            start_date=start_date,
+                                                            end_date=end_date)
+    new_users = get_total_site_users_joined_for_time_period(site=site,
+                                                            start_date=start_date,
+                                                            end_date=end_date)
+    site_courses = get_total_site_courses_for_time_period(site=site,
+                                                          start_date=start_date,
+                                                          end_date=end_date)
+    course_enrollments = get_total_enrollments_for_time_period(site=site,
+                                                               start_date=start_date,
+                                                               end_date=end_date)
+    course_completions = get_total_course_completions_for_time_period(site=site,
+                                                                      start_date=start_date,
+                                                                      end_date=end_date)
+    return dict(active_users=active_users,
+                registered_users=registered_users,
+                new_users=new_users,
+                site_courses=site_courses,
+                course_enrollments=course_enrollments,
+                course_completions=course_completions)
 
 
 def get_monthly_site_metrics(site, date_for=None, **kwargs):

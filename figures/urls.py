@@ -20,6 +20,11 @@ router.register(
     base_name='site-daily-metrics')
 
 router.register(
+    r'site-monthly-metrics',
+    views.SiteMonthlyMetricsViewSet,
+    base_name='site-monthly-metrics')
+
+router.register(
     r'course-mau-metrics',
     views.CourseMauMetricsViewSet,
     base_name='course-mau-metrics')
@@ -81,7 +86,6 @@ router.register(
     r'users/detail',
     views.LearnerDetailsViewSet,
     base_name='users-detail')
-
 
 # TODO: Consider changing this path to be 'users' or 'users/summary'
 # So that all user data fall under the same root path
