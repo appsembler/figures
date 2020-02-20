@@ -299,7 +299,7 @@ class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
     filter_class = CourseOverviewFilter
     search_fields = ['display_name', 'id']
-    ordering_fields = ['display_name', 'self_paced']
+    ordering_fields = ['display_name', 'self_paced', 'date_joined']
 
     def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
@@ -367,8 +367,8 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = GeneralUserDataSerializer
     filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
     filter_class = UserFilterSet
-    search_fields = ['username', 'email', 'profile__name']
-    ordering_fields = ['username', 'email', 'profile__name', 'is_active']
+    search_fields = ['username', 'email', 'name']
+    ordering_fields = ['username', 'email', 'name', 'is_active', 'date_joined']
 
     def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)

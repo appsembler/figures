@@ -116,7 +116,7 @@ class UserFilterSet(django_filters.FilterSet):
     is_superuser = django_filters.BooleanFilter(name='is_superuser')
     username = django_filters.CharFilter(lookup_expr='icontains')
     email = django_filters.CharFilter(lookup_expr='icontains')
-    profile__name = django_filters.CharFilter(lookup_expr='icontains')
+    name = django_filters.CharFilter(lookup_expr='icontains', name='profile__name')
 
     country = django_filters.CharFilter(
         name='profile__country', lookup_expr='iexact')
@@ -125,8 +125,9 @@ class UserFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email', 'profile__name', 'country', 'is_active', 'is_staff',
-                  'is_superuser', 'enrolled_in_course_id', 'user_ids', ]
+        fields = ['username', 'email', 'name', 'country', 'is_active',
+                  'is_staff', 'is_superuser', 'enrolled_in_course_id',
+                  'user_ids', 'date_joined']
 
     def filter_user_ids(self, queryset, name, value):
         user_ids = [id for id in value.split(',') if id.isdigit()]
