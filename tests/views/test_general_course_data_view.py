@@ -56,6 +56,16 @@ COURSE_DATA = [
     { 'id': u'course-v1:BravoOrg+B002+RUN', 'name': u'Bravo Course 2', 'org': u'BravoOrg', 'number': u'B002' },
 ]
 
+SEARCH_TERMS = [
+    {'term': 'org', 'expected_result': 4},
+    {'term': 'alpha', 'expected_result': 2},
+    {'term': 'B002', 'expected_result': 1},
+    {'term': 'maxi', 'expected_result': 0},
+    {'term': 'pha Course 2', 'expected_result': 1},
+    {'term': 'rse-v1:BravoOrg+A001+R', 'expected_result': 1},
+    {'term': 'run', 'expected_result': 4},
+]
+
 def make_user(**kwargs):
     '''
 
@@ -72,7 +82,7 @@ def make_user(**kwargs):
 
 def make_course(**kwargs):
     return CourseOverviewFactory(
-        id=kwargs['id'], display_name=kwargs['name'], org=kwargs['org'], number=kwargs['number'])
+        id=kwargs['id'], display_name=kwargs['name'], org=kwargs['org'], number=kwargs['number'], self_paced=kwargs['self_paced'])
 
 def make_course_enrollments(user, courses, **kwargs):
     '''
@@ -137,7 +147,7 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             # TODO: add asserts for more fields
             # TODO as testing improvement future work: validating metrics and staff
             # We're starting to need more complex data set-up, so deferring to
-            # implement a 
+            # implement a
 
     def test_get_retrieve(self):
         '''Tests retrieving a list of users with abbreviated details
@@ -226,3 +236,21 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             view = self.view_class.as_view({'get': 'retrieve'})
             response = view(request, pk=str(course.id))
             assert response.status_code == 403
+
+    def test_get_search(self):
+        """
+        Based on a SEARCH_TERMS data set, we query the endpoint with search
+        terms and we compare with the expected results.
+        """
+        for search_term in SEARCH_TERMS:
+            request_path = self.request_path + '?search=' + search_term['term']
+            print request_path
+            request = APIRequestFactory().get(request_path)
+            force_authenticate(request, user=self.staff_user)
+            view = self.view_class.as_view({'get': 'list'})
+            response = view(request)
+
+            assert response.status_code == 200
+            assert response.data['count'] == search_term['expected_result']
+            assert len(response.data['results']) == \
+                search_term['expected_result']

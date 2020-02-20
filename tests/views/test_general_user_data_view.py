@@ -75,6 +75,13 @@ COURSE_DATA = [
      'org': u'BravoOrg', 'number': u'B002'},
 ]
 
+SEARCH_TERMS = [
+    {'term': 'alpha', 'expected_result': 2},
+    {'term': 'bravo02', 'expected_result': 1},
+    {'term': 'bravo02@example.com', 'expected_result': 1},
+    {'term': 'Two', 'expected_result': 2},
+    {'term': 'Bravo Two', 'expected_result': 1},
+]
 
 def make_user(**kwargs):
     '''
@@ -185,3 +192,21 @@ class TestGeneralUserViewSet(BaseViewTest):
             for course_enrollment in CourseEnrollment.objects.filter(user=user_model):
                 # Test that the course id exists in the data
                 assert get_course_rec(course_enrollment.course_id, rec['courses'])
+
+    def test_get_search(self):
+        """
+        Based on a SEARCH_TERMS data set, we query the endpoint with search
+        terms and we compare with the expected results.
+        """
+        for search_term in SEARCH_TERMS:
+            request_path = self.request_path + '?search=' + search_term['term']
+            print request_path
+            request = APIRequestFactory().get(request_path)
+            force_authenticate(request, user=self.staff_user)
+            view = self.view_class.as_view({'get': 'list'})
+            response = view(request)
+
+            assert response.status_code == 200
+            assert response.data['count'] == search_term['expected_result']
+            assert len(response.data['results']) == \
+                search_term['expected_result']
