@@ -58,7 +58,7 @@ COURSE_DATA = [
 
 SEARCH_TERMS = [
     {'term': 'org', 'expected_result': 4},
-    {'term': 'alpha', 'expected_result': 2},
+    {'term': 'bravo', 'expected_result': 2},
     {'term': 'B002', 'expected_result': 1},
     {'term': 'maxi', 'expected_result': 0},
     {'term': 'pha Course 2', 'expected_result': 1},

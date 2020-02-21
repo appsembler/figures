@@ -42,6 +42,7 @@ from rest_framework.test import (
 
 from student.models import CourseEnrollment
 
+from figures.helpers import is_multisite
 from figures.views import GeneralUserDataViewSet
 
 from tests.factories import (
@@ -205,8 +206,15 @@ class TestGeneralUserViewSet(BaseViewTest):
             force_authenticate(request, user=self.staff_user)
             view = self.view_class.as_view({'get': 'list'})
             response = view(request)
-
             assert response.status_code == 200
-            assert response.data['count'] == search_term['expected_result']
-            assert len(response.data['results']) == \
-                search_term['expected_result']
+            if not is_multisite():
+                assert response.data['count'] == search_term['expected_result']
+                assert len(response.data['results']) == \
+                    search_term['expected_result']
+            else:
+                # the defaul site is example.com so it won't be find users, and
+                # that the expected outcome, we should test with different
+                # sites expecting different results, but is out of scope for
+                # now.
+                assert response.data['count'] == 0
+                assert len(response.data['results']) == 0
