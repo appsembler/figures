@@ -82,7 +82,11 @@ def make_user(**kwargs):
 
 def make_course(**kwargs):
     return CourseOverviewFactory(
-        id=kwargs['id'], display_name=kwargs['name'], org=kwargs['org'], number=kwargs['number'], self_paced=kwargs['self_paced'])
+        id=kwargs['id'],
+        display_name=kwargs['name'],
+        org=kwargs['org'],
+        number=kwargs['number']
+    )
 
 def make_course_enrollments(user, courses, **kwargs):
     '''
@@ -111,7 +115,7 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
         self.users = [make_user(**data) for data in USER_DATA]
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
         self.expected_result_keys = [
-            'course_id', 'course_name', 'course_code','org', 'start_date',
+            'course_id', 'course_name', 'course_code', 'org', 'start_date',
             'end_date', 'self_paced', 'staff', 'metrics',
         ]
         if is_multisite():
@@ -237,20 +241,19 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
             response = view(request, pk=str(course.id))
             assert response.status_code == 403
 
-    def test_get_search(self):
+    @pytest.mark.parametrize('search_term', SEARCH_TERMS)
+    def test_get_search(self, search_term):
         """
         Based on a SEARCH_TERMS data set, we query the endpoint with search
         terms and we compare with the expected results.
         """
-        for search_term in SEARCH_TERMS:
-            request_path = self.request_path + '?search=' + search_term['term']
-            print request_path
-            request = APIRequestFactory().get(request_path)
-            force_authenticate(request, user=self.staff_user)
-            view = self.view_class.as_view({'get': 'list'})
-            response = view(request)
+        request_path = self.request_path + '?search=' + search_term['term']
+        request = APIRequestFactory().get(request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get': 'list'})
+        response = view(request)
 
-            assert response.status_code == 200
-            assert response.data['count'] == search_term['expected_result']
-            assert len(response.data['results']) == \
-                search_term['expected_result']
+        assert response.status_code == 200
+        assert response.data['count'] == search_term['expected_result']
+        assert len(response.data['results']) == \
+            search_term['expected_result']

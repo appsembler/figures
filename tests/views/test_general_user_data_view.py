@@ -193,14 +193,14 @@ class TestGeneralUserViewSet(BaseViewTest):
                 # Test that the course id exists in the data
                 assert get_course_rec(course_enrollment.course_id, rec['courses'])
 
-    def test_get_search(self):
+    @pytest.mark.parametrize('search_term', SEARCH_TERMS)
+    def test_get_search(self, search_term):
         """
         Based on a SEARCH_TERMS data set, we query the endpoint with search
         terms and we compare with the expected results.
         """
         for search_term in SEARCH_TERMS:
             request_path = self.request_path + '?search=' + search_term['term']
-            print request_path
             request = APIRequestFactory().get(request_path)
             force_authenticate(request, user=self.staff_user)
             view = self.view_class.as_view({'get': 'list'})
