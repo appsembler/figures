@@ -116,9 +116,8 @@ def days_in_month(month_for):
 
 
 # TODO: Consider changing name to 'months_back_iterator' or similar
-# TODO: implement or removed include_month_for
-def previous_months_iterator(month_for, months_back, include_month_for=False):
-    '''Iterator returns a year,month tulbe for n months including the month_for
+def previous_months_iterator(month_for, months_back):
+    '''Iterator returns a year,month tuple for n months including the month_for
 
     month_for is either a date, datetime, or tuple with year and month
     months back is the number of months to iterate

@@ -253,7 +253,7 @@ class GeneralCourseDataSerializer(serializers.Serializer):
         ]
 
     """
-    # site = serializers.SerializerMethodField()
+    site = None
     course_id = serializers.CharField(source='id', read_only=True)
     course_name = serializers.CharField(
         source='display_name_with_default_escaped', read_only=True)
@@ -344,6 +344,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
     Need to ask edX team why CourseEnrollment doesn't have a foreign key
     relationship to CourseOverview
     """
+    site = None
     course_id = serializers.CharField(source='id', read_only=True)
     course_name = serializers.CharField(
         source='display_name_with_default_escaped', read_only=True)
@@ -449,23 +450,23 @@ class GeneralSiteMetricsSerializer(serializers.Serializer):
     total_course_enrollments = serializers.SerializerMethodField()
     total_course_completions = serializers.SerializerMethodField()
 
-    def get_monthly_active_users(self, obj):
+    def get_monthly_active_users(self, _obj):
         return dict(
         )
 
-    def get_total_site_users(self, obj):
+    def get_total_site_users(self, _obj):
         return dict(
         )
 
-    def get_total_site_courses(self, obj):
+    def get_total_site_courses(self, _obj):
         return dict(
         )
 
-    def get_total_course_enrollments(self, obj):
+    def get_total_course_enrollments(self, _obj):
         return dict(
         )
 
-    def get_total_course_completions(self, obj):
+    def get_total_course_completions(self, _obj):
         return dict(
         )
 
