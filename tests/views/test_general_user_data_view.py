@@ -200,21 +200,20 @@ class TestGeneralUserViewSet(BaseViewTest):
         Based on a SEARCH_TERMS data set, we query the endpoint with search
         terms and we compare with the expected results.
         """
-        for search_term in SEARCH_TERMS:
-            request_path = self.request_path + '?search=' + search_term['term']
-            request = APIRequestFactory().get(request_path)
-            force_authenticate(request, user=self.staff_user)
-            view = self.view_class.as_view({'get': 'list'})
-            response = view(request)
-            assert response.status_code == 200
-            if not is_multisite():
-                assert response.data['count'] == search_term['expected_result']
-                assert len(response.data['results']) == \
-                    search_term['expected_result']
-            else:
-                # the defaul site is example.com so it won't be find users, and
-                # that the expected outcome, we should test with different
-                # sites expecting different results, but is out of scope for
-                # now.
-                assert response.data['count'] == 0
-                assert len(response.data['results']) == 0
+        request_path = self.request_path + '?search=' + search_term['term']
+        request = APIRequestFactory().get(request_path)
+        force_authenticate(request, user=self.staff_user)
+        view = self.view_class.as_view({'get': 'list'})
+        response = view(request)
+        assert response.status_code == 200
+        if not is_multisite():
+            assert response.data['count'] == search_term['expected_result']
+            assert len(response.data['results']) == \
+                search_term['expected_result']
+        else:
+            # the defaul site is example.com so it won't be find users, and
+            # that the expected outcome, we should test with different
+            # sites expecting different results, but is out of scope for
+            # now.
+            assert response.data['count'] == 0
+            assert len(response.data['results']) == 0
