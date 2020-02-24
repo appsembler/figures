@@ -83,7 +83,7 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
     course_id = char_method_filter(method='filter_course_id')
     is_active = django_filters.BooleanFilter(name='is_active',)
 
-    def filter_course_id(self, queryset, name, value):
+    def filter_course_id(self, queryset, name, value):  # pylint: disable=unused-argument
         '''
 
         This method converts the course id string to a CourseLocator object
@@ -127,11 +127,12 @@ class UserFilterSet(django_filters.FilterSet):
         fields = ['username', 'email', 'country', 'is_active', 'is_staff',
                   'is_superuser', 'enrolled_in_course_id', 'user_ids', ]
 
-    def filter_user_ids(self, queryset, name, value):
-        user_ids = [id for id in value.split(',') if id.isdigit()]
+    def filter_user_ids(self, queryset, name, value):  # pylint: disable=unused-argument
+        user_ids = [user_id for user_id in value.split(',') if user_id.isdigit()]
         return queryset.filter(id__in=user_ids)
 
-    def filter_enrolled_in_course_id(self, queryset, name, value):
+    def filter_enrolled_in_course_id(self, queryset,
+                                     name, value):  # pylint: disable=unused-argument
         '''
 
         This method converts the course id string to a CourseLocator object

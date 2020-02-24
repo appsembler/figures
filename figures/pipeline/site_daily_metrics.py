@@ -87,7 +87,7 @@ def get_previous_cumulative_active_user_count(site, date_for):
         return 0
 
 
-def get_total_enrollment_count(site, date_for, course_ids=None):
+def get_total_enrollment_count(site, date_for, course_ids=None):  # pylint: disable=unused-argument
     '''Returns the total enrollments across all courses for the site
     It does not return unique learners
     '''
@@ -110,7 +110,7 @@ class SiteDailyMetricsExtractor(object):
     def __init__(self):
         pass
 
-    def extract(self, site, date_for=None, **kwargs):
+    def extract(self, site, date_for=None, **kwargs):  # pylint: disable=unused-argument
         '''
         We get the count from the User model since there can be registered users
         who have not enrolled.
@@ -147,7 +147,7 @@ class SiteDailyMetricsLoader(object):
     def __init__(self, extractor=None):
         self.extractor = extractor or SiteDailyMetricsExtractor()
 
-    def load(self, site, date_for=None, force_update=False, **kwargs):
+    def load(self, site, date_for=None, force_update=False, **_kwargs):
         '''
         Architectural note:
         Initially, we're going to be explicit, requiring callers to specify the
