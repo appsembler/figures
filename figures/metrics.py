@@ -53,10 +53,10 @@ import figures.sites
 #
 
 
-def period_str(month_tuple, format='%Y/%m'):
+def period_str(month_tuple, fmt='%Y/%m'):
     """Returns display date for the given month tuple containing year, month, day
     """
-    return datetime.date(*month_tuple).strftime(format)
+    return datetime.date(*month_tuple).strftime(fmt)
 
 
 #
@@ -91,7 +91,7 @@ class LearnerCourseGrades(object):
     TODO: Make convenience method to instantiate from a GeneratedCertificate
     """
 
-    def __init__(self, user_id, course_id, **kwargs):
+    def __init__(self, user_id, course_id, **_kwargs):
         """
 
         If figures.compat.course_grade is unable to retrieve the course blocks,
@@ -139,7 +139,7 @@ class LearnerCourseGrades(object):
             and section.all_total.possible > 0
         )
 
-    def sections(self, only_graded=False, **kwargs):
+    def sections(self, only_graded=False, **_kwargs):
         """
         yields objects of type:
             lms.djangoapps.grades.new.subsection_grade.SubsectionGrade
@@ -284,7 +284,8 @@ def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
         return calc_from_user_model()
 
 
-def get_total_site_users_joined_for_time_period(site, start_date, end_date, course_ids=None):
+def get_total_site_users_joined_for_time_period(site, start_date, end_date,
+                                                course_ids=None):  # pylint: disable=unused-argument
     """returns the number of new enrollments for the time period
 
     NOTE: Untested and not yet used in the general site metrics, but we'll want to add it
@@ -304,7 +305,8 @@ def get_total_site_users_joined_for_time_period(site, start_date, end_date, cour
     return calc_from_user_model()
 
 
-def get_total_enrollments_for_time_period(site, start_date, end_date, course_ids=None):
+def get_total_enrollments_for_time_period(site, start_date, end_date,
+                                          course_ids=None):  # pylint: disable=unused-argument
     """Returns the maximum number of enrollments
 
     This returns the count of unique enrollments, not unique learners
@@ -322,8 +324,7 @@ def get_total_enrollments_for_time_period(site, start_date, end_date, course_ids
         return 0
 
 
-def get_total_site_courses_for_time_period(site, start_date, end_date,
-                                           course_ids=None, **kwargs):
+def get_total_site_courses_for_time_period(site, start_date, end_date, **kwargs):
     """
     Potential fix:
     get unique course ids from CourseEnrollment
@@ -357,7 +358,7 @@ def get_total_site_courses_for_time_period(site, start_date, end_date,
         return calc_from_site_daily_metrics()
 
 
-def get_total_course_completions_for_time_period(site, start_date, end_date, course_ids=None):
+def get_total_course_completions_for_time_period(site, start_date, end_date):
     """
     This metric is not currently captured in SiteDailyMetrics, so retrieving from
     course dailies instead
@@ -451,7 +452,7 @@ def get_course_num_learners_completed_for_time_period(site, start_date, end_date
 
 
 def get_monthly_history_metric(func, site, date_for, months_back,
-                               include_current_in_history=True):
+                               include_current_in_history=True):  # pylint: disable=unused-argument
     """Convenience method to retrieve current and historic data
 
     Convenience function to populate monthly metrics data with history. Purpose
@@ -498,7 +499,7 @@ def get_monthly_history_metric(func, site, date_for, months_back,
         history=history,)
 
 
-def get_current_month_site_metrics(site, **kwargs):
+def get_current_month_site_metrics(site, **_kwargs):
     """
     TODO: put the metric names and functions in a dict and iterate. This then
     will let up dynamically retrieve fields for the monthly metrics this function

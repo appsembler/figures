@@ -111,11 +111,11 @@ def get_average_progress(course_id, date_for, course_enrollments):
                 course_progress_details=None)
         if course_progress:
             progress.append(course_progress)
-    if len(progress):
+
+    if progress:
         progress_percent = [rec['progress_percent'] for rec in progress]
         average_progress = float(sum(progress_percent)) / float(len(progress_percent))
         average_progress = float(Decimal(average_progress).quantize(Decimal('.00')))
-
     else:
         average_progress = 0.0
 
@@ -215,7 +215,7 @@ class CourseDailyMetricsExtractor(object):
     BUT, we will then need to find a transform
     """
 
-    def extract(self, course_id, date_for=None, **kwargs):
+    def extract(self, course_id, date_for=None, **_kwargs):
         """
             defaults = dict(
                 enrollment_count=data['enrollment_count'],
@@ -301,7 +301,7 @@ class CourseDailyMetricsLoader(object):
         cdm.clean_fields()
         return (cdm, created,)
 
-    def load(self, date_for=None, force_update=False, **kwargs):
+    def load(self, date_for=None, force_update=False, **_kwargs):
         """
         TODO: clean up how we do this. We want to be able to call the loader
         with an existing data set (not having to call the extractor) but we

@@ -73,6 +73,8 @@ def default_site():
     if getattr(settings, 'SITE_ID', ''):
         return Site.objects.get(pk=settings.SITE_ID)
 
+    return None
+
 
 def get_site_for_course(course_id):
     """

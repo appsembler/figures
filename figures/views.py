@@ -272,7 +272,7 @@ class GeneralSiteMetricsView(CommonAuthMixin, APIView):
         '''
         return metrics.get_monthly_site_metrics
 
-    def get(self, request, format=None):
+    def get(self, request, format=None):  # pylint: disable=redefined-builtin
         '''
         Does not yet support multi-tenancy
         '''
