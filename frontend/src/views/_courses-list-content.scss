@@ -26,6 +26,24 @@
     font-size: calcRem(12);
   }
 
+  .sorting-header-button {
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    outline: none;
+
+    span {
+      margin-right: calcRem(5);
+      text-decoration: underline;
+      font-size: calcRem(12);
+    }
+
+    &:hover, &:focus {
+      cursor: pointer;
+    }
+  }
+
   .course-name-link {
     color: $primary-color;
     font-weight: bold;

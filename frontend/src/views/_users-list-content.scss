@@ -15,7 +15,7 @@
 
 .user-list-item {
   display: grid;
-  grid-template-columns: 2fr 2fr 1fr 1fr 2fr;
+  grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr;
   grid-column-gap: calcRem(20);
   border-bottom: 1px solid #ccc;
   padding: calcRem(20) 0;
@@ -24,6 +24,24 @@
 
   &.list-header {
     font-size: calcRem(12);
+  }
+
+  .sorting-header-button {
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    outline: none;
+
+    span {
+      margin-right: calcRem(5);
+      text-decoration: underline;
+      font-size: calcRem(12);
+    }
+
+    &:hover, &:focus {
+      cursor: pointer;
+    }
   }
 
   .user-fullname-link {
@@ -36,7 +54,7 @@
 
   }
 
-  .is-active, .number-of-courses {
+  .is-active, .number-of-courses, .date-joined {
     text-align: center;
   }
 
