@@ -19,7 +19,11 @@ from rest_framework.authentication import (
 from rest_framework.decorators import list_route
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import DjangoFilterBackend
+from rest_framework.filters import (
+    DjangoFilterBackend,
+    SearchFilter,
+    OrderingFilter
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -292,6 +296,10 @@ class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     # have to change the front end until Figures "Level 2"
     pagination_class = FiguresKiloPagination
     serializer_class = GeneralCourseDataSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
+    filter_class = CourseOverviewFilter
+    search_fields = ['display_name', 'id']
+    ordering_fields = ['display_name', 'self_paced', 'date_joined']
 
     def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
@@ -357,8 +365,10 @@ class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     model = get_user_model()
     pagination_class = FiguresKiloPagination
     serializer_class = GeneralUserDataSerializer
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
     filter_class = UserFilterSet
+    search_fields = ['username', 'email', 'profile__name']
+    ordering_fields = ['username', 'email', 'profile__name', 'is_active', 'date_joined']
 
     def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
