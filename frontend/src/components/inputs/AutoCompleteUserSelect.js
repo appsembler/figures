@@ -50,8 +50,7 @@ class AutoCompleteUserSelect extends Component {
   };
 
   doSearch = () => {
-    // TODO: Change the query parameter once the API is modified
-    const requestUrl = apiConfig.figuresUsersIndexApi + '?username=' + this.state.value;
+    const requestUrl = apiConfig.learnersGeneral + '?search=' + this.state.value;
     fetch((requestUrl), { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({

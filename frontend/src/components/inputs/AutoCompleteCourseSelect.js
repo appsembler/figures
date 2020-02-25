@@ -50,8 +50,7 @@ class AutoCompleteCourseSelect extends Component {
   };
 
   doSearch = () => {
-    // TODO: Change the query parameter once the API is modified
-    const requestUrl = apiConfig.coursesGeneral + '?course_name=' + this.state.value;
+    const requestUrl = apiConfig.coursesGeneral + '?search=' + this.state.value;
     fetch((requestUrl), { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({
