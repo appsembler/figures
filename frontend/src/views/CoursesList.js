@@ -6,8 +6,9 @@ import styles from './_courses-list-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import HeaderContentStatic from 'base/components/header-views/header-content-static/HeaderContentStatic';
 import Paginator from 'base/components/layout/Paginator';
+import ListSearch from 'base/components/inputs/ListSearch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons';
 
 import classNames from 'classnames/bind';
 let cx = classNames.bind(styles);
@@ -34,15 +35,19 @@ class CoursesList extends Component {
       count: 0,
       pages: 0,
       currentPage: 1,
+      searchQuery: '',
+      ordering: 'display_name',
     };
 
     this.getCourses = this.getCourses.bind(this);
     this.setPerPage = this.setPerPage.bind(this);
+    this.setSearchQuery = this.setSearchQuery.bind(this);
+    this.setOrdering = this.setOrdering.bind(this);
   }
 
   getCourses(page = 1) {
     const offset = (page-1) * this.state.perPage;
-    const requestUrl = apiConfig.coursesGeneral + '?limit=' + this.state.perPage + '&offset=' + offset;
+    const requestUrl = apiConfig.coursesGeneral + '?search=' + this.state.searchQuery + '&ordering=' + this.state.ordering + '&limit=' + this.state.perPage + '&offset=' + offset;
     trackPromise(
       fetch((requestUrl), { credentials: "same-origin" })
         .then(response => response.json())
@@ -65,6 +70,22 @@ class CoursesList extends Component {
   setPerPage(newValue) {
     this.setState({
       perPage: newValue
+    }, () => {
+      this.getCourses();
+    })
+  }
+
+  setSearchQuery(newValue) {
+    this.setState({
+      searchQuery: newValue
+    }, () => {
+      this.getCourses();
+    })
+  }
+
+  setOrdering(newValue) {
+    this.setState({
+      ordering: newValue
     }, () => {
       this.getCourses();
     })
@@ -119,10 +140,14 @@ class CoursesList extends Component {
         <HeaderAreaLayout>
           <HeaderContentStatic
             title='Courses list'
-            subtitle={'This view allows you to browse your sites courses. Total number of courses: ' + this.state.count + '.'}
+            subtitle={'This view allows you to browse your sites courses. Total number of results: ' + this.state.count + '.'}
           />
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'courses-content': true})}>
+          <ListSearch
+            valueChangeFunction={this.setSearchQuery}
+            inputPlaceholder='Search by course name, code or ID...'
+          />
           {this.state.pages ? (
             <Paginator
               pageSwitchFunction={this.getCourses}
@@ -135,7 +160,19 @@ class CoursesList extends Component {
           <ul className={styles['courses-list']}>
             <li key='list-header' className={cx(styles['course-list-item'], styles['list-header'])}>
               <div className={styles['course-name']}>
-                Course name:
+                <button
+                  className={styles['sorting-header-button']}
+                  onClick={() => (this.state.ordering !== 'display_name') ? this.setOrdering('display_name') : this.setOrdering('-display_name')}
+                >
+                  <span>
+                    Course name
+                  </span>
+                  {(this.state.ordering === 'display_name') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleUp} />
+                  ) : (this.state.ordering === '-display_name') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleDown} />
+                  ) : ''}
+                </button>
               </div>
               <div className={styles['course-id']}>
                 Course ID:
@@ -144,7 +181,19 @@ class CoursesList extends Component {
                 Course start:
               </div>
               <div className={styles['self-paced']}>
-                Self paced:
+                <button
+                  className={styles['sorting-header-button']}
+                  onClick={() => (this.state.ordering !== 'self_paced') ? this.setOrdering('self_paced') : this.setOrdering('-self_paced')}
+                >
+                  <span>
+                    Self paced
+                  </span>
+                  {(this.state.ordering === 'self_paced') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleUp} />
+                  ) : (this.state.ordering === '-self_paced') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleDown} />
+                  ) : ''}
+                </button>
               </div>
               <div className={styles['enrolments']}>
                 Enrolments:

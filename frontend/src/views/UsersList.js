@@ -6,8 +6,9 @@ import styles from './_users-list-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import HeaderContentStatic from 'base/components/header-views/header-content-static/HeaderContentStatic';
 import Paginator from 'base/components/layout/Paginator';
+import ListSearch from 'base/components/inputs/ListSearch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons';
 
 import classNames from 'classnames/bind';
 let cx = classNames.bind(styles);
@@ -23,15 +24,19 @@ class UsersList extends Component {
       count: 0,
       pages: 0,
       currentPage: 1,
+      searchQuery: '',
+      ordering: 'profile__name',
     };
 
     this.getUsers = this.getUsers.bind(this);
     this.setPerPage = this.setPerPage.bind(this);
+    this.setSearchQuery = this.setSearchQuery.bind(this);
+    this.setOrdering = this.setOrdering.bind(this);
   }
 
   getUsers(page = 1) {
     const offset = (page-1) * this.state.perPage;
-    const requestUrl = apiConfig.learnersGeneral + '?limit=' + this.state.perPage + '&offset=' + offset;
+    const requestUrl = apiConfig.learnersGeneral + '?search=' + this.state.searchQuery + '&ordering=' + this.state.ordering + '&limit=' + this.state.perPage + '&offset=' + offset;
     trackPromise(
       fetch((requestUrl), { credentials: "same-origin" })
         .then(response => response.json())
@@ -45,15 +50,25 @@ class UsersList extends Component {
     )
   }
 
-  setCurrentPage(newValue) {
+  setPerPage(newValue) {
     this.setState({
-      currentPage: newValue,
+      perPage: newValue,
+    }, () => {
+      this.getUsers();
     })
   }
 
-  setPerPage(newValue) {
+  setSearchQuery(newValue) {
     this.setState({
-      perPage: newValue
+      searchQuery: newValue
+    }, () => {
+      this.getUsers();
+    })
+  }
+
+  setOrdering(newValue) {
+    this.setState({
+      ordering: newValue
     }, () => {
       this.getUsers();
     })
@@ -64,6 +79,7 @@ class UsersList extends Component {
   }
 
   render() {
+    console.log(this.state.searchQuery);
 
     const listItems = this.state.usersList.map((user, index) => {
       return (
@@ -81,6 +97,9 @@ class UsersList extends Component {
           </div>
           <div className={styles['is-active']}>
             {user['is_active'] ? <FontAwesomeIcon icon={faCheck} className={styles['checkmark-icon']} /> : '-'}
+          </div>
+          <div className={styles['date-joined']}>
+            {user['date_joined']}
           </div>
           <div className={styles['number-of-courses']}>
             {user['courses'].length}
@@ -102,10 +121,14 @@ class UsersList extends Component {
         <HeaderAreaLayout>
           <HeaderContentStatic
             title='Users list'
-            subtitle={'This view allows you to browse your sites users. Total number of users: ' + this.state.count + '.'}
+            subtitle={'This view allows you to browse your sites users. Total number of results: ' + this.state.count + '.'}
           />
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'users-content': true})}>
+          <ListSearch
+            valueChangeFunction={this.setSearchQuery}
+            inputPlaceholder='Search by users name, username or email...'
+          />
           {this.state.pages ? (
             <Paginator
               pageSwitchFunction={this.getUsers}
@@ -118,13 +141,64 @@ class UsersList extends Component {
           <ul className={styles['users-list']}>
             <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
               <div className={styles['user-fullname']}>
-                User full name:
+                <button
+                  className={styles['sorting-header-button']}
+                  onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
+                >
+                  <span>
+                    User full name
+                  </span>
+                  {(this.state.ordering === 'profile__name') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleUp} />
+                  ) : (this.state.ordering === '-profile__name') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleDown} />
+                  ) : ''}
+                </button>
               </div>
               <div className={styles['username']}>
-                Username:
+                <button
+                  className={styles['sorting-header-button']}
+                  onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
+                >
+                  <span>
+                    Username
+                  </span>
+                  {(this.state.ordering === 'username') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleUp} />
+                  ) : (this.state.ordering === '-username') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleDown} />
+                  ) : ''}
+                </button>
               </div>
               <div className={styles['is-active']}>
-                Is user active:
+                <button
+                  className={styles['sorting-header-button']}
+                  onClick={() => (this.state.ordering !== 'is_active') ? this.setOrdering('is_active') : this.setOrdering('-is_active')}
+                >
+                  <span>
+                    Is user active
+                  </span>
+                  {(this.state.ordering === 'is_active') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleUp} />
+                  ) : (this.state.ordering === '-is_active') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleDown} />
+                  ) : ''}
+                </button>
+              </div>
+              <div className={styles['date-joined']}>
+                <button
+                  className={styles['sorting-header-button']}
+                  onClick={() => (this.state.ordering !== 'date_joined') ? this.setOrdering('date_joined') : this.setOrdering('-date_joined')}
+                >
+                  <span>
+                    Date joined
+                  </span>
+                  {(this.state.ordering === 'date_joined') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleUp} />
+                  ) : (this.state.ordering === '-date_joined') ? (
+                    <FontAwesomeIcon icon={faAngleDoubleDown} />
+                  ) : ''}
+                </button>
               </div>
               <div className={styles['number-of-courses']}>
                 Courses enroled in:
