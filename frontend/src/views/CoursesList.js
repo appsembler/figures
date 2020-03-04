@@ -43,11 +43,26 @@ class CoursesList extends Component {
     this.setPerPage = this.setPerPage.bind(this);
     this.setSearchQuery = this.setSearchQuery.bind(this);
     this.setOrdering = this.setOrdering.bind(this);
+    this.constructApiUrl = this.constructApiUrl.bind(this);
+  }
+
+  constructApiUrl(rootUrl, searchQuery, orderingType, perPageLimit, resultsOffset) {
+    let requestUrl = rootUrl;
+    // add search term
+    requestUrl += '?search=' + searchQuery;
+    // add ordering
+    requestUrl += '&ordering=' + orderingType;
+    // add results per page limit
+    requestUrl += '&limit=' + perPageLimit;
+    // add results offset
+    requestUrl += '&offset=' + resultsOffset;
+    // return
+    return requestUrl;
   }
 
   getCourses(page = 1) {
     const offset = (page-1) * this.state.perPage;
-    const requestUrl = apiConfig.coursesGeneral + '?search=' + encodeURIComponent(this.state.searchQuery) + '&ordering=' + this.state.ordering + '&limit=' + this.state.perPage + '&offset=' + offset;
+    const requestUrl = this.constructApiUrl(apiConfig.coursesGeneral, this.state.searchQuery, this.state.ordering, this.state.perPage, offset);
     trackPromise(
       fetch((requestUrl), { credentials: "same-origin" })
         .then(response => response.json())
