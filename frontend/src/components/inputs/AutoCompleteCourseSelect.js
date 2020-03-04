@@ -50,7 +50,7 @@ class AutoCompleteCourseSelect extends Component {
   };
 
   doSearch = () => {
-    const requestUrl = apiConfig.coursesGeneral + '?search=' + this.state.value;
+    const requestUrl = apiConfig.coursesGeneral + '?search=' + encodeURIComponent(this.state.value);
     fetch((requestUrl), { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({
