@@ -50,7 +50,7 @@ class AutoCompleteUserSelect extends Component {
   };
 
   doSearch = () => {
-    const requestUrl = apiConfig.learnersGeneral + '?search=' + this.state.value;
+    const requestUrl = apiConfig.learnersGeneral + '?search=' + encodeURIComponent(this.state.value);
     fetch((requestUrl), { credentials: "same-origin" })
       .then(response => response.json())
       .then(json => this.setState({
