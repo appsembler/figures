@@ -47,7 +47,7 @@ class CoursesList extends Component {
 
   getCourses(page = 1) {
     const offset = (page-1) * this.state.perPage;
-    const requestUrl = apiConfig.coursesGeneral + '?search=' + this.state.searchQuery + '&ordering=' + this.state.ordering + '&limit=' + this.state.perPage + '&offset=' + offset;
+    const requestUrl = apiConfig.coursesGeneral + '?search=' + encodeURIComponent(this.state.searchQuery) + '&ordering=' + this.state.ordering + '&limit=' + this.state.perPage + '&offset=' + offset;
     trackPromise(
       fetch((requestUrl), { credentials: "same-origin" })
         .then(response => response.json())
