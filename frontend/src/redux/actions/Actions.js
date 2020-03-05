@@ -3,43 +3,6 @@ import * as types from './ActionTypes';
 import apiConfig from 'base/apiConfig';
 import { trackPromise } from 'react-promise-tracker';
 
-// course index data related Redux actions
-
-export const loadCoursesIndex = ( coursesData ) => ({
-  type: types.LOAD_COURSES_INDEX,
-  fetchedData: coursesData,
-  receivedAt: Date.now()
-})
-
-export function fetchCoursesIndex () {
-  return dispatch => {
-    return trackPromise(
-      fetch(apiConfig.coursesGeneral, { credentials: "same-origin" })
-        .then(response => response.json())
-        .then(json => dispatch(loadCoursesIndex(json['results'])))
-    )
-  }
-}
-
-
-// user index data related Redux actions
-
-export const loadUserIndex = ( coursesData ) => ({
-  type: types.LOAD_USER_INDEX,
-  fetchedData: coursesData,
-  receivedAt: Date.now()
-})
-
-export function fetchUserIndex () {
-  return dispatch => {
-    return trackPromise(
-      fetch(apiConfig.learnersGeneral, { credentials: "same-origin" })
-        .then(response => response.json())
-        .then(json => dispatch(loadUserIndex(json.results)))
-    )
-  }
-}
-
 
 // report related Redux actions
 
