@@ -6,3 +6,37 @@
   margin-top: calcRem(40);
   padding-bottom: calcRem(50);
 }
+
+.functionality-callout {
+  text-align: center;
+  border-top: 1px solid #ccc;
+  margin-top: calcRem(30);
+  padding-top: calcRem(60);
+
+  h3 {
+    font-size: calcRem(20);
+    text-align: center;
+    max-width: calcRem(800);
+    margin: 0 auto;
+  }
+
+  .functionality-callout-cta {
+    display: inline-block;
+    font-size: calcRem(16);
+    padding: calcRem(15) calcRem(25);
+    margin: calcRem(30) auto 0;
+    font-weight: bold;
+    color: $primary-color;
+    border: calcRem(2) solid $primary-color;
+    background: transparent;
+    cursor: pointer;
+    border-radius: calcRem(30);
+    transition: all 0.3s ease-in-out;
+    text-decoration: none;
+
+    &:hover {
+      color: #fff;
+      background: $primary-color;
+    }
+  }
+}

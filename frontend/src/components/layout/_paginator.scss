@@ -1,0 +1,95 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+
+.paginator {
+  padding-top: calcRem(15);
+  padding-bottom: calcRem(15);
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .dropdown-controls-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+
+    .paginator-dropdown-label {
+      flex-shrink: 0;
+      flex-grow: 0;
+      display: inline-block;
+      margin-right: calcRem(10);
+      font-size: calcRem(12);
+      color: #666;
+    }
+  }
+
+  .dropdown-inner-container {
+    width: calcRem(100);
+  }
+
+  .number-controls-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .text-item {
+    display: block;
+    padding: 1rem;
+    font-size: calcRem(14);
+    color: $primary-color;
+    margin-right: calcRem(5);
+    border: none;
+    background: none;
+    outline: none;
+
+    &:hover {
+      opacity: 0.6;
+      cursor: pointer;
+    }
+  }
+
+  .text-item-dummy {
+    display: block;
+    padding: calcRem(10);
+    font-size: calcRem(14);
+    color: #ccc;
+    pointer-events: none;
+    margin-right: calcRem(5);
+  }
+
+  .ellipsis-item {
+    display: block;
+    padding: calcRem(10);
+    margin-right: calcRem(5);
+  }
+
+  .number-item {
+    display: block;
+    padding: calcRem(10);
+    font-size: calcRem(14);
+    color: $primary-color;
+    margin-right: calcRem(5);
+    border: none;
+    background: none;
+    outline: none;
+
+    &:hover {
+      opacity: 0.6;
+      cursor: pointer;
+    }
+  }
+
+  .number-item-active {
+    display: block;
+    padding: calcRem(10);
+    font-size: calcRem(14);
+    color: #ccc;
+    pointer-events: none;
+    margin-right: calcRem(5);
+    border: none;
+    background: none;
+    outline: none;
+  }
+}

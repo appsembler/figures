@@ -1,0 +1,24 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+
+.header-content-static {
+  margin-bottom: calcRem(60);
+  position: relative;
+  padding-bottom: calcRem(40);
+
+  .title {
+    font-weight: 900;
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+    font-size: calcRem(48);
+    line-height: 120%;
+    margin: calcRem(20) 0 calcRem(10);
+  }
+
+  .subtitle {
+    font-weight: normal;
+    color: pick-visible-color($primary-color, #fff, $base-text-color);
+    font-size: calcRem(18);
+    line-height: 150%;
+  }
+}
