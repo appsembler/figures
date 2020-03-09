@@ -1,0 +1,56 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/mixins';
+
+.list-search {
+  display: block;
+  padding: calcRem(15) 0;
+
+  .inner-container {
+    padding: calcRem(15) 0;
+    width: 100%;
+    max-width: calcRem(420);
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+
+    &.active {
+      border-bottom: 2px solid $primary-color;
+    }
+  }
+
+  .search-icon {
+    font-size: calcRem(14);
+    margin-right: calcRem(10);
+    color: #ccc;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+
+  .list-search-input {
+    border: none;
+    font-size: calcRem(14);
+    flex: 1 1 100%;
+    outline: none;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .clear-button {
+    border: none;
+    flex-grow: 0;
+    flex-shrink: 0;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  .clear-icon {
+    font-size: calcRem(14);
+    border: none;
+    color: $primary-color;
+  }
+}

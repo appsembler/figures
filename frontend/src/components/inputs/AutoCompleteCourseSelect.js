@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { Link } from 'react-router-dom';
@@ -7,17 +6,11 @@ import styles from './_autocomplete-course-select.scss';
 import classNames from 'classnames/bind';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import apiConfig from 'base/apiConfig';
 
 let cx = classNames.bind(styles);
 
-var coursesList = [
-];
-
-const getSuggestions = value => {
-  const inputValue = value.trim().toLowerCase();
-  const inputLength = inputValue.length;
-  return inputLength === coursesList ? [] : coursesList.filter(course => ((course.courseName.toLowerCase().slice(0, inputLength) === inputValue) || (course.courseNumber.toLowerCase().slice(0, inputLength) === inputValue))).toArray();
-};
+const WAIT_INTERVAL = 1000;
 
 const getSuggestionValue = suggestion => suggestion.courseName;
 
@@ -32,6 +25,7 @@ class AutoCompleteCourseSelect extends Component {
     };
 
     this.onChange = this.onChange.bind(this);
+    this.doSearch = this.doSearch.bind(this);
     this.modalTrigger = this.modalTrigger.bind(this);
     this.storeInputReference = this.storeInputReference.bind(this);
   }
@@ -46,10 +40,24 @@ class AutoCompleteCourseSelect extends Component {
   }
 
   onChange = (event, { newValue }) => {
+    clearTimeout(this.timer);
+
     this.setState({
       value: newValue
     });
+
+    this.timer = setTimeout(this.doSearch, WAIT_INTERVAL);
   };
+
+  doSearch = () => {
+    const requestUrl = apiConfig.coursesGeneral + '?search=' + encodeURIComponent(this.state.value);
+    fetch((requestUrl), { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => this.setState({
+        suggestions: json['results'],
+      })
+    )
+  }
 
   onSuggestionsClearRequested = () => {
 
@@ -63,10 +71,8 @@ class AutoCompleteCourseSelect extends Component {
     });
   }
 
-  onSuggestionsFetchRequested = ({ value }) => {
-    this.setState({
-      suggestions: getSuggestions(value)
-    });
+  onSuggestionsFetchRequested = () => {
+
   };
 
   storeInputReference = autosuggest => {
@@ -74,6 +80,16 @@ class AutoCompleteCourseSelect extends Component {
       this.input = autosuggest.input;
     }
   };
+
+  componentWillMount() {
+    this.timer = null;
+    fetch((apiConfig.coursesGeneral), { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => this.setState({
+        suggestions: json['results'],
+      })
+    )
+  }
 
   render() {
     const { value, suggestions } = this.state;
@@ -84,21 +100,13 @@ class AutoCompleteCourseSelect extends Component {
       onChange: this.onChange
     };
 
-    coursesList = this.props.coursesIndex.map((item, index) => {
-      return {
-        courseId: item['course_id'],
-        courseName: item['course_name'],
-        courseNumber: item['course_code']
-      }
-    })
-
     const renderSuggestion = suggestion => (
-      <Link className={styles['suggestion-link']} to={'/figures/course/' + suggestion.courseId} onClick={this.modalTrigger}>
+      <Link className={styles['suggestion-link']} to={'/figures/course/' + suggestion['course_id']} onClick={this.modalTrigger}>
         <div className={styles['suggestion-link__link-upper']}>
-          <span className={styles['suggestion-link__course-number']}>{suggestion.courseNumber}</span>
-          <span className={styles['suggestion-link__course-id']}>{suggestion.courseId}</span>
+          <span className={styles['suggestion-link__course-number']}>{suggestion['course_code']}</span>
+          <span className={styles['suggestion-link__course-id']}>{suggestion['course_id']}</span>
         </div>
-        <span className={styles['suggestion-link__course-name']}>{suggestion.courseName}</span>
+        <span className={styles['suggestion-link__course-name']}>{suggestion['course_name']}</span>
       </Link>
     );
 
@@ -131,7 +139,7 @@ class AutoCompleteCourseSelect extends Component {
 AutoCompleteCourseSelect.defaultProps = {
   negativeStyleButton: false,
   buttonText: 'Select a course',
-  inputPlaceholder: 'Select or start typing',
+  inputPlaceholder: 'Start typing to search...',
   coursesList: [
     {
       courseId: 'A101',
@@ -179,10 +187,4 @@ AutoCompleteCourseSelect.propTypes = {
   coursesList: PropTypes.array
 };
 
-const mapStateToProps = (state, ownProps) => ({
-  coursesIndex: state.coursesIndex.coursesIndex,
-})
-
-export default connect(
-  mapStateToProps
-)(AutoCompleteCourseSelect)
+export default AutoCompleteCourseSelect
