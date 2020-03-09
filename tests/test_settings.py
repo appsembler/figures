@@ -87,3 +87,45 @@ class TestUpdateSettings(object):
             assert self.CELERY_TASK_NAME not in settings.CELERYBEAT_SCHEDULE
 
         assert settings.ENV_TOKENS['FIGURES'] == figures_env_tokens
+
+
+class TestDailyMauPipelineSettings(object):
+    """Tests MAU pipeline settings
+
+    See how edx-platforms does plugins. App: openedx.core.djangoapps.plugins
+
+    * constants.PLUGIN_APP_SETTINGS_FUNC_NAME
+    * openedx.core.djangoapps.plugins.plugin_settings
+
+    TODO: Abstract the core functionality in this test class because it presents
+    a pattern for testing plugin CeleryBeat schedule settings
+    """
+    TASK_NAME = 'figures-daily-mau'
+    TASK_FUNC = 'figures.tasks.populate_all_mau'
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.settings = mock.Mock(
+            WEBPACK_LOADER={},
+            CELERYBEAT_SCHEDULE={},
+            FEATURES={},
+            ENV_TOKENS={},
+            CELERY_IMPORTS=[],
+        )
+
+    def test_daily_mau_pipeline_flag_enabled(self):
+        self.settings.ENV_TOKENS['FIGURES'] = { 'ENABLE_DAILY_MAU_IMPORT': True }
+        plugin_settings(self.settings)
+        assert self.TASK_NAME in self.settings.CELERYBEAT_SCHEDULE
+        assert set(['task', 'schedule']) == set(
+            self.settings.CELERYBEAT_SCHEDULE[self.TASK_NAME].keys())
+
+    def test_daily_mau_pipeline_flag_disabled(self):
+        self.settings.ENV_TOKENS['FIGURES'] = { 'ENABLE_DAILY_MAU_IMPORT': False }
+        plugin_settings(self.settings)
+        assert self.TASK_NAME not in self.settings.CELERYBEAT_SCHEDULE
+
+    def test_daily_mau_pipeline_flag_not_present(self):
+        assert 'FIGURES' not in self.settings.ENV_TOKENS
+        plugin_settings(self.settings)
+        assert self.TASK_NAME not in self.settings.CELERYBEAT_SCHEDULE
