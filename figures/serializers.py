@@ -24,14 +24,10 @@ from django.contrib.sites.models import Site
 from django_countries import Countries
 from rest_framework import serializers
 
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
-from openedx.core.djangoapps.user_api.accounts.serializers import (
-    AccountLegacyProfileSerializer,
-)
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
+from openedx.core.djangoapps.user_api.accounts.serializers import AccountLegacyProfileSerializer  # noqa pylint: disable=import-error
 
-from student.models import CourseAccessRole, CourseEnrollment
+from student.models import CourseAccessRole, CourseEnrollment  # pylint: disable=import-error
 
 from figures.compat import RELEASE_LINE, GeneratedCertificate
 from figures.helpers import as_course_key
@@ -543,15 +539,6 @@ class GeneralUserDataSerializer(serializers.Serializer):
         return [CourseOverviewSerializer(data).data for data in course_overviews]
 
 
-class UserIndexSerializer(serializers.Serializer):
-    """Provides a limited set of user information for summary display
-    """
-    id = serializers.IntegerField(read_only=True)
-    username = serializers.CharField(read_only=True)
-    fullname = serializers.CharField(
-        source='profile.name', default=None, read_only=True)
-
-
 class UserDemographicSerializer(serializers.Serializer):
     country = SerializeableCountryField(
         source='profile.country', required=False, read_only=True, allow_blank=True)
@@ -631,8 +618,8 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
             course_progress = dict(
                 progress_percent=obj.progress_percent,
                 course_progress_details=obj.progress_details)
-
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
+            # TODO: Use more specific database-related exception
             error_data = dict(
                 msg='Unable to get learner course metrics',
                 username=course_enrollment.user.username,

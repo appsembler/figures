@@ -135,8 +135,8 @@ class LearnerCourseGradeMetricsManager(models.Manager):
     """Custom model manager for LearnerCourseGrades model
     """
     def most_recent_for_learner_course(self, user, course_id):
-        return self.filter(
-            user=user, course_id=str(course_id)).order_by('-date_for').first()
+        queryset = self.filter(user=user, course_id=str(course_id))
+        return queryset.order_by('-date_for').first()   # pylint: disable=no-member
 
 
 @python_2_unicode_compatible
@@ -268,9 +268,8 @@ class SiteMauMetricsManager(models.Manager):
         """Return the latest record for the given site, month, and year
         If no record found, returns 'None'
         """
-        return self.filter(site=site,
-                           date_for__year=year,
-                           date_for__month=month).order_by('-modified').first()
+        queryset = self.filter(site=site, date_for__year=year, date_for__month=month)
+        return queryset.order_by('-modified').first()  # pylint: disable=no-member
 
 
 @python_2_unicode_compatible
@@ -314,10 +313,13 @@ class CourseMauMetricsManager(models.Manager):
         """Return the latest record for the given site, course_id, month and year
         If no record found, returns 'None'
         """
-        return self.filter(site=site,
-                           course_id=course_id,
-                           date_for__year=year,
-                           date_for__month=month).order_by('-modified').first()
+        queryset = self.filter(
+            site=site,
+            course_id=course_id,
+            date_for__year=year,
+            date_for__month=month,
+        )
+        return queryset.order_by('-modified').first()  # pylint: disable=no-member
 
 
 @python_2_unicode_compatible

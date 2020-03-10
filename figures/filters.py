@@ -17,10 +17,9 @@ import django_filters
 
 from opaque_keys.edx.keys import CourseKey
 
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
-from student.models import CourseEnrollment
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
+
+from student.models import CourseEnrollment  # pylint: disable=import-error
 
 from figures.pipeline.course_daily_metrics import get_enrolled_in_exclude_admins
 from figures.models import (
@@ -39,7 +38,7 @@ def char_method_filter(method):
     Pre v1:
     """
     if hasattr(django_filters, 'MethodFilter'):
-        return django_filters.MethodFilter(action=method)
+        return django_filters.MethodFilter(action=method)  # pylint: disable=no-member
     else:
         return django_filters.CharFilter(method=method)
 

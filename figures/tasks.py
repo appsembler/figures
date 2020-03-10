@@ -12,8 +12,8 @@ from celery import chord
 from celery.app import shared_task
 from celery.utils.log import get_task_logger
 
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from student.models import CourseEnrollment
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
+from student.models import CourseEnrollment  # pylint: disable=import-error
 
 from figures.helpers import as_course_key, as_date
 from figures.models import PipelineError
@@ -107,7 +107,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
                     course_id=course.id,
                     date_for=date_for,
                     force_update=force_update)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.exception('figures.tasks.populate_daily_metrics failed')
                 # Always capture CDM load exceptions to the Figures pipeline
                 # error table
@@ -117,7 +117,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
                     exception_class=e.__class__.__name__,
                     )
                 if hasattr(e, 'message_dict'):
-                    error_data['message_dict'] = e.message_dict
+                    error_data['message_dict'] = e.message_dict  # pylint: disable=no-member
                 log_error_to_db(
                     error_data=error_data,
                     error_type=PipelineError.COURSE_DATA,
