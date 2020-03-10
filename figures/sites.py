@@ -17,11 +17,9 @@ from django.conf import settings
 # TODO: Add exception handling
 import organizations
 
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
-from courseware.models import StudentModule
-from student.models import CourseEnrollment
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
+from courseware.models import StudentModule  # pylint: disable=import-error
+from student.models import CourseEnrollment  # pylint: disable=import-error
 
 from figures.helpers import as_course_key
 import figures.helpers

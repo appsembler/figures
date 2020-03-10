@@ -9,12 +9,8 @@ load-plugins = edx_lint.pylint,pylint_django,pylint_celery
 disable =
     # TODO: Enable those errors incrementally by removing them
     abstract-method,  # TODO: Remove
-    broad-except,  # TODO: Remove
     empty-docstring,  # TODO: Remove
-    function-redefined,  # TODO: Remove
-    import-error,  # TODO: Remove
     missing-docstring,  # TODO: Remove
-    no-member,  # TODO: Remove
 
     # Those are the default we should leave them as-is
     bad-continuation,

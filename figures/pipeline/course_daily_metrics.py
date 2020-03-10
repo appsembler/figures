@@ -18,10 +18,10 @@ import logging
 from django.db import transaction
 from django.utils.timezone import utc
 
-from courseware.models import StudentModule
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from student.models import CourseEnrollment
-from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
+from courseware.models import StudentModule  # pylint: disable=import-error
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
+from student.models import CourseEnrollment  # pylint: disable=import-error
+from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
 
 from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 import figures.metrics
@@ -93,7 +93,8 @@ def get_average_progress(course_id, date_for, course_enrollments):
                 date_for=date_for,
                 course_enrollment=ce,
                 course_progress_details=course_progress['course_progress_details'])
-        except Exception as e:
+        # TODO: Use more specific database-related exception
+        except Exception as e:  # pylint: disable=broad-except
             error_data = dict(
                 msg='Unable to get course blocks',
                 username=ce.user.username,

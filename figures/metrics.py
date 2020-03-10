@@ -28,8 +28,8 @@ import math
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Max
 
-from courseware.courses import get_course_by_id
-from courseware.models import StudentModule
+from courseware.courses import get_course_by_id  # pylint: disable=import-error
+from courseware.models import StudentModule  # pylint: disable=import-error
 
 from figures.compat import (
     GeneratedCertificate,

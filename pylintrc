@@ -271,12 +271,8 @@ enable =
 disable = 
 	# TODO: Enable those errors incrementally by removing them
 	abstract-method,  # TODO: Remove
-	broad-except,  # TODO: Remove
 	empty-docstring,  # TODO: Remove
-	function-redefined,  # TODO: Remove
-	import-error,  # TODO: Remove
 	missing-docstring,  # TODO: Remove
-	no-member,  # TODO: Remove
 	# Those are the default we should leave them as-is
 	bad-continuation,
 	invalid-name,
@@ -452,4 +448,4 @@ int-import-graph =
 [EXCEPTIONS]
 overgeneral-exceptions = Exception
 
-# 92b91929ba5d9ead70bb87b757d6f1df9a21a86e
+# 5371f0506e040989115e604d90dd349fb473742b

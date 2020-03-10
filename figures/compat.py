@@ -29,9 +29,9 @@ except ImportError:
 
 
 if RELEASE_LINE == 'ginkgo':
-    from certificates.models import GeneratedCertificate  # noqa: F401 pylint: disable=unused-import
+    from certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
 else:
-    from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa: F401
+    from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
 
 
 def course_grade(learner, course):
