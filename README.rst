@@ -10,11 +10,30 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 Figures master branch is working toward release 0.3.5.
 
-TBD Feb 2020 - Figures release 0.3.5
+16 Feb 2020 - Figures release 0.3.6
+===================================
+
+* Updated UI to address performance issues
+* Added missing `organizations` to devsite settings `INSTALLED_APPS`
+
+
+20 Feb 2020 - Figures release 0.3.5
 ====================================
 
-Items planned for this release:
-* Site Monthly Metrics pipeline and API
+Client (UI and API) facing updates
+
+* Site Monthly Metrics pipeline and new API endpoints
+* Added Course MAU metrics API endpoint and pipeline
+* Added user email address to general user data
+* Bug fix - URL pattern fix for `figures/`
+
+Developer facing updates
+
+* Updated Django micro version to Figures devsite
+* Added missing `.env` file for Makefile support
+* Added Pylint to testing
+* Refactored permissions module
+
 
 29 Jan 2020 - Figures release 0.3.4
 ====================================
