@@ -2,13 +2,11 @@ import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import { connect } from 'react-redux';
-import { trackPromise } from 'react-promise-tracker';
 import Immutable from 'immutable';
 import styles from './_dashboard-content.scss';
 import HeaderAreaLayout from 'base/components/layout/HeaderAreaLayout';
 import HeaderContentMaus from 'base/components/header-views/header-content-maus/HeaderContentMaus';
 import BaseStatCard from 'base/components/stat-cards/BaseStatCard';
-import apiConfig from 'base/apiConfig';
 
 let cx = classNames.bind(styles);
 
@@ -18,23 +16,8 @@ class DashboardContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      coursesDetailed: Immutable.List(),
+
     };
-    this.fetchCoursesList = this.fetchCoursesList.bind(this);
-  }
-
-  fetchCoursesList = () => {
-    trackPromise(
-      fetch(apiConfig.coursesDetailed, { credentials: "same-origin" })
-        .then(response => response.json())
-        .then(json => this.setState({
-          coursesDetailed: Immutable.fromJS(json['results'])
-        }))
-    )
-  }
-
-  componentDidMount() {
-    this.fetchCoursesList();
   }
 
   render() {
