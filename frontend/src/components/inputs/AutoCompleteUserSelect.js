@@ -83,12 +83,6 @@ class AutoCompleteUserSelect extends Component {
 
   componentWillMount() {
     this.timer = null;
-    fetch((apiConfig.figuresUsersIndexApi), { credentials: "same-origin" })
-      .then(response => response.json())
-      .then(json => this.setState({
-        suggestions: json['results'],
-      })
-    )
   }
 
   render() {
