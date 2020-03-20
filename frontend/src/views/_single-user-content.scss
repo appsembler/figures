@@ -6,8 +6,16 @@
 .user-content {
   padding: calcRem(40) 0 calcRem(70);
 
+  @media (max-width: $tablet-breakpoint) {
+    grid-template-columns: 1fr;
+  }
+
   .user-information {
     grid-column-end: span 1;
+
+    @media (max-width: $tablet-breakpoint) {
+      padding: 0 calcRem(30);
+    }
 
     .name {
       font-weight: bold;
