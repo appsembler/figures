@@ -20,9 +20,11 @@ from figures.helpers import (
     next_day,
     prev_day,
     previous_months_iterator,
+    first_last_days_for_month,
     )
 
 from tests.factories import COURSE_ID_STR_TEMPLATE
+
 
 class TestCourseKeyHelper(object):
     '''Tests the figures.helpers.as_course_key method
@@ -204,3 +206,16 @@ class TestMonthIterator(object):
 
         vals = list(previous_months_iterator(month_for, months_back))
         assert vals == expected_vals
+
+
+def test_first_last_days_for_month():
+    month_for = '2/2020'
+    month = 2
+    year = 2020
+    first_day, last_day = first_last_days_for_month(month_for=month_for)
+    assert first_day.month == month
+    assert last_day.month == month
+    assert first_day.year == year
+    assert last_day.year == year
+    assert first_day.day == 1
+    assert last_day.day == 29

@@ -134,3 +134,18 @@ def previous_months_iterator(month_for, months_back):
     for dt in rrule(freq=MONTHLY, dtstart=start_month, until=month_for):
         last_day_of_month = days_in_month(month_for=dt)
         yield (dt.year, dt.month, last_day_of_month)
+
+
+def first_last_days_for_month(month_for):
+    """Given a MM/YYYY string, derive the first and last days for the month
+
+    Returns a tuple of first_day, last_day
+    """
+    month, year = [int(val) for val in month_for.split('/')]
+    first_day = datetime.date(year=year,
+                              month=month,
+                              day=1)
+    last_day = datetime.date(year=year,
+                             month=month,
+                             day=days_in_month(first_day))
+    return first_day, last_day
