@@ -26,6 +26,18 @@ def get_mau_from_student_modules(student_modules, year, month):
     return qs.values_list('student__id', flat=True).distinct()
 
 
+def get_mau_from_site_course(site, course_id, year, month):
+    """Convenience function to get the distinct active users for a given course
+    in a site
+
+    """
+    student_modules = get_student_modules_for_course_in_site(site=site,
+                                                             course_id=course_id)
+    return get_mau_from_student_modules(student_modules=student_modules,
+                                        year=year,
+                                        month=month)
+
+
 def retrieve_live_site_mau_data(site):
     """
     Used this when we need to retrieve unique active users for the
