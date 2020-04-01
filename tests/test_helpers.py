@@ -1,4 +1,3 @@
- 
 import calendar
 import datetime
 from django.utils.timezone import utc
@@ -158,9 +157,9 @@ class TestDeltaDays(object):
     def setup(self):
         self.now = datetime.datetime(2018, 6, 1)
 
-    @pytest.mark.parametrize('days', range(-2,3))
+    @pytest.mark.parametrize('days', range(-2, 3))
     def test_days_from(self, days):
-        '''TODO: Test with input as a 
+        '''TODO: Test with input as a
         - datetime
         - date
         - str
@@ -179,7 +178,6 @@ class TestDeltaDays(object):
         with pytest.raises(TypeError):
             days_from("some string", 1)
 
-
     def test_prev_day(self):
         expected = self.now + datetime.timedelta(days=-1)
         assert prev_day(self.now) == expected
@@ -188,8 +186,8 @@ class TestDeltaDays(object):
 class TestMonthIterator(object):
 
     @pytest.mark.parametrize('month_for, months_back, first_month', [
-        ((2018,1,31), 0, datetime.date(2018,1,1)),
-        ((2018,1,31), 6, datetime.date(2017,7,1)),
+        ((2018, 1, 31), 0, datetime.date(2018, 1, 1)),
+        ((2018, 1, 31), 6, datetime.date(2017, 7, 1)),
         ])
     def test_previous_months_iterator(self, month_for, months_back, first_month):
 
