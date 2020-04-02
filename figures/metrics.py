@@ -225,6 +225,13 @@ class LearnerCourseGrades(object):
 # We may refactor these into a base class with the contructor params of
 # start_date, end_date, site
 
+# -----------------------
+# Site metrics collectors
+# -----------------------
+#
+# TODO: move these to `figures.metrics.site` module
+#
+
 
 def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):
     """
@@ -380,6 +387,12 @@ def get_total_course_completions_for_time_period(site, start_date, end_date):
     return calc_from_course_daily_metrics()
 
 
+# -------------------------
+# Course metrics collectors
+# -------------------------
+#
+# TODO: move these to `figures.metrics.course` module
+#
 # TODO: Consider moving these aggregate queries to the
 # CourseDailyMetricsManager class (not yet created)
 
@@ -451,6 +464,31 @@ def get_course_num_learners_completed_for_time_period(site, start_date, end_date
         return qs.aggregate(max=Max('num_learners_completed'))['max']
     else:
         return 0
+
+
+def get_course_mau_history_metrics(site, course_id, date_for, months_back):
+    """Quick copy/modification of 'get_monthly_history_metric' for Course MAU
+    """
+    date_for = as_date(date_for)
+    history = []
+
+    for year, month, day in previous_months_iterator(month_for=date_for,
+                                                     months_back=months_back,):
+
+        period = '{year}/{month}'.format(year=year, month=str(month).zfill(2))
+        active_users = get_mau_from_site_course(site=site,
+                                                course_id=course_id,
+                                                year=year,
+                                                month=month)
+        history.append(dict(period=period, value=active_users.count(),))
+
+    if history:
+        # use the last entry
+        current_month = history[-1]['value']
+    else:
+        # This should work for float too since '0 == 0.0' resolves to True
+        current_month = 0
+    return dict(current_month=current_month, history=history)
 
 
 def get_monthly_history_metric(func, site, date_for, months_back,

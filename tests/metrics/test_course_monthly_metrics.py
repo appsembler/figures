@@ -4,13 +4,54 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from figures.metrics import get_month_course_metrics
+from figures.metrics import (
+    get_course_mau_history_metrics,
+    get_month_course_metrics,
+)
 
 from tests.factories import (
     CourseOverviewFactory,
     SiteFactory,
     UserFactory,
 )
+
+
+@pytest.mark.django_db
+def test_get_course_mau_history_metrics(monkeypatch):
+    """Initially basic test for coverage and structure of return data
+
+    TODO: Create generalized "history structure check" so we can use the single
+    test to check all historical metrics data
+    {
+        'current_month': 1,
+        'history': [
+            {'period': '2019/10', 'value': 1},
+            {'period': '2019/11', 'value': 1},
+            {'period': '2019/12', 'value': 1},
+            {'period': '2020/01', 'value': 1},
+            {'period': '2020/02', 'value': 1},
+            {'period': '2020/03', 'value': 1},
+            {'period': '2020/04', 'value': 1}
+        ]
+    }
+    """
+    UserFactory()
+
+    def mock_get_mau_from_site_course(**_kwargs):
+        return get_user_model().objects.all()
+
+    monkeypatch.setattr('figures.metrics.get_mau_from_site_course',
+                        mock_get_mau_from_site_course)
+    site = SiteFactory()
+    course_overview = CourseOverviewFactory()
+    date_for = '2020/4/1'
+    months_back = 6
+    data = get_course_mau_history_metrics(
+        site=site,
+        course_id=course_overview.id,
+        date_for=date_for,
+        months_back=months_back)
+    assert set(data.keys()) == set(['current_month', 'history'])
 
 
 @pytest.mark.django_db
