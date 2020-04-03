@@ -398,6 +398,9 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     """
 
     """
+
+    # TODO: Make 'months_back' be a query parameter.
+    # We will also need to either set a limit or paginate history results
     months_back = 6
 
     def site_course_helper(self, pk):
@@ -424,7 +427,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
 
     def historic_data(self, site, course_id, func, **_kwargs):
         date_for = _kwargs.get('date_for', datetime.utcnow().date())
-        months_back = _kwargs.get('months_back', 6)
+        months_back = _kwargs.get('months_back', self.months_back)
         return get_course_history_metric(
             site=site,
             course_id=course_id,
