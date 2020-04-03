@@ -143,12 +143,29 @@ class TestCourseMonthlyMetricsViewSet(BaseViewTest):
             (key in rec for key in ('period', 'value'))
         return True
 
-    @pytest.mark.skip(reason='Need to implement this test')
-    def test_list_method(self, monkeypatch):
+    def test_list_method(self, monkeypatch, course_test_data):
         """
-        We need to add pagination to the list method. Then we'll add the test
+        We need to add pagination to the list method and add that to the test
         """
-        pass
+        site = course_test_data['site']
+        users = course_test_data['users']
+        course_overview = course_test_data['course_overview']
+
+        if organizations_support_sites():
+            caller = UserFactory(is_staff=True)
+            map_users_to_org_site(caller=caller, site=site, users=users)
+        else:
+            caller = UserFactory(is_staff=True)
+
+        request = APIRequestFactory().get(self.base_request_path)
+        request.META['HTTP_HOST'] = site.domain
+        monkeypatch.setattr(django.contrib.sites.shortcuts,
+                            'get_current_site',
+                            lambda req: site)
+        force_authenticate(request, user=caller)
+        view = self.view_class.as_view({'get': 'list'})
+        response = view(request)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_retrieve_method(self, monkeypatch, course_test_data):
         site = course_test_data['site']
@@ -172,9 +189,33 @@ class TestCourseMonthlyMetricsViewSet(BaseViewTest):
         response = view(request, pk=str(course_overview.id))
         assert response.status_code == status.HTTP_200_OK
 
-    @pytest.mark.skip(reason='Need to implement this test')
-    def test_invalid_course_id(self, monkeypatch):
-        pass
+    @pytest.mark.parametrize('invalid_course_id', [
+            '',
+            'invalid-string',
+            'course-v1:NothingToSeeHere+NTS+42',
+        ])
+    def test_retrieve_invalid_course_id(self, monkeypatch, course_test_data,
+                                        invalid_course_id):
+        """Tests that invalid course ids return '404 NOT FOUND'
+        """
+        site = course_test_data['site']
+        users = course_test_data['users']
+        if organizations_support_sites():
+            caller = UserFactory(is_staff=True)
+            map_users_to_org_site(caller=caller, site=site, users=users)
+        else:
+            caller = UserFactory(is_staff=True)
+
+        request_path = self.base_request_path
+        request = APIRequestFactory().get(request_path)
+        request.META['HTTP_HOST'] = site.domain
+        monkeypatch.setattr(django.contrib.sites.shortcuts,
+                            'get_current_site',
+                            lambda req: site)
+        force_authenticate(request, user=caller)
+        view = self.view_class.as_view({'get': 'retrieve'})
+        response = view(request, pk=invalid_course_id)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_active_users(self, monkeypatch, sog_data):
         site = sog_data['site']

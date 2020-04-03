@@ -27,6 +27,7 @@ from rest_framework.filters import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
 # Directly including edx-platform objects for early development
@@ -400,17 +401,25 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     months_back = 6
 
     def site_course_helper(self, pk):
-        """
+        """Hep
 
         Improvements:
         * make this a decorator
         * Test this with both course id strings and CourseKey objects
         """
         course_id = pk.replace(' ', '+')
+        try:
+            course_key = CourseKey.from_string(course_id)
+        except InvalidKeyError:
+            raise NotFound()
+
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         if figures.helpers.is_multisite():
             if site != figures.sites.get_site_for_course(course_id):
                 raise NotFound()
+        else:
+            get_object_or_404(CourseOverview,
+                              pk=course_key)
         return site, course_id
 
     def historic_data(self, site, course_id, func, **_kwargs):
@@ -429,15 +438,12 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         Returns site metrics data for current month
 
         TODO: NEXT Add query params to get data from previous months
-        IMCOMPLETE : Need to paginage
+        TODO: Add paginagation
         """
-
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         course_keys = figures.sites.get_course_keys_for_site(site)
         date_for = datetime.utcnow().date()
         month_for = '{}/{}'.format(date_for.month, date_for.year)
-        # TODO: NEEDS PAGINATION. Doing all initial to test endpoint
-        # TODO: Improvement: do 'courselike' to allow polymorphism
         data = []
         for course_key in course_keys:
             data.append(metrics.get_month_course_metrics(site=site,
@@ -450,6 +456,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         TODO: Make sure we have a test to handle invalid or empty course id
         """
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
+
         date_for = datetime.utcnow().date()
         month_for = '{}/{}'.format(date_for.month, date_for.year)
         data = metrics.get_month_course_metrics(site=site,
