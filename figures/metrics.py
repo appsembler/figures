@@ -472,8 +472,8 @@ def get_course_mau_history_metrics(site, course_id, date_for, months_back):
     date_for = as_date(date_for)
     history = []
 
-    for year, month, day in previous_months_iterator(month_for=date_for,
-                                                     months_back=months_back,):
+    for year, month, _ in previous_months_iterator(month_for=date_for,
+                                                   months_back=months_back,):
 
         period = '{year}/{month}'.format(year=year, month=str(month).zfill(2))
         active_users = get_mau_from_site_course(site=site,
