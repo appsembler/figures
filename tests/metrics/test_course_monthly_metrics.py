@@ -76,31 +76,20 @@ def test_get_month_course_metrics(monkeypatch):
         assert year
         return users_qs
 
-    def mock_get_course_enrolled_users_for_time_period(**_kwargs):
-        return expected_data['course_enrollments']
-
-    def mock_get_course_num_learners_completed_for_time_period(**_kwargs):
-        return expected_data['num_learners_completed']
-
-    def mock_get_course_average_days_to_complete_for_time_period(**_kwargs):
-        return expected_data['avg_days_to_complete']
-
-    def mock_get_course_average_progress_for_time_period(**_kwargs):
-        return expected_data['avg_progress']
-
     # Set up the mocks that our function under test will call
     monkeypatch.setattr('figures.metrics.get_mau_from_site_course',
                         mock_get_mau_from_site_course)
     monkeypatch.setattr('figures.metrics.get_course_enrolled_users_for_time_period',
-                        mock_get_course_enrolled_users_for_time_period)
+                        lambda **_kwargs: expected_data['course_enrollments'])
     monkeypatch.setattr('figures.metrics.get_course_num_learners_completed_for_time_period',
-                        mock_get_course_num_learners_completed_for_time_period)
+                        lambda **_kwargs: expected_data['num_learners_completed'])
     monkeypatch.setattr('figures.metrics.get_course_average_days_to_complete_for_time_period',
-                        mock_get_course_average_days_to_complete_for_time_period)
+                        lambda **_kwargs: expected_data['avg_days_to_complete'])
     monkeypatch.setattr('figures.metrics.get_course_average_progress_for_time_period',
-                        mock_get_course_average_progress_for_time_period)
+                        lambda **_kwargs: expected_data['avg_progress'])
 
     data = get_month_course_metrics(site=site,
                                     course_id=course_id,
                                     month_for=expected_data['month_for'])
-    assert not cmp(data, expected_data)
+
+    assert data == expected_data
