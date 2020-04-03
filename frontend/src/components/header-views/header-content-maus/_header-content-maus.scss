@@ -118,3 +118,13 @@
     margin-right: calcRem(-20);
   }
 }
+
+.no-data-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-style: italic;
+  opacity: 0.6;
+  font-size: 1.4rem;
+}
