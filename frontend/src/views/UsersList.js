@@ -94,7 +94,6 @@ class UsersList extends Component {
   }
 
   render() {
-    console.log(this.state.searchQuery);
 
     const listItems = this.state.usersList.map((user, index) => {
       return (

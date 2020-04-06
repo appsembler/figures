@@ -24,7 +24,7 @@
     display: inline-block;
     font-size: calcRem(16);
     padding: calcRem(15) calcRem(25);
-    margin: calcRem(30) auto 0;
+    margin: calcRem(30) auto calcRem(50);
     font-weight: bold;
     color: $primary-color;
     border: calcRem(2) solid $primary-color;

@@ -1,7 +1,102 @@
 import fetch from 'cross-fetch';
 import * as types from './ActionTypes';
 import apiConfig from 'base/apiConfig';
+import siteMonthlyMetrics from 'base/apiServices/siteMonthlyMetrics';
 import { trackPromise } from 'react-promise-tracker';
+
+
+// main site metrics related Redux actions
+
+export const loadActiveUsersGeneralData = ( activeUsersData ) => ({
+  type: types.LOAD_ACTIVE_USERS_GENERAL_DATA,
+  activeUsersData,
+  receivedAt: Date.now()
+})
+
+export function fetchActiveUsersGeneralData() {
+  return dispatch => {
+    return siteMonthlyMetrics.getSpecificWithHistory('active_users')
+      .then((response) => {
+        return response.error ? dispatch(loadActiveUsersGeneralData(false)) : dispatch(loadActiveUsersGeneralData(response['active_users']));
+      })
+  }
+}
+
+export const loadSiteCoursesGeneralData = ( siteCoursesData ) => ({
+  type: types.LOAD_SITE_COURSES_GENERAL_DATA,
+  siteCoursesData,
+  receivedAt: Date.now()
+})
+
+export function fetchSiteCoursesGeneralData() {
+  return dispatch => {
+    return siteMonthlyMetrics.getSpecificWithHistory('site_courses')
+      .then((response) => {
+        return response.error ? dispatch(loadSiteCoursesGeneralData(false)) : dispatch(loadSiteCoursesGeneralData(response['site_courses']));
+      })
+  }
+}
+
+export const loadCourseEnrollmentsGeneralData = ( courseEnrollmentsData ) => ({
+  type: types.LOAD_COURSE_ENROLLMENTS_GENERAL_DATA,
+  courseEnrollmentsData,
+  receivedAt: Date.now()
+})
+
+export function fetchCourseEnrollmentsGeneralData() {
+  return dispatch => {
+    return siteMonthlyMetrics.getSpecificWithHistory('course_enrollments')
+      .then((response) => {
+        return response.error ? dispatch(loadCourseEnrollmentsGeneralData(false)) : dispatch(loadCourseEnrollmentsGeneralData(response['course_enrollments']));
+      })
+  }
+}
+
+export const loadRegisteredUsersGeneralData = ( registeredUsersData ) => ({
+  type: types.LOAD_REGISTERED_USERS_GENERAL_DATA,
+  registeredUsersData,
+  receivedAt: Date.now()
+})
+
+export function fetchRegisteredUsersGeneralData() {
+  return dispatch => {
+    return siteMonthlyMetrics.getSpecificWithHistory('registered_users')
+      .then((response) => {
+        return response.error ? dispatch(loadRegisteredUsersGeneralData(false)) : dispatch(loadRegisteredUsersGeneralData(response['registered_users']));
+      })
+  }
+}
+
+export const loadNewUsersGeneralData = ( newUsersData ) => ({
+  type: types.LOAD_NEW_USERS_GENERAL_DATA,
+  newUsersData,
+  receivedAt: Date.now()
+})
+
+export function fetchNewUsersGeneralData() {
+  return dispatch => {
+    return siteMonthlyMetrics.getSpecificWithHistory('new_users')
+      .then((response) => {
+        return response.error ? dispatch(loadNewUsersGeneralData(false)) : dispatch(loadNewUsersGeneralData(response['new_users']));
+      })
+  }
+}
+
+export const loadCourseCompletionsGeneralData = ( courseCompletionsData ) => ({
+  type: types.LOAD_COURSE_COMPLETIONS_GENERAL_DATA,
+  courseCompletionsData,
+  receivedAt: Date.now()
+})
+
+export function fetchCourseCompletionsGeneralData() {
+  return dispatch => {
+    return siteMonthlyMetrics.getSpecificWithHistory('course_completions')
+      .then((response) => {
+        return response.error ? dispatch(loadCourseCompletionsGeneralData(false)) : dispatch(loadCourseCompletionsGeneralData(response['course_completions']));
+      })
+  }
+}
+
 
 
 // report related Redux actions
@@ -69,22 +164,6 @@ export function fetchReportsList(userId) {
       fetch(testReportsListApiURL, { credentials: "same-origin" })
         .then(response => response.json())
         .then(json => dispatch(loadReportsList(json)))
-    )
-  }
-}
-
-export const loadGeneralData = ( generalData ) => ({
-  type: types.LOAD_GENERAL_DATA,
-  generalData,
-  receivedAt: Date.now()
-})
-
-export function fetchGeneralData() {
-  return dispatch => {
-    return trackPromise(
-      fetch(apiConfig.generalSiteMetrics, { credentials: "same-origin" })
-        .then(response => response.json())
-        .then(json => dispatch(loadGeneralData(json)))
     )
   }
 }

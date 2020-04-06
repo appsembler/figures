@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Immutable from 'immutable';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import classNames from 'classnames/bind';
@@ -31,7 +32,7 @@ class CustomTooltip extends Component {
 class HeaderContentMaus extends Component {
   render() {
     let currentPeriodValue = this.props.mauDataCurrent;
-    let previousPeriodValue = this.props.mauDataHistory[this.props.mauDataHistory.length-2]['value'];
+    let previousPeriodValue = this.props.mauDataHistory.getIn([this.props.mauDataHistory.size-2, 'value'], 0);
     let comparisonIcon;
     let comparisonValue;
     if (currentPeriodValue >= previousPeriodValue) {
@@ -62,17 +63,21 @@ class HeaderContentMaus extends Component {
         </div>
         <div className={styles['graph-container']}>
           <ResponsiveContainer width="100%" height={110}>
-            <AreaChart
-              data={this.props.mauDataHistory}
-              margin={{top: 0, bottom: 0, left: 0, right: 0}}
-            >
-              <Area type='linear' dataKey='value' stroke='none' fill='#ffffff' fillOpacity={0.8} />
-              <Tooltip
-                content={<CustomTooltip/>}
-                cursor={{ fill: 'rgba(255, 255, 255, 0.15)'}}
-                offset={0}
-              />
-            </AreaChart>
+            {this.props.mauDataHistory.size ? (
+              <AreaChart
+                data={this.props.mauDataHistory.toJS()}
+                margin={{top: 0, bottom: 0, left: 0, right: 0}}
+              >
+                <Area type='linear' dataKey='value' stroke='none' fill='#ffffff' fillOpacity={0.8} />
+                <Tooltip
+                  content={<CustomTooltip/>}
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.15)'}}
+                  offset={0}
+                />
+              </AreaChart>
+            ) : (
+              <span className={styles['no-data-label']}>Active Users historic data unavailable</span>
+            )}
           </ResponsiveContainer>
         </div>
       </section>
@@ -85,8 +90,8 @@ HeaderContentMaus.defaultProps = {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  mauDataCurrent: state.generalData.data['monthly_active_users']['current_month'],
-  mauDataHistory: state.generalData.data['monthly_active_users']['history']
+  mauDataCurrent: Immutable.fromJS(state.generalData.activeUsers['current_month']),
+  mauDataHistory: Immutable.fromJS(state.generalData.activeUsers['history']),
 })
 
 export default connect(

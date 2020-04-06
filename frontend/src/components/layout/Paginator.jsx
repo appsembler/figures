@@ -22,7 +22,6 @@ class Paginator extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props !== nextProps) {
-      console.log(nextProps);
       this.setState({
         currentPage: nextProps.currentPage,
         perPage: nextProps.perPage,

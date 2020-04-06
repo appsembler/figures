@@ -10,6 +10,7 @@ import BaseStatCard from 'base/components/stat-cards/BaseStatCard';
 import LearnerStatistics from 'base/components/learner-statistics/LearnerStatistics';
 import CourseLearnersList from 'base/components/course-learners-list/CourseLearnersList';
 import apiConfig from 'base/apiConfig';
+import courseMonthlyMetrics from 'base/apiServices/courseMonthlyMetrics';
 
 let cx = classNames.bind(styles);
 
@@ -23,15 +24,11 @@ class SingleCourseContent extends Component {
       learnersList: Immutable.List(),
       apiFetchMoreLearnersUrl: null
     };
-
-    this.fetchCourseData = this.fetchCourseData.bind(this);
-    this.fetchLearnersData = this.fetchLearnersData.bind(this);
-    this.setLearnersData = this.setLearnersData.bind(this);
   }
 
   fetchCourseData = () => {
     trackPromise(
-      fetch((apiConfig.coursesDetailed + this.props.courseId + '/'), { credentials: "same-origin" })
+      fetch((apiConfig.coursesGeneral + this.props.courseId + '/'), { credentials: "same-origin" })
         .then(response => response.json())
         .then(json => this.setState({
           courseData: Immutable.fromJS(json)
@@ -81,25 +78,35 @@ class SingleCourseContent extends Component {
         </div>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
+            cardTitle='Active users'
+            fetchDataKey={'active_users'}
+            fetchValueFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
+            fetchHistoryFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
+          />
+          <BaseStatCard
             cardTitle='Number of enrolled learners'
-            mainValue={this.state.courseData.getIn(['learners_enrolled', 'current_month'], 0)}
-            valueHistory={this.state.courseData.getIn(['learners_enrolled', 'history'], [])}
+            fetchDataKey={'course_enrollments'}
+            fetchValueFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
+            fetchHistoryFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
           />
           <BaseStatCard
             cardTitle='Average course progress'
-            mainValue={this.state.courseData.getIn(['average_progress', 'current_month'], 0).toFixed(2)}
-            valueHistory={this.state.courseData.getIn(['average_progress', 'history'], [])}
+            fetchDataKey={'avg_progress'}
+            fetchValueFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
+            fetchHistoryFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
             dataType='percentage'
           />
           <BaseStatCard
             cardTitle='Average days to complete'
-            mainValue={this.state.courseData.getIn(['average_days_to_complete', 'current_month'], 0)}
-            valueHistory={this.state.courseData.getIn(['average_days_to_complete', 'history'], [])}
+            fetchDataKey={'avg_days_to_complete'}
+            fetchValueFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
+            fetchHistoryFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
           />
           <BaseStatCard
             cardTitle='User course completions'
-            mainValue={this.state.courseData.getIn(['users_completed', 'current_month'], 0)}
-            valueHistory={this.state.courseData.getIn(['users_completed', 'history'], [])}
+            fetchDataKey={'num_learners_completed'}
+            fetchValueFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
+            fetchHistoryFunction={(dataKey) => courseMonthlyMetrics.getSpecificWithHistory(this.props.courseId, dataKey)}
           />
           <LearnerStatistics
             learnersData = {this.state.learnersList}
