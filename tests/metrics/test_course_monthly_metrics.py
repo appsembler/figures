@@ -46,9 +46,19 @@ def test_get_course_mau_history_metrics(monkeypatch):
     course_overview = CourseOverviewFactory()
     date_for = '2020/4/1'
     months_back = 6
+
+    # test with course id as a `CourseKey` instance
     data = get_course_mau_history_metrics(
         site=site,
         course_id=course_overview.id,
+        date_for=date_for,
+        months_back=months_back)
+    assert set(data.keys()) == set(['current_month', 'history'])
+
+    # test with course id as a string
+    data = get_course_mau_history_metrics(
+        site=site,
+        course_id=str(course_overview.id),
         date_for=date_for,
         months_back=months_back)
     assert set(data.keys()) == set(['current_month', 'history'])

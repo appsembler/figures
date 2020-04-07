@@ -232,6 +232,12 @@ class TestHandlersForMultisiteMode(object):
 
         assert sm.count() == len(sm_expected)
 
+        # test that course id as a string works
+        sm = figures.sites.get_student_modules_for_course_in_site(
+            site=self.site, course_id=str(course_overviews[0].id))
+
+        assert sm.count() == len(sm_expected)
+
         sm = figures.sites.get_student_modules_for_site(site=self.site)
         assert sm.count() == len(sm_expected) + 1
 

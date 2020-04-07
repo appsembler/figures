@@ -175,7 +175,7 @@ def get_student_modules_for_course_in_site(site, course_id):
         if not check_site or site_id != check_site.id:
             CourseNotInSiteError('course "{}"" does not belong to site "{}"'.format(
                 course_id, site_id))
-    return StudentModule.objects.filter(course_id=course_id)
+    return StudentModule.objects.filter(course_id=as_course_key(course_id))
 
 
 def get_student_modules_for_site(site):
