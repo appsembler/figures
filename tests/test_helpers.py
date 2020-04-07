@@ -1,4 +1,3 @@
- 
 import calendar
 import datetime
 from django.utils.timezone import utc
@@ -20,9 +19,11 @@ from figures.helpers import (
     next_day,
     prev_day,
     previous_months_iterator,
+    first_last_days_for_month,
     )
 
 from tests.factories import COURSE_ID_STR_TEMPLATE
+
 
 class TestCourseKeyHelper(object):
     '''Tests the figures.helpers.as_course_key method
@@ -156,9 +157,9 @@ class TestDeltaDays(object):
     def setup(self):
         self.now = datetime.datetime(2018, 6, 1)
 
-    @pytest.mark.parametrize('days', range(-2,3))
+    @pytest.mark.parametrize('days', range(-2, 3))
     def test_days_from(self, days):
-        '''TODO: Test with input as a 
+        '''TODO: Test with input as a
         - datetime
         - date
         - str
@@ -177,7 +178,6 @@ class TestDeltaDays(object):
         with pytest.raises(TypeError):
             days_from("some string", 1)
 
-
     def test_prev_day(self):
         expected = self.now + datetime.timedelta(days=-1)
         assert prev_day(self.now) == expected
@@ -186,8 +186,8 @@ class TestDeltaDays(object):
 class TestMonthIterator(object):
 
     @pytest.mark.parametrize('month_for, months_back, first_month', [
-        ((2018,1,31), 0, datetime.date(2018,1,1)),
-        ((2018,1,31), 6, datetime.date(2017,7,1)),
+        ((2018, 1, 31), 0, datetime.date(2018, 1, 1)),
+        ((2018, 1, 31), 6, datetime.date(2017, 7, 1)),
         ])
     def test_previous_months_iterator(self, month_for, months_back, first_month):
 
@@ -204,3 +204,16 @@ class TestMonthIterator(object):
 
         vals = list(previous_months_iterator(month_for, months_back))
         assert vals == expected_vals
+
+
+def test_first_last_days_for_month():
+    month_for = '2/2020'
+    month = 2
+    year = 2020
+    first_day, last_day = first_last_days_for_month(month_for=month_for)
+    assert first_day.month == month
+    assert last_day.month == month
+    assert first_day.year == year
+    assert last_day.year == year
+    assert first_day.day == 1
+    assert last_day.day == 29

@@ -16,7 +16,7 @@ from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
-from rest_framework.decorators import list_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import (
@@ -27,6 +27,7 @@ from rest_framework.filters import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
 # Directly including edx-platform objects for early development
@@ -65,6 +66,7 @@ from figures.serializers import (
     SiteSerializer,
     UserIndexSerializer,
     GeneralUserDataSerializer,
+    get_course_history_metric,
 )
 from figures import metrics
 from figures.pagination import (
@@ -390,6 +392,134 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         context = super(LearnerDetailsViewSet, self).get_serializer_context()
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
         return context
+
+
+class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
+    """
+
+    """
+
+    # TODO: Make 'months_back' be a query parameter.
+    # We will also need to either set a limit or paginate history results
+    months_back = 6
+
+    def site_course_helper(self, pk):
+        """Hep
+
+        Improvements:
+        * make this a decorator
+        * Test this with both course id strings and CourseKey objects
+        """
+        course_id = pk.replace(' ', '+')
+        try:
+            course_key = CourseKey.from_string(course_id)
+        except InvalidKeyError:
+            raise NotFound()
+
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        if figures.helpers.is_multisite():
+            if site != figures.sites.get_site_for_course(course_id):
+                raise NotFound()
+        else:
+            get_object_or_404(CourseOverview,
+                              pk=course_key)
+        return site, course_id
+
+    def historic_data(self, site, course_id, func, **_kwargs):
+        date_for = _kwargs.get('date_for', datetime.utcnow().date())
+        months_back = _kwargs.get('months_back', self.months_back)
+        return get_course_history_metric(
+            site=site,
+            course_id=course_id,
+            func=func,
+            date_for=date_for,
+            months_back=months_back
+        )
+
+    def list(self, request):
+        """
+        Returns site metrics data for current month
+
+        TODO: NEXT Add query params to get data from previous months
+        TODO: Add paginagation
+        """
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        course_keys = figures.sites.get_course_keys_for_site(site)
+        date_for = datetime.utcnow().date()
+        month_for = '{}/{}'.format(date_for.month, date_for.year)
+        data = []
+        for course_key in course_keys:
+            data.append(metrics.get_month_course_metrics(site=site,
+                                                         course_id=str(course_key),
+                                                         month_for=month_for))
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        TODO: Make sure we have a test to handle invalid or empty course id
+        """
+        site, course_id = self.site_course_helper(kwargs.get('pk', ''))
+
+        date_for = datetime.utcnow().date()
+        month_for = '{}/{}'.format(date_for.month, date_for.year)
+        data = metrics.get_month_course_metrics(site=site,
+                                                course_id=course_id,
+                                                month_for=month_for)
+        return Response(data)
+
+    @detail_route()
+    def active_users(self, request, **kwargs):
+        site, course_id = self.site_course_helper(kwargs.get('pk', ''))
+        date_for = datetime.utcnow().date()
+        months_back = 6
+        active_users = metrics.get_course_mau_history_metrics(
+            site=site,
+            course_id=course_id,
+            date_for=date_for,
+            months_back=months_back,
+        )
+        data = dict(active_users=active_users)
+        return Response(data)
+
+    @detail_route()
+    def course_enrollments(self, request, *args, **kwargs):
+        site, course_id = self.site_course_helper(kwargs.get('pk', ''))
+        data = dict(course_enrollments=self.historic_data(
+            request=request,
+            site=site,
+            course_id=course_id,
+            func=metrics.get_course_enrolled_users_for_time_period))
+        return Response(data)
+
+    @detail_route()
+    def num_learners_completed(self, request, *args, **kwargs):
+        site, course_id = self.site_course_helper(kwargs.get('pk', ''))
+        data = dict(num_learners_completed=self.historic_data(
+            request=request,
+            site=site,
+            course_id=course_id,
+            func=metrics.get_course_num_learners_completed_for_time_period))
+        return Response(data)
+
+    @detail_route()
+    def avg_days_to_complete(self, request, *args, **kwargs):
+        site, course_id = self.site_course_helper(kwargs.get('pk', ''))
+        data = dict(avg_days_to_complete=self.historic_data(
+            request=request,
+            site=site,
+            course_id=course_id,
+            func=metrics.get_course_average_days_to_complete_for_time_period))
+        return Response(data)
+
+    @detail_route()
+    def avg_progress(self, request, *args, **kwargs):
+        site, course_id = self.site_course_helper(kwargs.get('pk', ''))
+        data = dict(avg_progress=self.historic_data(
+            request=request,
+            site=site,
+            course_id=course_id,
+            func=metrics.get_course_average_progress_for_time_period))
+        return Response(data)
 
 
 class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):

@@ -44,7 +44,9 @@ from figures.helpers import (
     next_day,
     prev_day,
     previous_months_iterator,
+    first_last_days_for_month,
 )
+from figures.mau import get_mau_from_site_course
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 import figures.sites
 
@@ -223,6 +225,13 @@ class LearnerCourseGrades(object):
 # We may refactor these into a base class with the contructor params of
 # start_date, end_date, site
 
+# -----------------------
+# Site metrics collectors
+# -----------------------
+#
+# TODO: move these to `figures.metrics.site` module
+#
+
 
 def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):
     """
@@ -378,6 +387,12 @@ def get_total_course_completions_for_time_period(site, start_date, end_date):
     return calc_from_course_daily_metrics()
 
 
+# -------------------------
+# Course metrics collectors
+# -------------------------
+#
+# TODO: move these to `figures.metrics.course` module
+#
 # TODO: Consider moving these aggregate queries to the
 # CourseDailyMetricsManager class (not yet created)
 
@@ -451,6 +466,31 @@ def get_course_num_learners_completed_for_time_period(site, start_date, end_date
         return 0
 
 
+def get_course_mau_history_metrics(site, course_id, date_for, months_back):
+    """Quick copy/modification of 'get_monthly_history_metric' for Course MAU
+    """
+    date_for = as_date(date_for)
+    history = []
+
+    for year, month, _ in previous_months_iterator(month_for=date_for,
+                                                   months_back=months_back,):
+
+        period = '{year}/{month}'.format(year=year, month=str(month).zfill(2))
+        active_users = get_mau_from_site_course(site=site,
+                                                course_id=course_id,
+                                                year=year,
+                                                month=month)
+        history.append(dict(period=period, value=active_users.count(),))
+
+    if history:
+        # use the last entry
+        current_month = history[-1]['value']
+    else:
+        # This should work for float too since '0 == 0.0' resolves to True
+        current_month = 0
+    return dict(current_month=current_month, history=history)
+
+
 def get_monthly_history_metric(func, site, date_for, months_back,
                                include_current_in_history=True):  # pylint: disable=unused-argument
     """Convenience method to retrieve current and historic data
@@ -497,6 +537,46 @@ def get_monthly_history_metric(func, site, date_for, months_back,
     return dict(
         current_month=current_month,
         history=history,)
+
+
+def get_month_course_metrics(site, course_id, month_for, **_kwargs):
+    """Returns a dict with the metrics for the given site, course, month
+
+    This function provides first generation metrics
+    Initially this function returns a partial set of the course monthly metrics:
+    * active users
+    * course enrollments
+    * number of learners completed
+    """
+    # TODO: handle invalid "month_for" exception
+    # month, year = [int(val) for val in month_for.split('/')]
+    # start_date = datetime.date(year=year, month=month, day=1)
+    # end_date = datetime.date(year=year, month=month, day=days_in_month(start_date))
+
+    first_day, last_day = first_last_days_for_month(month_for)
+    params_dict = dict(site=site,
+                       course_id=course_id,
+                       start_date=first_day,
+                       end_date=last_day)
+
+    active_users = get_mau_from_site_course(site=site,
+                                            course_id=course_id,
+                                            year=first_day.year,
+                                            month=first_day.month)
+    course_enrollments = get_course_enrolled_users_for_time_period(**params_dict)
+    num_learners_completed = get_course_num_learners_completed_for_time_period(**params_dict)
+    avg_days_to_complete = get_course_average_days_to_complete_for_time_period(**params_dict)
+    avg_progress = get_course_average_progress_for_time_period(**params_dict)
+
+    return dict(
+        course_id=course_id,
+        month_for=month_for,
+        active_users=active_users.count(),
+        course_enrollments=course_enrollments,
+        num_learners_completed=num_learners_completed,
+        avg_days_to_complete=avg_days_to_complete,
+        avg_progress=avg_progress,
+        )
 
 
 def get_current_month_site_metrics(site, **_kwargs):

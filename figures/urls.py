@@ -20,6 +20,11 @@ router.register(
     base_name='site-daily-metrics')
 
 router.register(
+    r'course-monthly-metrics',
+    views.CourseMonthlyMetricsViewSet,
+    base_name='course-monthly-metrics')
+
+router.register(
     r'site-monthly-metrics',
     views.SiteMonthlyMetricsViewSet,
     base_name='site-monthly-metrics')

@@ -21,6 +21,7 @@ class DashboardContent extends Component {
   }
 
   render() {
+
     return (
       <div className="ef--layout-root">
         <HeaderAreaLayout>
@@ -30,19 +31,24 @@ class DashboardContent extends Component {
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'base-grid-layout': true, 'dashboard-content': true})}>
           <BaseStatCard
+            mainValue={this.props.generalData.getIn(['registeredUsers', 'current_month'], 0)}
+            valueHistory={this.props.generalData.getIn(['registeredUsers', 'history'], [])}
             cardTitle='Registered learners'
-            mainValue={this.props.generalData.getIn(['total_site_users', 'current_month'])}
-            valueHistory={this.props.generalData.getIn(['total_site_users', 'history'])}
           />
           <BaseStatCard
+            mainValue={this.props.generalData.getIn(['newUsers', 'current_month'], 0)}
+            valueHistory={this.props.generalData.getIn(['newUsers', 'history'], [])}
+            cardTitle='Registered learners'
+          />
+          <BaseStatCard
+            mainValue={this.props.generalData.getIn(['courseEnrollments', 'current_month'], 0)}
+            valueHistory={this.props.generalData.getIn(['courseEnrollments', 'history'], [])}
             cardTitle='Course enrollments'
-            mainValue={this.props.generalData.getIn(['total_course_enrollments', 'current_month'])}
-            valueHistory={this.props.generalData.getIn(['total_course_enrollments', 'history'])}
           />
           <BaseStatCard
+            mainValue={this.props.generalData.getIn(['courseCompletions', 'current_month'], 0)}
+            valueHistory={this.props.generalData.getIn(['courseCompletions', 'history'], [])}
             cardTitle='Course completions'
-            mainValue={this.props.generalData.getIn(['total_course_completions', 'current_month'])}
-            valueHistory={this.props.generalData.getIn(['total_course_completions', 'history'])}
           />
         </div>
         <div className={cx({ 'container': true, 'functionality-callout': true})}>
@@ -60,7 +66,7 @@ class DashboardContent extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  generalData: Immutable.fromJS(state.generalData.data)
+  generalData: Immutable.fromJS(state.generalData),
 })
 
 export default connect(
