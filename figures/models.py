@@ -2,6 +2,7 @@
 
 """
 
+from datetime import date
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -129,6 +130,47 @@ class SiteDailyMetrics(TimeStampedModel):
         if date_for:
             filter_args['date_for__lt'] = date_for
         return cls.objects.filter(**filter_args).order_by('-date_for').first()
+
+
+@python_2_unicode_compatible
+class SiteMonthlyMetrics(TimeStampedModel):
+    """
+    Stores metrics for a given site and month
+
+
+    """
+
+    site = models.ForeignKey(Site)
+    # Month for which this record's data are collected
+    # Important fields are year and month
+    month_for = models.DateField()
+    active_user_count = models.IntegerField()
+
+    class Meta:
+        ordering = ['-month_for', 'site']
+        unique_together = ['month_for', 'site']
+
+    def __str__(self):
+        return "id:{}, month_for:{}, site:{}".format(
+            self.id, self.month_for, self.site.domain)
+
+    @classmethod
+    def add_month(cls, site, year, month, active_user_count, overwrite=False):
+
+        month_for = date(year=year, month=month, day=1)
+        if not overwrite:
+            try:
+
+                obj = SiteMonthlyMetrics.objects.get(site=site,
+                                                     month_for=month_for)
+                return (obj, False,)
+            except SiteMonthlyMetrics.DoesNotExist:
+                pass
+
+        defaults = dict(active_user_count=active_user_count)
+        return SiteMonthlyMetrics.objects.update_or_create(site=site,
+                                                           month_for=month_for,
+                                                           defaults=defaults)
 
 
 class LearnerCourseGradeMetricsManager(models.Manager):
