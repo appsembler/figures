@@ -50,6 +50,16 @@ class SiteDailyMetricsAdmin(admin.ModelAdmin):
         'date_for')
 
 
+@admin.register(figures.models.SiteMonthlyMetrics)
+class SiteMonthlyMetricsAdmin(admin.ModelAdmin):
+    """Defines the admin interface for the SiteMonthlyMetrics model
+    """
+    list_display = ('id', 'month_for', 'site', 'active_user_count')
+    list_filter = (
+        ('site', RelatedOnlyDropdownFilter),
+        'month_for')
+
+
 @admin.register(figures.models.LearnerCourseGradeMetrics)
 class LearnerCourseGradeMetricsAdmin(admin.ModelAdmin):
     """Defines the admin interface for the LearnerCourseGradeMetrics model

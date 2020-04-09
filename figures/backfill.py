@@ -22,9 +22,9 @@ def backfill_monthly_metrics_for_site(site, overwrite):
     site_sm = get_student_modules_for_site(site)
     first_created = site_sm.order_by('created').first().created
 
-    # We do this because there _might_ be a bug in rrule. It was skipping over
-    # February when we used the `created` field directly for the start_month
-    # variable
+    # We do this because there _might_ be a bug in `dateutil.rrule`. It was
+    # skipping over February when we used the `created` field directly for the
+    # start_month variable
     start_month = datetime(year=first_created.year,
                            month=first_created.month,
                            day=1)
