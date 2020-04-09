@@ -241,19 +241,24 @@ def get_site_mau_history_metrics(site, months_back):
     """
     history = []
 
-    for rec in SiteMonthlyMetrics.objects.order_by('-month_for')[:months_back+1]:
+    # We will not have the current month's data because metrics are calculated
+    # after the month is over
+    for rec in SiteMonthlyMetrics.objects.order_by('-month_for')[:months_back]:
         period = '{year}/{month}'.format(year=rec.month_for.year,
                                          month=str(rec.month_for.month).zfill(2))
         history.append(dict(period=period, value=rec.active_user_count))
 
+    # Hack to set current month data in the history list
+    current_month_active = get_site_mau_current_month(site)
     if history:
-        # use the last entry
-        current_month = history[0]['value']
+        # reverse the list because it is currently in reverser chronological order
         history.reverse()
-    else:
-        # This should work for float too since '0 == 0.0' resolves to True
-        current_month = 0
-    return dict(current_month=current_month, history=history)
+
+    current_month = datetime.datetime.utcnow().date()
+    period = '{year}/{month}'.format(year=current_month.year,
+                                     month=str(current_month.month).zfill(2))
+    history.append(dict(period=period, value=current_month_active))
+    return dict(current_month=current_month_active, history=history)
 
 
 def get_site_mau_current_month(site):

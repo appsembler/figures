@@ -30,7 +30,7 @@ if organizations_support_sites():
 
 
 @pytest.mark.django_db
-def test_get_site_mau_history_metrics_basic(db):
+def test_get_site_mau_history_metrics_basic(db, monkeypatch):
     """Simple data, skipping doing a fixture for now
 
     Expected data:
@@ -47,25 +47,30 @@ def test_get_site_mau_history_metrics_basic(db):
     all_months_back = 12
     months_back = 6
     mock_today = date(year=2020, month=6, day=1)
+    last_month = mock_today - relativedelta(months=1)
     freezer = freeze_time(mock_today)
     freezer.start()
+
     start_month = mock_today - relativedelta(months=all_months_back)
     smm = []
     site = SiteFactory()
     for counter, dt in enumerate(rrule(freq=MONTHLY,
                                        dtstart=start_month,
-                                       until=mock_today)):
+                                       until=last_month)):
         month_for = date(year=dt.year, month=dt.month, day=1)
         smm.append(SiteMonthlyMetricsFactory(site=site,
                                              month_for=month_for,
                                              active_user_count=counter))
+    current_month_active = 42
+    monkeypatch.setattr('figures.metrics.get_site_mau_current_month',
+                        lambda n: current_month_active)
 
     data = get_site_mau_history_metrics(site=site, months_back=months_back)
 
     freezer.stop()
 
-    assert data['current_month'] == 12
-    for rec in data['history']:
+    assert data['current_month'] == current_month_active
+    for rec in data['history'][:-1]:
         year, month = [int(val) for val in rec['period'].split('/')]
         month_for = date(year=year, month=month, day=1)
         obj = SiteMonthlyMetrics.objects.get(site=site, month_for=month_for)
