@@ -34,6 +34,9 @@ class Command(BaseCommand):
         # Would be really Really REALLY great to be able to filter out dead sites
         overwrite = options['overwrite']
         for site in Site.objects.all():
+            print('Backfilling monthly metrics for site id="{}" domain={}'.format(
+                site.id,
+                site.domain))
             backfilled = backfill_monthly_metrics_for_site(site=site,
                                                            overwrite=overwrite)
             for rec in backfilled:

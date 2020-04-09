@@ -20,6 +20,9 @@ def backfill_monthly_metrics_for_site(site, overwrite):
     this function was quickly put together
     """
     site_sm = get_student_modules_for_site(site)
+    if not site_sm:
+        return None
+
     first_created = site_sm.order_by('created').first().created
 
     # We do this because there _might_ be a bug in `dateutil.rrule`. It was
