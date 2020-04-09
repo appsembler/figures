@@ -626,17 +626,10 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     @list_route()
     def active_users(self, request):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
-        date_for = datetime.utcnow().date()
         months_back = 6
-
-        active_users = metrics.get_monthly_history_metric(
-            func=metrics.get_active_users_for_time_period,
-            site=site,
-            date_for=date_for,
-            months_back=months_back,
-        )
-        data = dict(active_users=active_users)
-        return Response(data)
+        active_users = metrics.get_site_mau_history_metrics(site=site,
+                                                            months_back=months_back)
+        return Response(dict(active_users=active_users))
 
 
 #
