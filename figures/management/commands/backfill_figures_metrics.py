@@ -39,11 +39,13 @@ class Command(BaseCommand):
                 site.domain))
             backfilled = backfill_monthly_metrics_for_site(site=site,
                                                            overwrite=overwrite)
-            for rec in backfilled:
-                obj = rec['obj']
-                print('Backfilled site "{}" for {} with active user count {}'.format(
-                    obj.site.domain,
-                    obj.month_for,
-                    obj.active_user_count))
-
+            if backfilled:
+                for rec in backfilled:
+                    obj = rec['obj']
+                    print('Backfilled site "{}" for {} with active user count {}'.format(
+                        obj.site.domain,
+                        obj.month_for,
+                        obj.active_user_count))
+            else:
+                print('No student modules for site "{}"'.format(site.domain))
         print('DONE: Backfill Figures Metrics')
