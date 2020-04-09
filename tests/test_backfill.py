@@ -1,5 +1,6 @@
-
-from datetime import datetime, timedelta
+"""Tests the figures.backfill module
+"""
+from datetime import datetime
 import pytest
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, MONTHLY
@@ -14,12 +15,12 @@ from tests.factories import (
     OrganizationCourseFactory,
     StudentModuleFactory,
     SiteFactory)
-
-
-
 from tests.helpers import organizations_support_sites
+
+
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
+
 
 @pytest.fixture
 @pytest.mark.django_db
@@ -28,26 +29,23 @@ def backfill_test_data(db):
     TODO: make counts different for each course per month
     """
     months_back = 7
-    sm_per_month = [ 10+i for i in range(months_back+1)]
+    sm_per_month = [10+i for i in range(months_back+1)]
     site = SiteFactory()
     now = datetime.utcnow().replace(tzinfo=utc)
 
     first_month = now + relativedelta(months=months_back * -1)
 
     course_overviews = [CourseOverviewFactory() for i in range(1)]
-    month_data = []
     count_check = []
     sm = []
     for i, dt in enumerate(rrule(freq=MONTHLY, dtstart=first_month, until=now)):
         for co in course_overviews:
             sm_count = sm_per_month[i]
             month_sm = [StudentModuleFactory(course_id=co.id,
-                                            created=dt,
-                                            modified=dt
-                   ) for i in range(sm_count)]
+                                             created=dt,
+                                             modified=dt) for i in range(sm_count)]
             sm += month_sm
-        count_check.append(dict(month=dt,month_sm=month_sm,sm_count=sm_count))
-    # import pdb; pdb.set_trace()
+        count_check.append(dict(month=dt, month_sm=month_sm, sm_count=sm_count))
     if organizations_support_sites():
         org = OrganizationFactory(sites=[site])
         for co in course_overviews:
@@ -99,7 +97,7 @@ def test_backfill_monthly_metrics_for_site(backfill_test_data):
     assert len(backfilled) == backfill_test_data['months_back'] + 1
     assert len(backfilled) == SiteMonthlyMetrics.objects.count()
     assert len(backfilled) == len(count_check)
-    for rec, check_rec in zip(backfilled,count_check):
+    for rec, check_rec in zip(backfilled, count_check):
         assert rec['obj'].active_user_count == check_rec['sm_count']
         assert rec['obj'].month_for.year == check_rec['month'].year
         assert rec['obj'].month_for.month == check_rec['month'].month
