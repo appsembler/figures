@@ -8,6 +8,11 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+10 APR 2020 - Figures release 0.3.8
+===================================
+
+* Performance improvement to "Site Monthly Metrics" active users endpoint
+
 
 8 APR 2020 - Figures release 0.3.7
 ==================================
