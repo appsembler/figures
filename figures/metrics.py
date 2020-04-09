@@ -47,7 +47,11 @@ from figures.helpers import (
     first_last_days_for_month,
 )
 from figures.mau import get_mau_from_site_course
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    SiteDailyMetrics,
+    SiteMonthlyMetrics,
+)
 import figures.sites
 
 #
@@ -231,6 +235,45 @@ class LearnerCourseGrades(object):
 #
 # TODO: move these to `figures.metrics.site` module
 #
+
+def get_site_mau_history_metrics(site, months_back):
+    """Quick adaptation of `get_monthly_history_metric` for site MAU
+    """
+    history = []
+
+    for rec in SiteMonthlyMetrics.objects.order_by('-month_for')[:months_back+1]:
+        period = '{year}/{month}'.format(year=rec.month_for.year,
+                                         month=str(rec.month_for.month).zfill(2))
+        history.append(dict(period=period, value=rec.active_user_count))
+
+    if history:
+        # use the last entry
+        current_month = history[0]['value']
+        history.reverse()
+    else:
+        # This should work for float too since '0 == 0.0' resolves to True
+        current_month = 0
+    return dict(current_month=current_month, history=history)
+
+
+def get_site_mau_current_month(site):
+    """
+    WIP for performance optimizsation
+
+    Safer to get the site users first, then filter on those ids, but may be
+    faster to get the unique ids for student modules for month and year, then
+    filter on User.objectrs.filter(id__in=student_module.studen__id)
+    OR get the StudentModule objects for courses in the site and year/month
+    then get distinct user ids
+
+    """
+    month_for = datetime.datetime.utcnow().date()
+    user_ids = figures.sites.get_user_ids_for_site(site)
+    sm = StudentModule.objects.filter(
+        modified__year=month_for.year,
+        modified__month=month_for.month,
+        student_id__in=user_ids)
+    return sm.values('student__id').distinct().count()
 
 
 def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):

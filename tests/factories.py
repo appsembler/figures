@@ -8,6 +8,7 @@ Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
 '''
 
 import datetime
+from dateutil.relativedelta import relativedelta
 from django.utils.timezone import utc
 
 from django.contrib.auth import get_user_model
@@ -38,6 +39,7 @@ from figures.models import (
     CourseMauMetrics,
     LearnerCourseGradeMetrics,
     SiteDailyMetrics,
+    SiteMonthlyMetrics,
     SiteMauMetrics,
 )
 
@@ -324,6 +326,16 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)
     total_enrollment_count = factory.Sequence(lambda n: n)
+
+
+class SiteMonthlyMetricsFactory(DjangoModelFactory):
+    class Meta:
+        model = SiteMonthlyMetrics
+
+    site = factory.SubFactory(SiteFactory)
+    month_for = factory.Sequence(lambda n: (
+        datetime.date(2020, 6, 1) - relativedelta(months=n)))
+    active_user_count = factory.Sequence(lambda n: n)
 
 
 class CourseMauMetricsFactory(DjangoModelFactory):
