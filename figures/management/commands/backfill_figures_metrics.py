@@ -26,7 +26,7 @@ class Command(BaseCommand):
                             help='overwrite existing data in SiteMonthlyMetrics')
 
     def handle(self, *args, **options):
-        print('BEGIN:Backfill Figures Metrics')
+        print('BEGIN: Backfill Figures Metrics')
 
         # Would be great to be able to filter out dead sites
         # Would be really great to be able to filter out dead sites
@@ -43,4 +43,4 @@ class Command(BaseCommand):
                     obj.month_for,
                     obj.active_user_count))
 
-        print('DONE:Backfill Figures Metrics')
+        print('DONE: Backfill Figures Metrics')
