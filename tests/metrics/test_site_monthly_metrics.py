@@ -17,7 +17,9 @@ from figures.metrics import (
 from figures.models import SiteMonthlyMetrics
 
 from tests.factories import (
+    CourseOverviewFactory,
     OrganizationFactory,
+    OrganizationCourseFactory,
     SiteMonthlyMetricsFactory,
     SiteFactory,
     StudentModuleFactory,
@@ -53,19 +55,23 @@ def test_get_site_mau_history_metrics_basic(db, monkeypatch):
 
     start_month = mock_today - relativedelta(months=all_months_back)
     smm = []
-    site = SiteFactory()
-    for counter, dt in enumerate(rrule(freq=MONTHLY,
-                                       dtstart=start_month,
-                                       until=last_month)):
-        month_for = date(year=dt.year, month=dt.month, day=1)
-        smm.append(SiteMonthlyMetricsFactory(site=site,
-                                             month_for=month_for,
-                                             active_user_count=counter))
+    our_site = SiteFactory()
+    other_site = SiteFactory()
+
+    for site in [our_site, other_site]:
+        for counter, dt in enumerate(rrule(freq=MONTHLY,
+                                           dtstart=start_month,
+                                           until=last_month)):
+            month_for = date(year=dt.year, month=dt.month, day=1)
+            smm.append(SiteMonthlyMetricsFactory(site=site,
+                                                 month_for=month_for,
+                                                 active_user_count=counter))
+
     current_month_active = 42
     monkeypatch.setattr('figures.metrics.get_site_mau_current_month',
                         lambda n: current_month_active)
 
-    data = get_site_mau_history_metrics(site=site, months_back=months_back)
+    data = get_site_mau_history_metrics(site=our_site, months_back=months_back)
 
     freezer.stop()
 
@@ -73,8 +79,9 @@ def test_get_site_mau_history_metrics_basic(db, monkeypatch):
     for rec in data['history'][:-1]:
         year, month = [int(val) for val in rec['period'].split('/')]
         month_for = date(year=year, month=month, day=1)
-        obj = SiteMonthlyMetrics.objects.get(site=site, month_for=month_for)
+        obj = SiteMonthlyMetrics.objects.get(site=our_site, month_for=month_for)
         assert obj.active_user_count == rec['value']
+        assert obj.site == our_site
 
 
 @pytest.mark.django_db
@@ -87,17 +94,24 @@ def test_get_site_mau_current_month(db):
     start_dt = datetime(mock_today.year, mock_today.month, 1, tzinfo=fuzzy.compat.UTC)
     end_dt = datetime(mock_today.year, mock_today.month, 31, tzinfo=fuzzy.compat.UTC)
     date_gen = fuzzy.FuzzyDateTime(start_dt=start_dt, end_dt=end_dt)
-
     site = SiteFactory()
-    users = [UserFactory() for i in range(10)]
+    course_overviews = [CourseOverviewFactory() for i in range(2)]
+    users = [UserFactory() for i in range(2)]
+    sm = []
     for user in users:
-        [StudentModuleFactory(student=user,
-                              modified=date_gen.evaluate(2, None, False)) for i in range(2)]
+        for co in course_overviews:
+            sm.append(StudentModuleFactory(course_id=co.id,
+                                           student=user,
+                                           modified=date_gen.evaluate(2, None, False)))
 
     if organizations_support_sites():
         org = OrganizationFactory(sites=[site])
+        for co in course_overviews:
+            OrganizationCourseFactory(organization=org, course_id=str(co.id))
         for user in users:
-            UserOrganizationMappingFactory(user=user, organization=org)
+            UserOrganizationMappingFactory(user=user,
+                                           organization=org)
+
     active_user_count = get_site_mau_current_month(site)
     freezer.stop()
     assert active_user_count == len(users)

@@ -273,23 +273,12 @@ def get_site_mau_current_month(site):
     generation. When we update for MAU 2G, we will be able to make the query
     more efficient by pulling unique users from a single table used for live
     capture.
-
-    Current approach to this function:
-    Generally, it is safer to get the site users first, then filter on those
-    ids. For MAU 1G, it may be faster to get the unique ids for student modules
-    for month and year, then filter on
-    User.objectrs.filter(id__in=student_module.studen__id) OR get the
-    StudentModule objects for courses in the site and year/month then get
-    distinct user ids. We'l evalute MySQL slow queries log if needed before we
-    upgrade to MAU 2G
     """
-    month_for = datetime.datetime.utcnow().date()
-    user_ids = figures.sites.get_user_ids_for_site(site)
-    sm = StudentModule.objects.filter(
-        modified__year=month_for.year,
-        modified__month=month_for.month,
-        student_id__in=user_ids)
-    return sm.values('student__id').distinct().count()
+    month_for = datetime.datetime.utcnow()
+    site_sm = figures.sites.get_student_modules_for_site(site)
+    curr_sm = site_sm.filter(modified__year=month_for.year,
+                             modified__month=month_for.month)
+    return curr_sm.values('student__id').distinct().count()
 
 
 def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):
