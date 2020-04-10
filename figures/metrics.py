@@ -47,7 +47,11 @@ from figures.helpers import (
     first_last_days_for_month,
 )
 from figures.mau import get_mau_from_site_course
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    SiteDailyMetrics,
+    SiteMonthlyMetrics,
+)
 import figures.sites
 
 #
@@ -231,6 +235,50 @@ class LearnerCourseGrades(object):
 #
 # TODO: move these to `figures.metrics.site` module
 #
+
+def get_site_mau_history_metrics(site, months_back):
+    """Quick adaptation of `get_monthly_history_metric` for site MAU
+
+    The `months_back` gets the previous N months back not including current
+    month because we do not capture the current month until it is over. Meaning
+    we wait until the next month to create a `SiteMonthlyMetrics` record for
+    that month's data
+    """
+    history = []
+
+    # We will not have the current month's data because metrics are calculated
+    # after the month is over
+    for rec in SiteMonthlyMetrics.objects.filter(site=site).order_by('-month_for')[:months_back]:
+        period = '{year}/{month}'.format(year=rec.month_for.year,
+                                         month=str(rec.month_for.month).zfill(2))
+        history.append(dict(period=period, value=rec.active_user_count))
+
+    # Hack to set current month data in the history list
+    current_month_active = get_site_mau_current_month(site)
+    if history:
+        # reverse the list because it is currently in reverser chronological order
+        history.reverse()
+
+    current_month = datetime.datetime.utcnow().date()
+    period = '{year}/{month}'.format(year=current_month.year,
+                                     month=str(current_month.month).zfill(2))
+    history.append(dict(period=period, value=current_month_active))
+    return dict(current_month=current_month_active, history=history)
+
+
+def get_site_mau_current_month(site):
+    """Specific function to get the live active users for the current month
+
+    Developers note: We're starting with the simple aproach for MAU 1G, first
+    generation. When we update for MAU 2G, we will be able to make the query
+    more efficient by pulling unique users from a single table used for live
+    capture.
+    """
+    month_for = datetime.datetime.utcnow()
+    site_sm = figures.sites.get_student_modules_for_site(site)
+    curr_sm = site_sm.filter(modified__year=month_for.year,
+                             modified__month=month_for.month)
+    return curr_sm.values('student__id').distinct().count()
 
 
 def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):

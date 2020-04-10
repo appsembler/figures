@@ -11,6 +11,7 @@ import figures.admin
 from figures.models import (
     CourseDailyMetrics,
     SiteDailyMetrics,
+    SiteMonthlyMetrics,
     LearnerCourseGradeMetrics,
     PipelineError,
     CourseMauMetrics,
@@ -35,6 +36,7 @@ class TestModelAdminRepresentations(object):
     @pytest.mark.parametrize('model_class, model_admin_class', [
             (CourseDailyMetrics, figures.admin.CourseDailyMetricsAdmin),
             (SiteDailyMetrics, figures.admin.SiteDailyMetricsAdmin),
+            (SiteMonthlyMetrics, figures.admin.SiteMonthlyMetricsAdmin),
             (LearnerCourseGradeMetrics, figures.admin.LearnerCourseGradeMetricsAdmin),
             (PipelineError, figures.admin.PipelineErrorAdmin),
             (CourseMauMetrics, figures.admin.CourseMauMetricsAdmin),

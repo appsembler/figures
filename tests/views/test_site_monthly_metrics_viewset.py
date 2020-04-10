@@ -255,15 +255,16 @@ class TestSiteMonthlyMetricsViewSet(BaseViewTest):
         endpoint = 'active_users'
         request_method = 'get'
         site = user_reg_test_data['site']
-        users = user_reg_test_data['users']
-        dates = user_reg_test_data['dates']
-        months_back = user_reg_test_data['months_back']
 
         if organizations_support_sites():
             caller = UserFactory(is_staff=True)
-            map_users_to_org_site(caller=caller, site=site, users=users)
+            map_users_to_org_site(caller=caller, site=site, users=[])
         else:
             caller = UserFactory(is_staff=True)
+
+        expected_response = 'active_users history metric data'
+        monkeypatch.setattr('figures.views.metrics.get_site_mau_history_metrics',
+                            lambda **_kwargs: expected_response)
 
         request = APIRequestFactory().get(self.request_path)
         request.META['HTTP_HOST'] = site.domain
@@ -273,8 +274,8 @@ class TestSiteMonthlyMetricsViewSet(BaseViewTest):
         force_authenticate(request, user=caller)
         view = self.view_class.as_view({request_method: endpoint})
         response = view(request)
-        assert self.check_response(response=response, endpoint=endpoint)
 
+        assert response.data['active_users'] == expected_response
 
     @pytest.mark.skip(reason='test this after other module tests pass')
     def test_run_request(self, monkeypatch, user_reg_test_data):
