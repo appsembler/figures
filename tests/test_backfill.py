@@ -28,17 +28,17 @@ def backfill_test_data(db):
     """
     TODO: make counts different for each course per month
     """
-    months_back = 7
+    months_back = 6
     sm_per_month = [10+i for i in range(months_back+1)]
     site = SiteFactory()
     now = datetime.utcnow().replace(tzinfo=utc)
 
-    first_month = now + relativedelta(months=months_back * -1)
-
+    first_month = now - relativedelta(months=months_back)
+    last_month = now - relativedelta(months=1)
     course_overviews = [CourseOverviewFactory() for i in range(1)]
     count_check = []
     sm = []
-    for i, dt in enumerate(rrule(freq=MONTHLY, dtstart=first_month, until=now)):
+    for i, dt in enumerate(rrule(freq=MONTHLY, dtstart=first_month, until=last_month)):
         for co in course_overviews:
             sm_count = sm_per_month[i]
             month_sm = [StudentModuleFactory(course_id=co.id,
@@ -94,7 +94,7 @@ def test_backfill_monthly_metrics_for_site(backfill_test_data):
     count_check = backfill_test_data['count_check']
     assert not SiteMonthlyMetrics.objects.count()
     backfilled = backfill_monthly_metrics_for_site(site=site, overwrite=True)
-    assert len(backfilled) == backfill_test_data['months_back'] + 1
+    assert len(backfilled) == backfill_test_data['months_back']
     assert len(backfilled) == SiteMonthlyMetrics.objects.count()
     assert len(backfilled) == len(count_check)
     for rec, check_rec in zip(backfilled, count_check):

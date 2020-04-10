@@ -238,12 +238,17 @@ class LearnerCourseGrades(object):
 
 def get_site_mau_history_metrics(site, months_back):
     """Quick adaptation of `get_monthly_history_metric` for site MAU
+
+    The `months_back` gets the previous N months back not including current
+    month because we do not capture the current month until it is over. Meaning
+    we wait until the next month to create a `SiteMonthlyMetrics` record for
+    that month's data
     """
     history = []
 
     # We will not have the current month's data because metrics are calculated
     # after the month is over
-    for rec in SiteMonthlyMetrics.objects.order_by('-month_for')[:months_back]:
+    for rec in SiteMonthlyMetrics.objects.filter(site=site).order_by('-month_for')[:months_back]:
         period = '{year}/{month}'.format(year=rec.month_for.year,
                                          month=str(rec.month_for.month).zfill(2))
         history.append(dict(period=period, value=rec.active_user_count))
