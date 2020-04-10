@@ -5,6 +5,7 @@ Initially developed to support API performance improvements
 
 from datetime import datetime
 from dateutil.rrule import rrule, MONTHLY
+from dateutil.relativedelta import relativedelta
 
 from django.utils.timezone import utc
 
@@ -30,11 +31,10 @@ def backfill_monthly_metrics_for_site(site, overwrite):
     # start_month variable
     start_month = datetime(year=first_created.year,
                            month=first_created.month,
-                           day=1)
+                           day=1).replace(tzinfo=utc)
+    last_month = datetime.utcnow().replace(tzinfo=utc) - relativedelta(months=1)
     backfilled = []
-    for dt in rrule(freq=MONTHLY,
-                    dtstart=start_month.replace(tzinfo=utc),
-                    until=datetime.utcnow().replace(tzinfo=utc)):
+    for dt in rrule(freq=MONTHLY, dtstart=start_month, until=last_month):
         mau = get_mau_from_student_modules(student_modules=site_sm,
                                            year=dt.year,
                                            month=dt.month)
