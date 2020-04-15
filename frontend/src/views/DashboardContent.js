@@ -38,7 +38,7 @@ class DashboardContent extends Component {
           <BaseStatCard
             mainValue={this.props.generalData.getIn(['newUsers', 'current_month'], 0)}
             valueHistory={this.props.generalData.getIn(['newUsers', 'history'], [])}
-            cardTitle='Registered learners'
+            cardTitle='New learners'
           />
           <BaseStatCard
             mainValue={this.props.generalData.getIn(['courseEnrollments', 'current_month'], 0)}
