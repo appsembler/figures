@@ -11,15 +11,15 @@ let cx = classNames.bind(styles);
 class MauDetailsContent extends Component {
 
   render() {
-    let previousValue = 0;
+    let previousValue = undefined;
     const mausRender = this.props.mauHistory.map((period, index) => {
-      const difference = period.value - previousValue;
+      const difference = previousValue ? (period.value - previousValue) : 'N/A';
       previousValue = period.value;
       return (
         <li key={index} className={styles['content-row']}>
           <span className={styles['period']}>{period.period}</span>
           <span className={styles['mau-count']}>{period.value}</span>
-          <span className={cx({ 'difference': true, 'positive': (difference > 0), 'negative': (difference < 0)})}>{(difference > 0) ? "+" : ""}{difference}</span>
+          <span className={cx({ 'difference': true, 'positive': ((difference > 0) || (difference === undefined)), 'negative': (difference < 0)})}>{(difference > 0) ? "+" : ""}{difference}</span>
         </li>
       )
     });
@@ -43,7 +43,7 @@ class MauDetailsContent extends Component {
                   <span className={styles['mau-count']}>Monthly active users</span>
                   <span className={styles['difference']}>Difference vs. previous period</span>
                 </li>
-                {mausRender}
+                {mausRender.reverse()}
               </ul>
             </div>
           </section>
