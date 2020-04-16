@@ -20,10 +20,16 @@
 			text-shadow: none;
 			border: none;
 			outline: none;
+
+			&:hover {
+				background-image: none;
+				background-color: unset;
+			}
 		}
 
 		input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled), input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled), button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled), button {
 		  box-shadow: none;
+			letter-spacing: normal;
 		}
 	}
 }

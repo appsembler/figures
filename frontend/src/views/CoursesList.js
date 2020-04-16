@@ -116,27 +116,69 @@ class CoursesList extends Component {
       return (
         <li key={course['id']} className={styles['course-list-item']}>
           <div className={styles['course-name']}>
-            <Link
-              className={styles['course-name-link']}
-              to={'/figures/course/' + course['course_id']}
-            >
-              {course['course_name']}
-            </Link>
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Course name:
+              </div>
+              <div className={styles['mobile-value']}>
+                <Link
+                  className={styles['course-name-link']}
+                  to={'/figures/course/' + course['course_id']}
+                >
+                  {course['course_name']}
+                </Link>
+              </div>
+            </div>
           </div>
           <div className={styles['course-id']}>
-            {course['course_id']}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Course ID:
+              </div>
+              <div className={styles['mobile-value']}>
+                {course['course_id']}
+              </div>
+            </div>
           </div>
           <div className={styles['start-date']}>
-            {parseCourseDate(course['start_date'])}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Course start:
+              </div>
+              <div className={styles['mobile-value']}>
+                {parseCourseDate(course['start_date'])}
+              </div>
+            </div>
           </div>
           <div className={styles['self-paced']}>
-            {course['self_paced'] ? <FontAwesomeIcon icon={faCheck} className={styles['checkmark-icon']} /> : '-'}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Self paced:
+              </div>
+              <div className={styles['mobile-value']}>
+                {course['self_paced'] ? <FontAwesomeIcon icon={faCheck} className={styles['checkmark-icon']} /> : '-'}
+              </div>
+            </div>
           </div>
           <div className={styles['enrolments']}>
-            {course['metrics']['enrollment_count']}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Enrolments:
+              </div>
+              <div className={styles['mobile-value']}>
+                {course['metrics']['enrollment_count']}
+              </div>
+            </div>
           </div>
           <div className={styles['completions']}>
-            {course['metrics']['num_learners_completed']}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Completions:
+              </div>
+              <div className={styles['mobile-value']}>
+                {course['metrics']['num_learners_completed']}
+              </div>
+            </div>
           </div>
           <div className={styles['action-container']}>
             <Link
