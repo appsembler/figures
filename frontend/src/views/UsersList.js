@@ -99,24 +99,59 @@ class UsersList extends Component {
       return (
         <li key={user['id']} className={styles['user-list-item']}>
           <div className={styles['user-fullname']}>
-            <Link
-              className={styles['user-fullname-link']}
-              to={'/figures/user/' + user['id']}
-            >
-              {user['fullname']}
-            </Link>
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Full name:
+              </div>
+              <div className={styles['mobile-value']}>
+                <Link
+                  className={styles['user-fullname-link']}
+                  to={'/figures/user/' + user['id']}
+                >
+                  {user['fullname']}
+                </Link>
+              </div>
+            </div>
           </div>
           <div className={styles['username']}>
-            {user['username']}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Username:
+              </div>
+              <div className={styles['mobile-value']}>
+                {user['username']}
+              </div>
+            </div>
           </div>
           <div className={styles['is-active']}>
-            {user['is_active'] ? <FontAwesomeIcon icon={faCheck} className={styles['checkmark-icon']} /> : '-'}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Is activated:
+              </div>
+              <div className={styles['mobile-value']}>
+                {user['is_active'] ? <FontAwesomeIcon icon={faCheck} className={styles['checkmark-icon']} /> : '-'}
+              </div>
+            </div>
           </div>
           <div className={styles['date-joined']}>
-            {user['date_joined']}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                Date joined:
+              </div>
+              <div className={styles['mobile-value']}>
+                {user['date_joined']}
+              </div>
+            </div>
           </div>
           <div className={styles['number-of-courses']}>
-            {user['courses'].length}
+            <div className={styles['in-cell-label-value']}>
+              <div className={styles['mobile-label']}>
+                No. of courses:
+              </div>
+              <div className={styles['mobile-value']}>
+                {user['courses'].length}
+              </div>
+            </div>
           </div>
           <div className={styles['action-container']}>
             <Link
@@ -190,7 +225,7 @@ class UsersList extends Component {
                   onClick={() => (this.state.ordering !== 'is_active') ? this.setOrdering('is_active') : this.setOrdering('-is_active')}
                 >
                   <span>
-                    Is user active
+                    Is activated
                   </span>
                   {(this.state.ordering === 'is_active') ? (
                     <FontAwesomeIcon icon={faAngleDoubleUp} />

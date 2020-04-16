@@ -4,6 +4,7 @@ $rem-base-size: 10 !default;
 $base-font-size: calcRem(14) !default;
 $max-grid-width: calcRem(1180);
 $mobile-breakpoint: calcRem(420);
+$half-screen-breakpoint: calcRem(639);
 $tablet-breakpoint: calcRem(1020);
 
 $font-family: 'Open Sans', sans-serif;
