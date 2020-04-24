@@ -14,7 +14,7 @@ from figures.models import SiteMonthlyMetrics
 from figures.sites import get_student_modules_for_site
 
 
-def backfill_monthly_metrics_for_site(site, overwrite):
+def backfill_monthly_metrics_for_site(site, overwrite=False):
     """Quick hack function to backfill all historical site metrics for the site
 
     We are a bit verbose with the output to help testing and validation since
@@ -38,7 +38,7 @@ def backfill_monthly_metrics_for_site(site, overwrite):
         mau = get_mau_from_student_modules(student_modules=site_sm,
                                            year=dt.year,
                                            month=dt.month)
-        month_sm = site_sm.filter(created__year=dt.year, created__month=dt.month)
+        month_sm = site_sm.filter(modified__year=dt.year, modified__month=dt.month)
         month_learners = month_sm.values_list('student__id', flat=True).distinct()
 
         obj, created = SiteMonthlyMetrics.add_month(
@@ -56,3 +56,4 @@ def backfill_monthly_metrics_for_site(site, overwrite):
         backfilled.append(backfill_rec)
 
     return backfilled
+
