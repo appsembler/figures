@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django_filters',
     # 'rest_framework.authtoken',
+    'debug_toolbar',
     'webpack_loader',
     'organizations',
     'devsite',
@@ -84,6 +85,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'devsite.urls'
@@ -183,3 +185,8 @@ ENV_TOKENS = {}
 
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
+
+# Used by Django Debug Toolbar
+INTERNAL_IPS = [
+    '127.0.0.1'
+]
