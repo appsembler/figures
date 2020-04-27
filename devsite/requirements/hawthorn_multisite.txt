@@ -56,6 +56,13 @@ git+https://github.com/appsembler/edx-organizations.git@0.4.12-appsembler4
 
 
 ##
+## Devsite 
+##
+
+django-debug-toolbar==1.11
+
+
+##
 ## Test dependencies
 ##
 

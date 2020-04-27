@@ -52,6 +52,12 @@ edx-opaque-keys==0.4.4
 
 edx-organizations==0.4.10
 
+##
+## Devsite 
+##
+
+django-debug-toolbar==1.11
+
 
 ##
 ## Test dependencies
