@@ -31,7 +31,8 @@ def backfill_monthly_metrics_for_site(site, overwrite=False):
     for dt in rrule(freq=MONTHLY, dtstart=start_month, until=last_month):
         obj, created = fill_month(site=site,
                                   month_for=dt,
-                                  student_modules=site_sm)
+                                  student_modules=site_sm,
+                                  overwrite=overwrite)
         backfilled.append(dict(obj=obj, created=created, dt=dt))
 
     return backfilled
