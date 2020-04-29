@@ -8,6 +8,13 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+24 APR 2020 - Figures release 0.3.9
+===================================
+
+* Updated UI, MAU fix, style fixes, label changes
+* Added site monthly metrics scheduled tasks to fill last month's MAU
+* Added Django Debug Toolbar to devsite
+
 10 APR 2020 - Figures release 0.3.8
 ===================================
 
