@@ -89,6 +89,10 @@ def test_backfill_monthly_metrics_for_site(backfill_test_data):
           True),
          (<SiteMonthlyMetrics: id:8, month_for:2020-04-01, site:site-0.example.com>,
           True)]
+
+    TODO: Update test data and test to have the created and modified dates different
+    and make sure that `modified` dates are used in the production code and not
+    `created` dates
     """
     site = backfill_test_data['site']
     count_check = backfill_test_data['count_check']

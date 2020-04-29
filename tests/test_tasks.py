@@ -6,6 +6,8 @@ from datetime import date
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 
+import pytest
+
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
@@ -25,6 +27,7 @@ from tests.factories import (
     CourseOverviewFactory,
     SiteFactory,
     SiteDailyMetricsFactory,
+    SiteMonthlyMetricsFactory,
     )
 
 
@@ -176,3 +179,39 @@ def test_populate_all_mau_multiple_site(transactional_db, monkeypatch):
     figures.tasks.populate_all_mau()
 
     assert set(sites_visited) == set([site.id for site in sites])
+
+
+def test_populate_monthly_metrics_for_site(transactional_db, monkeypatch):
+    """
+    Simple test to exercise the figures task
+    """
+    expected_site = SiteFactory()
+    sites_visited = []
+    def mock_fill_last_smm_month(site):
+        assert site == expected_site
+        sites_visited.append(site)
+
+    monkeypatch.setattr('figures.tasks.fill_last_smm_month',
+                        mock_fill_last_smm_month)
+    figures.tasks.populate_monthly_metrics_for_site(expected_site.id)
+
+    assert set(sites_visited) == set([expected_site])
+
+
+@pytest.mark.xfail
+def test_run_figures_monthly_metrics(transactional_db, monkeypatch):
+    """
+    Need to add mock to call the .delay() for the subtask
+    """
+    expected_site = SiteFactory()
+    sites_visited = []
+
+    def mock_populate_monthly_metrics_for_site(site_id):
+        assert site_id == expected_site.id
+        sites_visited.append(site_id)
+
+    monkeypatch.setattr('figures.tasks.populate_monthly_metrics_for_site',
+                        mock_populate_monthly_metrics_for_site)
+
+    figures.tasks.run_figures_monthly_metrics()
+    assert set(sites_visited) == set([expected_site.id])
