@@ -91,8 +91,8 @@ class SingleUserContent extends Component {
                 <span className={styles['value']}>{dateJoined.toUTCString()}</span>
               </li>
               <li>
-                <span className={styles['label']}>Is active:</span>
-                <span className={styles['value']}>{this.state.userData.getIn(['is_active'], false) ? 'Active user' : 'User inactive'}</span>
+                <span className={styles['label']}>Account activated:</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['is_active'], false) ? 'Account activated' : 'Not activated'}</span>
               </li>
               <li>
                 <span className={styles['label']}>Courses enrolled:</span>

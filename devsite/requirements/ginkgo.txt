@@ -53,6 +53,14 @@ edx-opaque-keys==0.4
 #edx-drf-extensions==1.2.2
 edx-organizations==0.4.4
 
+
+##
+## Devsite 
+##
+
+django-debug-toolbar==1.11
+
+
 ##
 ## Pytest dependencies
 ##

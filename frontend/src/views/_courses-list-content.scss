@@ -22,6 +22,11 @@
   font-size: calcRem(14);
   align-items: center;
 
+  @media (max-width: $half-screen-breakpoint) {
+    grid-template-columns: 1fr;
+    grid-row-gap: calcRem(15);
+  }
+
   &.list-header {
     font-size: calcRem(12);
   }
@@ -56,10 +61,19 @@
 
   .start-date, .self-paced, .enrolments, .completions {
     text-align: center;
+
+    @media (max-width: $half-screen-breakpoint) {
+      text-align: left;
+    }
   }
 
   .action-container {
     text-align: right;
+
+    @media (max-width: $half-screen-breakpoint) {
+      text-align: left;
+      padding-top: calcRem(15);
+    }
   }
 
   .course-action {
@@ -78,5 +92,35 @@
       color: #fff;
       background: $primary-color;
     }
+
+    @media (max-width: $half-screen-breakpoint) {
+      display: inline-block;
+      min-width: calcRem(200);
+      text-align: center;
+    }
+  }
+}
+
+.in-cell-label-value {
+  display: flex;
+  align-items: baseline;
+
+  .mobile-label {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: calcRem(90);
+    margin-right: calcRem(15);
+    font-size: calcRem(12);
+    color: #666;
+
+    @media (min-width: $half-screen-breakpoint) {
+      display: none;
+    }
+  }
+
+  .mobile-value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 100%;
   }
 }
