@@ -21,6 +21,7 @@ from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
 import figures.sites
 from figures.pipeline.mau_pipeline import collect_course_mau
+from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
 from figures.pipeline.logger import log_error_to_db
 
 
@@ -191,7 +192,7 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
 
 
 #
-# MAU Metrics
+# Monthly Metrics
 #
 
 
@@ -245,3 +246,19 @@ def populate_all_mau():
     """
     for site in Site.objects.all():
         populate_mau_metrics_for_site(site_id=site.id, force_update=False)
+
+
+@shared_task
+def populate_monthly_metrics_for_site(site_id):
+    site = Site.objects.get(id=site_id)
+    fill_last_smm_month(site=site)
+
+
+@shared_task
+def run_figures_monthly_metrics():
+    """
+    TODO: only run for active sites. Requires knowing which sites we can skip
+    """
+    logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
+    for site in Site.objects.all():
+        populate_monthly_metrics_for_site.delay(site_id=site.id)
