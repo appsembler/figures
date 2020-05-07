@@ -611,17 +611,21 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
         else:
             course_completed = False
 
+        # Default values if we can't retrieve progress data
+        progress_percent = 0.0
+        course_progress_details = None
+
         try:
             obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
                 user=course_enrollment.user,
                 course_id=str(course_enrollment.course_id))
-            course_progress = dict(
-                progress_percent=obj.progress_percent,
-                course_progress_details=obj.progress_details)
+            if obj:
+                progress_percent = obj.progress_percent
+                course_progress_details = obj.progress_details
         except Exception as e:  # pylint: disable=broad-except
             # TODO: Use more specific database-related exception
             error_data = dict(
-                msg='Unable to get learner course metrics',
+                msg='Exception trying to get learner course metrics',
                 username=course_enrollment.user.username,
                 course_id=str(course_enrollment.course_id),
                 exception=str(e)
@@ -630,9 +634,6 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
                 error_data=error_data,
                 error_type=PipelineError.UNSPECIFIED_DATA,
                 )
-            course_progress = dict(
-                progress_percent=0.0,
-                course_progress_details=None)
 
         # Empty list initially, then will fill after we implement capturing
         # learner specific progress
@@ -640,8 +641,8 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
 
         data = dict(
             course_completed=course_completed,
-            course_progress=course_progress['progress_percent'],
-            course_progress_details=course_progress['course_progress_details'],
+            course_progress=progress_percent,
+            course_progress_details=course_progress_details,
             course_progress_history=course_progress_history,
             )
         return data

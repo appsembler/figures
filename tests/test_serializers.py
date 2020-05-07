@@ -18,6 +18,7 @@ from student.models import CourseEnrollment
 from figures.models import (
     CourseDailyMetrics,
     CourseMauMetrics,
+    LearnerCourseGradeMetrics,
     SiteDailyMetrics,
     SiteMauMetrics,
 )
@@ -45,6 +46,7 @@ from tests.factories import (
     CourseMauMetricsFactory,
     CourseOverviewFactory,
     GeneratedCertificateFactory,
+    LearnerCourseGradeMetricsFactory,
     SiteDailyMetricsFactory,
     SiteMauMetricsFactory,
     UserFactory,
@@ -395,7 +397,7 @@ class TestGeneralUserDataSerializer(object):
         data = self.serializer.data
 
         assert set(data.keys()) == set(self.expected_fields)
-        
+
         # This is to make sure that the serializer retrieves the correct nested
         # model (UserProfile) data
         assert data['username'] == 'alpha_one'
@@ -413,13 +415,6 @@ class TestLearnerCourseDetailsSerializer(object):
     '''
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        # self.model = CourseEnrollment
-        # self.user_attributes = {
-        #     'username': 'alpha_one',
-        #     'profile__name': 'Alpha One',
-        #     'profile__country': 'CA',
-        # }
-        #self.user = UserFactory(**self.user_attributes)
         self.site = Site.objects.first()
         self.certificate_date = datetime.datetime(2018, 4, 1, tzinfo=utc)
         self.course_enrollment = CourseEnrollmentFactory(
@@ -441,6 +436,53 @@ class TestLearnerCourseDetailsSerializer(object):
 
         data = self.serializer.data
         assert set(data.keys()) == expected_fields
+
+    def test_get_progress_data(self):
+        """
+        Method should return data of the form:
+            {'course_progress_history': [],
+             'course_progress_details': {
+                 'sections_worked': 5,
+                 'points_possible': 30.0,
+                 'sections_possible': 10,
+                 'points_earned': 15.0
+             },
+             'course_progress': (0.5,),
+             'course_completed': datetime.datetime(2018, 4, 1, 0, 0, tzinfo=<UTC>)
+            }
+        """
+        metrics_data = dict(
+            points_possible=1,
+            points_earned=2,
+            sections_worked=3,
+            sections_possible=4)
+        lcgm = LearnerCourseGradeMetricsFactory(
+                user=self.course_enrollment.user,
+                course_id=str(self.course_enrollment.course_id),
+                **metrics_data
+                )
+
+        data = self.serializer.get_progress_data(self.course_enrollment)
+        details = data['course_progress_details']
+        for key, val in metrics_data.items():
+            assert details[key] == val
+        assert data['course_progress'] == lcgm.progress_percent
+        assert data['course_completed'] == self.generated_certificate.created_date
+
+    def test_get_progress_data_with_no_data(self):
+        """Tests that the serializer method succeeds when no learner course
+        grade metrics records
+        """
+        expected_data = {
+            'course_progress_history': [],
+            'course_progress_details': None,
+            'course_progress': 0.0,
+            'course_completed': False
+        }
+        assert not LearnerCourseGradeMetrics.objects.count()
+        course_enrollment = CourseEnrollmentFactory()
+        data = self.serializer.get_progress_data(course_enrollment)
+        assert data == expected_data
 
 
 @pytest.mark.django_db
