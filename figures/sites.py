@@ -39,6 +39,22 @@ class CourseNotInSiteError(CrossSiteResourceError):
     pass
 
 
+class UnlinkedCourseError(Exception):
+    """Raise when we need to fail if we can't get the site for a course
+
+    This will happen in multisite mode if the course is not linked to the site.
+    In Tahoe Hawthorn, we use the Appsembler fork of `edx-organizations` to map
+    courses to sites. For community and standalone deployments, we don't expect
+    courses to map to sites, so we just return the app instance's default site.
+
+    * This is new to support enrollment metrics rework (May 2020)
+    * We need to evaluate if we want to make sites.get_site_for_course` to
+      raise this automatically. But first we need to make sure we have test
+      coverage to make sure we don't introduce new bugs
+    """
+    pass
+
+
 def site_to_id(site):
     """
     Helper to cast site or site id to id
@@ -181,3 +197,19 @@ def get_student_modules_for_course_in_site(site, course_id):
 def get_student_modules_for_site(site):
     course_ids = get_course_keys_for_site(site)
     return StudentModule.objects.filter(course_id__in=course_ids)
+
+
+def course_enrollments_for_course(course_id):
+    """Return a queryset of all `CourseEnrollment` records for a course
+
+    Relies on the fact that course_ids are globally unique
+    """
+    return CourseEnrollment.objects.filter(course_id=as_course_key(course_id))
+
+
+def student_modules_for_course_enrollment(ce):
+    """Return a queryset of all `StudentModule` records for a `CourseEnrollment`1
+
+    Relies on the fact that course_ids are globally unique
+    """
+    return StudentModule.objects.filter(student=ce.user, course_id=ce.course_id)
