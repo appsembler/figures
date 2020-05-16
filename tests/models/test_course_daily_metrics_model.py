@@ -130,13 +130,11 @@ class TestCourseDailyMetrics(object):
             course_id='course-v1:SomeOrg+ABC01+2121',
             enrollment_count=11,
             active_learners_today=1,
-            # average_progress=Decimal(str(average_progress)),
             average_progress=str(average_progress),
             average_days_to_complete=5,
             num_learners_completed=10
         )
         metrics = CourseDailyMetrics.objects.create(**rec)
-        # assert metrics.average_progress == Decimal(str(average_progress))
         assert metrics.average_progress == average_progress
         metrics.clean_fields()
 
@@ -154,7 +152,6 @@ class TestCourseDailyMetrics(object):
             defaults=dict(
                 enrollment_count=11,
                 active_learners_today=1,
-                # average_progress=Decimal(str(average_progress)),
                 average_progress=str(average_progress),
                 average_days_to_complete=5,
                 num_learners_completed=10,
@@ -163,10 +160,6 @@ class TestCourseDailyMetrics(object):
         cdm, created = CourseDailyMetrics.objects.update_or_create(**rec)
         cdm.save()
 
-        # import pdb; pdb.set_trace()
-
-
-        # assert metrics.average_progress == Decimal(str(average_progress))
         assert cdm.average_progress == str(average_progress)
         cdm.clean_fields()
 

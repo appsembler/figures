@@ -11,6 +11,7 @@ import pytest
 
 from courseware.models import StudentModule
 
+from figures.compat import RELEASE_LINE
 from figures.models import SiteMonthlyMetrics
 from figures.pipeline.site_monthly_metrics import fill_month, fill_last_month
 
@@ -70,13 +71,24 @@ def test_fill_month_with_sm_wo_overwrite(monkeypatch, smm_test_data):
     assert obj.month_for == smm_test_data['month_before'].date()
 
 
+@pytest.mark.skipif(RELEASE_LINE=='ginkgo',
+                    reason='Freezegun breaks the StudentModule query')
 def test_fill_last_month_wo_overwrite(monkeypatch, smm_test_data):
     """
+    This test breaks when run in the Ginkgo environment. The problem is that
+    after `freezer.start()`, StudentModule queries on `modified` fields return
+    empty results when there are data for the modified fields set for the filter
+    values. See tests/test_ginkgo.py
     """
     assert SiteMonthlyMetrics.objects.count() == 0
     mock_today = smm_test_data['mock_today']
     freezer = freeze_time(mock_today)
+    year_check = smm_test_data['last_month_sm'][0].modified.year
+    assert StudentModule.objects.filter(modified__year=year_check), \
+        'before freezegun start'
     freezer.start()
+    assert StudentModule.objects.filter(modified__year=year_check), \
+        'after freezegun start'
 
     site = smm_test_data['site']
 

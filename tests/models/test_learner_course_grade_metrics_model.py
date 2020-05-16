@@ -6,10 +6,55 @@ import datetime
 import pytest
 
 from django.contrib.sites.models import Site
+from django.utils.timezone import utc
 
+from figures.helpers import as_date
 from figures.models import LearnerCourseGradeMetrics
 
-from tests.factories import CourseEnrollmentFactory
+from tests.factories import (
+    CourseEnrollmentFactory,
+    CourseOverviewFactory,
+    LearnerCourseGradeMetricsFactory,
+    UserFactory
+)
+
+
+@pytest.mark.django_db
+def test_most_recent_with_data(db):
+    """Make sure the query works with a couple of existing models
+
+    We create two LearnerCourseGradeMetrics models and test that the function
+    retrieves the newer one
+    """
+    user = UserFactory()
+    first_date = as_date('2020-02-02')
+    second_date = as_date('2020-04-01')
+    course_overview = CourseOverviewFactory()
+    older_lcgm = LearnerCourseGradeMetricsFactory(user=user,
+                                                  course_id=str(course_overview.id),
+                                                  date_for=first_date)
+    newer_lcgm = LearnerCourseGradeMetricsFactory(user=user,
+                                                  course_id=str(course_overview.id),
+                                                  date_for=second_date)
+
+    obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+        user=user, course_id=course_overview.id)
+    assert obj == newer_lcgm
+
+
+@pytest.mark.django_db
+def test_most_recent_with_empty_table(db):
+    """Make sure the query works when there are no models to find
+    
+    Tests that the function returns None and does not fail when it cannot find
+    any LearnerCourseGradeMetrics model instances
+    """
+    assert not LearnerCourseGradeMetrics.objects.count()
+    user = UserFactory()
+    course_overview = CourseOverviewFactory()
+    obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+        user=user, course_id=course_overview.id)
+    assert not obj
 
 
 @pytest.mark.django_db
@@ -69,7 +114,7 @@ class TestLearnerCourseGradeMetrics(object):
 
     def test_progress_percent(self):
         expected = (self.grade_data['sections_worked'] /
-            self.grade_data['sections_possible'])
+                    self.grade_data['sections_possible'])
         obj = LearnerCourseGradeMetrics(**self.create_rec)
         assert obj.progress_percent == expected
 
