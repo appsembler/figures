@@ -301,7 +301,6 @@ class TestLearnerDetailsViewSetMultisite(BaseViewTest):
         queryset = enrollments.filter(user=self.my_site_users[0])
         assert queryset
         serializer = LearnerCourseDetailsSerializer(queryset[0])
-        # import pdb; pdb.set_trace()
         # We're asserting that we can get the serializer `data` property without
         # error, not checking the contents of the data. That should be done in
         # the serializer specific tests (see tests/test_serializers.py).
