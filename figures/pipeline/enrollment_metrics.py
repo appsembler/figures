@@ -13,22 +13,24 @@ field
 # Logic
 
 ```
-for each learner+course
+
+for each learner+course  # See bulk_calculate_course_progress_data
     get newest lgcm record
     get newest sm record
 
+    # Check if update needed, see _enrollment_metrics_needs_update
     if not lcgm and not sm
         # Learner has not started course
         skip collection for this learner+course
     else if lcgm and sm
         # we have saved history so we can check to update
-        if lcgm.modified is older than sm.modified:
-            collect new course data
+        if lcgm.modified is older than sm.modified
+            collect new course data  # See _collect_progress_data
             return new metrics object created
 
     else if not lcgm and sm
         # Learner started course after last collection action
-        collect new course data
+        collect new course data  # See _collect_progress_data
         return new metrics object created
 
     else  # lcgm and not sm
@@ -39,10 +41,9 @@ for each learner+course
         return None
 ```
 
-# NOTE: Change 'lcgm' in this file to either 'enrollment' or 'lp' when an
-        abbreviation is acceptible. This is to get this module forward ready for
-        reworking `LearnerCourseGradeMetrics`
-
+# NOTE: We plan to change 'lcgm' in this file to either 'enrollment' or 'LP'
+       (for Learner Progress) when an abbreviation is acceptible. This is to get
+       this module forward ready for reworking `LearnerCourseGradeMetrics`
 """
 
 from datetime import datetime
@@ -148,12 +149,19 @@ def collect_metrics_for_enrollment(course_enrollment, date_for=None, **_kwargs):
         raise UnlinkedCourseError('No site found for course "{}"'.format(
             course_enrollment.course_id))
 
-    most_recent_sm = student_modules_for_course_enrollment(
-        course_enrollment).order_by('modified').last()
+    # The following are two different ways to avoide the dreaded error
+    #     "Instance of 'list' has no 'order_by' member (no-member)"
+    # See: https://github.com/PyCQA/pylint-django/issues/165
+    student_modules = student_modules_for_course_enrollment(ce=course_enrollment)
+    if student_modules:
+        most_recent_sm = student_modules.latest('modified')
+    else:
+        most_recent_sm = None
 
-    most_recent_lcgm = LearnerCourseGradeMetrics.objects.filter(
+    lcgm = LearnerCourseGradeMetrics.objects.filter(
         user=course_enrollment.user,
-        course_id=str(course_enrollment.course_id)).order_by('date_for').last()
+        course_id=str(course_enrollment.course_id))
+    most_recent_lcgm = lcgm.order_by('date_for').last()  # pylint: disable=E1101
 
     if _enrollment_metrics_needs_update(most_recent_lcgm, most_recent_sm):
         progress_data = _collect_progress_data(most_recent_sm)
