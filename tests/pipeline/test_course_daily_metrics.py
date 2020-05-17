@@ -158,7 +158,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             course_id=self.course_overview.id, date_for=self.today)
         assert recs.count() == len(self.course_enrollments)
 
-    def test_get_average_progress(self):
+    def test_get_average_progress_deprecated(self):
         """
         [John] This test needs work. The function it is testing needs work too
         for testability. We don't want to reproduce the function's behavior, we
@@ -167,7 +167,7 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         """
         course_enrollments = CourseEnrollment.objects.filter(
             course_id=self.course_overview.id)
-        actual = pipeline_cdm.get_average_progress(
+        actual = pipeline_cdm.get_average_progress_deprecated(
             course_id=self.course_overview.id,
             date_for=self.today,
             course_enrollments=course_enrollments
@@ -183,13 +183,13 @@ class TestCourseDailyMetricsPipelineFunctions(object):
         'figures.metrics.LearnerCourseGrades.course_progress',
         side_effect=PermissionDenied('mock-failure')
     )
-    def test_get_average_progress_error(self, mock_lcg):
+    def test_get_average_progress_deprecated_has_error(self, mock_lcg):
 
         assert PipelineError.objects.count() == 0
         course_enrollments = CourseEnrollment.objects.filter(
             course_id=self.course_overview.id)
 
-        results = pipeline_cdm.get_average_progress(
+        results = pipeline_cdm.get_average_progress_deprecated(
                 course_id=self.course_overview.id,
                 date_for=self.today,
                 course_enrollments=course_enrollments
@@ -236,8 +236,12 @@ class TestCourseDailyMetricsExtractor(object):
         self.course_enrollments = [CourseEnrollmentFactory() for i in range(1, 5)]
         self.student_module = StudentModuleFactory()
 
-    def test_extract(self):
+    def test_extract(self, monkeypatch):
         course_id = self.course_enrollments[0].course_id
+        monkeypatch.setattr(figures.pipeline.course_daily_metrics,
+                            'bulk_calculate_course_progress_data',
+                            lambda **_kwargs: dict(average_progress=0.5))
+
         results = pipeline_cdm.CourseDailyMetricsExtractor().extract(course_id)
         assert results
 
@@ -298,14 +302,11 @@ class TestCourseDailyMetricsLoader(object):
     @pytest.mark.parametrize('average_progress', [-1.0, -0.01, 1.01])
     def test_load_invalid_data(self, monkeypatch, average_progress):
 
-        def mock_get_average_progress(course_id, date_for, course_enrollments):
-            return average_progress
-
         course_id = self.course_enrollments[0].course_id
-        monkeypatch.setattr(
-            figures.pipeline.course_daily_metrics,
-            'get_average_progress',
-            mock_get_average_progress)
+        monkeypatch.setattr(figures.pipeline.course_daily_metrics,
+                            'bulk_calculate_course_progress_data',
+                            lambda **_kwargs: dict(average_progress=average_progress))
+
         with pytest.raises(ValidationError) as execinfo:
             assert CourseDailyMetrics.objects.count() == 0
             cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
