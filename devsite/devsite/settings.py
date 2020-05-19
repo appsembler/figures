@@ -36,6 +36,8 @@ ALLOWED_HOSTS = []
 # Set the default Site (django.contrib.sites.models.Site)
 SITE_ID = 1
 
+USE_CELERY_RESULTS = True
+
 # Adds the mock edx-platform modules to the Python module search path
 sys.path.append(os.path.normpath(os.path.join(PROJECT_ROOT_DIR, MOCKS_DIR)))
 
@@ -67,6 +69,9 @@ INSTALLED_APPS = [
     'openedx.core.djangoapps.course_groups',
     'student',
 ]
+
+if USE_CELERY_RESULTS:
+    INSTALLED_APPS.append('django_celery_results')
 
 # certificates app
 
@@ -160,6 +165,31 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
+
+
+# Temporary and only for dev env, we want to get the secrets fro ENV
+# CELERY_BROKER_URL='amqp://celery_user:celery_pwd@localhost:5672/myvhost'
+
+FIGURES_CELERY_USER='figures_user'
+FIGURES_CELERY_PASSWORD='figures_pwd'
+FIGURES_CELERY_VHOST='figures_vhost'
+
+CELERY_BROKER_URL='amqp://{user}:{password}@localhost:5672/{vhost}'.format(
+    user=FIGURES_CELERY_USER,
+    password=FIGURES_CELERY_PASSWORD,
+    vhost=FIGURES_CELERY_VHOST,
+)
+
+if USE_CELERY_RESULTS:
+    CELERY_CACHE_BACKEND = 'default'
+
+    CELERY_CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'devsite_cache'
+
+        }
+    }
 
 
 #
