@@ -9,7 +9,7 @@ It calls the task `devsite.celery.run_celery_check`
 
 from django.core.management.base import BaseCommand
 
-from devsite.celery import run_celery_check
+from devsite.celery import celery_check
 
 
 class Command(BaseCommand):
@@ -25,7 +25,7 @@ class Command(BaseCommand):
         """
         print('Checking Celery...')
         msg = 'run_devsite_check management command'
-        result = run_celery_check.delay(msg)
+        result = celery_check.delay(msg)
         print('Task called. task_id={}'.format(result.task_id))
 
         try:
