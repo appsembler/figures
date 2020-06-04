@@ -1,0 +1,151 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/mixins';
+@import '~base/sass/base/stat-cards';
+
+.container-max {
+  padding-left: calcRem(50);
+  padding-right: calcRem(50);
+}
+
+.users-overview-list {
+  padding-top: calcRem(30);
+  display: grid;
+  grid-template-columns: calcRem(200) 1fr;
+}
+
+.list-floating-columns {
+  padding: 0;
+
+  .user-fullname {
+    width: 100%;
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    padding-right: calcRem(15);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+  }
+}
+
+.list-scrolling-columns {
+  overflow-x: auto;
+  padding: 0;
+
+  .username {
+    width: calcRem(140);
+    font-size: calcRem(13);
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-left: calcRem(15);
+    padding-right: calcRem(15);
+    border-left: 1px solid #ccc;
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .email {
+    width: calcRem(210);
+    font-size: calcRem(13);
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-right: calcRem(15);
+    padding-left: calcRem(15);
+    border-left: 1px solid #ccc;
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .course-info-column, .single-course-progress {
+    width: calcRem(200);
+    text-align: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-right: calcRem(15);
+    padding-left: calcRem(15);
+    border-left: 1px solid #ccc;
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .single-course-progress {
+
+    .data-group {
+      padding: 0 calcRem(7);
+      text-align: center;
+      width: 33%;
+
+      .data-label {
+        display: block;
+        font-size: calcRem(11);
+        color: #aaa;
+        margin: 0 0 calcRem(5) 0;
+      }
+
+      .data {
+        display: block;
+      }
+
+      .no-data {
+        color: #aaa;
+      }
+    }
+  }
+}
+
+
+
+
+.users-content {
+
+}
+
+.users-list {
+  padding: calcRem(25) 0;
+  border-top: 1px solid #ccc;
+}
+
+.user-list-item {
+  font-size: calcRem(14);
+  height: calcRem(80);
+  display: flex;
+
+  &.list-header {
+    font-size: calcRem(12);
+  }
+
+  .sorting-header-button {
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    outline: none;
+
+    span {
+      margin-right: calcRem(5);
+      text-decoration: underline;
+      font-size: calcRem(12);
+    }
+
+    &:hover, &:focus {
+      cursor: pointer;
+    }
+  }
+
+  .user-fullname-link {
+    color: $primary-color;
+    font-weight: bold;
+    text-decoration: none;
+  }
+}
