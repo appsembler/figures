@@ -346,6 +346,7 @@ def get_total_site_users_joined_for_time_period(site, start_date, end_date,
     """returns the number of new enrollments for the time period
 
     NOTE: Untested and not yet used in the general site metrics, but we'll want to add it
+    TODO: Rename this function to be "new_users" for consistency with the API endpoint
     """
     def calc_from_user_model():
         filter_args = dict(
