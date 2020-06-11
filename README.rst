@@ -8,6 +8,11 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+12 JUN 2020 - Figures release 0.3.11
+====================================
+* Fixes incorrect site monthly metrics course completion data
+
+
 21 MAY 2020 - Figures release 0.3.10
 ====================================
 
