@@ -4,6 +4,7 @@
 from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
+from django.conf import settings
 
 
 CELERY_CHECK_MSG_PREFIX = 'figures-devsite-celery-check'
@@ -14,14 +15,25 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'devsite.settings')
 
 app = Celery('devsite')
 
+# For Celery 4.0+
+#
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
 # - namespace='CELERY' means all celery-related configuration keys
 #   should have a `CELERY_` prefix.
-app.config_from_object('django.conf:settings', namespace='CELERY')
+# See: https://docs.celeryproject.org/en/4.0/whatsnew-4.0.html
+# `app.config_from_object('django.conf:settings', namespace='CELERY')`
+
+app.config_from_object('django.conf:settings')
+
 
 # Load task modules from all registered Django app configs.
-app.autodiscover_tasks()
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+
+
+app.conf.update(
+    CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',
+)
 
 
 @app.task(bind=True)
