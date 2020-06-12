@@ -206,11 +206,11 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     actually needed and edx-platform uses FloatField in its grades models
 
     """
-    site = models.ForeignKey(Site)
-    date_for = models.DateField()
+    site = models.ForeignKey(Site, db_index=True)
+    date_for = models.DateField(db_index=True)
     # TODO: We should require the user
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
-    course_id = models.CharField(max_length=255, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, db_index=True)
+    course_id = models.CharField(max_length=255, blank=True, db_index=True)
     points_possible = models.FloatField()
     points_earned = models.FloatField()
     sections_worked = models.IntegerField()
