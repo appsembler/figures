@@ -565,6 +565,9 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
 
     @list_route()
     def new_users(self, request):
+        """
+        TODO: Rename the metrics module function to "new_users" to match this
+        """
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         date_for = datetime.utcnow().date()
         months_back = 6
@@ -585,7 +588,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         months_back = 6
 
         course_completions = metrics.get_monthly_history_metric(
-            func=metrics.get_total_site_users_for_time_period,
+            func=metrics.get_total_course_completions_for_time_period,
             site=site,
             date_for=date_for,
             months_back=months_back,
