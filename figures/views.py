@@ -380,8 +380,10 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     model = get_user_model()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = LearnerDetailsSerializer
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
     filter_class = UserFilterSet
+    search_fields = ['username', 'email', 'profile__name']
+    ordering_fields = ['username', 'email', 'profile__name', 'is_active', 'date_joined']
 
     def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
