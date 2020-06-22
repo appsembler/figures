@@ -101,7 +101,8 @@ def populate_daily_metrics(date_for=None, force_update=False):
     logger.info('Starting task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
 
-    for site in Site.objects.all():
+    sites_count = Site.objects.count()
+    for i, site in enumerate(Site.objects.all()):
         for course in figures.sites.get_courses_for_site(site):
             try:
                 populate_single_cdm(
@@ -131,6 +132,8 @@ def populate_daily_metrics(date_for=None, force_update=False):
             site_id=site.id,
             date_for=date_for,
             force_update=force_update)
+        logger.info("figures.populate_daily_metrics: finished Site {:04d} of {:04d}".format(
+            i, sites_count))
 
     logger.info('Finished task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
