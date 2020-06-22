@@ -144,10 +144,15 @@ class UserFilterSet(django_filters.FilterSet):
         replaced with spaces, so we need to put the '+' back in for CourseKey
         to be able to create a course key object from the string
         '''
-        course_key = CourseKey.from_string(value.replace(' ', '+'))
-        enrollments = get_enrolled_in_exclude_admins(course_id=course_key)
-        user_ids = enrollments.values_list('user__id', flat=True)
-        return queryset.filter(id__in=user_ids)
+        total_user_ids = []
+        if value is not None:
+            courseIds = value.split('|')
+            for courseId in courseIds:
+                course_key = CourseKey.from_string(courseId.replace(' ', '+'))
+                enrollments = get_enrolled_in_exclude_admins(course_id=course_key)
+                user_ids = enrollments.values_list('user__id', flat=True)
+                total_user_ids = total_user_ids + list(set(user_ids) - set(total_user_ids))
+        return queryset.filter(id__in=total_user_ids)
 
 
 class CourseDailyMetricsFilter(django_filters.FilterSet):
