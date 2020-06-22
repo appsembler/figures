@@ -9,42 +9,40 @@ import HeaderContentStatic from 'base/components/header-views/header-content-sta
 import Paginator from 'base/components/layout/Paginator';
 import ListSearch from 'base/components/inputs/ListSearch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons';
+import { faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons';
+import { ExportToCsv } from 'export-to-csv';
+import { Multiselect } from 'multiselect-react-dropdown';
 
 import classNames from 'classnames/bind';
 let cx = classNames.bind(styles);
-
 
 class ProgressOverview extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      coursesIndex: [],
-      coursesList: [],
       learnersList: [],
       selectedCourses: [],
+      coursesFilterOptions: [],
       perPage: 20,
       count: 0,
       pages: 0,
       currentPage: 1,
       searchQuery: '',
       ordering: 'profile__name',
+      selectedCourseIds: '',
+      csvExportProgress: 0,
     };
-
-    this.getUsers = this.getUsers.bind(this);
-    this.getCourses = this.getCourses.bind(this);
-    this.setCoursesIndex = this.setCoursesIndex.bind(this);
-    this.setPerPage = this.setPerPage.bind(this);
-    this.setSearchQuery = this.setSearchQuery.bind(this);
-    this.setOrdering = this.setOrdering.bind(this);
-    this.constructApiUrl = this.constructApiUrl.bind(this);
+    this.fetchFullViewData = this.fetchFullViewData.bind(this);
+    this.getUsersForCsv = this.getUsersForCsv.bind(this);
   }
 
-  constructApiUrl(rootUrl, searchQuery, orderingType, perPageLimit, resultsOffset) {
+  constructApiUrl = (rootUrl, searchQuery, selectedCourseIds, orderingType, perPageLimit, resultsOffset) => {
     let requestUrl = rootUrl;
     // add search term
     requestUrl += '?search=' + searchQuery;
+    // add course filtering
+    requestUrl += '&enrolled_in_course_id=' + selectedCourseIds;
     // add ordering
     requestUrl += '&ordering=' + orderingType;
     // add results per page limit
@@ -55,7 +53,7 @@ class ProgressOverview extends Component {
     return requestUrl;
   }
 
-  getCourses() {
+  getCourses = () => {
     const requestUrl = apiConfig.coursesIndex + '?limit=1000';
     trackPromise(
       fetch((requestUrl), { credentials: "same-origin" })
@@ -64,23 +62,24 @@ class ProgressOverview extends Component {
     )
   }
 
-  setCoursesIndex(courses) {
-    let coursesIndex = {};
-    const coursesList = courses.map((course, index) => {
-      coursesIndex[course['id']] = course;
-      return course['id'];
+  setCoursesIndex = (courses) => {
+    const coursesFilterOptions = courses.map((course, index) => {
+      const entry = {
+        id: course.id,
+        name: course.name
+      }
+      return (
+        entry
+      )
     })
     this.setState({
-      coursesIndex: coursesIndex,
-      coursesList: coursesList,
-    }, () => {
-      console.log("done", this.state.coursesIndex, this.state.coursesList);
+      coursesFilterOptions: coursesFilterOptions,
     })
   }
 
-  getUsers(page = 1) {
+  getUsers = (page = 1) => {
     const offset = (page-1) * this.state.perPage;
-    const requestUrl = this.constructApiUrl(apiConfig.learnersDetailed, this.state.searchQuery, this.state.ordering, this.state.perPage, offset);
+    const requestUrl = this.constructApiUrl(apiConfig.learnersDetailed, this.state.searchQuery, this.state.selectedCourseIds, this.state.ordering, this.state.perPage, offset);
     trackPromise(
       fetch((requestUrl), { credentials: "same-origin" })
         .then(response => response.json())
@@ -94,7 +93,7 @@ class ProgressOverview extends Component {
     )
   }
 
-  setPerPage(newValue) {
+  setPerPage = (newValue) => {
     this.setState({
       perPage: newValue,
     }, () => {
@@ -102,7 +101,7 @@ class ProgressOverview extends Component {
     })
   }
 
-  setSearchQuery(newValue) {
+  setSearchQuery = (newValue) => {
     this.setState({
       searchQuery: newValue
     }, () => {
@@ -110,12 +109,97 @@ class ProgressOverview extends Component {
     })
   }
 
-  setOrdering(newValue) {
+  setOrdering = (newValue) => {
     this.setState({
       ordering: newValue
     }, () => {
       this.getUsers();
     })
+  }
+
+  onChangeSelectedCourses = (selectedList, item) => {
+    const selectedIdsList = selectedList.map((course, index) => {
+      return course.id;
+    });
+    const selectedCourseIds = selectedIdsList.join('|');
+    this.setState({
+      selectedCourses: selectedList,
+      selectedCourseIds: selectedCourseIds,
+    }, () => {
+      this.getUsers();
+    })
+  }
+
+  startCsvExport = () => {
+    this.setState({
+      csvExportProgress: 0.01,
+    }, async () => {
+      const allData = await this.fetchFullViewData();
+      this.exportViewToCsv(allData);
+    })
+  }
+
+  async fetchFullViewData(page = 1) {
+    const results = await this.getUsersForCsv(page);
+    this.setState({
+      csvExportProgress: (100 * (page - 1) / this.state.count) + 0.01,
+    })
+    console.log("Retreiving data from API for page : " + page);
+    if (results.length > 0) {
+      return results.concat(await this.fetchFullViewData(page+1));
+    } else {
+      return results;
+    }
+  }
+
+  async getUsersForCsv(page = 1) {
+    const offset = (page-1) * 100;
+    const requestUrl = this.constructApiUrl(apiConfig.learnersDetailed, this.state.searchQuery, this.state.selectedCourseIds, this.state.ordering, 100, offset);
+    var apiResults = await fetch((requestUrl), { credentials: "same-origin" })
+      .then(response => response.json())
+      .then(json => {return json['results']})
+    return apiResults;
+  }
+
+  exportViewToCsv = (data) => {
+    const options = {
+      fieldSeparator: ',',
+      quoteStrings: '"',
+      decimalSeparator: '.',
+      showLabels: true,
+      showTitle: true,
+      title: 'My Awesome CSV',
+      filename: 'CSV Export',
+      useTextFile: false,
+      useBom: true,
+      useKeysAsHeaders: true,
+    };
+    const csvExporter = new ExportToCsv(options);
+    const schemaData = this.convertJsonToCsvSchema(data);
+    csvExporter.generateCsv(schemaData);
+  }
+
+  convertJsonToCsvSchema = (jsonData) => {
+    const csvTestVar = jsonData.map((user, index) => {
+      const singleRecord = {};
+      singleRecord['name'] = user['name'];
+      singleRecord['email'] = user['email'];
+      singleRecord['username'] = user['username'];
+      singleRecord['date_joined'] = user['date_joined'];
+
+      const coursesFilter = this.state.selectedCourses.length ? this.state.selectedCourses : this.state.coursesFilterOptions;
+      const userCoursesImmutable = Immutable.fromJS(user['courses']);
+      coursesFilter.forEach((course, i) => {
+        const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course.id);
+        if (userProgress) {
+          singleRecord[course.id] = userProgress.getIn(['progress_data', 'course_progress']);
+        } else {
+          singleRecord[course.id] = '-';
+        };
+      })
+      return singleRecord;
+    })
+    return csvTestVar;
   }
 
   componentDidMount() {
@@ -125,12 +209,12 @@ class ProgressOverview extends Component {
 
   render() {
 
-    const coursesFilter = this.state.selectedCourses.length ? this.state.selectedCourses : this.state.coursesList;
+    const coursesFilter = this.state.selectedCourses.length ? this.state.selectedCourses : this.state.coursesFilterOptions;
 
     const headerCourseColumns = coursesFilter.map((course, index) => {
       return(
         <div className={styles['course-info-column']}>
-          {this.state.coursesIndex[course]['name']}
+          {course['name']}
         </div>
       )
     })
@@ -154,8 +238,7 @@ class ProgressOverview extends Component {
 
       const userCoursesImmutable = Immutable.fromJS(user['courses']);
       const userCoursesRender = coursesFilter.map((course, i) => {
-        console.log("course filter", course);
-        const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course);
+        const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course.id);
         return (
           <div className={styles['single-course-progress']}>
             {userProgress ? [
@@ -191,96 +274,138 @@ class ProgressOverview extends Component {
       )
     })
 
+
     return (
       <div className="ef--layout-root">
         <HeaderAreaLayout>
           <HeaderContentStatic
             title='Learners progress overview'
-            subtitle={'This view allows you to view a snapshot of your sites learners progress. Total number of results: ' + this.state.count + '.'}
+            subtitle={'This view allows you to view a snapshot of your sites learners progress. Total number of results in current view is: ' + this.state.count + '. You can also filter down the results in the view, then export the data in the view as a CSV file on-the-fly.'}
           />
         </HeaderAreaLayout>
-        <div className={cx({ 'container-max': true, 'users-content': true})}>
-          <ListSearch
-            valueChangeFunction={this.setSearchQuery}
-            inputPlaceholder='Search by users name, username or email...'
-          />
-          {this.state.pages ? (
-            <Paginator
-              pageSwitchFunction={this.getUsers}
-              currentPage={this.state.currentPage}
-              perPage={this.state.perPage}
-              pages={this.state.pages}
-              changePerPageFunction={this.setPerPage}
-            />
-          ) : ''}
-          <div className={styles['users-overview-list']}>
-            <ul className={styles['list-floating-columns']}>
-              <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
-                <div className={styles['user-fullname']}>
-                  <button
-                    className={styles['sorting-header-button']}
-                    onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
-                  >
-                    <span>
-                      User full name
-                    </span>
-                    {(this.state.ordering === 'profile__name') ? (
-                      <FontAwesomeIcon icon={faAngleDoubleUp} />
-                    ) : (this.state.ordering === '-profile__name') ? (
-                      <FontAwesomeIcon icon={faAngleDoubleDown} />
-                    ) : ''}
-                  </button>
-                </div>
-              </li>
-              {floatingListItems}
-            </ul>
-            <ul className={styles['list-scrolling-columns']}>
-              <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
-                <div className={styles['username']}>
-                  <button
-                    className={styles['sorting-header-button']}
-                    onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
-                  >
-                    <span>
-                      Username
-                    </span>
-                    {(this.state.ordering === 'username') ? (
-                      <FontAwesomeIcon icon={faAngleDoubleUp} />
-                    ) : (this.state.ordering === '-username') ? (
-                      <FontAwesomeIcon icon={faAngleDoubleDown} />
-                    ) : ''}
-                  </button>
-                </div>
-                <div className={styles['email']}>
-                  <button
-                    className={styles['sorting-header-button']}
-                    onClick={() => (this.state.ordering !== 'email') ? this.setOrdering('email') : this.setOrdering('-email')}
-                  >
-                    <span>
-                      Email
-                    </span>
-                    {(this.state.ordering === 'username') ? (
-                      <FontAwesomeIcon icon={faAngleDoubleUp} />
-                    ) : (this.state.ordering === '-username') ? (
-                      <FontAwesomeIcon icon={faAngleDoubleDown} />
-                    ) : ''}
-                  </button>
-                </div>
-                {headerCourseColumns}
-              </li>
-              {scrollingListItems}
-            </ul>
+        {this.state.csvExportProgress ? (
+          <div className={cx({ 'container': true, 'csv-export-content': true})}>
+            <h2>Exporting your CSV data...</h2>
+            <p>Please don't close this browser tab.</p>
+            <div className={styles['progress-bar']}>
+              <span className={styles['progress-bar-inner']} style={{ width: this.state.csvExportProgress * 100 + '%'}}></span>
+            </div>
+            {(this.state.csvExportProgress < 1) ? (
+              <span className={styles['percentage']}>
+                {(this.state.csvExportProgress * 100).toFixed(0)}%
+              </span>
+            ) : (
+              <button
+                className={styles['close-csv-button']}
+                onClick = {() => this.setState({ csvExportProgress: 0 })}
+              >
+                Close the exporter
+              </button>
+            )}
           </div>
-          {this.state.pages ? (
-            <Paginator
-              pageSwitchFunction={this.getUsers}
-              currentPage={this.state.currentPage}
-              perPage={this.state.perPage}
-              pages={this.state.pages}
-              changePerPageFunction={this.setPerPage}
-            />
-          ) : ''}
-        </div>
+        ) : (
+          <div className={cx({ 'container-max': true, 'users-content': true})}>
+            <div className={styles['refining-container']}>
+              <div className={styles['refining-container__filters']}>
+                <ListSearch
+                  valueChangeFunction={this.setSearchQuery}
+                  inputPlaceholder='Search by users name, username or email...'
+                />
+                <Multiselect
+                  options={this.state.coursesFilterOptions}
+                  selectedValues={this.state.selectedCourses}
+                  onSelect={this.onChangeSelectedCourses}
+                  onRemove={this.onChangeSelectedCourses}
+                  displayValue="name"
+                  placeholder="Filter by courses..."
+                  style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" } }}
+                />
+              </div>
+              <button
+                className={styles['export-the-csv-button']}
+                onClick = {() => this.startCsvExport()}
+              >
+                Generate a CSV from Current View
+              </button>
+            </div>
+            {this.state.pages ? (
+              <Paginator
+                pageSwitchFunction={this.getUsers}
+                currentPage={this.state.currentPage}
+                perPage={this.state.perPage}
+                pages={this.state.pages}
+                changePerPageFunction={this.setPerPage}
+              />
+            ) : ''}
+            <div className={styles['users-overview-list']}>
+              <ul className={styles['list-floating-columns']}>
+                <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
+                  <div className={styles['user-fullname']}>
+                    <button
+                      className={styles['sorting-header-button']}
+                      onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
+                    >
+                      <span>
+                        User full name
+                      </span>
+                      {(this.state.ordering === 'profile__name') ? (
+                        <FontAwesomeIcon icon={faAngleDoubleUp} />
+                      ) : (this.state.ordering === '-profile__name') ? (
+                        <FontAwesomeIcon icon={faAngleDoubleDown} />
+                      ) : ''}
+                    </button>
+                  </div>
+                </li>
+                {floatingListItems}
+              </ul>
+              <ul className={styles['list-scrolling-columns']}>
+                <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
+                  <div className={styles['username']}>
+                    <button
+                      className={styles['sorting-header-button']}
+                      onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
+                    >
+                      <span>
+                        Username
+                      </span>
+                      {(this.state.ordering === 'username') ? (
+                        <FontAwesomeIcon icon={faAngleDoubleUp} />
+                      ) : (this.state.ordering === '-username') ? (
+                        <FontAwesomeIcon icon={faAngleDoubleDown} />
+                      ) : ''}
+                    </button>
+                  </div>
+                  <div className={styles['email']}>
+                    <button
+                      className={styles['sorting-header-button']}
+                      onClick={() => (this.state.ordering !== 'email') ? this.setOrdering('email') : this.setOrdering('-email')}
+                    >
+                      <span>
+                        Email
+                      </span>
+                      {(this.state.ordering === 'username') ? (
+                        <FontAwesomeIcon icon={faAngleDoubleUp} />
+                      ) : (this.state.ordering === '-username') ? (
+                        <FontAwesomeIcon icon={faAngleDoubleDown} />
+                      ) : ''}
+                    </button>
+                  </div>
+                  {headerCourseColumns}
+                </li>
+                {scrollingListItems}
+              </ul>
+            </div>
+            {this.state.pages ? (
+              <Paginator
+                pageSwitchFunction={this.getUsers}
+                currentPage={this.state.currentPage}
+                perPage={this.state.perPage}
+                pages={this.state.pages}
+                changePerPageFunction={this.setPerPage}
+              />
+            ) : ''}
+          </div>
+        )}
       </div>
     );
   }

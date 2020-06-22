@@ -20,12 +20,12 @@
 
   .user-fullname {
     width: 100%;
+    padding-left: calcRem(15);
     padding-top: calcRem(20);
     padding-bottom: calcRem(20);
     padding-right: calcRem(15);
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #ccc;
   }
 }
 
@@ -40,12 +40,10 @@
     flex-shrink: 0;
     padding-left: calcRem(15);
     padding-right: calcRem(15);
-    border-left: 1px solid #ccc;
     padding-top: calcRem(20);
     padding-bottom: calcRem(20);
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #ccc;
   }
 
   .email {
@@ -55,12 +53,10 @@
     flex-shrink: 0;
     padding-right: calcRem(15);
     padding-left: calcRem(15);
-    border-left: 1px solid #ccc;
     padding-top: calcRem(20);
     padding-bottom: calcRem(20);
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #ccc;
   }
 
   .course-info-column, .single-course-progress {
@@ -70,13 +66,11 @@
     flex-shrink: 0;
     padding-right: calcRem(15);
     padding-left: calcRem(15);
-    border-left: 1px solid #ccc;
     padding-top: calcRem(20);
     padding-bottom: calcRem(20);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid #ccc;
   }
 
   .single-course-progress {
@@ -113,13 +107,19 @@
 
 .users-list {
   padding: calcRem(25) 0;
-  border-top: 1px solid #ccc;
 }
 
 .user-list-item {
   font-size: calcRem(14);
   height: calcRem(80);
   display: flex;
+
+  &:nth-child(even) {
+
+    .user-fullname, .username, .email, .single-course-progress {
+      background-color: #eee;
+    }
+  }
 
   &.list-header {
     font-size: calcRem(12);
@@ -145,7 +145,93 @@
 
   .user-fullname-link {
     color: $primary-color;
-    font-weight: bold;
     text-decoration: none;
+  }
+}
+
+button.export-the-csv-button {
+  padding: calcRem(15) calcRem(30);
+  color: #fff;
+  display: inline-block;
+  background-color: $primary-color !important;
+  border: none;
+  outline: none;
+  border-radius: 50px;
+  margin-left: auto;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    background-color: darken($primary-color, 15%) !important;
+  }
+}
+
+.refining-container {
+  display: flex;
+  align-items: center;
+
+  &__filters {
+    width: 50%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    grid-column-gap: calcRem(30);
+  }
+}
+
+.csv-export-content {
+  min-height: calcRem(500);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calcRem(80) calcRem(30);
+
+  h2 {
+    font-size: calcRem(24);
+    text-align: center;
+    margin: 0 0 calcRem(20);
+  }
+
+  .progress-bar {
+    width: 100%;
+    max-width: calcRem(500);
+    height: calcRem(18);
+    border-radius: calcRem(30);
+    padding: 4px;
+    border: 1px solid #ddd;
+    margin: calcRem(40) 0 calcRem(20);
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    display: block;
+    height: 100%;
+    background-color: $primary-color;
+    border-radius: calcRem(30);
+  }
+
+  .percentage {
+    display: block;
+    text-align: center;
+    font-size: calcRem(14);
+    color: #aaa;
+  }
+}
+
+button.close-csv-button {
+  padding: calcRem(15) calcRem(30);
+  color: #fff;
+  display: inline-block;
+  background-color: $primary-color !important;
+  border: none;
+  outline: none;
+  border-radius: 50px;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    background-color: darken($primary-color, 15%) !important;
   }
 }
