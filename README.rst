@@ -8,12 +8,24 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
-12 JUN 2020 - Figures release 0.3.11
+29 Jun 2020 - Figures release 0.3.11
 ====================================
+
 * Fixes incorrect site monthly metrics course completion data
+  * https://github.com/appsembler/figures/pull/219
+* Fixes CourseDailyMetricsSerializer when average_progress is 1.00
+  * https://github.com/appsembler/figures/pull/230
+* Updates pipeline enrollment metrics queries to improve performance
+  * https://github.com/appsembler/figures/pull/226
+* Added site pipeline progress indicator to logging
+  * https://github.com/appsembler/figures/pull/228
+* Bump devsite Django 1.11 to version 1.11.29
+  * https://github.com/appsembler/figures/pull/227
+* Bump websocket-extensions from 0.1.3 to 0.1.4 in /frontend
+  * https://github.com/appsembler/figures/pull/222
 
 
-21 MAY 2020 - Figures release 0.3.10
+21 May 2020 - Figures release 0.3.10
 ====================================
 
 * Improved daily metrics pipeline performance
@@ -21,20 +33,22 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 * Bug fixes
   * https://github.com/appsembler/figures/pull/213
 
-24 APR 2020 - Figures release 0.3.9
+
+24 Apr 2020 - Figures release 0.3.9
 ===================================
 
 * Updated UI, MAU fix, style fixes, label changes
 * Added site monthly metrics scheduled tasks to fill last month's MAU
 * Added Django Debug Toolbar to devsite
 
-10 APR 2020 - Figures release 0.3.8
+
+10 Apr 2020 - Figures release 0.3.8
 ===================================
 
 * Performance improvement to "Site Monthly Metrics" active users endpoint
 
 
-8 APR 2020 - Figures release 0.3.7
+8 Apr 2020 - Figures release 0.3.7
 ==================================
 
 * Updated UI to improve performance and usability
