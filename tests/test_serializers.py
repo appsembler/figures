@@ -373,6 +373,10 @@ class TestGeneralCourseDataSerializer(object):
         data = self.serializer.get_metrics(self.course_overview)
         assert data['date_for'] == dates[-1]
 
+    def test_get_metrics_with_no_cdm_records(self):
+        data = self.serializer.get_metrics(self.course_overview)
+        assert not data
+
 
 class TestGeneralUserDataSerializer(object):
     '''Tests the UserIndexSerializer serializer class
