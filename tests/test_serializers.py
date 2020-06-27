@@ -12,6 +12,7 @@ import pytz
 from django.contrib.sites.models import Site
 from django.db import models
 from django.utils.timezone import utc
+from rest_framework.exceptions import ValidationError
 
 from student.models import CourseEnrollment
 
@@ -240,6 +241,22 @@ class TestCourseDailyMetricsSerializer(object):
             else:
                 assert data[field_name] == db_field
 
+    @pytest.mark.parametrize('average_progress', [0, 0.00, 0.5, 1.0, 1.00])
+    def test_average_progress_valid(self, average_progress):
+        obj = CourseDailyMetricsFactory(average_progress=average_progress)
+        serializer = CourseDailyMetricsSerializer(instance=obj)
+        check_val = Decimal(average_progress).quantize(Decimal('.00'))
+        data = serializer.data
+        assert data['average_progress'] == unicode(check_val)
+
+    @pytest.mark.xfail
+    @pytest.mark.parametrize('average_progress', [-1.0, 9.0])
+    def test_average_progress_not_valid(self, average_progress):
+        obj = CourseDailyMetricsFactory(average_progress=average_progress)
+        serializer = CourseDailyMetricsSerializer(instance=obj)
+        with pytest.raises(ValidationError):
+            data = serializer.data
+
 
 @pytest.mark.django_db
 class TestSiteDailyMetricsSerializer(object):
@@ -353,8 +370,12 @@ class TestGeneralCourseDataSerializer(object):
         [CourseDailyMetricsFactory(site=self.site,
                                    course_id=self.course_overview.id,
                                    date_for=date) for date in dates]
-        assert self.serializer.get_metrics(
-            self.course_overview)['date_for'] == dates[-1]
+        data = self.serializer.get_metrics(self.course_overview)
+        assert data['date_for'] == dates[-1]
+
+    def test_get_metrics_with_no_cdm_records(self):
+        data = self.serializer.get_metrics(self.course_overview)
+        assert not data
 
 
 class TestGeneralUserDataSerializer(object):

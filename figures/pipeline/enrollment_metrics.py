@@ -56,8 +56,8 @@ from figures.models import LearnerCourseGradeMetrics, PipelineError
 from figures.pipeline.logger import log_error
 from figures.sites import (
     get_site_for_course,
+    get_student_modules_for_course_in_site,
     course_enrollments_for_course,
-    student_modules_for_course_enrollment,
     UnlinkedCourseError,
     )
 
@@ -81,8 +81,16 @@ def bulk_calculate_course_progress_data(course_id, date_for=None):
     if not date_for:
         date_for = datetime.utcnow().replace(tzinfo=utc).date()
 
+    site = get_site_for_course(course_id)
+    if not site:
+        raise UnlinkedCourseError('No site found for course "{}"'.format(course_id))
+
+    course_sm = get_student_modules_for_course_in_site(site=site,
+                                                       course_id=course_id)
     for ce in course_enrollments_for_course(course_id):
-        metrics = collect_metrics_for_enrollment(course_enrollment=ce,
+        metrics = collect_metrics_for_enrollment(site=site,
+                                                 course_enrollment=ce,
+                                                 course_sm=course_sm,
                                                  date_for=date_for)
         if metrics:
             progress_percentages.append(metrics.progress_percent)
@@ -118,7 +126,7 @@ def calculate_average_progress(progress_percentages):
     return average_progress
 
 
-def collect_metrics_for_enrollment(course_enrollment, date_for=None, **_kwargs):
+def collect_metrics_for_enrollment(site, course_enrollment, course_sm, date_for=None):
     """Collect metrics for enrollment (learner+course)
 
     This function performs course enrollment merics collection for the given
@@ -144,17 +152,14 @@ def collect_metrics_for_enrollment(course_enrollment, date_for=None, **_kwargs):
     """
     if not date_for:
         date_for = datetime.utcnow().replace(tzinfo=utc).date()
-    site = get_site_for_course(course_enrollment.course_id)
-    if not site:
-        raise UnlinkedCourseError('No site found for course "{}"'.format(
-            course_enrollment.course_id))
 
     # The following are two different ways to avoide the dreaded error
     #     "Instance of 'list' has no 'order_by' member (no-member)"
     # See: https://github.com/PyCQA/pylint-django/issues/165
-    student_modules = student_modules_for_course_enrollment(ce=course_enrollment)
+    student_modules = course_sm.filter(
+        student_id=course_enrollment.user.id).order_by('-modified')
     if student_modules:
-        most_recent_sm = student_modules.latest('modified')
+        most_recent_sm = student_modules[0]
     else:
         most_recent_sm = None
 

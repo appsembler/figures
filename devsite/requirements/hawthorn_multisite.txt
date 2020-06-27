@@ -24,7 +24,7 @@ pytz==2016.10
 ## Django package dependencies
 ##
 
-Django==1.11.23
+Django==1.11.29
 
 # edx-platform hawthorn does not use django-extensions
 django-extensions==1.5.9

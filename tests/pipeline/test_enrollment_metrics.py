@@ -8,8 +8,8 @@ from django.utils.timezone import utc
 
 from courseware.models import StudentModule
 
+from figures.helpers import is_multisite
 from figures.models import LearnerCourseGradeMetrics
-
 from figures.pipeline.enrollment_metrics import (
     calculate_average_progress,
     bulk_calculate_course_progress_data,
@@ -18,6 +18,7 @@ from figures.pipeline.enrollment_metrics import (
     _add_enrollment_metrics_record,
     _collect_progress_data,
 )
+from figures.sites import UnlinkedCourseError
 
 from tests.factories import (
     CourseEnrollmentFactory,
@@ -49,10 +50,54 @@ def test_bulk_calculate_course_progress_data_happy_path(db, monkeypatch):
     def mock_metrics(course_enrollment, **_kwargs):
         return mapping[course_enrollment.course_id]
 
+    monkeypatch.setattr('figures.pipeline.enrollment_metrics.get_site_for_course',
+                        lambda val: SiteFactory())
     monkeypatch.setattr('figures.pipeline.enrollment_metrics.collect_metrics_for_enrollment',
                         mock_metrics)
     data = bulk_calculate_course_progress_data(course_overview.id)
     assert data['average_progress'] == 0.5
+
+
+@pytest.mark.skipif(not is_multisite(),
+                    reason='Standalone always returns a site')
+@pytest.mark.django_db
+def test_bulk_calculate_course_progress_unlinked_course_error(db, monkeypatch):
+    """Tests 'bulk_calculate_course_progress_data' function
+
+    The function under test iterates over a set of course enrollment records,
+    So we create a couple of records to iterate over and mock the collect
+    function
+    """
+    course_overview = CourseOverviewFactory()
+    course_enrollments = [CourseEnrollmentFactory(
+        course_id=course_overview.id) for i in range(2)]
+    mapping = {ce.course_id: LearnerCourseGradeMetricsFactory(
+        course_id=str(ce.course_id),
+        user=ce.user,
+        sections_worked=1,
+        sections_possible=2) for ce in course_enrollments
+    }
+
+    def mock_metrics(course_enrollment, **_kwargs):
+        return mapping[course_enrollment.course_id]
+
+    monkeypatch.setattr('figures.pipeline.enrollment_metrics.collect_metrics_for_enrollment',
+                        mock_metrics)
+    with pytest.raises(UnlinkedCourseError) as e_info:
+        data = bulk_calculate_course_progress_data(course_overview.id)
+
+    # assert data['average_progress'] == 0.5
+
+
+@pytest.mark.django_db
+def test_bulk_calculate_course_progress_no_enrollments(db, monkeypatch):
+    """This tests when there is a new course with no enrollments
+    """
+    monkeypatch.setattr('figures.pipeline.enrollment_metrics.get_site_for_course',
+                        lambda val: SiteFactory())
+    course_overview = CourseOverviewFactory()
+    data = bulk_calculate_course_progress_data(course_overview.id)
+    assert data['average_progress'] == 0.0
 
 
 @pytest.mark.parametrize('progress_percentages, expected_result', [
@@ -88,6 +133,7 @@ class TestCollectMetricsForEnrollment(object):
     """
     @pytest.fixture(autouse=True)
     def setup(self, db):
+        self.site = SiteFactory()
         self.date_1 = datetime(2020, 2, 2, tzinfo=utc)
         self.date_2 = self.date_1 + relativedelta(months=1)  # future of date_1
         self.course_enrollment = CourseEnrollmentFactory()
@@ -131,12 +177,14 @@ class TestCollectMetricsForEnrollment(object):
         """
         assert not LearnerCourseGradeMetrics.objects.count()
         monkeypatch.setattr('figures.pipeline.enrollment_metrics.get_site_for_course',
-                            lambda val: SiteFactory())
+                            lambda val: self.site)
         monkeypatch.setattr('figures.pipeline.enrollment_metrics._collect_progress_data',
                             lambda val: self.progress_data)
-        metrics = collect_metrics_for_enrollment(
-            course_enrollment=self.course_enrollment,
-            )
+
+        course_sm = StudentModule.objects.filter(course_id=self.course_enrollment.course_id)
+        metrics = collect_metrics_for_enrollment(site=self.site,
+                                                 course_enrollment=self.course_enrollment,
+                                                 course_sm=course_sm)
 
         self.check_response_metrics(metrics, self.progress_data)
         assert LearnerCourseGradeMetrics.objects.count() == 1
@@ -150,12 +198,13 @@ class TestCollectMetricsForEnrollment(object):
         """
         lcgm = self.create_lcgm(date_for=self.date_1)
         monkeypatch.setattr('figures.pipeline.enrollment_metrics.get_site_for_course',
-                            lambda val: SiteFactory())
+                            lambda val: self.site)
         monkeypatch.setattr('figures.pipeline.enrollment_metrics._collect_progress_data',
                             lambda val: self.progress_data)
-        metrics = collect_metrics_for_enrollment(
-            course_enrollment=self.course_enrollment,
-            )
+        course_sm = StudentModule.objects.filter(course_id=self.course_enrollment.course_id)
+        metrics = collect_metrics_for_enrollment(site=self.site,
+                                                 course_enrollment=self.course_enrollment,
+                                                 course_sm=course_sm)
 
         self.check_response_metrics(metrics, self.progress_data)
         assert metrics != lcgm
@@ -173,12 +222,13 @@ class TestCollectMetricsForEnrollment(object):
         """
         lcgm = self.create_lcgm(date_for=self.date_2.date())
         monkeypatch.setattr('figures.pipeline.enrollment_metrics.get_site_for_course',
-                            lambda val: SiteFactory())
+                            lambda val: self.site)
         monkeypatch.setattr('figures.pipeline.enrollment_metrics._collect_progress_data',
                             lambda val: self.progress_data)
-        metrics = collect_metrics_for_enrollment(
-            course_enrollment=self.course_enrollment,
-            )
+        course_sm = StudentModule.objects.filter(course_id=self.course_enrollment.course_id)
+        metrics = collect_metrics_for_enrollment(site=self.site,
+                                                 course_enrollment=self.course_enrollment,
+                                                 course_sm=course_sm)
 
         self.check_response_metrics(metrics, self.progress_data)
         assert metrics == lcgm
@@ -190,13 +240,15 @@ class TestCollectMetricsForEnrollment(object):
         The function under test should return None
         """
         monkeypatch.setattr('figures.pipeline.enrollment_metrics.get_site_for_course',
-                            lambda val: SiteFactory())
+                            lambda val: self.site)
         monkeypatch.setattr('figures.pipeline.enrollment_metrics._collect_progress_data',
                             lambda val: self.progress_data)
         # Create a course enrollment for which we won't have student module records
-        metrics = collect_metrics_for_enrollment(
-            course_enrollment=CourseEnrollmentFactory(),
-            )
+        ce = CourseEnrollmentFactory()
+        course_sm = StudentModule.objects.filter(course_id=ce.course_id)
+        metrics = collect_metrics_for_enrollment(site=self.site,
+                                                 course_enrollment=ce,
+                                                 course_sm=course_sm)
         assert not metrics
 
     def test_no_update_has_lcgm_no_sm(self, monkeypatch):
@@ -205,13 +257,16 @@ class TestCollectMetricsForEnrollment(object):
         The function under test should return the existing LCGM
         """
         monkeypatch.setattr('figures.pipeline.enrollment_metrics.get_site_for_course',
-                            lambda val: SiteFactory())
+                            lambda val: self.site)
         monkeypatch.setattr('figures.pipeline.enrollment_metrics._collect_progress_data',
                             lambda val: self.progress_data)
         # Create a course enrollment for which we won't have student module records
         ce = CourseEnrollmentFactory()
         lcgm = LearnerCourseGradeMetricsFactory(course_id=ce.course_id, user=ce.user)
-        metrics = collect_metrics_for_enrollment(course_enrollment=ce)
+        course_sm = StudentModule.objects.filter(course_id=ce.course_id)
+        metrics = collect_metrics_for_enrollment(site=self.site,
+                                                 course_enrollment=ce,
+                                                 course_sm=course_sm)
         assert metrics == lcgm
         assert not StudentModule.objects.filter(course_id=ce.course_id)
 

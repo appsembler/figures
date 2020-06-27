@@ -170,8 +170,16 @@ class SiteSerializer(serializers.ModelSerializer):
 
 class CourseDailyMetricsSerializer(serializers.ModelSerializer):
     """Provides summary data about a specific course
+
+    [john@appsembler] min_value and max_value validation added to average_progress,
+    however, unit tests show these are ignored. I timeboxed an hour to go through
+    the DRF 3.6.3 source code, and try to trace why then stopped due to time
+    constraints.
     """
-    average_progress = serializers.DecimalField(max_digits=2, decimal_places=2)
+    average_progress = serializers.DecimalField(max_digits=3,
+                                                decimal_places=2,
+                                                min_value=0.00,
+                                                max_value=1.00)
 
     class Meta:
         model = CourseDailyMetrics
@@ -290,9 +298,9 @@ class GeneralCourseDataSerializer(serializers.Serializer):
     def get_metrics(self, obj):
         qs = CourseDailyMetrics.objects.filter(course_id=str(obj.id))
         if qs:
-            return CourseDailyMetricsSerializer(qs.latest('date_for')).data
+            return CourseDailyMetricsSerializer(qs.order_by('-date_for')[0]).data
         else:
-            return []
+            return None
 
 
 def get_course_history_metric(site, course_id, func, date_for, months_back):
