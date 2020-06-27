@@ -3,3 +3,4 @@ omit =
     setup.py
     tests/*
     mocks/*
+    devsite/devsite/celery.py
