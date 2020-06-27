@@ -171,17 +171,17 @@ REST_FRAMEWORK = {
 if ENABLE_DEVSITE_CELERY:
     # TODO: update to allow environemnt variable overrides
     # the password seting is only for local development environments
-    FIGURES_CELERY_USER='figures_user'
-    FIGURES_CELERY_PASSWORD='figures_pwd'
-    FIGURES_CELERY_VHOST='figures_vhost'
+    FIGURES_CELERY_USER = 'figures_user'
+    FIGURES_CELERY_PASSWORD = 'figures_pwd'
+    FIGURES_CELERY_VHOST = 'figures_vhost'
 
-    BROKER_URL='amqp://{user}:{password}@localhost:5672/{vhost}'.format(
+    BROKER_URL = 'amqp://{user}:{password}@localhost:5672/{vhost}'.format(
         user=FIGURES_CELERY_USER,
         password=FIGURES_CELERY_PASSWORD,
         vhost=FIGURES_CELERY_VHOST,
     )
 
-    CELERY_RESULT_BACKEND='djcelery.backends.cache:CacheBackend'
+    CELERY_RESULT_BACKEND = 'djcelery.backends.cache:CacheBackend'
 
     import djcelery
     djcelery.setup_loader()
