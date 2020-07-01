@@ -1,13 +1,10 @@
 """Tests Figures GradesCache model
-
 """
-
 import datetime
 import pytest
 
 from django.contrib.sites.models import Site
-from django.utils.timezone import utc
-
+from django.db.models.query import QuerySet
 from figures.helpers import as_date
 from figures.models import LearnerCourseGradeMetrics
 
@@ -15,8 +12,62 @@ from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,
     LearnerCourseGradeMetricsFactory,
-    UserFactory
+    SiteFactory,
+    UserFactory,
+    COURSE_ID_STR_TEMPLATE
 )
+
+
+def create_sample_completed_lcgm(site, user_count, course_count):
+    """Generate test data
+
+    TODO: Make this a parametrized fixture
+    https://docs.pytest.org/en/3.1.3/example/parametrize.html
+
+    We don't create CourseEnrollment objects because we don't need them as
+    Figures models try to rely on the content and context of the data in the
+    LMS and not the LMS models specifically
+    """
+    users = [UserFactory() for i in range(user_count)]
+    # We need just the course_ids
+    course_ids = [COURSE_ID_STR_TEMPLATE.format(i) for i in range(course_count)]
+
+    # Two records for each enrollment, one shows not complete, one shows complete
+    lcgm_data = [
+        dict(
+            date_for='2020-04-01',
+            points_possible=40,
+            points_earned=40,
+            sections_possible=5,
+            sections_worked=4),
+        dict(
+            date_for='2020-05-05',
+            points_possible=50,
+            points_earned=50,
+            sections_possible=5,
+            sections_worked=5)
+    ]
+    lcgm_list = []
+    for user in users:
+        for course_id in course_ids:
+            for lcgm in lcgm_data:
+                lcgm_list.append(LearnerCourseGradeMetricsFactory(
+                    site=site,
+                    user=user,
+                    course_id=course_id,
+                    date_for=lcgm['date_for'],
+                    points_possible=lcgm['points_possible'],
+                    points_earned=lcgm['points_earned'],
+                    sections_possible=lcgm['sections_possible'],
+                    sections_worked=lcgm['sections_worked']
+                    )
+                )
+    return dict(
+        lcgm_list=lcgm_list,
+        users=users,
+        course_ids=course_ids,
+        site=site,
+    )
 
 
 @pytest.mark.django_db
@@ -36,7 +87,7 @@ def test_most_recent_with_data(db):
     newer_lcgm = LearnerCourseGradeMetricsFactory(user=user,
                                                   course_id=str(course_overview.id),
                                                   date_for=second_date)
-
+    assert older_lcgm.date_for != newer_lcgm.date_for
     obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
         user=user, course_id=course_overview.id)
     assert obj == newer_lcgm
@@ -45,7 +96,7 @@ def test_most_recent_with_data(db):
 @pytest.mark.django_db
 def test_most_recent_with_empty_table(db):
     """Make sure the query works when there are no models to find
-    
+
     Tests that the function returns None and does not fail when it cannot find
     any LearnerCourseGradeMetrics model instances
     """
@@ -55,6 +106,91 @@ def test_most_recent_with_empty_table(db):
     obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
         user=user, course_id=course_overview.id)
     assert not obj
+
+
+@pytest.mark.django_db
+class TestLearnerCourseGradeMetricsManager(object):
+    """Test the Manager methods
+
+    This is a quick hack job to get test coverage and make sure filtering works
+    """
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.site = SiteFactory()
+
+    def test_completed_ids_for_site_empty(self):
+        """Make sure the method doesn't break if there are no LCGM records
+        """
+        data = LearnerCourseGradeMetrics.objects.completed_ids_for_site(self.site)
+        assert isinstance(data, QuerySet)
+        assert not data
+
+    def test_completed_ids_for_site(self):
+        """
+        Example data
+        ```
+        {'course_id': u'course-v1:StarFleetAcademy+SFA2+2161', 'user_id': 1}
+        ```
+        """
+        lcgm_data = create_sample_completed_lcgm(self.site,
+                                                 user_count=2,
+                                                 course_count=2)
+
+        # Build lcgm w/out completion
+        LearnerCourseGradeMetrics(site=self.site,
+                                  sections_possible=2,
+                                  sections_worked=1)
+        data = LearnerCourseGradeMetrics.objects.completed_ids_for_site(self.site)
+        # Check we have our expected data
+
+        expected = [(a.id, b) for a in lcgm_data['users']
+                    for b in lcgm_data['course_ids']]
+        results = [(rec['user_id'], rec['course_id']) for rec in data]
+        assert set(results) == set(expected)
+
+    def test_completed_ids_for_user_list(self):
+        """Test when we filter on a list of user ids
+        """
+        lcgm_data = create_sample_completed_lcgm(self.site,
+                                                 user_count=4,
+                                                 course_count=2)
+        user_ids = [lcgm_data['users'][i].id for i in [0, 2]]
+        data = LearnerCourseGradeMetrics.objects.completed_ids_for_site(self.site,
+                                                                        user_ids=user_ids)
+        expected = [(a.id, b) for a in lcgm_data['users']
+                    for b in lcgm_data['course_ids'] if a.id in user_ids]
+        results = [(rec['user_id'], rec['course_id']) for rec in data]
+        assert set(results) == set(expected)
+
+    def test_completed_ids_for_course_list(self):
+        """Test when we filter on a set of course_ids
+        """
+        lcgm_data = create_sample_completed_lcgm(self.site,
+                                                 user_count=2,
+                                                 course_count=4)
+        course_ids = [lcgm_data['course_ids'][i] for i in [0, 2]]
+        data = LearnerCourseGradeMetrics.objects.completed_ids_for_site(self.site,
+                                                                        course_ids=course_ids)
+        expected = [(a.id, b) for a in lcgm_data['users']
+                    for b in lcgm_data['course_ids'] if b in course_ids]
+        results = [(rec['user_id'], rec['course_id']) for rec in data]
+        assert set(results) == set(expected)
+
+    def test_completed_ids_for_user_and_course_lists(self):
+        """Test when we filter on a set of course_ids
+        """
+        lcgm_data = create_sample_completed_lcgm(self.site,
+                                                 user_count=4,
+                                                 course_count=4)
+        user_ids = [lcgm_data['users'][i].id for i in [0, 2]]
+        course_ids = [lcgm_data['course_ids'][i] for i in [0, 2]]
+        data = LearnerCourseGradeMetrics.objects.completed_ids_for_site(self.site,
+                                                                        user_ids=user_ids,
+                                                                        course_ids=course_ids)
+        expected = [(a.id, b) for a in lcgm_data['users']
+                    for b in lcgm_data['course_ids'] if b in course_ids and a.id in user_ids]
+        results = [(rec['user_id'], rec['course_id']) for rec in data]
+        assert set(results) == set(expected)
 
 
 @pytest.mark.django_db
