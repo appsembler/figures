@@ -10,6 +10,7 @@
 ###
 
 celery==3.1.25
+django-celery==3.3.1
 
 # Faker is used to seed mock data in devsite
 Faker==2.0.3

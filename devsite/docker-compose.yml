@@ -1,0 +1,10 @@
+version: '3.5'
+services:
+
+  rabbitmq_figures:
+    # build: ./rabbitmq
+    image: rabbitmq:3
+    env_file: rabbitmq.env
+    ports:
+      - 5672:5672
+      - 15672:15672
