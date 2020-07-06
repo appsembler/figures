@@ -40,6 +40,7 @@ from figures.filters import (
     CourseEnrollmentFilter,
     CourseMauMetricsFilter,
     CourseOverviewFilter,
+    EnrollmentMetricsFilter,
     SiteDailyMetricsFilter,
     SiteFilterSet,
     SiteMauMetricsFilter,
@@ -48,16 +49,19 @@ from figures.filters import (
 from figures.models import (
     CourseDailyMetrics,
     CourseMauMetrics,
+    LearnerCourseGradeMetrics,
     SiteDailyMetrics,
     SiteMauMetrics,
 )
 from figures.serializers import (
+    CourseCompletedSerializer,
     CourseDailyMetricsSerializer,
     CourseDetailsSerializer,
     CourseEnrollmentSerializer,
     CourseIndexSerializer,
     CourseMauMetricsSerializer,
     CourseMauLiveMetricsSerializer,
+    EnrollmentMetricsSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
     SiteDailyMetricsSerializer,
@@ -394,6 +398,64 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return context
 
 
+class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """Initial viewset for enrollment metrics
+
+    Initial purpose to serve up course progress and completion data
+
+    Because we need to test performance, we want to keep completion data
+    isolated from other API data
+    """
+    model = LearnerCourseGradeMetrics
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = EnrollmentMetricsSerializer
+    filter_backends = (DjangoFilterBackend, )
+    # Assess updating to "EnrollmentFilterSet" to filter on list of courses and
+    # or users, so we can use it to build a filterable table of users, courses
+    filter_class = EnrollmentMetricsFilter
+
+    def get_queryset(self):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = LearnerCourseGradeMetrics.objects.filter(site=site)
+        return queryset
+
+    @list_route()
+    def completed_ids(self, request, *args, **kwargs):
+        """Return distinct course id/user id pairs for completed enrollments
+
+        Endpoint is `/figures/api/enrollment-metrics/completed_ids/`
+
+        The default router does not support hyphen in the custom action, so
+        we need to use the underscore until we implement a custom router
+        """
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        qs = self.model.objects.completed_ids_for_site(site=site)
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = CourseCompletedSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = CourseCompletedSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    @list_route()
+    def completed(self, reqwuest, *args, **kwargs):
+        """Experimental endpoint to return completed LCGM records
+
+        This is the same as `/figures/api/enrollment-metrics/?only_completed=True
+
+        Return matching LearnerCourseGradeMetric rows that have completed
+        enrollments
+        """
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        qs = self.model.objects.completed_for_site(site=site)
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+
 class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     """
 
@@ -633,11 +695,6 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         active_users = metrics.get_site_mau_history_metrics(site=site,
                                                             months_back=months_back)
         return Response(dict(active_users=active_users))
-
-
-#
-# MAU metrics views
-#
 
 
 class CourseMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):

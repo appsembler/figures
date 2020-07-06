@@ -18,3 +18,9 @@ def create_test_users():
         UserFactory(username='super_user', is_superuser=True),
         UserFactory(username='superstaff_user', is_staff=True, is_superuser=True)
     ]
+
+
+def assert_paginated(response_data):
+    """Assert the response data dict has expected paginated results keys
+    """
+    assert set(response_data.keys()) == set([u'count', u'next', u'previous', u'results'])
