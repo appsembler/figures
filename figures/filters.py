@@ -9,6 +9,9 @@ Some work has been done to support Django Filter prior to 1.0 but it is not comp
 See the following for breaking changes when upgrading to Django Filter 1.0:
 
 https://django-filter.readthedocs.io/en/master/guide/migration.html#migrating-to-1-0
+
+TODO: Rename classes so they eiher all end with "Filter" or "FilterSet" then
+      update the test class names in "tests/test_filters.py" to match.
 """
 
 from django.contrib.auth import get_user_model
@@ -50,7 +53,7 @@ def boolean_method_filter(method):
     First check for old style (pre version 1 Django Filters)
     """
     if hasattr(django_filters, 'MethodFilter'):
-        return django_filters.MethodFilter(action=method)
+        return django_filters.MethodFilter(action=method)  # pylint: disable=no-member
     else:
         return django_filters.BooleanFilter(method=method)
 
@@ -166,7 +169,7 @@ class EnrollmentMetricsFilter(CourseEnrollmentFilter):
         """
         The "value" parameter is either `True` or `False`
         """
-        if value:
+        if value is True:
             return queryset.filter(sections_possible__gt=0,
                                    sections_worked=F('sections_possible'))
         else:
@@ -176,7 +179,7 @@ class EnrollmentMetricsFilter(CourseEnrollmentFilter):
         """
         The "value" parameter is either `True` or `False`
         """
-        if value:
+        if value is True:
             # This is a hack until we add `completed` field to LCGM
             return queryset.filter(sections_worked__lt=F('sections_possible'))
         else:

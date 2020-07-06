@@ -420,7 +420,7 @@ class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return queryset
 
     @list_route()
-    def completed_ids(self, request, *args, **kwargs):
+    def completed_ids(self, request):
         """Return distinct course id/user id pairs for completed enrollments
 
         Endpoint is `/figures/api/enrollment-metrics/completed_ids/`
@@ -438,7 +438,7 @@ class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     @list_route()
-    def completed(self, reqwuest, *args, **kwargs):
+    def completed(self, request):
         """Experimental endpoint to return completed LCGM records
 
         This is the same as `/figures/api/enrollment-metrics/?only_completed=True
