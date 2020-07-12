@@ -326,6 +326,7 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)
     total_enrollment_count = factory.Sequence(lambda n: n)
+    mau = factory.Sequence(lambda n: n)
 
 
 class SiteMonthlyMetricsFactory(DjangoModelFactory):

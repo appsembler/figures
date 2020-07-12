@@ -85,16 +85,23 @@ class CourseDailyMetrics(TimeStampedModel):
 class SiteDailyMetrics(TimeStampedModel):
     """
     Stores metrics for a given site and day
+
+    When we upgrade to MAU 2G, we'll add a new field, 'active_users_today'
+    and pull the data from the previous day's live active user capture
     """
 
     site = models.ForeignKey(Site)
     # Date for which this record's data are collected
     date_for = models.DateField()
+
+    # Under review for deletion
     cumulative_active_user_count = models.IntegerField(blank=True, null=True)
+
     todays_active_user_count = models.IntegerField(blank=True, null=True)
     total_user_count = models.IntegerField()
     course_count = models.IntegerField()
     total_enrollment_count = models.IntegerField()
+    mau = models.IntegerField(blank=True, null=True)
 
     class Meta:
         """
@@ -129,7 +136,8 @@ class SiteDailyMetrics(TimeStampedModel):
 
         if date_for:
             filter_args['date_for__lt'] = date_for
-        return cls.objects.filter(**filter_args).order_by('-date_for').first()
+        recs = cls.objects.filter(**filter_args).order_by('-date_for')
+        return recs[0] if recs else None
 
 
 @python_2_unicode_compatible
