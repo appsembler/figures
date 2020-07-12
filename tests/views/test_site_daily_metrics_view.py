@@ -123,13 +123,13 @@ class TestSiteDailyMetricsView(BaseViewTest):
         Note: We don't need write functionality with this view as of version 0.2.0
         """
         data = dict(
-            # site=SiteSerializer(self.site).data,
             date_for='2020-01-01',
             cumulative_active_user_count=1,
             todays_active_user_count=2,
             total_user_count=3,
             course_count=4,
-            total_enrollment_count=5
+            total_enrollment_count=5,
+            mau=6,
             )
         # Might not need to set format='json'
         request = APIRequestFactory().post(

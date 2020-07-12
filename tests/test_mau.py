@@ -1,6 +1,10 @@
 
 from datetime import datetime
 from freezegun import freeze_time
+from dateutil.relativedelta import relativedelta
+import pytest
+
+from django.utils.timezone import utc
 
 from courseware.models import StudentModule
 
@@ -11,8 +15,12 @@ from figures.sites import (
 from figures.mau import (
     get_mau_from_student_modules,
     get_mau_from_site_course,
+    mau_1g_for_month_as_of_day,
+    site_mau_1g_for_month_as_of_day,
     store_mau_metrics,
 )
+
+from tests.factories import StudentModuleFactory
 
 
 def test_get_mau_from_site_course(sm_test_data):
@@ -45,6 +53,74 @@ def test_get_mau_from_sm_for_site(sm_test_data):
 
     sm_check = sm.values_list('student__id', flat=True).distinct()
     assert set(users) == set(sm_check)
+
+
+@pytest.mark.django_db
+def test_mau_1g_for_month_as_of_day_first_day_next_month(db):
+    """
+    Test getting live MAU 1G values from StudentModule for the given day
+
+    Quick-n-dirty data setup:
+
+    We want to make sure we get the right records when the query happens on the
+    first day of the next month. So we do the following
+
+    * Add a StudentModule record for two months before
+    * Add at least one StudentModule record for the month we want
+    * Add at least one StudentModule record for after the month we want
+
+    This sets up the scenario that we run the daily pipeline to capture MAU
+    "as of" yesterday (the last day of the previous month) to capture MAU for
+    the previous month
+    """
+    mock_today = datetime(year=2020, month=4, day=1).replace(tzinfo=utc)
+    month_before = datetime(year=2020, month=2, day=2).replace(tzinfo=utc)
+    in_dates = [datetime(year=2020, month=3, day=1).replace(tzinfo=utc),
+                datetime(year=2020, month=3, day=15).replace(tzinfo=utc),
+                datetime(year=2020, month=3, day=31).replace(tzinfo=utc)]
+    date_for = mock_today.date() - relativedelta(days=1)
+
+    # Create a student module in the month before, and in month after
+    StudentModuleFactory(created=month_before, modified=month_before)
+    StudentModuleFactory(created=mock_today, modified=mock_today)
+    sm_in = [StudentModuleFactory(created=rec,
+                                  modified=rec) for rec in in_dates]
+    expected_user_ids = [obj.student_id for obj in sm_in]
+
+    sm_queryset = StudentModule.objects.all()
+    user_ids = mau_1g_for_month_as_of_day(sm_queryset=sm_queryset,
+                                          date_for=date_for)
+    assert set([rec['student__id'] for rec in user_ids]) == set(expected_user_ids)
+
+
+def test_site_mau_1g_for_month_as_of_day(monkeypatch):
+    """Test our wrapper function, site_mau_1g_for_month_as_of_day
+
+    All we really care about is the call stack is what we expect with the args
+    we expect
+    """
+    expected_site = 'this is our site'
+    expected_date_for = 'this is my date'
+    expected_sm_queryset = 'this is my expected student module queryset'
+    expected_user_id_qs = 'this is my expected user id queryset'
+
+    def mock_get_student_modules_for_site(site):
+        assert site == expected_site
+        return expected_sm_queryset
+
+    def mock_mau_1g_for_month_as_of_day(sm_queryset, date_for):
+        assert date_for == expected_date_for
+        assert sm_queryset == expected_sm_queryset
+        return expected_user_id_qs
+
+    monkeypatch.setattr('figures.mau.mau_1g_for_month_as_of_day',
+                        mock_mau_1g_for_month_as_of_day)
+    monkeypatch.setattr('figures.mau.get_student_modules_for_site',
+                        mock_get_student_modules_for_site)
+
+    qs = site_mau_1g_for_month_as_of_day(site=expected_site,
+                                         date_for=expected_date_for)
+    assert qs == expected_user_id_qs
 
 
 def test_store_mau_metrics(monkeypatch, sm_test_data):
