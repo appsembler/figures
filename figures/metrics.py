@@ -253,8 +253,10 @@ def get_site_mau_history_metrics(site, months_back):
                                          month=str(rec.month_for.month).zfill(2))
         history.append(dict(period=period, value=rec.active_user_count))
 
-    # Hack to set current month data in the history list
-    current_month_active = get_site_mau_current_month(site)
+    # Get our latest stored site MAU count
+    sdm = SiteDailyMetrics.latest_previous_record(site=site)
+    current_month_active = sdm.mau if sdm else 0
+
     if history:
         # reverse the list because it is currently in reverser chronological order
         history.reverse()
@@ -264,21 +266,6 @@ def get_site_mau_history_metrics(site, months_back):
                                      month=str(current_month.month).zfill(2))
     history.append(dict(period=period, value=current_month_active))
     return dict(current_month=current_month_active, history=history)
-
-
-def get_site_mau_current_month(site):
-    """Specific function to get the live active users for the current month
-
-    Developers note: We're starting with the simple aproach for MAU 1G, first
-    generation. When we update for MAU 2G, we will be able to make the query
-    more efficient by pulling unique users from a single table used for live
-    capture.
-    """
-    month_for = datetime.datetime.utcnow()
-    site_sm = figures.sites.get_student_modules_for_site(site)
-    curr_sm = site_sm.filter(modified__year=month_for.year,
-                             modified__month=month_for.month)
-    return curr_sm.values('student__id').distinct().count()
 
 
 def get_active_users_for_time_period(site, start_date, end_date, course_ids=None):

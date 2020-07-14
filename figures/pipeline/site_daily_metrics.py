@@ -12,6 +12,7 @@ from django.utils.timezone import utc
 from django.db.models import Sum
 
 from figures.helpers import as_course_key, as_datetime, next_day, prev_day
+from figures.mau import site_mau_1g_for_month_as_of_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 from figures.sites import (
     get_courses_for_site,
@@ -133,12 +134,15 @@ class SiteDailyMetricsExtractor(object):
 
         todays_active_users = get_site_active_users_for_date(site, date_for)
         todays_active_user_count = todays_active_users.count()
+        mau = site_mau_1g_for_month_as_of_day(site, date_for)
+
         data['todays_active_user_count'] = todays_active_user_count
         data['cumulative_active_user_count'] = get_previous_cumulative_active_user_count(
             site, date_for) + todays_active_user_count
         data['total_user_count'] = user_count
         data['course_count'] = course_count
         data['total_enrollment_count'] = get_total_enrollment_count(site, date_for)
+        data['mau'] = mau.count()
         return data
 
 
@@ -186,6 +190,7 @@ class SiteDailyMetricsLoader(object):
                 total_user_count=data['total_user_count'],
                 course_count=data['course_count'],
                 total_enrollment_count=data['total_enrollment_count'],
+                mau=data['mau'],
             )
         )
         return site_metrics, created
