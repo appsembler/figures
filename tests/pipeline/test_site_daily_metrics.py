@@ -1,4 +1,7 @@
-'''Tests figures.pipeline.
+'''Tests figures.pipeline.site_daily_metrics module
+
+IMPORTANT: We need to refactor the test data in this test module as this was
+early work and we've learned a lot since then.
 
 TODO:
 
@@ -71,6 +74,7 @@ SDM_DATA = [
         total_user_count=200,
         course_count=len(CDM_INPUT_TEST_DATA),
         total_enrollment_count=100,
+        mau=55,
     )
 ]
 
@@ -81,6 +85,7 @@ SDM_EXPECTED_RESULTS = dict(
     total_user_count=200,
     course_count=len(CDM_INPUT_TEST_DATA),
     total_enrollment_count=150,
+    mau=56,
     )
 
 
@@ -232,12 +237,15 @@ class TestSiteDailyMetricsExtractor(object):
                                                    organization=self.organization)
 
     def test_extract(self, monkeypatch):
+        previous_cumulative_active_user_count = 50
+
         expected_results = dict(
             cumulative_active_user_count=52,  # previous cumulative is 50
             todays_active_user_count=2,
             total_user_count=len(self.users),
             course_count=len(CDM_INPUT_TEST_DATA),
             total_enrollment_count=150,
+            mau=len(self.users),  # expect 3
         )
 
         assert not StudentModule.objects.count()
@@ -252,6 +260,19 @@ class TestSiteDailyMetricsExtractor(object):
 
         monkeypatch.setattr(pipeline_sdm, 'get_student_modules_for_site',
                             mock_student_modules_for_site)
+
+        def mock_site_mau_1g_for_month_as_of_day(site, date_for):
+            return get_user_model().objects.filter(
+                id__in=[user.id for user in self.users]).values('id')
+
+        monkeypatch.setattr(pipeline_sdm, 'site_mau_1g_for_month_as_of_day',
+                            mock_site_mau_1g_for_month_as_of_day)
+
+        def mock_get_previous_cumulative_active_user_count(site, date_for):
+            return previous_cumulative_active_user_count
+
+        monkeypatch.setattr(pipeline_sdm, 'get_previous_cumulative_active_user_count',
+                            mock_get_previous_cumulative_active_user_count)
 
         for course in figures.sites.get_courses_for_site(self.site):
             assert course.created.date() < self.date_for
@@ -278,6 +299,7 @@ class TestSiteDailyMetricsLoader(object):
                 total_user_count=3,
                 course_count=4,
                 total_enrollment_count=5,
+                mau=6,
                 )
 
     class MockExtractor(object):

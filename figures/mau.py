@@ -73,6 +73,40 @@ def retrieve_live_course_mau_data(site, course_id):
     )
 
 
+def mau_1g_for_month_as_of_day(sm_queryset, date_for):
+    """Get the MAU from the sm, as of the "date_for" for "date_for" month
+
+    sm_queryset is the StudentModule queryset for our source
+
+    This is a MAU 1G function that calculates the monthly active users as of the
+    day in the given month.
+
+    This function queries `courseware.models.StudentModule` to identify users
+    who are active in the site
+
+    Returns a queryset of distinct user ids
+    """
+    month_sm = sm_queryset.filter(modified__year=date_for.year,
+                                  modified__month=date_for.month,
+                                  modified__day__lte=date_for.day)
+    return month_sm.values('student__id').distinct()
+
+
+def site_mau_1g_for_month_as_of_day(site, date_for):
+    """Get the MAU for the given site, as of the "date_for" in the month
+
+    This is a conenvience function. It gets the student modules for the site,
+    then calls
+
+        `figures.mau.mau_for_month_as_of_day(...)`
+
+    Returns a queryset with distinct user ids
+    """
+    site_sm = get_student_modules_for_site(site)
+    return mau_1g_for_month_as_of_day(sm_queryset=site_sm,
+                                      date_for=date_for)
+
+
 def store_mau_metrics(site, overwrite=False):
     """
     Save "snapshot" of MAU metrics

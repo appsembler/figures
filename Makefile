@@ -56,6 +56,21 @@ ginkgo.pytest:  ## Run Pytest for the Ginkgo environment
 ginkgo.tox:  ## Run tox just for the Ginkgo environment
 	tox -e py27-ginkgo
 
+### Devsite Docker targets
+
+devsite.docker.prep: ## state needed to run devsite docker
+	pip install -e .
+
+devsite.docker.up: devsite.docker.prep  ## Start devsite docker
+	cd devsite; docker-compose up
+
+devsite.docker.rabbitmq.config:  ## configure RabbitMQ container
+	cd devsite; docker cp rabbitmq-init.sh devsite_rabbitmq_figures_1:/rabbitmq-init.sh ; \
+		docker exec devsite_rabbitmq_figures_1 /rabbitmq-init.sh
+
+devsite.docker.celery.start:  ## Start the celery server
+	cd devsite; celery -A devsite worker --logleve=info
+
 ### Automatically constructed Virtualenv based targets
 
 ve/bin/figures-ws: devsite/requirements/${EDX_PLATFORM_RELEASE}_appsembler.txt
