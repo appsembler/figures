@@ -2,18 +2,14 @@
 """
 
 from decimal import Decimal
+import mock
 import pytest
 
 import django.contrib.sites.shortcuts
-from django.utils.timezone import utc
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from figures.models import LearnerCourseGradeMetrics
-from figures.serializers import (
-    EnrollmentMetricsSerializer,
-    )
-
 from figures.views import EnrollmentMetricsViewSet
 
 from tests.factories import (
@@ -21,13 +17,13 @@ from tests.factories import (
     CourseOverviewFactory,
     LearnerCourseGradeMetricsFactory,
     OrganizationFactory,
-    OrganizationCourseFactory,
+    # OrganizationCourseFactory,
     SiteFactory,
     UserFactory,
 )
 from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
-from tests.views.helpers import assert_paginated
+from tests.views.helpers import is_response_paginated
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
@@ -82,6 +78,8 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
     TODO: Test main list method with the matrix of filter options
     - course_ids, user_ids,
     - Above mix with only_completed and with exclude_completed
+
+    One option is to break this into different test classes, one for each action
     """
     base_request_path = 'api/enrollment-metrics/'
     view_class = EnrollmentMetricsViewSet
@@ -94,7 +92,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
 
     def check_serialized_data(self, result_rec, obj):
         fields = ['id', 'course_id', 'date_for', 'points_earned',
-                  'points_possible', 'sections_worked', 
+                  'points_possible', 'sections_worked',
                   'sections_possible']
         expected_keys = fields + ['user', 'completed', 'progress_percent']
         assert set(result_rec.keys()) == set(expected_keys)
@@ -150,7 +148,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
                                      action='list')
 
         assert response.status_code == status.HTTP_200_OK
-        assert_paginated(response.data)
+        assert is_response_paginated(response.data)
         results = response.data['results']
         # Check keys
         result_ids = [obj['id'] for obj in results]
@@ -181,7 +179,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
                                      action='list')
 
         assert response.status_code == status.HTTP_200_OK
-        assert_paginated(response.data)
+        assert is_response_paginated(response.data)
         results = response.data['results']
         # Check keys
         result_ids = [obj['id'] for obj in results]
@@ -212,7 +210,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
                                      action='list')
 
         assert response.status_code == status.HTTP_200_OK
-        assert_paginated(response.data)
+        assert is_response_paginated(response.data)
         results = response.data['results']
         # Check keys
         result_ids = [obj['id'] for obj in results]
@@ -233,13 +231,13 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
         LearnerCourseGradeMetricsFactory(site=other_site,
                                          sections_worked=1,
                                          sections_possible=1)
-        not_completed_lcgm = LearnerCourseGradeMetricsFactory(site=site,
-            sections_worked=1,
-            sections_possible=5)
+        LearnerCourseGradeMetricsFactory(site=site,
+                                         sections_worked=1,
+                                         sections_possible=5)
         completed_lcgm = [LearnerCourseGradeMetricsFactory(site=site,
-            sections_worked=5,
-            sections_possible=5
-            ) for i in range(3)]
+                                                           sections_worked=5,
+                                                           sections_possible=5)
+                          for i in range(3)]
 
         request_path = self.base_request_path + '?only_completed=True'
         response = self.make_request(request_path=request_path,
@@ -249,7 +247,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
                                      action='list')
 
         assert response.status_code == status.HTTP_200_OK
-        assert_paginated(response.data)
+        assert is_response_paginated(response.data)
         results = response.data['results']
         # Check keys
         result_ids = [obj['id'] for obj in results]
@@ -270,12 +268,13 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
         LearnerCourseGradeMetricsFactory(site=other_site,
                                          sections_worked=1,
                                          sections_possible=1)
-        not_completed_lcgm = [LearnerCourseGradeMetricsFactory(site=site,
+        not_completed_lcgm = [LearnerCourseGradeMetricsFactory(
+            site=site,
             sections_worked=1,
             sections_possible=5) for i in range(2)]
-        completed_lcgm = LearnerCourseGradeMetricsFactory(site=site,
-            sections_worked=5,
-            sections_possible=5)
+        LearnerCourseGradeMetricsFactory(site=site,
+                                         sections_worked=5,
+                                         sections_possible=5)
 
         request_path = self.base_request_path + '?exclude_completed=True'
         response = self.make_request(request_path=request_path,
@@ -285,7 +284,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
                                      action='list')
 
         assert response.status_code == status.HTTP_200_OK
-        assert_paginated(response.data)
+        assert is_response_paginated(response.data)
         results = response.data['results']
         # Check keys
         result_ids = [obj['id'] for obj in results]
@@ -295,7 +294,6 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
         self.check_serialized_data(results[0], obj)
 
     def test_completed_ids_method(self, monkeypatch, enrollment_test_data):
-        # course_overview = sog_data['course_overview']
         site = enrollment_test_data['site']
         users = enrollment_test_data['users']
         caller = self.make_caller(site, users)
@@ -304,13 +302,14 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
         LearnerCourseGradeMetricsFactory(site=other_site,
                                          sections_worked=1,
                                          sections_possible=1)
-        not_completed_lcgm = LearnerCourseGradeMetricsFactory(site=site,
-            sections_worked=1,
-            sections_possible=5)
+        # Create an incomplete LCGM rec for our site
+        LearnerCourseGradeMetricsFactory(site=site,
+                                         sections_worked=1,
+                                         sections_possible=5)
         completed_lcgm = [LearnerCourseGradeMetricsFactory(site=site,
-            sections_worked=5,
-            sections_possible=5
-            ) for i in range(3)]
+                                                           sections_worked=5,
+                                                           sections_possible=5)
+                          for i in range(3)]
 
         request_path = self.base_request_path + '/completed_ids/'
         response = self.make_request(request_path=request_path,
@@ -319,7 +318,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
                                      caller=caller,
                                      action='completed_ids')
         assert response.status_code == status.HTTP_200_OK
-        assert_paginated(response.data)
+        assert is_response_paginated(response.data)
         results = response.data['results']
         # Check that the results have our expected keys and only our expected keys
         res_keys_list = [elem.keys() for elem in results]
@@ -337,16 +336,18 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
         caller = self.make_caller(site, users)
         other_site = SiteFactory()
         assert site.domain != other_site.domain
+        # Create an LCGM record for the other site
         LearnerCourseGradeMetricsFactory(site=other_site,
                                          sections_worked=1,
                                          sections_possible=1)
-        not_completed_lcgm = LearnerCourseGradeMetricsFactory(site=site,
-            sections_worked=1,
-            sections_possible=5)
+        # Create an LCGM record for our site that is not completed
+        LearnerCourseGradeMetricsFactory(site=site,
+                                         sections_worked=1,
+                                         sections_possible=5)
         completed_lcgm = [LearnerCourseGradeMetricsFactory(site=site,
-            sections_worked=5,
-            sections_possible=5
-            ) for i in range(3)]
+                                                           sections_worked=5,
+                                                           sections_possible=5)
+                          for i in range(3)]
 
         request_path = self.base_request_path + '/completed/'
         response = self.make_request(request_path=request_path,
@@ -355,7 +356,7 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
                                      caller=caller,
                                      action='completed')
         assert response.status_code == status.HTTP_200_OK
-        assert_paginated(response.data)
+        assert is_response_paginated(response.data)
         results = response.data['results']
         # Check keys
         result_ids = [obj['id'] for obj in results]
@@ -363,3 +364,22 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
         # Spot check the first record
         obj = LearnerCourseGradeMetrics.objects.get(id=results[0]['id'])
         self.check_serialized_data(results[0], obj)
+
+    @pytest.mark.parametrize('action', ['completed', 'completed_ids'])
+    def test_no_paginate(self, monkeypatch, enrollment_test_data, action):
+
+        site = enrollment_test_data['site']
+        users = enrollment_test_data['users']
+        caller = self.make_caller(site, users)
+        request_path = '{}/{}/'.format(self.base_request_path, action)
+        monkeypatch.setattr(EnrollmentMetricsViewSet, 'paginate_queryset',
+                            lambda self, qs: None)
+        with mock.patch.object(self.view_class, 'get_paginated_response') as paginate_check:
+            response = self.make_request(request_path=request_path,
+                                         monkeypatch=monkeypatch,
+                                         site=site,
+                                         caller=caller,
+                                         action=action)
+            assert response.status_code == status.HTTP_200_OK
+            assert not is_response_paginated(response.data)
+            assert not paginate_check.called
