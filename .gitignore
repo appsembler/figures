@@ -83,6 +83,7 @@ celerybeat-schedule
 .venv
 venv/
 ENV/
+/ve
 
 # Spyder project settings
 .spyderproject
@@ -118,7 +119,9 @@ devsite/*.sqlite3
 # Vi, Vim, swap
 *.swp
 
-# misc folders
+# misc folders and files used in the workspace
 scratch
 sandbox
-
+/scratch.py
+/scratch.txt
+/notes
