@@ -20,7 +20,14 @@ def create_test_users():
     ]
 
 
-def assert_paginated(response_data):
-    """Assert the response data dict has expected paginated results keys
+def is_response_paginated(response_data):
+    """Checks if the response data dict has expected paginated results keys
+
+    Returns True if it finds all the paginated keys, False otherwise
     """
-    assert set(response_data.keys()) == set([u'count', u'next', u'previous', u'results'])
+    try:
+        keys = response_data.keys()
+    except AttributeError:
+        # If we can't get keys, wer'e certainly not paginated
+        return False
+    return set(keys) == set([u'count', u'next', u'previous', u'results'])
