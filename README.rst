@@ -8,20 +8,47 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+15 Jul 2020 - Figures release 0.3.12
+====================================
+
+* Adds enrollment metrics API endpoint
+
+  * https://github.com/appsembler/figures/pull/233
+
+* Site monthly metrics API performance improvement
+
+  * https://github.com/appsembler/figures/pull/234
+
+* Initial implementation of Celery support for Figures devsite
+
+  * https://github.com/appsembler/figures/pull/215
+
+
 29 Jun 2020 - Figures release 0.3.11
 ====================================
 
 * Fixes incorrect site monthly metrics course completion data
+
   * https://github.com/appsembler/figures/pull/219
+
 * Fixes CourseDailyMetricsSerializer when average_progress is 1.00
+
   * https://github.com/appsembler/figures/pull/230
+
 * Updates pipeline enrollment metrics queries to improve performance
+
   * https://github.com/appsembler/figures/pull/226
+
 * Added site pipeline progress indicator to logging
+
   * https://github.com/appsembler/figures/pull/228
+
 * Bump devsite Django 1.11 to version 1.11.29
+
   * https://github.com/appsembler/figures/pull/227
+
 * Bump websocket-extensions from 0.1.3 to 0.1.4 in /frontend
+
   * https://github.com/appsembler/figures/pull/222
 
 
@@ -29,8 +56,11 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 ====================================
 
 * Improved daily metrics pipeline performance
+
   * https://github.com/appsembler/figures/pull/214
+
 * Bug fixes
+
   * https://github.com/appsembler/figures/pull/213
 
 
