@@ -1,5 +1,6 @@
 """Defines Figures models
 
+TODO: Create a base "SiteModel" or a "SiteModelMixin"
 """
 
 from datetime import date
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import F
 from django.utils.encoding import python_2_unicode_compatible
 
 from jsonfield import JSONField
@@ -186,7 +188,70 @@ class LearnerCourseGradeMetricsManager(models.Manager):
     """
     def most_recent_for_learner_course(self, user, course_id):
         queryset = self.filter(user=user, course_id=str(course_id))
-        return queryset.order_by('-date_for').first()   # pylint: disable=no-member
+        if queryset:
+            return queryset.order_by('-date_for')[0]  # pylint: disable=E1101
+        else:
+            return None
+
+    def most_recent_for_course(self, course_id):
+        statement = """ \
+        SELECT id, user_id, course_id, MAX(date_for)
+        FROM figures_learnercoursegrademetrics lcgm
+        WHERE course_id = {course_id} AND
+        GROUP BY user_id, course_id
+        """
+        return self.raw(statement.format(course_id=str(course_id)))
+
+    def completed_for_site(self, site, **_kwargs):
+        """Return course_id/user_id pairs that have completed
+        Initial filters on list of users, listr of course ids
+
+        User IDs can be filtered by passing `user_id=` list of user ids
+
+        Course IDs can be filtered by passing `course_ids=` list of course ids
+
+        Returns a distinct QuerySet dict list of values with keys
+        'course_id' and 'user_id'
+
+        We will consider adding a "completed" field to the model for faster
+        filtering, since we can index on the field. However, we need to evaluate
+        the additional storage need
+        """
+        qs = self.filter(site=site,
+                         sections_possible__gt=0,
+                         sections_worked=F('sections_possible'))
+
+        # Build out filter. Note, we don't check if the var is iterable
+        # we let it fail of invalid values passed in
+        filter_args = dict()
+        user_ids = _kwargs.get('user_ids', None)
+        if user_ids:
+            filter_args['user_id__in'] = user_ids
+        course_ids = _kwargs.get('course_ids', None)
+        if course_ids:
+            # We do the string casting in case couse_ids are CourseKey instance
+            filter_args['course_id__in'] = [str(key) for key in course_ids]
+        if filter_args:
+            qs = qs.filter(**filter_args)  # pylint: disable=E1101
+        return qs
+
+    def completed_ids_for_site(self, site, **_kwargs):
+        qs = self.completed_for_site(site, **_kwargs)
+        return qs.values('course_id', 'user_id').distinct()
+
+    def completed_raw_for_site(self, site, **_kwargs):
+        """Experimental
+        """
+        statement = """ \
+        SELECT id, user_id, course_id, MAX(date_for)
+        FROM figures_learnercoursegrademetrics lcgm
+        WHERE site_id = {site} AND
+        lcgm.sections_possible > 0 AND
+        lcgm.sections_worked = lcgm.sections_possible
+        GROUP BY user_id, course_id
+        ORDER BY user_id, course_id
+        """
+        return self.raw(statement.format(site=site))
 
 
 @python_2_unicode_compatible
@@ -213,6 +278,12 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     But for now, using float, as I'm not entirely sure how many decimal places are
     actually needed and edx-platform uses FloatField in its grades models
 
+
+    TODO: Add fields
+        `is_active` - get the 'is_active' value from the enrollment at the time
+        this record is created
+        `completed` - This lets us filter on a table column instead of calculating it
+    TODO: Add index on 'course_id', 'date_for', 'completed'
     """
     site = models.ForeignKey(Site)
     date_for = models.DateField()
@@ -227,6 +298,10 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     objects = LearnerCourseGradeMetricsManager()
 
     class Meta:
+        """
+        Do we want to add 'site' to the `unique_together` set?
+        Open edX Course IDs are globally unique, so it is not required
+        """
         unique_together = ('user', 'course_id', 'date_for',)
         ordering = ('date_for', 'user__username', 'course_id',)
 
@@ -259,6 +334,10 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
             sections_worked=self.sections_worked,
             sections_possible=self.sections_possible,
         )
+
+    @property
+    def completed(self):
+        return self.sections_worked > 0 and self.sections_worked == self.sections_possible
 
 
 @python_2_unicode_compatible

@@ -100,6 +100,12 @@ router.register(
     views.UserIndexViewSet,
     base_name='user-index')
 
+# Experimental
+
+router.register(
+    r'enrollment-metrics',
+    views.EnrollmentMetricsViewSet,
+    base_name='enrollment-metrics')
 
 urlpatterns = [
 

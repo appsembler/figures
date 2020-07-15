@@ -20,7 +20,11 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 
 from figures.compat import RELEASE_LINE, GeneratedCertificate
-from figures.models import CourseDailyMetrics, SiteDailyMetrics
+from figures.models import (
+    CourseDailyMetrics,
+    LearnerCourseGradeMetrics,
+    SiteDailyMetrics,
+)
 from figures.helpers import as_course_key, as_datetime, days_from, prev_day
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 from figures.pipeline import site_daily_metrics as pipeline_sdm
@@ -42,6 +46,10 @@ def get_site():
     In demo mode, we have just one site (for now)
     """
     return Site.objects.first()
+
+
+def today():
+    return datetime.datetime.utcnow().date()
 
 
 def days_back_list(days_back):
@@ -85,6 +93,8 @@ def seed_course_overviews(data=None):
                 display_org_with_default=rec['org'],
                 number=rec['number'],
                 created=as_datetime(rec['created']).replace(tzinfo=utc),
+                start=as_datetime(rec['enrollment_start']).replace(tzinfo=utc),
+                end=as_datetime(rec['enrollment_end']).replace(tzinfo=utc),
                 enrollment_start=as_datetime(rec['enrollment_start']).replace(tzinfo=utc),
                 enrollment_end=as_datetime(rec['enrollment_end']).replace(tzinfo=utc),
             )
@@ -265,6 +275,49 @@ def seed_site_daily_metrics(data=None):
             date_for=dt, force_update=True)
 
 
+def seed_lcgm_for_course(**_kwargs):
+    """Quick hack to create a number of LCGM records
+    Improvement is to add a devsite model for "synthetic course policy". This
+    model specifies course info: points possible, sections possible, number of
+    learners or learer range, learner completion/progress curve
+    """
+    date_for = _kwargs.get('date_for', datetime.datetime.utcnow().date())
+    site = _kwargs.get('site', get_site())
+    course_id = _kwargs.get('course_id')
+    points_possible = _kwargs.get('points_possible', 20)
+    points_earned = _kwargs.get('points_earned', 10)
+    sections_possible = _kwargs.get('sections_possible', 10)
+    sections_worked = _kwargs.get('sections_worked', 5)
+    for ce in CourseEnrollment.objects.filter(course_id=as_course_key(course_id)):
+        LearnerCourseGradeMetrics.objects.update_or_create(
+            site=site,
+            user=ce.user,
+            course_id=str(course_id),
+            date_for=date_for,
+            defaults=dict(
+                points_possible=points_possible,
+                points_earned=points_earned,
+                sections_possible=sections_possible,
+                sections_worked=sections_worked
+            )
+        )
+
+
+def seed_lcgm_all():
+    for co in CourseOverview.objects.all():
+        print('Seeding LCGM for course {}'.format(str(co.id)))
+        for i, date_for in enumerate(days_back_list(10)):
+            seed_args = dict(
+                date_for=date_for,
+                course_id=str(co.id),
+                points_possible=100,
+                points_earned=i*5,
+                sections_possible=20,
+                sections_worked=i*2,
+            )
+            seed_lcgm_for_course(**seed_args)
+
+
 def wipe():
     clear_non_admin_users()
     CourseEnrollment.objects.all().delete()
@@ -272,6 +325,7 @@ def wipe():
     CourseOverview.objects.all().delete()
     CourseDailyMetrics.objects.all().delete()
     SiteDailyMetrics.objects.all().delete()
+    LearnerCourseGradeMetrics.all().delete()
 
 
 def seed_all():

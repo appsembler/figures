@@ -9,10 +9,15 @@ Some work has been done to support Django Filter prior to 1.0 but it is not comp
 See the following for breaking changes when upgrading to Django Filter 1.0:
 
 https://django-filter.readthedocs.io/en/master/guide/migration.html#migrating-to-1-0
+
+TODO: Rename classes so they eiher all end with "Filter" or "FilterSet" then
+      update the test class names in "tests/test_filters.py" to match.
 """
 
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
+from django.db.models import F
+
 import django_filters
 
 from opaque_keys.edx.keys import CourseKey
@@ -26,21 +31,31 @@ from figures.models import (
     CourseDailyMetrics,
     SiteDailyMetrics,
     CourseMauMetrics,
+    LearnerCourseGradeMetrics,
     SiteMauMetrics,
 )
 
 
 def char_method_filter(method):
     """
-    method is the method name string
-    Check if old style first
-
-    Pre v1:
+    "method" is the method name string
+    First check for old style (pre  version 1 Django Filters)
     """
     if hasattr(django_filters, 'MethodFilter'):
         return django_filters.MethodFilter(action=method)  # pylint: disable=no-member
     else:
         return django_filters.CharFilter(method=method)
+
+
+def boolean_method_filter(method):
+    """
+    "method" is the method name string
+    First check for old style (pre version 1 Django Filters)
+    """
+    if hasattr(django_filters, 'MethodFilter'):
+        return django_filters.MethodFilter(action=method)  # pylint: disable=no-member
+    else:
+        return django_filters.BooleanFilter(method=method)
 
 
 class CourseOverviewFilter(django_filters.FilterSet):
@@ -99,6 +114,76 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
     class Meta:
         model = CourseEnrollment
         fields = ['course_id', 'user_id', 'is_active', ]
+
+
+class EnrollmentMetricsFilter(CourseEnrollmentFilter):
+    """Filter query params for enrollment metrics
+
+    Consider making 'user_ids' and 'course_ids' be mixins for `user` foreign key
+    and 'course_id' respectively. Perhaps a class decorator if there's some
+    unforseen issue with doing a mixin for each
+
+    Filters
+
+    "course_ids" filters on a set of comma delimited course id strings
+    "user_ids" filters on a set of comma delimited integer user ids
+    "only_completed" shows only completed records. Django Filter 1.0.4 appears
+    to only support capitalized "True" as the value in the query string
+
+    The "only_completed" filter is subject to change. We want to be able to
+    filter on: "hide completed", "show only completed", "show everything"
+    So we may go with a "choice field"
+
+    Use ``date_for`` for retrieving a specific date
+    Use ``date_0`` and ``date_1`` for retrieving values in a date range, inclusive
+    each of these can be used singly to get:
+    * ``date_0`` to get records greater than or equal
+    * ``date_1`` to get records less than or equal
+
+    TODO: Add 'is_active' filter - need to find matches in CourseEnrollment
+    """
+    course_ids = char_method_filter(method='filter_course_ids')
+    user_ids = char_method_filter(method='filter_user_ids')
+    date = django_filters.DateFromToRangeFilter(name='date_for')
+    only_completed = boolean_method_filter(method='filter_only_completed')
+    exclude_completed = boolean_method_filter(method='filter_exclude_completed')
+
+    class Meta:
+        """
+        Allow all field and related filtering except for "site"
+        """
+        model = LearnerCourseGradeMetrics
+        exclude = ['site']
+
+    def filter_course_ids(self, queryset, name, value):  # pylint: disable=unused-argument
+        course_ids = [cid.replace(' ', '+') for cid in value.split(',')]
+        return queryset.filter(course_id__in=course_ids)
+
+    def filter_user_ids(self, queryset, name, value):  # pylint: disable=unused-argument
+        """
+        """
+        user_ids = [user_id for user_id in value.split(',') if user_id.isdigit()]
+        return queryset.filter(user_id__in=user_ids)
+
+    def filter_only_completed(self, queryset, name, value):  # pylint: disable=unused-argument
+        """
+        The "value" parameter is either `True` or `False`
+        """
+        if value is True:
+            return queryset.filter(sections_possible__gt=0,
+                                   sections_worked=F('sections_possible'))
+        else:
+            return queryset
+
+    def filter_exclude_completed(self, queryset, name, value):  # pylint: disable=unused-argument
+        """
+        The "value" parameter is either `True` or `False`
+        """
+        if value is True:
+            # This is a hack until we add `completed` field to LCGM
+            return queryset.filter(sections_worked__lt=F('sections_possible'))
+        else:
+            return queryset
 
 
 class UserFilterSet(django_filters.FilterSet):

@@ -19,6 +19,7 @@ from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
     CourseOverviewFilter,
+    EnrollmentMetricsFilter,
     SiteDailyMetricsFilter,
     CourseMauMetricsFilter,
     SiteMauMetricsFilter,
@@ -30,6 +31,7 @@ from figures.models import (
     SiteDailyMetrics,
     CourseMauMetrics,
     SiteMauMetrics,
+    LearnerCourseGradeMetrics,
 )
 
 from tests.factories import (
@@ -37,6 +39,7 @@ from tests.factories import (
     CourseEnrollmentFactory,
     CourseMauMetricsFactory,
     CourseOverviewFactory,
+    LearnerCourseGradeMetricsFactory,
     SiteDailyMetricsFactory,
     SiteMauMetricsFactory,
     SiteFactory,
@@ -101,7 +104,6 @@ class CourseEnrollmentFilterTest(TestCase):
         course_id = CourseEnrollment.objects.all()[0].course_id
         expected_results = CourseEnrollment.objects.filter(course_id=course_id)
         assert expected_results.count() != len(self.course_enrollments)
-        f = CourseEnrollmentFilter(queryset=expected_results)
 
         res = CourseEnrollmentFilter().filter_course_id(
             queryset=CourseEnrollment.objects.all(),
@@ -276,6 +278,54 @@ class SiteMauMetricsFilterTest(TestCase):
             f.qs,
             [o.id for o in self.models if o.date_for == the_date],
             lambda o: o.id, ordered=False)
+
+
+@pytest.mark.skipif(django_filters_pre_v1(),
+                    reason='Django Filter backward compatibility not implemented')
+@pytest.mark.django_db
+class EnrollmentMetricsFilterTest(TestCase):
+    """
+    Initially adding coverage where view tests are not covering
+    """
+    def setUp(self):
+        self.site = SiteFactory()
+
+        self.not_complete = LearnerCourseGradeMetricsFactory(site=self.site,
+                                                             sections_worked=1,
+                                                             sections_possible=2)
+        self.complete = LearnerCourseGradeMetricsFactory(site=self.site,
+                                                         sections_worked=2,
+                                                         sections_possible=2)
+        self.site_qs = LearnerCourseGradeMetrics.objects.filter(site=self.site)
+        self.filter = EnrollmentMetricsFilter(queryset=self.site_qs)
+
+    def test_filter_only_completed(self):
+        qs = self.filter.filter_only_completed(queryset=self.site_qs,
+                                               name='only_completed',
+                                               value=True)
+        assert qs.count() == 1 and qs[0] == self.complete
+
+    def test_filter_only_completed_no_value(self):
+        """Test that the method returns the queryset passed in
+        """
+        qs = self.filter.filter_only_completed(queryset=self.site_qs,
+                                               name='only_completed',
+                                               value=False)
+        assert qs == self.site_qs
+
+    def test_filter_exclude_completed(self):
+        qs = self.filter.filter_exclude_completed(queryset=self.site_qs,
+                                                  name='exclude_completed',
+                                                  value=True)
+        assert qs.count() == 1 and qs[0] == self.not_complete
+
+    def test_filter_only_excluded_no_value(self):
+        """Test that the method returns the queryset passed in
+        """
+        qs = self.filter.filter_exclude_completed(queryset=self.site_qs,
+                                                  name='exclude_completed',
+                                                  value=False)
+        assert qs == self.site_qs
 
 
 @pytest.mark.skipif(django_filters_pre_v1(),

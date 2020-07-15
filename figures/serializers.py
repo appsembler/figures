@@ -787,3 +787,26 @@ class CourseMauLiveMetricsSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     course_id = serializers.CharField()
     domain = serializers.CharField()
+
+
+class EnrollmentMetricsSerializer(serializers.ModelSerializer):
+    """Serializer for LearnerCourseGradeMetrics
+    """
+    user = UserIndexSerializer(read_only=True)
+    progress_percent = serializers.DecimalField(max_digits=3,
+                                                decimal_places=2,
+                                                min_value=0.00,
+                                                max_value=1.00)
+
+    class Meta:
+        model = LearnerCourseGradeMetrics
+        editable = False
+        fields = ('id', 'user', 'course_id', 'date_for', 'completed',
+                  'points_earned', 'points_possible',
+                  'sections_worked', 'sections_possible',
+                  'progress_percent')
+
+
+class CourseCompletedSerializer(serializers.Serializer):
+    course_id = serializers.CharField()
+    user_id = serializers.IntegerField()
