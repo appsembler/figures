@@ -103,6 +103,8 @@ class SiteDailyMetrics(TimeStampedModel):
     total_user_count = models.IntegerField()
     course_count = models.IntegerField()
     total_enrollment_count = models.IntegerField()
+
+    # Should change this to default value of 0
     mau = models.IntegerField(blank=True, null=True)
 
     class Meta:

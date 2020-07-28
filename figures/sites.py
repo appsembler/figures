@@ -160,6 +160,9 @@ def get_courses_for_site(site):
 
 
 def get_user_ids_for_site(site):
+    """
+    We can use organization_instance.users instead
+    """
     if figures.helpers.is_multisite():
         orgs = organizations.models.Organization.objects.filter(sites__in=[site])
         mappings = organizations.models.UserOrganizationMapping.objects.filter(
