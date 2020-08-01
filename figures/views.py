@@ -64,6 +64,7 @@ from figures.serializers import (
     EnrollmentMetricsSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
+    LearnerMetricsSerializer,
     SiteDailyMetricsSerializer,
     SiteMauMetricsSerializer,
     SiteMauLiveMetricsSerializer,
@@ -394,6 +395,35 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
     def get_serializer_context(self):
         context = super(LearnerDetailsViewSet, self).get_serializer_context()
+        context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
+        return context
+
+
+class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """Provides user identity and nested enrollment data
+
+    This view is unders active development and subject to change
+
+    TODO: After we get this class tests running, restructure this module:
+    * Group all user model based viewsets together
+    * Make a base user viewset with the `get_queryset` and `get_serializer_context`
+      methods
+    """
+    model = get_user_model()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = LearnerMetricsSerializer
+    filter_backends = (DjangoFilterBackend, )
+
+    # TODO: Improve this filter
+    filter_class = UserFilterSet
+
+    def get_queryset(self):
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        queryset = figures.sites.get_users_for_site(site)
+        return queryset
+
+    def get_serializer_context(self):
+        context = super(LearnerMetricsViewSet, self).get_serializer_context()
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
         return context
 
