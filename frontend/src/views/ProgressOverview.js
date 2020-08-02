@@ -193,7 +193,7 @@ class ProgressOverview extends Component {
       coursesFilter.forEach((course, i) => {
         const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course.id);
         if (userProgress) {
-          singleRecord[course.id] = 'Progress:' + userProgress.getIn(['progress_percent']) + '/1' + '|Sections:' + userProgress.getIn(['progress_details', 'sections_worked']) + '/' + userProgress.getIn(['progress_details', 'sections_possible']) + '|Points:' + userProgress.getIn(['progress_details', 'points_earned']) + '/' + userProgress.getIn(['progress_details', 'points_possible']);
+          singleRecord[course.id] = `Progress: ${userProgress.getIn(['progress_percent'])}/1 | Sections: ${userProgress.getIn(['progress_details', 'sections_worked'])}/${userProgress.getIn(['progress_details', 'sections_possible'])} | Points: ${userProgress.getIn(['progress_details', 'points_earned'])}/${userProgress.getIn(['progress_details', 'points_possible'])}`;
         } else {
           singleRecord[course.id] = '-';
         };
