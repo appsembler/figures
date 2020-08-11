@@ -8,6 +8,23 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+14 Jul 2020 - Figures release 0.3.13
+====================================
+
+* Learner metrics Prerelease API and UI
+
+  * https://github.com/appsembler/figures/pull/239
+  * https://github.com/appsembler/figures/pull/240
+
+* Improve logging for monthly metrics pipeline and set default to run the monthly metrics pipeline task
+
+  * https://github.com/appsembler/figures/pull/242
+
+* Bug fix: Site level certificate metrics
+
+  * https://github.com/appsembler/figures/pull/244
+
+
 15 Jul 2020 - Figures release 0.3.12
 ====================================
 
