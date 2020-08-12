@@ -7,6 +7,7 @@ import django.contrib.sites.shortcuts
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
+from figures.sites import get_user_ids_for_site
 from figures.views import LearnerMetricsViewSet
 
 from tests.factories import (
@@ -128,7 +129,13 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         return view(request)
 
     def test_list_method_all(self, monkeypatch, enrollment_test_data):
-        """INCOMPLETE TEST
+        """Partial test coverage to check we get all site users
+
+        Checks returned user ids against all user ids for the site
+        Checks top level keys
+
+        Does NOT check values in the `enrollments` key. This should be done as
+        follow up work
         """
         site = enrollment_test_data['site']
         users = enrollment_test_data['users']
@@ -149,7 +156,8 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         results = response.data['results']
         # Check user ids
         result_ids = [obj['id'] for obj in results]
-        assert set(result_ids) == set([obj.user_id for obj in enrollments]+[caller.id])
+        user_ids = get_user_ids_for_site(site=site)
+        assert set(result_ids) == set(user_ids)
         # Spot check the first record
         top_keys = ['id', 'username', 'email', 'fullname', 'is_active',
                     'date_joined', 'enrollments']

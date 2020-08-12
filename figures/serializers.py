@@ -24,6 +24,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django_countries import Countries
 from rest_framework import serializers
+from rest_framework.fields import empty
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
 from openedx.core.djangoapps.user_api.accounts.serializers import AccountLegacyProfileSerializer  # noqa pylint: disable=import-error
@@ -834,6 +835,11 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
     progress_percent = serializers.SerializerMethodField()
     progress_details = serializers.SerializerMethodField()
 
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self._lcgm = None
+        super(EnrollmentMetricsSerializerV2, self).__init__(
+            instance=None, data=empty, **kwargs)
+
     class Meta:
         model = CourseEnrollment
         fields = ['id', 'course_id', 'date_enrolled', 'is_enrolled',
@@ -856,11 +862,12 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
         """
         return CourseEnrollment.is_enrolled(obj.user, obj.course_id)
 
-    def get_progress_percent(self, obj):
+
+    def get_progress_percent(self, obj):  # pylint: disable=unused-argument
         value = self._lcgm.progress_percent if self._lcgm else 0
         return float(Decimal(value).quantize(Decimal('.00')))
 
-    def get_progress_details(self, obj):
+    def get_progress_details(self, obj):  # pylint: disable=unused-argument
         """Get progress data for a single enrollment
         """
         return self._lcgm.progress_details if self._lcgm else None
