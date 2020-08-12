@@ -18,11 +18,13 @@ looking at adding additional Figures models to capture:
 """
 
 import datetime
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django_countries import Countries
 from rest_framework import serializers
+from rest_framework.fields import empty
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
 from openedx.core.djangoapps.user_api.accounts.serializers import AccountLegacyProfileSerializer  # noqa pylint: disable=import-error
@@ -791,6 +793,10 @@ class CourseMauLiveMetricsSerializer(serializers.Serializer):
 
 class EnrollmentMetricsSerializer(serializers.ModelSerializer):
     """Serializer for LearnerCourseGradeMetrics
+
+    This is a prototype serializer for exploring API endpoints
+
+    It provides an enrollment major, use minor view
     """
     user = UserIndexSerializer(read_only=True)
     progress_percent = serializers.DecimalField(max_digits=3,
@@ -808,5 +814,78 @@ class EnrollmentMetricsSerializer(serializers.ModelSerializer):
 
 
 class CourseCompletedSerializer(serializers.Serializer):
+    """Provides course id and user id for course completions
+
+    This serializer is used in the `enrollment-metrics` endpoint
+    """
     course_id = serializers.CharField()
     user_id = serializers.IntegerField()
+
+
+class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
+    """Provides serialization for an enrollment
+
+    This serializer note not identify the learner. It is used in
+    LearnerMetricsSerializer
+    """
+    course_id = serializers.CharField()
+    date_enrolled = serializers.DateTimeField(source='created',
+                                              format="%Y-%m-%d")
+    is_enrolled = serializers.BooleanField()
+    progress_percent = serializers.SerializerMethodField()
+    progress_details = serializers.SerializerMethodField()
+
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self._lcgm = None
+        super(EnrollmentMetricsSerializerV2, self).__init__(
+            instance=None, data=empty, **kwargs)
+
+    class Meta:
+        model = CourseEnrollment
+        fields = ['id', 'course_id', 'date_enrolled', 'is_enrolled',
+                  'progress_percent', 'progress_details']
+        read_only_fields = fields
+
+    def to_representation(self, instance):
+        """
+        Get the most recent LCGM record for the enrollment, if it exists
+        """
+        self._lcgm = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+            user=instance.user, course_id=str(instance.course_id))
+        return super(EnrollmentMetricsSerializerV2, self).to_representation(instance)
+
+    def get_is_enrolled(self, obj):
+        """
+        CourseEnrollment has to do some work to get this value
+        TODO: inspect CourseEnrollment._get_enrollment_state to see how we
+        can speed this up, avoiding construction of `CourseEnrollmentState`
+        """
+        return CourseEnrollment.is_enrolled(obj.user, obj.course_id)
+
+    def get_progress_percent(self, obj):  # pylint: disable=unused-argument
+        value = self._lcgm.progress_percent if self._lcgm else 0
+        return float(Decimal(value).quantize(Decimal('.00')))
+
+    def get_progress_details(self, obj):  # pylint: disable=unused-argument
+        """Get progress data for a single enrollment
+        """
+        return self._lcgm.progress_details if self._lcgm else None
+
+
+class LearnerMetricsSerializer(serializers.ModelSerializer):
+    fullname = serializers.CharField(source='profile.name', default=None)
+    # enrollments = EnrollmentMetricsSerializerV2(source='courseenrollment_set',
+    #     many=True)
+    enrollments = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        fields = ('id', 'username', 'email', 'fullname', 'is_active',
+                  'date_joined', 'enrollments')
+        read_only_fields = fields
+
+    def get_enrollments(self, user):
+        site_enrollments = figures.sites.get_course_enrollments_for_site(
+            self.context.get('site'))
+        user_enrollments = site_enrollments.filter(user=user)
+        return EnrollmentMetricsSerializerV2(user_enrollments, many=True).data
