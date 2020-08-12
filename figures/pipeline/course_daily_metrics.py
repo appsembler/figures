@@ -185,6 +185,14 @@ def get_average_days_to_complete(course_id, date_for):
 
 
 def get_num_learners_completed(course_id, date_for):
+    """
+    Get the total number of certificates generated for the course up to the
+    'date_for' date
+
+    We will need to relabel this to "certificates"
+
+    We may want to get the number of certificates granted in the given day
+    """
     certificates = GeneratedCertificate.objects.filter(
         course_id=as_course_key(course_id),
         created_date__lt=as_datetime(next_day(date_for)))
