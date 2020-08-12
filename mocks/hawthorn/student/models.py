@@ -1,5 +1,5 @@
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from datetime import datetime
 
 from pytz import UTC
@@ -129,6 +129,12 @@ class CourseEnrollmentManager(models.Manager):
         return enroll_dict
 
 
+# Named tuple for fields pertaining to the state of
+# CourseEnrollment for a user in a course.  This type
+# is used to cache the state in the request cache.
+CourseEnrollmentState = namedtuple('CourseEnrollmentState', 'mode, is_active')
+
+
 class CourseEnrollment(models.Model):
     '''
     The production model is student.models.CourseEnrollment
@@ -190,6 +196,42 @@ class CourseEnrollment(models.Model):
         # Private variable for storing course_overview to minimize calls to the database.
         # When the property .course_overview is accessed for the first time, this variable will be set.
         self._course_overview = None
+
+    @classmethod
+    def is_enrolled(cls, user, course_key):
+        """
+        Returns True if the user is enrolled in the course (the entry must exist
+        and it must have `is_active=True`). Otherwise, returns False.
+
+        `user` is a Django User object. If it hasn't been saved yet (no `.id`
+               attribute), this method will automatically save it before
+               adding an enrollment for it.
+
+        `course_id` is our usual course_id string (e.g. "edX/Test101/2013_Fall)
+        """
+        enrollment_state = cls._get_enrollment_state(user, course_key)
+        return enrollment_state.is_active or False
+
+    @classmethod
+    def _get_enrollment_state(cls, user, course_key):
+        """
+        Returns the CourseEnrollmentState for the given user
+        and course_key, caching the result for later retrieval.
+
+        Figures note: removed the caching after copying this method
+        """
+        assert user
+
+        if user.is_anonymous:
+            return CourseEnrollmentState(None, None)
+
+        try:
+            record = cls.objects.get(user=user, course_id=course_key)
+            enrollment_state = CourseEnrollmentState(record.mode, record.is_active)
+        except cls.DoesNotExist:
+            enrollment_state = CourseEnrollmentState(None, None)
+
+        return enrollment_state
 
 
 class CourseAccessRole(models.Model):
