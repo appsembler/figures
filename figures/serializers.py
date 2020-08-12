@@ -862,7 +862,6 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
         """
         return CourseEnrollment.is_enrolled(obj.user, obj.course_id)
 
-
     def get_progress_percent(self, obj):  # pylint: disable=unused-argument
         value = self._lcgm.progress_percent if self._lcgm else 0
         return float(Decimal(value).quantize(Decimal('.00')))
