@@ -54,6 +54,9 @@ class CourseDailyMetrics(TimeStampedModel):
         )
 
     average_days_to_complete = models.IntegerField(blank=True, null=True)
+
+    # As of Figures 0.3.13, this is the total number of certificates granted
+    # for the course as of the "date_for"
     num_learners_completed = models.IntegerField()
 
     class Meta:
