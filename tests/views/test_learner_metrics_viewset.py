@@ -154,7 +154,6 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         assert response.status_code == status.HTTP_200_OK
         assert is_response_paginated(response.data)
         results = response.data['results']
-
         # Check user ids
         result_ids = [obj['id'] for obj in results]
         user_ids = get_user_ids_for_site(site=site)
