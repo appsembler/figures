@@ -10,7 +10,7 @@
 ###
 
 celery==3.1.26.post2
-six==1.14.0 # this might be needed
+six==1.14.0
 
 # Faker is used to seed mock data in devsite
 Faker==2.0.3
@@ -38,7 +38,7 @@ jsonfield==2.1.1 #! 2.0.2
 ##
 
 Sphinx==3.1.2 #!1.8.1
-recommonmark==0.6.0 #! 0.4.0
+#recommonmark==0.6.0 #! 0.4.0 #caniusepython3 flagged
 
 ##
 ## Open edX package dependencies
