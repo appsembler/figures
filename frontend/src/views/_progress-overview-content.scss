@@ -34,7 +34,7 @@
   padding: 0;
 
   .username {
-    width: calcRem(140);
+    width: calcRem(200);
     font-size: calcRem(13);
     flex-grow: 0;
     flex-shrink: 0;
@@ -47,7 +47,7 @@
   }
 
   .email {
-    width: calcRem(210);
+    width: calcRem(300);
     font-size: calcRem(13);
     flex-grow: 0;
     flex-shrink: 0;
@@ -159,6 +159,7 @@ button.export-the-csv-button {
   border-radius: 50px;
   margin-left: auto;
   transition: all 0.3s ease-in-out;
+  font-size: calcRem(14);
 
   &:hover {
     cursor: pointer;
