@@ -2,6 +2,7 @@
 This module provides MAU metrics retrieval functionality
 """
 
+from __future__ import absolute_import
 from datetime import datetime
 
 from figures.models import CourseMauMetrics, SiteMauMetrics

@@ -1,4 +1,5 @@
 
+from __future__ import absolute_import
 from collections import defaultdict
 from datetime import datetime
 
@@ -16,6 +17,8 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
+import six
+from six.moves import range
 
 class UserProfile(models.Model):
     '''
@@ -34,7 +37,7 @@ class UserProfile(models.Model):
 
     # Optional demographic data we started capturing from Fall 2012
     this_year = datetime.now(UTC).year
-    VALID_YEARS = range(this_year, this_year - 120, -1)
+    VALID_YEARS = list(range(this_year, this_year - 120, -1))
     year_of_birth = models.IntegerField(blank=True, null=True, db_index=True)
 
     GENDER_CHOICES = (
@@ -141,7 +144,7 @@ class CourseEnrollment(models.Model):
     '''
 
     MODEL_TAGS = ['course', 'is_active', 'mode']
-
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     course = models.ForeignKey(
@@ -149,18 +152,18 @@ class CourseEnrollment(models.Model):
         db_constraint=False,
         on_delete=models.DO_NOTHING,
     )
-
+    '''
     @property
     def course_id(self):
         return self._course_id
 
     @course_id.setter
     def course_id(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             self._course_id = CourseKey.from_string(value)
         else:
             self._course_id = value
-
+    '''
     # NOTE: We do not want to enable `auto_now_add` because we need the factory
     # to set the created date
     created = models.DateTimeField(null=True)
@@ -193,7 +196,8 @@ class CourseEnrollment(models.Model):
 
 
 class CourseAccessRole(models.Model):
-    user = models.ForeignKey(User)
+    # TODO: Review the most appropriate on_delete behaviour
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     # blank org is for global group based roles such as course creator (may be deprecated)
     org = models.CharField(max_length=64, db_index=True, blank=True)
     # blank course_id implies org wide role

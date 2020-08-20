@@ -2,6 +2,8 @@
 This command writes synthetic data to the metrics models. Any existing data are deleted
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 from django.core.management.base import BaseCommand
 
 from devsite import seed

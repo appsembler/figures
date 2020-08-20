@@ -2,6 +2,7 @@
 
 TODO: Add test coverage for multisite
 """
+#from __future__ import absolute_import
 import mock
 import pytest
 

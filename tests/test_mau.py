@@ -1,4 +1,5 @@
 
+from __future__ import absolute_import
 from datetime import datetime
 from freezegun import freeze_time
 from dateutil.relativedelta import relativedelta

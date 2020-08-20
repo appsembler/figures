@@ -76,3 +76,6 @@ pytest-cov==2.6.0
 tox==3.14.2
 freezegun==0.3.12
 edx-lint==0.5.5
+
+# I had to manually install mock
+mock==3.0.5

@@ -22,6 +22,7 @@ or restructure into fixtures and standalone test functions, depending on how
 figures.sites evolves
 """
 
+from __future__ import absolute_import
 import mock
 import pytest
 
@@ -47,6 +48,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.helpers import organizations_support_sites
+from six.moves import range
 
 
 if organizations_support_sites():

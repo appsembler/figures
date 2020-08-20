@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -27,7 +28,8 @@ class StudentModule(models.Model):
 
     # Key used to share state. This is the XBlock usage_id
     #! module_state_key = LocationKeyField(max_length=255, db_index=True, db_column='module_id')
-    student = models.ForeignKey(User, db_index=True)
+    # TODO: Review the most appropriate on_delete behaviour
+    student = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE)
 
     # The learning context of the usage_key (usually a course ID, but may be a library or something else)
     course_id = LearningContextKeyField(max_length=255, db_index=True)

@@ -3,6 +3,7 @@
 ./common/lib/xmodule/xmodule/modulestore/django.py
 '''
 
+from __future__ import absolute_import
 from contextlib import contextmanager
 
 
@@ -32,7 +33,7 @@ class MockCourse(object):
 
 class MockMixedModulestore(object):
     '''
-    We are mocking functionalit needed by courseware.courses
+    We are mocking functionality needed by courseware.courses
     '''
     def __init__(self, **kwargs):
         pass

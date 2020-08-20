@@ -1,6 +1,7 @@
 """Helper methods for Figures testing
 """
 
+from __future__ import absolute_import
 import os
 from dateutil.rrule import rrule, DAILY
 from packaging import version

@@ -16,6 +16,8 @@ entries in sys.modules. Therefore, we need to use patch context manager.
 # wipe the branch, pull from develop and create new branch. Fastest
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 from mock import Mock, patch
 import pytest
 import six
@@ -40,7 +42,7 @@ def patch_module(module_path, extra_properties=None):
 
     for i, part in enumerate(path_parts):
         sub_path = '.'.join(path_parts[:i+1])
-        print('sub_path', sub_path)
+        print(('sub_path', sub_path))
         module = ModuleType(sub_path)
         patch_specs[sub_path] = module
 

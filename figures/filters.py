@@ -14,6 +14,7 @@ TODO: Rename classes so they eiher all end with "Filter" or "FilterSet" then
       update the test class names in "tests/test_filters.py" to match.
 """
 
+from __future__ import absolute_import
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.models import F

@@ -10,10 +10,11 @@
 ###
 
 celery==3.1.26.post2
+django-celery==3.3.1
 six==1.14.0
 
 # Faker is used to seed mock data in devsite
-Faker==2.0.3
+Faker==4.1.0 
 python-dateutil==2.7.3
 path.py==12.4.0
 
@@ -27,11 +28,11 @@ Django==2.2.15
 
 djangorestframework==3.9.4
 django-countries==5.5
-django-filter==2.2.0
 django-webpack-loader==0.7.0
 django-model-utils==4.0.0
+django-filter==2.3.0
 
-jsonfield==2.1.1 #! 2.0.2
+jsonfield==2.1.1
 
 ##
 ## Documentation (Sphinx) dependencies

@@ -15,9 +15,17 @@ from figures.settings.lms_production import (
 )
 
 OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
+ENABLE_DEVSITE_CELERY = os.environ.get('ENABLE_DEVSITE_CELERY', 'TRUE').upper()
+
+if ENABLE_DEVSITE_CELERY == 'FALSE':
+    ENABLE_DEVSITE_CELERY = False
+else:
+    ENABLE_DEVSITE_CELERY = True
 
 if OPENEDX_RELEASE == 'GINKGO':
     MOCKS_DIR = 'mocks/ginkgo'
+if OPENEDX_RELEASE == 'JUNIPER':
+    MOCKS_DIR = 'mocks/juniper'
 else:
     MOCKS_DIR = 'mocks/hawthorn'
 
@@ -37,7 +45,7 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 # TODO: Update this to allow environment variable override
-ENABLE_DEVSITE_CELERY = True
+# ENABLE_DEVSITE_CELERY = True
 
 # Adds the mock edx-platform modules to the Python module search path
 sys.path.append(os.path.normpath(os.path.join(PROJECT_ROOT_DIR, MOCKS_DIR)))
@@ -50,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'django_extensions',
+    #'django_extensions',
     'rest_framework',
     'django_countries',
     'django_filters',
@@ -82,17 +90,31 @@ else:
     INSTALLED_APPS.append('lms.djangoapps.certificates')
 
 
-MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
+
+if OPENEDX_RELEASE == 'JUNIPER':
+    MIDDLEWARE = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+else: 
+    MIDDLEWARE_CLASSES = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
 
 ROOT_URLCONF = 'devsite.urls'
 

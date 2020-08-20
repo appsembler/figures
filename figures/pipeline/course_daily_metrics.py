@@ -11,6 +11,7 @@ Future: add a remote mode to pull data via REST API
 
 # TODO: Move extractors to figures.pipeline.extract module
 """
+from __future__ import absolute_import
 import datetime
 from decimal import Decimal
 import logging

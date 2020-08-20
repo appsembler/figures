@@ -1,4 +1,5 @@
 
+from __future__ import absolute_import
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -17,6 +18,7 @@ class CourseTeamMembership(models.Model):
         app_label = "teams"
         unique_together = (('user', 'team'),)
 
-    user = models.ForeignKey(User)
-    team = models.ForeignKey(CourseTeam, related_name='membership')
+    # TODO Review on_delete behaviour
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    team = models.ForeignKey(CourseTeam, related_name='membership', on_delete=models.CASCADE)
 

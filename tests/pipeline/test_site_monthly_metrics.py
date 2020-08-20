@@ -3,6 +3,7 @@
 This is initial test coverage
 
 """
+from __future__ import absolute_import
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.utils.timezone import utc
@@ -19,6 +20,7 @@ from tests.factories import (
     SiteFactory,
     StudentModuleFactory,
 )
+from six.moves import range
 
 
 @pytest.fixture

@@ -2,6 +2,7 @@
 
 '''
 
+from __future__ import absolute_import
 import datetime
 from dateutil.parser import parse
 from dateutil.rrule import rrule, DAILY
@@ -139,6 +140,6 @@ class TestSiteDailyMetricsView(BaseViewTest):
         response = view(request)
 
         assert response.status_code == 201
-        assert 'id' in response.data.keys()
+        assert 'id' in list(response.data.keys())
         for key in data.keys():
             assert response.data[key] == data[key]

@@ -1,6 +1,7 @@
 """Tests Figures course monthly metrics viewset
 """
 
+from __future__ import absolute_import
 from faker import Faker
 import pytest
 
@@ -21,6 +22,8 @@ from tests.factories import (
 )
 from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
+from six.moves import range
+from six.moves import zip
 
 fake = Faker()
 
@@ -73,7 +76,7 @@ def course_test_data():
     student_modules = []
     dates = generate_date_series(months_back=months_back)
     assert dates
-    data_spec = zip(dates, range(months_back))
+    data_spec = list(zip(dates, list(range(months_back))))
 
     return dict(
         site=site,
@@ -132,7 +135,7 @@ class TestCourseMonthlyMetricsViewSet(BaseViewTest):
         """Helper method to reduce duplication
         """
         assert response.status_code == status.HTTP_200_OK
-        assert endpoint in response.data.keys()
+        assert endpoint in list(response.data.keys())
         history_list = response.data[endpoint]['history']
 
         # check that we have the current month and an element for each prior

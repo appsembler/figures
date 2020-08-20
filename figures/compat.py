@@ -10,6 +10,7 @@ a lowercase string, such as 'ginkgo' or 'hawthorn'
 '''
 # pylint: disable=ungrouped-imports,useless-suppression
 
+from __future__ import absolute_import
 try:
     from openedx.core.release import RELEASE_LINE
 except ImportError:
@@ -57,7 +58,7 @@ def chapter_grade_values(chapter_grades):
     '''
 
     if isinstance(chapter_grades, dict):
-        return chapter_grades.values()
+        return list(chapter_grades.values())
     elif isinstance(chapter_grades, list):
         return chapter_grades
     else:

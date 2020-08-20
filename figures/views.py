@@ -1,6 +1,7 @@
 """Figures views
 """
 
+from __future__ import absolute_import
 from datetime import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -19,10 +20,13 @@ from rest_framework.authentication import (
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import (
+# https://www.django-rest-framework.org/api-guide/filtering/#searchfilter
+from django_filters.rest_framework import (
     DjangoFilterBackend,
-    SearchFilter,
     OrderingFilter
+)
+from rest_framework.filters import (
+    SearchFilter
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView

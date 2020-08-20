@@ -2,6 +2,7 @@
 Figures URL definitions
 '''
 
+from __future__ import absolute_import
 from django.conf.urls import include, url
 from rest_framework import routers
 
@@ -113,7 +114,7 @@ urlpatterns = [
     url(r'^$', views.figures_home, name='figures-home'),
 
     # REST API
-    url(r'^api/', include(router.urls, namespace='api')),
+    url(r'^api/', include((router.urls, 'api'), namespace='api')),
     url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
         name='general-site-metrics'),
     url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')

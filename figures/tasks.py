@@ -2,6 +2,7 @@
 Figures Celery tasks. Initially this module contains tasks for the ETL pipeline.
 
 '''
+from __future__ import absolute_import
 import datetime
 import time
 
@@ -23,6 +24,7 @@ import figures.sites
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
 from figures.pipeline.logger import log_error_to_db
+import six
 
 
 logger = get_task_logger(__name__)
@@ -175,7 +177,7 @@ def experimental_populate_daily_metrics(date_for=None, force_update=False):
     courses = CourseOverview.objects.all()
     cdm_tasks = [
         populate_single_cdm.s(
-            course_id=unicode(course.id),  # noqa: F821
+            course_id=six.text_type(course.id),  # noqa: F821
             date_for=date_for,
             force_update=force_update) for course in courses if include_course(course)
     ]

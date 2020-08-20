@@ -1,6 +1,7 @@
 """Provides permissions for Figures views
 
 """
+from __future__ import absolute_import
 from rest_framework.permissions import BasePermission
 
 import django.contrib.sites.shortcuts

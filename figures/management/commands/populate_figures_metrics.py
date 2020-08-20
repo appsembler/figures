@@ -5,6 +5,7 @@ see the model ``edx_figures.models.CourseDailyMetrics``
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from textwrap import dedent
 
 from django.core.management.base import BaseCommand

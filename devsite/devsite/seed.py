@@ -5,6 +5,8 @@ Fills the standalone development environment database
   mock platform data
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 import datetime
 from dateutil.rrule import rrule, DAILY
 import faker
@@ -30,6 +32,7 @@ from figures.pipeline import course_daily_metrics as pipeline_cdm
 from figures.pipeline import site_daily_metrics as pipeline_sdm
 
 from devsite import cans
+from six.moves import range
 
 FAKE = faker.Faker()
 LAST_DAY = days_from(datetime.datetime.now(), -2).replace(tzinfo=utc)
@@ -82,7 +85,7 @@ def seed_course_overviews(data=None):
     if not data:
         data = cans.COURSE_OVERVIEW_DATA
         # append with randomly generated course overviews to test pagination
-        new_courses = [generate_course_overview(i, org='FOO') for i in xrange(20)]
+        new_courses = [generate_course_overview(i, org='FOO') for i in range(20)]
         data += new_courses
 
     for rec in data:
@@ -140,7 +143,7 @@ def seed_users(data=None):
                     country=profile_rec.get('country', None),
                 )
         except IntegrityError as e:
-            print('skipping duplicate user email {}'.format(e))
+            print(('skipping duplicate user email {}'.format(e)))
     return created_users
 
 
@@ -152,7 +155,7 @@ def seed_course_enrollments_for_course(course_id, users, max_days_back):
 
     for user in users:
         if VERBOSE:
-            print('seeding course enrollment for user {}'.format(user.username))
+            print(('seeding course enrollment for user {}'.format(user.username)))
 
         CourseEnrollment.objects.update_or_create(
             course_id=course_id,
@@ -229,7 +232,7 @@ def seed_course_daily_metrics_fixed(data=None):
     if not data:
         data = cans.COURSE_DAILY_METRICS_DATA
     for index, rec in enumerate(data):
-        print('seed CDM # {}'.format(index))
+        print(('seed CDM # {}'.format(index)))
         CourseDailyMetrics.objects.update_or_create(
             course_id=rec['course_id'],
             date_for=rec['date_for'],
@@ -249,7 +252,7 @@ def seed_course_daily_metrics_for_course(course_id):
 
     for dt in rrule(DAILY, dtstart=start_date, until=end_date):
         if VERBOSE:
-            print('populating day {} for course {}'.format(dt, course_id))
+            print(('populating day {} for course {}'.format(dt, course_id)))
         cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load(
             date_for=dt, force_update=True)
 
@@ -257,7 +260,7 @@ def seed_course_daily_metrics_for_course(course_id):
 def seed_course_daily_metrics():
     for co in CourseOverview.objects.all():
         if VERBOSE:
-            print('seeding CDM for course {}'.format(co.id))
+            print(('seeding CDM for course {}'.format(co.id)))
         seed_course_daily_metrics_for_course(co.id)
 
 
@@ -305,7 +308,7 @@ def seed_lcgm_for_course(**_kwargs):
 
 def seed_lcgm_all():
     for co in CourseOverview.objects.all():
-        print('Seeding LCGM for course {}'.format(str(co.id)))
+        print(('Seeding LCGM for course {}'.format(str(co.id))))
         for i, date_for in enumerate(days_back_list(10)):
             seed_args = dict(
                 date_for=date_for,
@@ -325,7 +328,7 @@ def wipe():
     CourseOverview.objects.all().delete()
     CourseDailyMetrics.objects.all().delete()
     SiteDailyMetrics.objects.all().delete()
-    LearnerCourseGradeMetrics.all().delete()
+    LearnerCourseGradeMetrics.objects.all().delete()
 
 
 def seed_all():
@@ -335,6 +338,7 @@ def seed_all():
     seed_course_overviews()
     print("seeding users...")
     seed_users()
+
     print("seeding course enrollments...")
     seed_course_enrollments()
 
@@ -348,7 +352,7 @@ def seed_all():
     seed_course_completions()
     print("\nseeding figures metrics models")
     print("------------------------------")
-    print("backfilling course daily metrics for {} days back...".format(DAYS_BACK))
+    print(("backfilling course daily metrics for {} days back...".format(DAYS_BACK)))
     print("  (this may take serveral minutes)")
     seed_course_daily_metrics()
     print("seeding site daily metrics...")

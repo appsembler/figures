@@ -2,6 +2,7 @@
 
 '''
 
+from __future__ import absolute_import
 import pytest
 
 from django.contrib.auth import get_user_model
@@ -114,6 +115,6 @@ class TestUserIndexViewSet(BaseViewTest):
 
         assert len(response.data['results']) == len(expected_data)
         for rec in response.data['results']:
-            match_rec = (item for item in expected_data 
-                if item['username'] == rec['username']).next()
+            match_rec = next((item for item in expected_data 
+                if item['username'] == rec['username']))
             assert rec == match_rec

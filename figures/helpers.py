@@ -2,6 +2,7 @@
 Helper functions to make data handling and conversions easier
 '''
 
+from __future__ import absolute_import
 import calendar
 import datetime
 from django.conf import settings
@@ -12,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, MONTHLY
 
 from opaque_keys.edx.keys import CourseKey
+import six
 
 
 def is_multisite():
@@ -43,7 +45,7 @@ def as_course_key(course_id):
     '''
     if isinstance(course_id, CourseKey):
         return course_id
-    elif isinstance(course_id, basestring):  # noqa: F821
+    elif isinstance(course_id, six.string_types):  # noqa: F821
         return CourseKey.from_string(course_id)
     else:
         raise TypeError('Unable to convert course id with type "{}"'.format(
@@ -65,7 +67,7 @@ def as_datetime(val):
             day=val.day,
             ).replace(tzinfo=utc)
 
-    elif isinstance(val, basestring):  # noqa: F821
+    elif isinstance(val, six.string_types):  # noqa: F821
         return dateutil_parse(val).replace(tzinfo=utc)
     else:
         raise TypeError(
@@ -84,7 +86,7 @@ def as_date(val):
         return val.date()
     elif isinstance(val, datetime.date):
         return val
-    elif isinstance(val, basestring):  # noqa: F821
+    elif isinstance(val, six.string_types):  # noqa: F821
         return dateutil_parse(val).date()
     else:
         raise TypeError(

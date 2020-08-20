@@ -2,6 +2,7 @@
 
 '''
 
+from __future__ import absolute_import
 import datetime
 from decimal import Decimal
 from dateutil.parser import parse

@@ -1,5 +1,6 @@
 
 
+from __future__ import absolute_import
 import datetime
 from dateutil.rrule import rrule, DAILY
 
@@ -42,12 +43,12 @@ def generate_cdm_data_for_course(course_id):
         average_progress = gen_avg_progress(yesterday.get('average_progress', 0))
         average_days_to_complete = randint(10, 30)
         num_learners_completed = gen_num_learners_completed(yesterday)
-
+        
         rec = dict(
             course_id=course_id,
             date_for=dt.strftime('%Y-%m-%d'),
             enrollment_count=enrollment_count,
-            active_learners_today=randint(0, enrollment_count / 2),
+            active_learners_today=randint(0, enrollment_count // 2),
             average_progress=average_progress,
             average_days_to_complete=average_days_to_complete,
             num_learners_completed=num_learners_completed,

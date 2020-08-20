@@ -3,6 +3,7 @@
 TODO: Update this test module to test multisite environments
 """
 
+from __future__ import absolute_import
 import datetime
 import mock
 import pytest
@@ -33,6 +34,7 @@ from tests.helpers import (
     OPENEDX_RELEASE,
     GINKGO,
 )
+from six.moves import range
 
 
 if organizations_support_sites():

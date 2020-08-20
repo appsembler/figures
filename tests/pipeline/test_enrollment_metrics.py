@@ -1,4 +1,5 @@
 
+from __future__ import absolute_import
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import mock
@@ -27,6 +28,7 @@ from tests.factories import (
     SiteFactory,
     StudentModuleFactory,
 )
+from six.moves import range
 
 
 @pytest.mark.django_db

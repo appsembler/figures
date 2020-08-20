@@ -3,6 +3,7 @@
 TODO: Create course staff users
 '''
 
+from __future__ import absolute_import
 import faker
 import random
 
@@ -66,8 +67,8 @@ class UserGenerator(object):
         return self
 
     def __next__(self):
-        return self.next()
-
+        return self.next() #next(self)
+# ./manage.py seed_data https://realpython.com/introduction-to-python-generators/
     def next(self):
         if self.counter < self.iterations:
             self.counter += 1

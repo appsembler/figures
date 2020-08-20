@@ -5,6 +5,7 @@ so that we can use TestCase.assertQuerysetEqual
 
 '''
 
+from __future__ import absolute_import
 from dateutil.parser import parse as dateutil_parse
 
 import pytest
@@ -46,6 +47,8 @@ from tests.factories import (
     UserFactory,
     )
 from tests.helpers import make_course_key_str, django_filters_pre_v1
+import six
+from six.moves import range
 
 # Because we are testing filtering on CourseOverview fields, we want to set
 # specific values to facilitate filtering
@@ -418,7 +421,7 @@ class UserFilterSetTest(TestCase):
         res = UserFilterSet().filter_enrolled_in_course_id(
             queryset=self.User.objects.all(),
             name='course_id',
-            value=unicode(self.course_overview.id))
+            value=six.text_type(self.course_overview.id))
 
         self.assertQuerysetEqual(
             res,
