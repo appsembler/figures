@@ -18,9 +18,15 @@ entries in sys.modules. Therefore, we need to use patch context manager.
 
 from __future__ import absolute_import
 from __future__ import print_function
-import six
 from types import ModuleType
+import six
 import pytest
+
+try:
+    from importlib import reload
+except ImportError:
+    pass
+
 from mock import Mock, patch
 
 
