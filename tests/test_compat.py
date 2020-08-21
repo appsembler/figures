@@ -18,10 +18,10 @@ entries in sys.modules. Therefore, we need to use patch context manager.
 
 from __future__ import absolute_import
 from __future__ import print_function
-from mock import Mock, patch
-import pytest
 import six
 from types import ModuleType
+import pytest
+from mock import Mock, patch
 
 
 def patch_module(module_path, extra_properties=None):

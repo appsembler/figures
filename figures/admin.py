@@ -10,7 +10,7 @@ from django.contrib.admin.filters import (
     RelatedOnlyFieldListFilter)
 from django.utils.html import format_html
 
-try: 
+try:
     # Django 2.0+
     from django.urls import reverse
 except ImportError:

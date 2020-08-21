@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('figures', '0003_pipelineerror'),
     ]
-    # TODO Review on_delete bahvious
+    # TODO Review on_delete bahviour
     operations = [
         migrations.CreateModel(
             name='LearnerCourseGradeMetrics',

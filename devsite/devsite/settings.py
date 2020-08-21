@@ -22,12 +22,7 @@ if ENABLE_DEVSITE_CELERY == 'FALSE':
 else:
     ENABLE_DEVSITE_CELERY = True
 
-if OPENEDX_RELEASE == 'GINKGO':
-    MOCKS_DIR = 'mocks/ginkgo'
-if OPENEDX_RELEASE == 'JUNIPER':
-    MOCKS_DIR = 'mocks/juniper'
-else:
-    MOCKS_DIR = 'mocks/hawthorn'
+MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
 DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
