@@ -8,6 +8,14 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+24 Aug 2020 - Figures release 0.3.14
+====================================
+
+* Added multi-course filtering to the `learner-metrics` API endpoint
+
+  * https://github.com/appsembler/figures/pull/248
+
+
 14 Jul 2020 - Figures release 0.3.13
 ====================================
 
