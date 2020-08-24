@@ -139,7 +139,6 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         """
         site = enrollment_test_data['site']
         users = enrollment_test_data['users']
-        enrollments = enrollment_test_data['enrollments']
 
         caller = self.make_caller(site, users)
         other_site = SiteFactory()
@@ -162,3 +161,66 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         top_keys = ['id', 'username', 'email', 'fullname', 'is_active',
                     'date_joined', 'enrollments']
         assert set(results[0].keys()) == set(top_keys)
+
+    def test_course_param_single(self, monkeypatch, enrollment_test_data):
+        """Test that the 'course' query parameter works
+
+        """
+        site = enrollment_test_data['site']
+        users = enrollment_test_data['users']
+        enrollments = enrollment_test_data['enrollments']
+        course_overviews = enrollment_test_data['course_overviews']
+
+        caller = self.make_caller(site, users)
+        other_site = SiteFactory()
+        assert site.domain != other_site.domain
+        assert len(course_overviews) > 1
+        query_params = '?course={}'.format(str(course_overviews[0].id))
+
+        request_path = self.base_request_path + query_params
+        response = self.make_request(request_path=request_path,
+                                     monkeypatch=monkeypatch,
+                                     site=site,
+                                     caller=caller,
+                                     action='list')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert is_response_paginated(response.data)
+        results = response.data['results']
+        # Check user ids
+        result_ids = [obj['id'] for obj in results]
+
+        our_enrollments = [elem for elem in enrollments if elem.course_id == course_overviews[0].id]
+        expected_user_ids = [obj.user.id for obj in our_enrollments]
+        assert set(result_ids) == set(expected_user_ids)
+
+    def test_course_param_multiple(self, monkeypatch, enrollment_test_data):
+        """Test that the 'course' query parameter works
+
+        """
+        site = enrollment_test_data['site']
+        users = enrollment_test_data['users']
+        enrollments = enrollment_test_data['enrollments']
+        course_overviews = enrollment_test_data['course_overviews']
+
+        caller = self.make_caller(site, users)
+        other_site = SiteFactory()
+        assert site.domain != other_site.domain
+        assert len(course_overviews) > 1
+        query_params = '?course={}&course={}'.format(str(course_overviews[0].id),
+                                                     str(course_overviews[1].id))
+
+        request_path = self.base_request_path + query_params
+        response = self.make_request(request_path=request_path,
+                                     monkeypatch=monkeypatch,
+                                     site=site,
+                                     caller=caller,
+                                     action='list')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert is_response_paginated(response.data)
+        results = response.data['results']
+        # Check user ids
+        result_ids = [obj['id'] for obj in results]
+        expected_user_ids = [obj.user.id for obj in enrollments]
+        assert set(result_ids) == set(expected_user_ids)

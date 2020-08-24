@@ -888,4 +888,8 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
         site_enrollments = figures.sites.get_course_enrollments_for_site(
             self.context.get('site'))
         user_enrollments = site_enrollments.filter(user=user)
+        course_keys = self.context.get('course_keys')
+        if course_keys:
+            user_enrollments = user_enrollments.filter(course_id__in=course_keys)
+
         return EnrollmentMetricsSerializerV2(user_enrollments, many=True).data
