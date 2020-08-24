@@ -15,6 +15,9 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
   * https://github.com/appsembler/figures/pull/248
 
+* Small cosmetic issues in new Learners Progress Overview page
+  * https://github.com/appsembler/figures/pull/247
+
 
 14 Jul 2020 - Figures release 0.3.13
 ====================================
