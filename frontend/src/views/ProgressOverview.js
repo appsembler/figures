@@ -181,7 +181,6 @@ class ProgressOverview extends Component {
 
   convertJsonToCsvSchema = (jsonData) => {
     const csvTestVar = jsonData.map((user, index) => {
-      console.log("sve", user);
       const singleRecord = {};
       singleRecord['name'] = user['fullname'];
       singleRecord['email'] = user['email'];
