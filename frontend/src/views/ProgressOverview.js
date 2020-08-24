@@ -41,8 +41,10 @@ class ProgressOverview extends Component {
     let requestUrl = rootUrl;
     // add search term
     requestUrl += '?search=' + searchQuery;
-    // add course filtering
-    requestUrl += '&enrolled_in_course_id=' + selectedCourseIds;
+    // optionally add course filtering
+    if (selectedCourseIds) {
+      requestUrl += '&course=' + selectedCourseIds;
+    }
     // add ordering
     requestUrl += '&ordering=' + orderingType;
     // add results per page limit
@@ -121,7 +123,7 @@ class ProgressOverview extends Component {
     const selectedIdsList = selectedList.map((course, index) => {
       return course.id;
     });
-    const selectedCourseIds = selectedIdsList.join(',');
+    const selectedCourseIds = selectedIdsList.join('&course=');
     this.setState({
       selectedCourses: selectedList,
       selectedCourseIds: selectedCourseIds,
