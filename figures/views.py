@@ -420,14 +420,29 @@ class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     search_fields = ['username', 'email', 'profile__name']
     ordering_fields = ['username', 'email', 'profile__name', 'is_active', 'date_joined']
 
+    def query_param_course_keys(self):
+        """
+        TODO: Mixin this
+        """
+        cid_list = self.request.GET.getlist('course')
+        return [CourseKey.from_string(elem.replace(' ', '+')) for elem in cid_list]
+
     def get_queryset(self):
+        """
+        This function has a hack to filter users until we can get the `filter_class`
+        working
+        """
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         queryset = figures.sites.get_users_for_site(site)
+        course_keys = self.query_param_course_keys()
+        if course_keys:
+            queryset = figures.sites.users_enrolled_in_courses(course_keys)
         return queryset
 
     def get_serializer_context(self):
         context = super(LearnerMetricsViewSet, self).get_serializer_context()
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
+        context['course_keys'] = self.query_param_course_keys()
         return context
 
 
