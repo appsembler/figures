@@ -19,7 +19,7 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
   * https://github.com/appsembler/figures/pull/247
 
 
-14 Jul 2020 - Figures release 0.3.13
+14 Aug 2020 - Figures release 0.3.13
 ====================================
 
 * Learner metrics Prerelease API and UI
