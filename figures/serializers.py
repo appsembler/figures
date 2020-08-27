@@ -444,39 +444,6 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
             )
 
 
-class GeneralSiteMetricsSerializer(serializers.Serializer):
-    """
-    Because of the way figures.metrics.get_monthly_site_metrics *currently*
-    works, we don't need a serializer. But we will when we refactor the metrics
-    module and add the site monthly metrics model
-    """
-    monthly_active_users = serializers.SerializerMethodField()
-    total_site_users = serializers.SerializerMethodField()
-    total_site_courses = serializers.SerializerMethodField()
-    total_course_enrollments = serializers.SerializerMethodField()
-    total_course_completions = serializers.SerializerMethodField()
-
-    def get_monthly_active_users(self, _obj):
-        return dict(
-        )
-
-    def get_total_site_users(self, _obj):
-        return dict(
-        )
-
-    def get_total_site_courses(self, _obj):
-        return dict(
-        )
-
-    def get_total_course_enrollments(self, _obj):
-        return dict(
-        )
-
-    def get_total_course_completions(self, _obj):
-        return dict(
-        )
-
-
 # The purpose of this serialzer is to provide summary info for a learner
 # so we're
 class GeneralUserDataSerializer(serializers.Serializer):
