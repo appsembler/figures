@@ -4,12 +4,14 @@ from collections import defaultdict
 from datetime import datetime
 
 from pytz import UTC
-
+import six
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_noop
 
 from django_countries.fields import CountryField
+
+from six.moves import range
 
 from course_modes.models import CourseMode
 
@@ -17,8 +19,7 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-import six
-from six.moves import range
+
 
 class UserProfile(models.Model):
     '''
@@ -41,10 +42,10 @@ class UserProfile(models.Model):
     year_of_birth = models.IntegerField(blank=True, null=True, db_index=True)
 
     GENDER_CHOICES = (
-        ('m', ugettext_noop('Male')),
-        ('f', ugettext_noop('Female')),
+        (u'm', ugettext_noop(u'Male')),
+        (u'f', ugettext_noop(u'Female')),
         # Translators: 'Other' refers to the student's gender
-        ('o', ugettext_noop('Other/Prefer Not to Say'))
+        (u'o', ugettext_noop(u'Other/Prefer Not to Say'))
     )
     gender = models.CharField(
         blank=True, null=True, max_length=6, db_index=True, choices=GENDER_CHOICES
@@ -55,17 +56,17 @@ class UserProfile(models.Model):
     # ('p_se', 'Doctorate in science or engineering'),
     # ('p_oth', 'Doctorate in another field'),
     LEVEL_OF_EDUCATION_CHOICES = (
-        ('p', ugettext_noop('Doctorate')),
-        ('m', ugettext_noop("Master's or professional degree")),
-        ('b', ugettext_noop("Bachelor's degree")),
-        ('a', ugettext_noop("Associate degree")),
-        ('hs', ugettext_noop("Secondary/high school")),
-        ('jhs', ugettext_noop("Junior secondary/junior high/middle school")),
-        ('el', ugettext_noop("Elementary/primary school")),
+        (u'p', ugettext_noop(u'Doctorate')),
+        (u'm', ugettext_noop(u"Master's or professional degree")),
+        (u'b', ugettext_noop(u"Bachelor's degree")),
+        (u'a', ugettext_noop(u"Associate degree")),
+        (u'hs', ugettext_noop(u"Secondary/high school")),
+        (u'jhs', ugettext_noop(u"Junior secondary/junior high/middle school")),
+        (u'el', ugettext_noop(u"Elementary/primary school")),
         # Translators: 'None' refers to the student's level of education
-        ('none', ugettext_noop("No formal education")),
+        (u'none', ugettext_noop(u"No formal education")),
         # Translators: 'Other' refers to the student's level of education
-        ('other', ugettext_noop("Other education"))
+        (u'other', ugettext_noop(u"Other education"))
     )
     level_of_education = models.CharField(
         blank=True, null=True, max_length=6, db_index=True,
@@ -106,7 +107,7 @@ class CourseEnrollmentManager(models.Manager):
         course_locator = course_id
 
         if getattr(course_id, 'ccx', None):
-            # We don't use CCX, so raising exception rather than support it
+            # NOTE We don't use CCX, so raising exception rather than support it
             raise Exception('CCX is not supported')
 
         staff = CourseStaffRole(course_locator).users_with_role()
@@ -121,8 +122,8 @@ class CourseEnrollmentManager(models.Manager):
     def enrollment_counts(self, course_id):
 
         query = super(CourseEnrollmentManager, self).get_queryset().filter(
-                      course_id=course_id, is_active=True).values(
-                      'mode').order_by().annotate(models.Count('mode'))
+            course_id=course_id, is_active=True).values(
+            'mode').order_by().annotate(models.Count('mode'))
         total = 0
         enroll_dict = defaultdict(int)
         for item in query:
@@ -144,7 +145,7 @@ class CourseEnrollment(models.Model):
     '''
 
     MODEL_TAGS = ['course', 'is_active', 'mode']
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     course = models.ForeignKey(
@@ -196,7 +197,7 @@ class CourseEnrollment(models.Model):
 
 
 class CourseAccessRole(models.Model):
-    # TODO: Review the most appropriate on_delete behaviour
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     # blank org is for global group based roles such as course creator (may be deprecated)
     org = models.CharField(max_length=64, db_index=True, blank=True)
@@ -231,5 +232,5 @@ class CourseAccessRole(models.Model):
         """
         return self._key < other._key  # pylint: disable=protected-access
 
-    def __unicode__(self):
+    def __str__(self):
         return "[CourseAccessRole] user: {}   role: {}   org: {}   course: {}".format(self.user.username, self.role, self.org, self.course_id)

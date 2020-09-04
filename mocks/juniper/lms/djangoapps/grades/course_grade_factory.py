@@ -21,6 +21,18 @@ class MockCourseData(object):
 
 class CourseGradeFactory(object):
 
-    def read(self, user, course=None, collected_block_structure=None, course_structure=None, course_key=None):
-        course_data = MockCourseData(user, course, collected_block_structure, course_structure, course_key)
-        return CourseGrade(user, course_data, force_update_subsections=False)
+    def read(
+        self,
+        user,
+        course=None,
+        collected_block_structure=None,
+        course_structure=None,
+        course_key=None
+    ):
+        course_data = MockCourseData(
+            user, course, collected_block_structure, course_structure, course_key)
+        return CourseGrade(
+            user,
+            course_data,
+            force_update_subsections=False
+        )

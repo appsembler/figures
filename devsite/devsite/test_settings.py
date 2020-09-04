@@ -28,7 +28,6 @@ OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
 MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
 sys.path.append(root('mocks', MOCKS_DIR))
-print(MOCKS_DIR)
 
 
 # Set the default Site (django.contrib.sites.models.Site)
@@ -47,7 +46,7 @@ DATABASES = {
 
 
 INSTALLED_APPS = [
-    'django.contrib.admin', #Why did it work without this before?
+    'django.contrib.admin',  # Why did it work without this before?
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sites',

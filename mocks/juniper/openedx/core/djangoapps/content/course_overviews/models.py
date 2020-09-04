@@ -43,7 +43,7 @@ class CourseOverview(models.Model):
     We want to provide enhanced live querying like
     - "Which courses are invitation only?"
     - "Which courses have a maximum allowed enrollment above X"
-    
+
     '''
     # Faking id, picking arbitrary length
     # Actual field is of type opaque_keys.edx.keys.CourseKey
@@ -53,7 +53,7 @@ class CourseOverview(models.Model):
         app_label = 'course_overviews'
 
     # IMPORTANT: Bump this whenever you modify this model and/or add a migration.
-    VERSION = 6
+    VERSION = 11  # this one goes to eleven
 
     # Cache entry versioning.
     version = models.IntegerField()
@@ -65,7 +65,7 @@ class CourseOverview(models.Model):
     # display_org_with_default
     display_org_with_default = models.TextField()
     number = models.TextField()
-    created = models.DateTimeField(null=True) # from TimeStampedModel
+    created = models.DateTimeField(null=True)  # from TimeStampedModel
     start = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
     enrollment_start = models.DateTimeField(null=True)

@@ -48,6 +48,7 @@ class _Creator(object):
 
     A placeholder class that provides a way to set the attribute on the model.
     """
+
     def __init__(self, field):
         self.field = field
 
@@ -66,6 +67,7 @@ class CreatorMixin(object):
     Mixin class to provide SubfieldBase functionality to django fields.
     See: https://docs.djangoproject.com/en/1.11/releases/1.8/#subfieldbase
     """
+
     def contribute_to_class(self, cls, name, *args, **kwargs):
         super(CreatorMixin, self).contribute_to_class(cls, name, *args, **kwargs)
         setattr(cls, name, _Creator(self))
@@ -114,6 +116,9 @@ class OpaqueKeyField(CreatorMixin, CharField):
     KEY_CLASS = None
 
     def __init__(self, *args, **kwargs):
+        warnings.warn("openedx.core.djangoapps.xmodule_django.models.OpaqueKeyField is deprecated. "
+                      "Please use opaque_keys.edx.django.models.OpaqueKeyField instead.", stacklevel=2)
+
         if self.KEY_CLASS is None:
             raise ValueError('Must specify KEY_CLASS in OpaqueKeyField subclasses')
 
@@ -151,7 +156,8 @@ class OpaqueKeyField(CreatorMixin, CharField):
         if isinstance(value, six.string_types):
             value = self.KEY_CLASS.from_string(value)
 
-        assert isinstance(value, self.KEY_CLASS), "%s is not an instance of %s" % (value, self.KEY_CLASS)
+        assert isinstance(value, self.KEY_CLASS), "%s is not an instance of %s" % (
+            value, self.KEY_CLASS)
         serialized_key = six.text_type(_strip_value(value))
         if serialized_key.endswith('\n'):
             # An opaque key object serialized to a string with a trailing newline.
@@ -185,6 +191,7 @@ class OpaqueKeyFieldEmptyLookupIsNull(IsNull):
     This overrides the default __isnull model filter to help enforce the special way
     we handle null / empty values in OpaqueKeyFields.
     """
+
     def get_prep_lookup(self):
         raise TypeError("Use this field's .Empty member rather than None or __isnull "
                         "to query for missing objects of this type.")
@@ -218,6 +225,7 @@ class LocationKeyField(UsageKeyField):
     """
     A django Field that stores a UsageKey object as a string.
     """
+
     def __init__(self, *args, **kwargs):
         warnings.warn("LocationKeyField is deprecated. Please use UsageKeyField instead.", stacklevel=2)
         super(LocationKeyField, self).__init__(*args, **kwargs)

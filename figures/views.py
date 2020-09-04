@@ -605,6 +605,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     Tradeoff: Additional storage cost to reduced request time
     Perhaps we make this a server setting
     """
+
     def list(self, request):
         """
         Returns site metrics data for current month

@@ -11,7 +11,6 @@ from django.db import models, transaction
 from opaque_keys.edx.django.models import CourseKeyField
 
 
-
 class CourseUserGroup(models.Model):
     """
     This model represents groups of users in a course.  Groups may have different types,
@@ -57,7 +56,7 @@ class CourseUserGroup(models.Model):
             name=name
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -67,10 +66,6 @@ class CohortMembership(models.Model):
     course_user_group = models.ForeignKey(CourseUserGroup, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course_id = CourseKeyField(max_length=255)
-
-    previous_cohort = None
-    previous_cohort_name = None
-    previous_cohort_id = None
 
     class Meta(object):
         unique_together = (('user', 'course_id'), )
@@ -82,10 +77,19 @@ class CohortMembership(models.Model):
 
     def clean(self):
         if self.course_user_group.group_type != CourseUserGroup.COHORT:
-            raise ValidationError("CohortMembership cannot be used with CourseGroup types other than COHORT")
+            raise ValidationError(
+                "CohortMembership cannot be used with CourseGroup types other than COHORT")
         if self.course_user_group.course_id != self.course_id:
             raise ValidationError("Non-matching course_ids provided")
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.full_clean(validate_unique=False)
+
+        return super(CohortMembership, self).save(force_insert=force_insert,
+                                                  force_update=force_update,
+                                                  using=using,
+                                                  update_fields=update_fields)
+    '''
     def save(self, *args, **kwargs):
         self.full_clean(validate_unique=False)
 
@@ -130,3 +134,4 @@ class CohortMembership(models.Model):
             self.course_user_group.users.add(self.user)
 
             super(CohortMembership, saved_membership).save(update_fields=['course_user_group'])
+'''
