@@ -10,11 +10,16 @@ See the following for breaking changes when upgrading to Django Filter 1.0:
 
 https://django-filter.readthedocs.io/en/master/guide/migration.html#migrating-to-1-0
 
+See the following for breaking changes when upgrading to Django Filter 2.0:
+
+https://django-filter.readthedocs.io/en/master/guide/migration.html#migrating-to-2-0
+
 TODO: Rename classes so they eiher all end with "Filter" or "FilterSet" then
       update the test class names in "tests/test_filters.py" to match.
 """
 
 from __future__ import absolute_import
+from packaging import version
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.models import F
@@ -57,6 +62,18 @@ def boolean_method_filter(method):
         return django_filters.MethodFilter(action=method)  # pylint: disable=no-member
     else:
         return django_filters.BooleanFilter(method=method)
+
+
+def date_field_filter():
+    """
+    Filter.name renamed to Filter.field_name 
+    https://django-filter.readthedocs.io/en/master/guide/migration.html#filter-name-renamed-to-filter-field-name-792
+    First check for old style (pre version 2 Django Filters)
+    """
+    if version.parse(django_filters.__version__) < version.parse('2.0.0'):
+        return django_filters.DateFromToRangeFilter(name='date_for')
+    else:
+        return django_filters.DateFromToRangeFilter(field_name='date_for')
 
 
 class CourseOverviewFilter(django_filters.FilterSet):
@@ -145,7 +162,7 @@ class EnrollmentMetricsFilter(CourseEnrollmentFilter):
     """
     course_ids = char_method_filter(method='filter_course_ids')
     user_ids = char_method_filter(method='filter_user_ids')
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+    date = date_field_filter()
     only_completed = boolean_method_filter(method='filter_only_completed')
     exclude_completed = boolean_method_filter(method='filter_exclude_completed')
 
@@ -248,7 +265,8 @@ class CourseDailyMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     '''
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_field_filter()
 
     class Meta:
         model = CourseDailyMetrics
@@ -267,7 +285,8 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     '''
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_field_filter()
 
     class Meta:
         model = SiteDailyMetrics
@@ -284,7 +303,8 @@ class CourseMauMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     """
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_field_filter()
 
     class Meta:
         model = CourseMauMetrics
@@ -300,7 +320,8 @@ class SiteMauMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     """
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_field_filter()
 
     class Meta:
         model = SiteMauMetrics

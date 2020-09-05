@@ -65,7 +65,7 @@ def as_datetime(val):
             year=val.year,
             month=val.month,
             day=val.day,
-            ).replace(tzinfo=utc)
+        ).replace(tzinfo=utc)
 
     elif isinstance(val, six.string_types):  # noqa: F821
         return dateutil_parse(val).replace(tzinfo=utc)

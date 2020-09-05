@@ -45,7 +45,7 @@ from tests.factories import (
     SiteMauMetricsFactory,
     SiteFactory,
     UserFactory,
-    )
+)
 from tests.helpers import make_course_key_str, django_filters_pre_v1
 import six
 from six.moves import range
@@ -125,6 +125,7 @@ class CourseEnrollmentFilterTest(TestCase):
 class CourseOverviewFilterTest(TestCase):
     '''Tests the CourseOverviewFilter filter class
     '''
+
     def setUp(self):
         self.course_overviews = [make_course(**data) for data in COURSE_DATA]
 
@@ -173,6 +174,7 @@ class CourseOverviewFilterTest(TestCase):
 class CourseDailyMetricsFilterTest(TestCase):
     '''Tests the CourseDailyMetricsFilter filter class
     '''
+
     def setUp(self):
         self.models = [
             CourseDailyMetricsFactory() for i in range(1, 10)
@@ -204,6 +206,7 @@ class CourseDailyMetricsFilterTest(TestCase):
 class SiteDailyMetricsFilterTest(TestCase):
     '''Tests the SiteDailyMetricsFilter filter class
     '''
+
     def setUp(self):
         self.site_daily_metrics = [
             SiteDailyMetricsFactory() for i in range(1, 10)
@@ -231,6 +234,7 @@ class SiteDailyMetricsFilterTest(TestCase):
 class CourseMauMetricsFilterTest(TestCase):
     '''Tests the CourseMauMetricsFilter filter class
     '''
+
     def setUp(self):
         self.models = [
             CourseMauMetricsFactory() for i in range(1, 10)
@@ -262,6 +266,7 @@ class CourseMauMetricsFilterTest(TestCase):
 class SiteMauMetricsFilterTest(TestCase):
     '''Tests the SiteDailyMetricsFilter filter class
     '''
+
     def setUp(self):
         self.models = [
             SiteMauMetricsFactory() for i in range(1, 10)
@@ -290,6 +295,7 @@ class EnrollmentMetricsFilterTest(TestCase):
     """
     Initially adding coverage where view tests are not covering
     """
+
     def setUp(self):
         self.site = SiteFactory()
 
@@ -342,6 +348,7 @@ class SiteFilterSetTest(TestCase):
 
     Did not add test for filtering on mulitple filter terms
     """
+
     def setUp(self):
         """There should be an existing site with domain and name of u'example.com'
         """
@@ -387,13 +394,14 @@ class SiteFilterSetTest(TestCase):
 class UserFilterSetTest(TestCase):
     '''Tests the UserFilterSet filter class
     '''
+
     def setUp(self):
         self.User = get_user_model()
         self.users = [make_user(**data) for data in USER_DATA]
         self.course_overview = CourseOverviewFactory()
         self.course_enrollments = [
-                CourseEnrollmentFactory(course_id=self.course_overview.id,
-                                        user=self.users[i]) for i in range(2)]
+            CourseEnrollmentFactory(course_id=self.course_overview.id,
+                                    user=self.users[i]) for i in range(2)]
 
     def tearDown(self):
         pass
