@@ -64,16 +64,23 @@ def boolean_method_filter(method):
         return django_filters.BooleanFilter(method=method)
 
 
-def date_field_filter():
+def date_from_range_filter(field_name):
     """
     Filter.name renamed to Filter.field_name 
     https://django-filter.readthedocs.io/en/master/guide/migration.html#filter-name-renamed-to-filter-field-name-792
     First check for old style (pre version 2 Django Filters)
     """
     if version.parse(django_filters.__version__) < version.parse('2.0.0'):
-        return django_filters.DateFromToRangeFilter(name='date_for')
+        return django_filters.DateFromToRangeFilter(name=field_name)
     else:
-        return django_filters.DateFromToRangeFilter(field_name='date_for')
+        return django_filters.DateFromToRangeFilter(field_name=field_name)
+
+
+def char_filter(field_name, lookup_expr):
+    if version.parse(django_filters.__version__) < version.parse('2.0.0'):
+        return django_filters.CharFilter(name=field_name, lookup_expr=lookup_expr)
+    else:
+        return django_filters.CharFilter(field_name=field_name, lookup_expr=lookup_expr)
 
 
 class CourseOverviewFilter(django_filters.FilterSet):
@@ -96,12 +103,12 @@ class CourseOverviewFilter(django_filters.FilterSet):
     '''
 
     display_name = django_filters.CharFilter(lookup_expr='icontains')
-    org = django_filters.CharFilter(
-        name='display_org_with_default', lookup_expr='iexact')
-    number = django_filters.CharFilter(
-        name='display_number_with_default', lookup_expr='iexact')
-    number_contains = django_filters.CharFilter(
-        name='display_number_with_default', lookup_expr='icontains')
+    org = char_filter(
+        field_name='display_org_with_default', lookup_expr='iexact')
+    number = char_filter(
+        field_name='display_number_with_default', lookup_expr='iexact')
+    number_contains = char_filter(
+        field_name='display_number_with_default', lookup_expr='icontains')
 
     class Meta:
         model = CourseOverview
@@ -162,7 +169,7 @@ class EnrollmentMetricsFilter(CourseEnrollmentFilter):
     """
     course_ids = char_method_filter(method='filter_course_ids')
     user_ids = char_method_filter(method='filter_user_ids')
-    date = date_field_filter()
+    date = date_from_range_filter(field_name='date_for')
     only_completed = boolean_method_filter(method='filter_only_completed')
     exclude_completed = boolean_method_filter(method='filter_exclude_completed')
 
@@ -218,10 +225,10 @@ class UserFilterSet(django_filters.FilterSet):
     is_superuser = django_filters.BooleanFilter(name='is_superuser')
     username = django_filters.CharFilter(lookup_expr='icontains')
     email = django_filters.CharFilter(lookup_expr='icontains')
-    name = django_filters.CharFilter(lookup_expr='icontains', name='profile__name')
+    name = char_filter(lookup_expr='icontains', field_name='profile__name')
 
-    country = django_filters.CharFilter(
-        name='profile__country', lookup_expr='iexact')
+    country = char_filter(
+        field_name='profile__country', lookup_expr='iexact')
     user_ids = char_method_filter(method='filter_user_ids')
     enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
 
@@ -266,7 +273,7 @@ class CourseDailyMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     '''
 
-    date = date_field_filter()
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = CourseDailyMetrics
@@ -286,7 +293,7 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     '''
 
-    date = date_field_filter()
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = SiteDailyMetrics
@@ -304,7 +311,7 @@ class CourseMauMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     """
 
-    date = date_field_filter()
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = CourseMauMetrics
@@ -321,7 +328,7 @@ class SiteMauMetricsFilter(django_filters.FilterSet):
     * ``date_1`` to get records less than or equal
     """
 
-    date = date_field_filter()
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = SiteMauMetrics
