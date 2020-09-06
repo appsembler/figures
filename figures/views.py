@@ -23,10 +23,11 @@ from rest_framework.permissions import IsAuthenticated
 # https://www.django-rest-framework.org/api-guide/filtering/#searchfilter
 from django_filters.rest_framework import (
     DjangoFilterBackend,
-    OrderingFilter
+    # OrderingFilter
 )
 from rest_framework.filters import (
-    SearchFilter
+    SearchFilter,
+    OrderingFilter  # TODO Is this backward compatible? fixes test_course_data_view
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
