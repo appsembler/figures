@@ -83,6 +83,13 @@ def char_filter(field_name, lookup_expr):
         return django_filters.CharFilter(field_name=field_name, lookup_expr=lookup_expr)
 
 
+def boolean_filter(field_name):
+    if version.parse(django_filters.__version__) < version.parse('2.0.0'):
+        return django_filters.BooleanFilter(field_name=field_name)
+    else:
+        return django_filters.BooleanFilter(field_name=field_name)
+
+
 class CourseOverviewFilter(django_filters.FilterSet):
     '''Provides filtering for CourseOverview model objects
 
@@ -120,7 +127,7 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
 
     '''
     course_id = char_method_filter(method='filter_course_id')
-    is_active = django_filters.BooleanFilter(name='is_active',)
+    is_active = boolean_filter(field_name='is_active')
 
     def filter_course_id(self, queryset, name, value):  # pylint: disable=unused-argument
         '''
@@ -220,9 +227,9 @@ class UserFilterSet(django_filters.FilterSet):
     We're starting with a few fields and will add as we find we want/need them
 
     '''
-    is_active = django_filters.BooleanFilter(name='is_active')
-    is_staff = django_filters.BooleanFilter(name='is_staff')
-    is_superuser = django_filters.BooleanFilter(name='is_superuser')
+    is_active = boolean_filter(field_name='is_active')
+    is_staff = boolean_filter(field_name='is_staff')
+    is_superuser = boolean_filter(field_name='is_superuser')
     username = django_filters.CharFilter(lookup_expr='icontains')
     email = django_filters.CharFilter(lookup_expr='icontains')
     name = char_filter(lookup_expr='icontains', field_name='profile__name')
