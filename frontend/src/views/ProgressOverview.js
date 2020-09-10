@@ -68,7 +68,8 @@ class ProgressOverview extends Component {
     const coursesFilterOptions = courses.map((course, index) => {
       const entry = {
         id: course.id,
-        name: course.name
+        label: `${course.name} | ${course.number} | ${course.id}`,
+        name: course.name,
       }
       return (
         entry
@@ -318,9 +319,9 @@ class ProgressOverview extends Component {
                   selectedValues={this.state.selectedCourses}
                   onSelect={this.onChangeSelectedCourses}
                   onRemove={this.onChangeSelectedCourses}
-                  displayValue="name"
+                  displayValue="label"
                   placeholder="Filter by courses..."
-                  style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" } }}
+                  style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" }, option: { "font-size": "14px" } }}
                 />
               </div>
               <button
