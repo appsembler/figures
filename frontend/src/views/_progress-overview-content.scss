@@ -125,6 +125,14 @@
     font-size: calcRem(12);
   }
 
+  .user-info-value {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
   .sorting-header-button {
     padding: 0;
     margin: 0;
@@ -170,13 +178,24 @@ button.export-the-csv-button {
 .refining-container {
   display: flex;
   align-items: center;
+  padding-bottom: calcRem(40);
+  margin-bottom: calcRem(30);
+  border-bottom: 1px solid #ccc;
 
   &__filters {
     width: 50%;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     align-items: center;
-    grid-column-gap: calcRem(30);
+    grid-gap: calcRem(10);
+
+    .list-search .inner-container {
+      max-width: calcRem(600);
+    }
+
+    .multiselect-container {
+      max-width: calcRem(600);
+    }
   }
 }
 
@@ -234,5 +253,30 @@ button.close-csv-button {
   &:hover {
     cursor: pointer;
     background-color: darken($primary-color, 15%) !important;
+  }
+}
+
+.view-controls-container {
+  display: flex;
+  align-items: center;
+
+  .toggle-wide-view-button {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: calcRem(20);
+    padding: calcRem(10) calcRem(10);
+    width: calcRem(200);
+    text-align: center;
+    border: 1px solid #ccc;
+    font-size: calcRem(14);
+    border-radius: calcRem(4);
+    transition: all 0.3s ease-in-out;
+    color: #666;
+
+    &:hover {
+      border-color: $primary-color;
+      color: $primary-color;
+      cursor: pointer;
+    }
   }
 }

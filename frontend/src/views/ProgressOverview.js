@@ -32,6 +32,7 @@ class ProgressOverview extends Component {
       ordering: 'profile__name',
       selectedCourseIds: '',
       csvExportProgress: 0,
+      wideView: false,
     };
     this.fetchFullViewData = this.fetchFullViewData.bind(this);
     this.getUsersForCsv = this.getUsersForCsv.bind(this);
@@ -100,7 +101,7 @@ class ProgressOverview extends Component {
     this.setState({
       perPage: newValue,
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -108,7 +109,7 @@ class ProgressOverview extends Component {
     this.setState({
       searchQuery: newValue
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -116,7 +117,7 @@ class ProgressOverview extends Component {
     this.setState({
       ordering: newValue
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -129,7 +130,7 @@ class ProgressOverview extends Component {
       selectedCourses: selectedList,
       selectedCourseIds: selectedCourseIds,
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -205,9 +206,14 @@ class ProgressOverview extends Component {
     return csvTestVar;
   }
 
+  toggleWideView = () => {
+    this.setState({
+      wideView: !this.state.wideView
+    })
+  }
+
   componentDidMount() {
     this.getCourses();
-    this.getUsers();
   }
 
   render() {
@@ -230,7 +236,9 @@ class ProgressOverview extends Component {
               className={styles['user-fullname-link']}
               to={'/figures/user/' + user['id']}
             >
-              {user['fullname']}
+              <span className={styles['user-info-value']}>
+                {user['fullname']}
+              </span>
             </Link>
           </div>
         </li>
@@ -267,10 +275,14 @@ class ProgressOverview extends Component {
       return (
         <li key={`scrolling+${user['id']}`} className={styles['user-list-item']}>
           <div className={styles['username']}>
-            {user['username']}
+            <span className={styles['user-info-value']}>
+              {user['username']}
+            </span>
           </div>
           <div className={styles['email']}>
-            {user['email']}
+            <span className={styles['user-info-value']}>
+              {user['email']}
+            </span>
           </div>
           {userCoursesRender}
         </li>
@@ -307,22 +319,24 @@ class ProgressOverview extends Component {
             )}
           </div>
         ) : (
-          <div className={cx({ 'container-max': true, 'users-content': true})}>
+          <div className={cx({ 'container-max': this.state.wideView, 'container': !this.state.wideView, 'users-content': true})}>
             <div className={styles['refining-container']}>
               <div className={styles['refining-container__filters']}>
                 <ListSearch
                   valueChangeFunction={this.setSearchQuery}
                   inputPlaceholder='Search by users name, username or email...'
                 />
-                <Multiselect
-                  options={this.state.coursesFilterOptions}
-                  selectedValues={this.state.selectedCourses}
-                  onSelect={this.onChangeSelectedCourses}
-                  onRemove={this.onChangeSelectedCourses}
-                  displayValue="label"
-                  placeholder="Filter by courses..."
-                  style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" }, option: { "font-size": "14px" } }}
-                />
+                <div className={styles['multiselect-container']}>
+                  <Multiselect
+                    options={this.state.coursesFilterOptions}
+                    selectedValues={this.state.selectedCourses}
+                    onSelect={this.onChangeSelectedCourses}
+                    onRemove={this.onChangeSelectedCourses}
+                    displayValue="label"
+                    placeholder="Filter by courses..."
+                    style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" }, option: { "font-size": "14px" } }}
+                  />
+                </div>
               </div>
               <button
                 className={styles['export-the-csv-button']}
@@ -332,13 +346,21 @@ class ProgressOverview extends Component {
               </button>
             </div>
             {this.state.pages ? (
-              <Paginator
-                pageSwitchFunction={this.getUsers}
-                currentPage={this.state.currentPage}
-                perPage={this.state.perPage}
-                pages={this.state.pages}
-                changePerPageFunction={this.setPerPage}
-              />
+              <div className={styles['view-controls-container']}>
+                <Paginator
+                  pageSwitchFunction={this.getUsers}
+                  currentPage={this.state.currentPage}
+                  perPage={this.state.perPage}
+                  pages={this.state.pages}
+                  changePerPageFunction={this.setPerPage}
+                />
+                <button
+                  className={styles['toggle-wide-view-button']}
+                  onClick = {() => this.toggleWideView()}
+                >
+                  {this.state.wideView ? 'Switch to narrow view' : 'Switch to wide view'}
+                </button>
+              </div>
             ) : ''}
             <div className={styles['users-overview-list']}>
               <ul className={styles['list-floating-columns']}>
@@ -386,9 +408,9 @@ class ProgressOverview extends Component {
                       <span>
                         Email
                       </span>
-                      {(this.state.ordering === 'username') ? (
+                      {(this.state.ordering === 'email') ? (
                         <FontAwesomeIcon icon={faAngleDoubleUp} />
-                      ) : (this.state.ordering === '-username') ? (
+                      ) : (this.state.ordering === '-email') ? (
                         <FontAwesomeIcon icon={faAngleDoubleDown} />
                       ) : ''}
                     </button>
