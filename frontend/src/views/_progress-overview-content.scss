@@ -280,3 +280,11 @@ button.close-csv-button {
     }
   }
 }
+
+.no-data-message {
+  text-align: center;
+  font-size: calcRem(18);
+  font-weight: bold;
+  color: $primary-color;
+  padding: calcRem(90) calcRem(30);
+}

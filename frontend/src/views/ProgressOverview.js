@@ -338,12 +338,14 @@ class ProgressOverview extends Component {
                   />
                 </div>
               </div>
-              <button
-                className={styles['export-the-csv-button']}
-                onClick = {() => this.startCsvExport()}
-              >
-                Generate a CSV from Current View
-              </button>
+              {(this.state.selectedCourses.length || this.state.searchQuery) ? (
+                <button
+                  className={styles['export-the-csv-button']}
+                  onClick = {() => this.startCsvExport()}
+                >
+                  Generate a CSV from Current View
+                </button>
+              ) : ''}
             </div>
             {this.state.pages ? (
               <div className={styles['view-controls-container']}>
@@ -362,64 +364,70 @@ class ProgressOverview extends Component {
                 </button>
               </div>
             ) : ''}
-            <div className={styles['users-overview-list']}>
-              <ul className={styles['list-floating-columns']}>
-                <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
-                  <div className={styles['user-fullname']}>
-                    <button
-                      className={styles['sorting-header-button']}
-                      onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
-                    >
-                      <span>
-                        User full name
-                      </span>
-                      {(this.state.ordering === 'profile__name') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleUp} />
-                      ) : (this.state.ordering === '-profile__name') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleDown} />
-                      ) : ''}
-                    </button>
-                  </div>
-                </li>
-                {floatingListItems}
-              </ul>
-              <ul className={styles['list-scrolling-columns']}>
-                <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
-                  <div className={styles['username']}>
-                    <button
-                      className={styles['sorting-header-button']}
-                      onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
-                    >
-                      <span>
-                        Username
-                      </span>
-                      {(this.state.ordering === 'username') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleUp} />
-                      ) : (this.state.ordering === '-username') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleDown} />
-                      ) : ''}
-                    </button>
-                  </div>
-                  <div className={styles['email']}>
-                    <button
-                      className={styles['sorting-header-button']}
-                      onClick={() => (this.state.ordering !== 'email') ? this.setOrdering('email') : this.setOrdering('-email')}
-                    >
-                      <span>
-                        Email
-                      </span>
-                      {(this.state.ordering === 'email') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleUp} />
-                      ) : (this.state.ordering === '-email') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleDown} />
-                      ) : ''}
-                    </button>
-                  </div>
-                  {headerCourseColumns}
-                </li>
-                {scrollingListItems}
-              </ul>
-            </div>
+            {(this.state.selectedCourses.length || this.state.searchQuery) ? (
+              <div className={styles['users-overview-list']}>
+                <ul className={styles['list-floating-columns']}>
+                  <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
+                    <div className={styles['user-fullname']}>
+                      <button
+                        className={styles['sorting-header-button']}
+                        onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
+                      >
+                        <span>
+                          User full name
+                        </span>
+                        {(this.state.ordering === 'profile__name') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleUp} />
+                        ) : (this.state.ordering === '-profile__name') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleDown} />
+                        ) : ''}
+                      </button>
+                    </div>
+                  </li>
+                  {floatingListItems}
+                </ul>
+                <ul className={styles['list-scrolling-columns']}>
+                  <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
+                    <div className={styles['username']}>
+                      <button
+                        className={styles['sorting-header-button']}
+                        onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
+                      >
+                        <span>
+                          Username
+                        </span>
+                        {(this.state.ordering === 'username') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleUp} />
+                        ) : (this.state.ordering === '-username') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleDown} />
+                        ) : ''}
+                      </button>
+                    </div>
+                    <div className={styles['email']}>
+                      <button
+                        className={styles['sorting-header-button']}
+                        onClick={() => (this.state.ordering !== 'email') ? this.setOrdering('email') : this.setOrdering('-email')}
+                      >
+                        <span>
+                          Email
+                        </span>
+                        {(this.state.ordering === 'email') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleUp} />
+                        ) : (this.state.ordering === '-email') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleDown} />
+                        ) : ''}
+                      </button>
+                    </div>
+                    {headerCourseColumns}
+                  </li>
+                  {scrollingListItems}
+                </ul>
+              </div>
+            ) : (
+              <div className={styles['no-data-message']}>
+                Enter a search term and/or select course(s) to display the data.
+              </div>
+            )}
             {this.state.pages ? (
               <Paginator
                 pageSwitchFunction={this.getUsers}
