@@ -247,15 +247,15 @@ class ProgressOverview extends Component {
             {userProgress ? [
               <div className={styles['data-group']}>
                 <span className={styles['data-label']}>Sections</span>
-                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'sections_worked'])}/{userProgress.getIn(['progress_details', 'sections_possible'])}</span>
+                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'sections_worked']).toFixed(1)}/{userProgress.getIn(['progress_details', 'sections_possible']).toFixed(1)}</span>
               </div>,
               <div className={styles['data-group']}>
                 <span className={styles['data-label']}>Points</span>
-                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'points_earned'])}/{userProgress.getIn(['progress_details', 'points_possible'])}</span>
+                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'points_earned']).toFixed(1)}/{userProgress.getIn(['progress_details', 'points_possible']).toFixed(1)}</span>
               </div>,
               <div className={styles['data-group']}>
                 <span className={styles['data-label']}>Progress</span>
-                <span className={styles['data']}>{userProgress.getIn(['progress_percent'])*100}%</span>
+                <span className={styles['data']}>{(userProgress.getIn(['progress_percent'])*100).toFixed(0)}%</span>
               </div>
             ] : (
               <span className={styles['no-data']}>-</span>
