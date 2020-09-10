@@ -71,6 +71,8 @@ class ProgressOverview extends Component {
         id: course.id,
         label: `${course.name} | ${course.number} | ${course.id}`,
         name: course.name,
+        number: course.number,
+        id: course.id,
       }
       return (
         entry
@@ -196,7 +198,7 @@ class ProgressOverview extends Component {
       coursesFilter.forEach((course, i) => {
         const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course.id);
         if (userProgress) {
-          
+
           const progressPercent = (userProgress.getIn(['progress_percent'])) ? userProgress.getIn(['progress_percent']).toFixed(2) : '-';
           const sectionsWorked = (userProgress.getIn(['progress_details', 'sections_worked'])) ? userProgress.getIn(['progress_details', 'sections_worked']).toFixed(1) : '-';
           const sectionsPossible = (userProgress.getIn(['progress_details', 'sections_possible'])) ? userProgress.getIn(['progress_details', 'sections_possible']).toFixed(1) : '-';
@@ -229,8 +231,13 @@ class ProgressOverview extends Component {
 
     const headerCourseColumns = coursesFilter.map((course, index) => {
       return(
-        <div className={styles['course-info-column']}>
-          {course['name']}
+        <div className={styles['course-info-column-header']}>
+          <span className={styles['course-name']}>
+            {course['name']}
+          </span>
+          <span className={styles['course-id']}>
+            {course['id']}
+          </span>
         </div>
       )
     })

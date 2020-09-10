@@ -59,8 +59,8 @@
     align-items: center;
   }
 
-  .course-info-column, .single-course-progress {
-    width: calcRem(200);
+  .course-info-column, .course-info-column-header, .single-course-progress {
+    width: calcRem(280);
     text-align: center;
     flex-grow: 0;
     flex-shrink: 0;
@@ -71,6 +71,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .course-info-column-header {
+    flex-wrap: wrap;
+
+    .course-name {
+      display: block;
+    }
+
+    .course-id {
+      display: block;
+      margin-top: calcRem(5);
+      font-size: calcRem(11);
+      color: #666;
+    }
   }
 
   .single-course-progress {
