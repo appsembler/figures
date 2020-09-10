@@ -33,6 +33,12 @@ class HeaderNav extends Component {
         >
           Courses
         </NavLink>
+        <NavLink
+          to="/figures/learners-progress-overview"
+          className={styles['header-nav__link']}
+        >
+          Learners Progress Overview
+        </NavLink>
         {(process.env.ENABLE_CSV_REPORTS === "enabled") && (
           <NavLink
             to="/figures/csv-reports"
