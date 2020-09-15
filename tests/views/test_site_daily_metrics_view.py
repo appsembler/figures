@@ -22,6 +22,7 @@ from figures.views import SiteDailyMetricsViewSet
 from figures.serializers import SiteSerializer
 from tests.factories import SiteDailyMetricsFactory, UserFactory
 from tests.views.base import BaseViewTest
+from tests.helpers import django_filters_pre_v2
 
 
 TEST_DATA = [
@@ -78,8 +79,13 @@ class TestSiteDailyMetricsView(BaseViewTest):
 
         TODO: Add more date ranges
         '''
-        endpoint = '{}?date_after={}&date_before={}'.format(
-            self.request_path, first_day, last_day)
+        if django_filters_pre_v2():
+            endpoint = '{}?date_0={}&date_1={}'.format(
+                self.request_path, first_day, last_day)
+        else:
+            endpoint = '{}?date_after={}&date_before={}'.format(
+                self.request_path, first_day, last_day)
+
         # TODO Is this backward compatible?
         expected_data = SiteDailyMetrics.objects.filter(
             date_for__range=(first_day, last_day))

@@ -21,6 +21,7 @@ from figures.views import CourseDailyMetricsViewSet
 
 from tests.factories import CourseDailyMetricsFactory, UserFactory
 from tests.views.base import BaseViewTest
+from tests.helpers import django_filters_pre_v2
 
 
 def generate_cdm_series(site, first_day, last_day):
@@ -94,8 +95,12 @@ class TestCourseDailyMetricsView(BaseViewTest):
         endpoint = '{}?date_0={}&date_1={}'.format(
             self.request_path, first_day, last_day)
         '''
-        endpoint = '{}?date_after={}&date_before={}'.format(
-            self.request_path, first_day, last_day)
+        if django_filters_pre_v2():
+            endpoint = '{}?date_0={}&date_1={}'.format(
+                self.request_path, first_day, last_day)
+        else:
+            endpoint = '{}?date_after={}&date_before={}'.format(
+                self.request_path, first_day, last_day)
 
         expected_data = CourseDailyMetrics.objects.filter(
             date_for__range=(first_day, last_day))

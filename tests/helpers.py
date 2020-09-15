@@ -52,3 +52,9 @@ def django_filters_pre_v1():
     """
     import django_filters
     return version.parse(django_filters.__version__) < version.parse('1.0.0')
+
+def django_filters_pre_v2():
+    """Returns `True` if the installed Django Filters package is before '1.0.0'
+    """
+    import django_filters
+    return version.parse(django_filters.__version__) < version.parse('2.0.0')
