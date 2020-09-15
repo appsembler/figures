@@ -85,7 +85,7 @@ def char_filter(field_name, lookup_expr):
 
 def boolean_filter(field_name):
     if version.parse(django_filters.__version__) < version.parse('2.0.0'):
-        return django_filters.BooleanFilter(field_name=field_name)
+        return django_filters.BooleanFilter(name=field_name)
     else:
         return django_filters.BooleanFilter(field_name=field_name)
 
