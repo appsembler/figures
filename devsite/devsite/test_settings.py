@@ -29,7 +29,7 @@ MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
 sys.path.append(root('mocks', MOCKS_DIR))
 
-
+print(OPENEDX_RELEASE)
 # Set the default Site (django.contrib.sites.models.Site)
 SITE_ID = 1
 
@@ -60,17 +60,22 @@ INSTALLED_APPS = [
     # edx-platform apps. Mocks are used by default
     # See: edx-figures/tests/mocks/
     # Also note the paths set in edx-figures/pytest.ini
-    'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'openedx.core.djangoapps.course_groups',
     'student',
     'organizations',
 ]
 
+
 if OPENEDX_RELEASE == 'GINKGO':
     INSTALLED_APPS.append('certificates')
+    INSTALLED_APPS.append('courseware')
+elif OPENEDX_RELEASE == 'HAWTHORN':
+    INSTALLED_APPS.append('lms.djangoapps.certificates')
+    INSTALLED_APPS.append('courseware')
 else:
     INSTALLED_APPS.append('lms.djangoapps.certificates')
+    INSTALLED_APPS.append('lms.djangoapps.courseware')
 
 TEMPLATES = [
     {

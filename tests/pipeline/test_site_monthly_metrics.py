@@ -10,7 +10,7 @@ from django.utils.timezone import utc
 from freezegun import freeze_time
 import pytest
 
-from courseware.models import StudentModule
+from lms.djangoapps.courseware.models import StudentModule
 
 from figures.compat import RELEASE_LINE
 from figures.models import SiteMonthlyMetrics

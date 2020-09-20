@@ -27,7 +27,7 @@ from openedx.core.djangoapps.course_groups.models import (
     CohortMembership,
 )
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-from courseware.models import StudentModule
+from lms.djangoapps.courseware.models import StudentModule
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 

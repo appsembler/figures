@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     # These are apps on which Figures has dependencies
     # See: <figures repo>/tests/mocks/
     # Also note the paths set in edx-figures/pytest.ini
-    'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'openedx.core.djangoapps.course_groups',
     'student',
@@ -78,11 +77,15 @@ if ENABLE_DEVSITE_CELERY:
     INSTALLED_APPS.append('djcelery')
 
 # certificates app
-
 if OPENEDX_RELEASE == 'GINKGO':
     INSTALLED_APPS.append('certificates')
+    INSTALLED_APPS.append('courseware')
+elif OPENEDX_RELEASE == 'HAWTHORN':
+    INSTALLED_APPS.append('lms.djangoapps.certificates')
+    INSTALLED_APPS.append('courseware')
 else:
     INSTALLED_APPS.append('lms.djangoapps.certificates')
+    INSTALLED_APPS.append('lms.djangoapps.courseware')
 
 
 
