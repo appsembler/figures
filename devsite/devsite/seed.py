@@ -325,7 +325,7 @@ def wipe():
     CourseOverview.objects.all().delete()
     CourseDailyMetrics.objects.all().delete()
     SiteDailyMetrics.objects.all().delete()
-    LearnerCourseGradeMetrics.all().delete()
+    LearnerCourseGradeMetrics.objects.all().delete()
 
 
 def seed_all():
