@@ -17,7 +17,12 @@ from django.contrib.sites.models import Site
 from django.db.utils import IntegrityError
 from django.utils.timezone import utc
 
-from lms.djangoapps.courseware.models import StudentModule
+try:
+    from lms.djangoapps.courseware.models import StudentModule
+except ImportError:
+    # Backward compatibily for pre-Juniper releases
+    from courseware.models import StudentModule
+
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 

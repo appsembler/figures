@@ -7,7 +7,11 @@ import pytest
 
 from django.utils.timezone import utc
 
-from lms.djangoapps.courseware.models import StudentModule
+try:
+    from lms.djangoapps.courseware.models import StudentModule
+except ImportError:
+    # Backward compatibily for pre-Juniper releases
+    from courseware.models import StudentModule
 
 from figures.helpers import is_multisite
 from figures.models import LearnerCourseGradeMetrics
