@@ -7,6 +7,7 @@ import django.contrib.sites.shortcuts
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
+from figures.helpers import as_course_key
 from figures.sites import get_user_ids_for_site
 from figures.views import LearnerMetricsViewSet
 
@@ -209,7 +210,9 @@ class TestLearnerMetricsViewSet(BaseViewTest):
                                                  lm_test_data,
                                                  query_params)
 
-    def test_valid_and_mangled_course_param_invalid(self, monkeypatch, lm_test_data):
+    def test_valid_and_mangled_course_param_invalid(self,
+                                                    monkeypatch,
+                                                    lm_test_data):
         """Test that the 'course' query parameter works
 
         """
@@ -217,6 +220,18 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         mangled_course_id = 'she-sell-seashells-by-the-seashore'
         query_params = '?course={}&course={}'.format(str(our_courses[0].id),
                                                      mangled_course_id)
+        assert self.invalid_course_ids_raise_404(monkeypatch,
+                                                 lm_test_data,
+                                                 query_params)
+
+    def test_unlinked_course_id_param_invalid(self, monkeypatch, lm_test_data):
+        """Test that the 'course' query parameter works
+
+        """
+        our_courses = lm_test_data['us']['courses']
+        unlinked_course_id = as_course_key('course-v1:UnlinkedCourse+UMK+1999')
+        query_params = '?course={}&course={}'.format(str(our_courses[0].id),
+                                                     unlinked_course_id)
         assert self.invalid_course_ids_raise_404(monkeypatch,
                                                  lm_test_data,
                                                  query_params)
