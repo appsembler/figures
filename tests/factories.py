@@ -26,15 +26,14 @@ from openedx.core.djangoapps.course_groups.models import (
     CourseUserGroup,
     CohortMembership,
 )
-from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-from figures.compat import StudentModule
+
+from figures.compat import StudentModule, CourseKeyField, GeneratedCertificate
 
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 import organizations
 
-from figures.compat import GeneratedCertificate
 from figures.helpers import as_course_key
 from figures.models import (
     CourseDailyMetrics,

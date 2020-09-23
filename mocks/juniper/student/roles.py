@@ -5,7 +5,7 @@ Mocks role classes needed in Figures tests
 from __future__ import absolute_import
 from django.contrib.auth.models import User
 
-from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
+from opaque_keys.edx.django.models import CourseKeyField
 from student.models import CourseAccessRole
 
 class MockCourseRole(object):

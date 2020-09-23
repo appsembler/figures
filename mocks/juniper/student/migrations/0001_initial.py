@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import django_countries.fields
-import openedx.core.djangoapps.xmodule_django.models
+import opaque_keys.edx.django.models
 
 
 class Migration(migrations.Migration):
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('org', models.CharField(blank=True, db_index=True, max_length=64)),
-                ('course_id', openedx.core.djangoapps.xmodule_django.models.CourseKeyField(blank=True, db_index=True, max_length=255)),
+                ('course_id', opaque_keys.edx.django.models.CourseKeyField(blank=True, db_index=True, max_length=255)),
                 ('role', models.CharField(db_index=True, max_length=64)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

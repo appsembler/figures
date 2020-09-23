@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import openedx.core.djangoapps.xmodule_django.models
+import opaque_keys.edx.django.models
 
 
 class Migration(migrations.Migration):
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             name='GeneratedCertificate',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('course_id', openedx.core.djangoapps.xmodule_django.models.CourseKeyField(blank=True, default=None, max_length=255)),
+                ('course_id', opaque_keys.edx.django.models.CourseKeyField(blank=True, default=None, max_length=255)),
                 ('created_date', models.DateTimeField()),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

@@ -18,7 +18,7 @@ from course_modes.models import CourseMode
 from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
-from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
+from opaque_keys.edx.django.models import CourseKeyField
 
 
 class UserProfile(models.Model):

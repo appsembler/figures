@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from __future__ import absolute_import
 from django.db import migrations, models
-import openedx.core.djangoapps.xmodule_django.models
+import opaque_keys.edx.django.models
 
 
 class Migration(migrations.Migration):
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             name='CourseOverview',
             fields=[
                 ('version', models.IntegerField()),
-                ('id', openedx.core.djangoapps.xmodule_django.models.CourseKeyField(db_index=True, max_length=255, primary_key=True, serialize=False)),
+                ('id', opaque_keys.edx.django.models.CourseKeyField(db_index=True, max_length=255, primary_key=True, serialize=False)),
                 ('display_name', models.TextField(null=True)),
                 ('org', models.TextField(default=b'outdated_entry', max_length=255)),
                 ('display_org_with_default', models.TextField()),
