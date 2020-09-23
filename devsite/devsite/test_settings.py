@@ -29,7 +29,7 @@ MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
 sys.path.append(root('mocks', MOCKS_DIR))
 
-print(OPENEDX_RELEASE)
+
 # Set the default Site (django.contrib.sites.models.Site)
 SITE_ID = 1
 
@@ -63,9 +63,8 @@ INSTALLED_APPS = [
     'openedx.core.djangoapps.content.course_overviews',
     'openedx.core.djangoapps.course_groups',
     'student',
-    'organizations',
+    'organizations'
 ]
-
 
 if OPENEDX_RELEASE == 'GINKGO':
     INSTALLED_APPS.append('certificates')
@@ -76,6 +75,7 @@ elif OPENEDX_RELEASE == 'HAWTHORN':
 else:
     INSTALLED_APPS.append('lms.djangoapps.certificates')
     INSTALLED_APPS.append('lms.djangoapps.courseware')
+
 
 TEMPLATES = [
     {

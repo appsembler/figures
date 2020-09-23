@@ -29,18 +29,12 @@ import math
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Max
 
-try:
-    from lms.djangoapps.courseware.models import StudentModule
-    from lms.djangoapps.courseware.courses import get_course_by_id
-except ImportError:
-    # Backward compatibily for pre-Juniper releases
-    from courseware.models import StudentModule
-    from courseware.courses import get_course_by_id
-
 from figures.compat import (
     GeneratedCertificate,
     chapter_grade_values,
     course_grade,
+    StudentModule,
+    get_course_by_id
 )
 from figures.helpers import (
     as_course_key,

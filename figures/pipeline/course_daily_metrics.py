@@ -18,11 +18,7 @@ import logging
 
 from django.db import transaction
 from django.utils.timezone import utc
-try:
-    from lms.djangoapps.courseware.models import StudentModule
-except ImportError:
-    # Backward compatibily for pre-Juniper releases
-    from courseware.models import StudentModule # pylint: disable=import-error
+from figures.compat import StudentModule
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
 from student.models import CourseEnrollment  # pylint: disable=import-error
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error

@@ -10,13 +10,7 @@ from django.utils.timezone import utc
 from freezegun import freeze_time
 import pytest
 
-try:
-    from lms.djangoapps.courseware.models import StudentModule
-except ImportError:
-    # Backward compatibily for pre-Juniper releases
-    from courseware.models import StudentModule
-
-from figures.compat import RELEASE_LINE
+from figures.compat import RELEASE_LINE, StudentModule
 from figures.models import SiteMonthlyMetrics
 from figures.pipeline.site_monthly_metrics import fill_month, fill_last_month
 

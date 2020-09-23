@@ -17,11 +17,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
-try:
-    from lms.djangoapps.courseware.models import StudentModule
-except ImportError:
-    # Backward compatibily for pre-Juniper releases
-    from courseware.models import StudentModule
+from figures.compat import StudentModule
 
 from figures.helpers import as_datetime, prev_day, days_from, is_multisite
 from figures.models import SiteDailyMetrics

@@ -27,12 +27,7 @@ from openedx.core.djangoapps.course_groups.models import (
     CohortMembership,
 )
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-
-try:
-    from lms.djangoapps.courseware.models import StudentModule
-except ImportError:
-    # Backward compatibily for pre-Juniper releases
-    from courseware.models import StudentModule
+from figures.compat import StudentModule
 
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership

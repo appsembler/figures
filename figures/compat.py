@@ -35,6 +35,18 @@ else:
     from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
 
 
+try:
+    from lms.djangoapps.courseware.models import StudentModule
+except ImportError:
+    # Backward compatibily for pre-Juniper releases
+    from courseware.models import StudentModule
+
+try:
+    from lms.djangoapps.courseware.courses import get_course_by_id
+except ImportError:
+    # Backward compatibily for pre-Juniper releases
+    from courseware.courses import get_course_by_id
+
 def course_grade(learner, course):
     """
     Compatibility function to retrieve course grades

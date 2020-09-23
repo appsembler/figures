@@ -101,7 +101,7 @@ if OPENEDX_RELEASE == 'JUNIPER':
         'django.middleware.security.SecurityMiddleware',
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
-else: 
+else:
     MIDDLEWARE_CLASSES = (
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
