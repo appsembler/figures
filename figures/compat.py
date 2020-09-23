@@ -47,6 +47,11 @@ except ImportError:
     # Backward compatibily for pre-Juniper releases
     from courseware.courses import get_course_by_id
 
+try:
+    from opaque_keys.edx.django.models import CourseKeyField
+except ImportError:
+    from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
+
 def course_grade(learner, course):
     """
     Compatibility function to retrieve course grades
