@@ -9,12 +9,24 @@ from __future__ import absolute_import, unicode_literals
 import os
 import sys
 
+import environ
+
 from figures.settings.lms_production import (
     update_webpack_loader,
     update_celerybeat_schedule,
 )
 
 OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
+
+
+env = environ.Env(
+    FIGURES_IS_MULTISITE=(bool, False),
+    SEED_DAYS_BACK=(int, 60),
+    SEED_NUM_LEARNERS_PER_COURSE=(int, 25)
+)
+
+environ.Env.read_env()
+
 
 if OPENEDX_RELEASE == 'GINKGO':
     MOCKS_DIR = 'mocks/ginkgo'
@@ -199,9 +211,10 @@ WEBPACK_LOADER = {}
 # Included here for completeness in having this settings file match behavior in
 # the LMS settings
 CELERYBEAT_SCHEDULE = {}
-FEATURES = {}
+FEATURES = {
+    'FIGURES_IS_MULTISITE': env('FIGURES_IS_MULTISITE')
+}
 
-FEATURES = {}
 
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
 # We have an empty dict here to replicate behavior in the LMS
@@ -214,3 +227,8 @@ update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
 INTERNAL_IPS = [
     '127.0.0.1'
 ]
+
+DEVSITE_SEED = {
+    'DAYS_BACK': env('SEED_DAYS_BACK'),
+    'NUM_LEARNERS_PER_COURSE': env('SEED_NUM_LEARNERS_PER_COURSE')
+}

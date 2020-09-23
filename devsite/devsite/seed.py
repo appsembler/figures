@@ -10,6 +10,7 @@ from dateutil.rrule import rrule, DAILY
 import faker
 import random
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.utils import IntegrityError
@@ -19,26 +20,43 @@ from courseware.models import StudentModule
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 
+from organizations.models import Organization, OrganizationCourse
+
 from figures.compat import RELEASE_LINE, GeneratedCertificate
 from figures.models import (
     CourseDailyMetrics,
     LearnerCourseGradeMetrics,
     SiteDailyMetrics,
 )
-from figures.helpers import as_course_key, as_datetime, days_from, prev_day
+from figures.helpers import (
+    as_course_key,
+    as_datetime,
+    days_from,
+    prev_day,
+    is_multisite,
+)
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 from figures.pipeline import site_daily_metrics as pipeline_sdm
 
 from devsite import cans
 
+if is_multisite():
+    # First trying this without capturing 'ImportError'
+    from organizations.models import UserOrganizationMapping
+
+
 FAKE = faker.Faker()
 LAST_DAY = days_from(datetime.datetime.now(), -2).replace(tzinfo=utc)
 
-DAYS_BACK = 180
-NO_LEARNERS_PER_COURSE = 50
+
+DAYS_BACK = settings.DEVSITE_SEED['DAYS_BACK']
+NUM_LEARNERS_PER_COURSE = settings.DEVSITE_SEED['NUM_LEARNERS_PER_COURSE']
 
 # Quick and dirty debuging
 VERBOSE = False
+
+
+FOO_ORG = 'FOO'
 
 
 def get_site():
@@ -82,7 +100,7 @@ def seed_course_overviews(data=None):
     if not data:
         data = cans.COURSE_OVERVIEW_DATA
         # append with randomly generated course overviews to test pagination
-        new_courses = [generate_course_overview(i, org='FOO') for i in xrange(20)]
+        new_courses = [generate_course_overview(i, org=FOO_ORG) for i in xrange(20)]
         data += new_courses
 
     for rec in data:
@@ -166,7 +184,7 @@ def seed_course_enrollments():
     TODO: make the number of users variable
     """
     for co in CourseOverview.objects.all():
-        users = seed_users(cans.users.UserGenerator(NO_LEARNERS_PER_COURSE))
+        users = seed_users(cans.users.UserGenerator(NUM_LEARNERS_PER_COURSE))
         seed_course_enrollments_for_course(co.id, users, DAYS_BACK)
 
 
@@ -318,7 +336,35 @@ def seed_lcgm_all():
             seed_lcgm_for_course(**seed_args)
 
 
+def hotwire_multisite():
+    """
+    This is a quick and dirty implementation of a single site in multisite mode
+    """
+    params = dict(
+        name='Foo Organization',
+        short_name='FOO',
+        description='Foo org description',
+        logo=None,
+        active=True,
+    )
+    org = Organization.objects.create(**params)
+    if is_multisite():
+        org.sites = [get_site()]
+        org.save()
+
+    for course in CourseOverview.objects.all():
+        OrganizationCourse.objects.create(course_id=str(course.id),
+                                          organization=org,
+                                          active=True)
+    for user in get_user_model().objects.all():
+        # For now, not setting is_amc_admin roles
+        UserOrganizationMapping.objects.create(user=user,
+                                               organization=org,
+                                               is_active=True)
+
+
 def wipe():
+    print('Wiping synthetic data...')
     clear_non_admin_users()
     CourseEnrollment.objects.all().delete()
     StudentModule.objects.all().delete()
@@ -326,6 +372,10 @@ def wipe():
     CourseDailyMetrics.objects.all().delete()
     SiteDailyMetrics.objects.all().delete()
     LearnerCourseGradeMetrics.objects.all().delete()
+    Organization.objects.all().delete()
+    OrganizationCourse.objects.all().delete()
+    if is_multisite():
+        UserOrganizationMapping.objects.all().delete()
 
 
 def seed_all():
@@ -335,8 +385,13 @@ def seed_all():
     seed_course_overviews()
     print("seeding users...")
     seed_users()
+
     print("seeding course enrollments...")
     seed_course_enrollments()
+
+    if is_multisite():
+        print("Hotwiring multisite...")
+        hotwire_multisite()
 
     print("- skipping seeding seed_course_access_roles, broken")
     # print("seeding course enrollments...")
