@@ -442,7 +442,7 @@ class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         """
         qs = figures.sites.get_users_for_site(site).filter(
             courseenrollment__course_id__in=course_keys
-            ).prefetch_related('courseenrollment_set')
+            ).select_related('profile').prefetch_related('courseenrollment_set')
         return qs
 
     def get_queryset(self):
@@ -454,18 +454,17 @@ class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
           this view
         """
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        course_keys = figures.sites.get_course_keys_for_site(site)
         try:
-            course_keys = self.query_param_course_keys()
+            param_course_keys = self.query_param_course_keys()
         except InvalidKeyError:
             raise NotFound()
-        if course_keys:
-            site_course_keys = figures.sites.get_course_keys_for_site(site)
-            if not set(course_keys).issubset(set(site_course_keys)):
+        if param_course_keys:
+            if not set(param_course_keys).issubset(set(course_keys)):
                 raise NotFound()
-            return self.get_enrolled_users(site=site, course_keys=course_keys)
-        else:
-            return figures.sites.get_users_for_site(site).prefetch_related(
-                'courseenrollment_set')
+            else:
+                course_keys = param_course_keys
+        return self.get_enrolled_users(site=site, course_keys=course_keys)
 
     def get_serializer_context(self):
         context = super(LearnerMetricsViewSet, self).get_serializer_context()

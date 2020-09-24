@@ -8,10 +8,13 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from figures.helpers import as_course_key
-from figures.sites import get_user_ids_for_site
+from figures.sites import (
+    get_course_keys_for_site,
+    users_enrolled_in_courses,
+)
 from figures.views import LearnerMetricsViewSet
 
-from tests.helpers import OPENEDX_RELEASE, GINKGO, organizations_support_sites
+from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
 from tests.views.helpers import is_response_paginated, make_caller
 
@@ -103,9 +106,12 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         assert response.status_code == status.HTTP_200_OK
         assert is_response_paginated(response.data)
         results = response.data['results']
-        # Check user ids
+        # Check users
         result_ids = [obj['id'] for obj in results]
-        user_ids = get_user_ids_for_site(site=us['site'])
+        # Get all enrolled users
+        course_keys = get_course_keys_for_site(site=us['site'])
+        users = users_enrolled_in_courses(course_keys)
+        user_ids = [user.id for user in users]
         assert set(result_ids) == set(user_ids)
         # Spot check the first record
         top_keys = ['id', 'username', 'email', 'fullname', 'is_active',
