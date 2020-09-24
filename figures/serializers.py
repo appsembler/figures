@@ -857,22 +857,6 @@ class LearnerMetricsListSerializer(serializers.ListSerializer):
         super(LearnerMetricsListSerializer, self).__init__(
             instance=instance, data=data, **kwargs)
 
-    def to_representation(self, data):
-        """
-        Placeholder for next level of performance improvement
-
-        The DRF ListSerializer.to_representation does the equivalent:
-        ```
-        results = []
-        for item in data:
-            rec = self.child.to_representation(item)
-            results.append(rec)
-        return results
-        ```
-        """
-        data = super(LearnerMetricsListSerializer, self).to_representation(obj)
-        return data
-
 
 class LearnerMetricsSerializer(serializers.ModelSerializer):
     fullname = serializers.CharField(source='profile.name', default=None)
@@ -882,7 +866,7 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        list_serializer_class = LearnerMetricsListSerializer
+        # list_serializer_class = LearnerMetricsListSerializer
         fields = ('id', 'username', 'email', 'fullname', 'is_active',
                   'date_joined', 'enrollments')
         read_only_fields = fields
