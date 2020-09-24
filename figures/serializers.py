@@ -839,6 +839,41 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
         return self._lcgm.progress_details if self._lcgm else None
 
 
+class LearnerMetricsListSerializer(serializers.ListSerializer):
+    """
+    See if we need to add to class: # pylint: disable=abstract-method
+    """
+    def __init__(self, instance=None, data=empty, **kwargs):
+        """instance is a queryset of users
+
+        TODO: Ensure that we only have our own site's course keys
+        """
+        self.site = kwargs['context'].get('site')
+        self.course_keys = kwargs['context'].get('course_keys')
+
+        if not self.course_keys:
+            self.course_keys = figures.sites.get_course_keys_for_site(self.site)
+
+        super(LearnerMetricsListSerializer, self).__init__(
+            instance=instance, data=data, **kwargs)
+
+    def to_representation(self, data):
+        """
+        Placeholder for next level of performance improvement
+
+        The DRF ListSerializer.to_representation does the equivalent:
+        ```
+        results = []
+        for item in data:
+            rec = self.child.to_representation(item)
+            results.append(rec)
+        return results
+        ```
+        """
+        data = super(LearnerMetricsListSerializer, self).to_representation(obj)
+        return data
+
+
 class LearnerMetricsSerializer(serializers.ModelSerializer):
     fullname = serializers.CharField(source='profile.name', default=None)
     # enrollments = EnrollmentMetricsSerializerV2(source='courseenrollment_set',
@@ -847,16 +882,24 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
+        list_serializer_class = LearnerMetricsListSerializer
         fields = ('id', 'username', 'email', 'fullname', 'is_active',
                   'date_joined', 'enrollments')
         read_only_fields = fields
 
     def get_enrollments(self, user):
-        site_enrollments = figures.sites.get_course_enrollments_for_site(
-            self.context.get('site'))
-        user_enrollments = site_enrollments.filter(user=user)
-        course_keys = self.context.get('course_keys')
-        if course_keys:
-            user_enrollments = user_enrollments.filter(course_id__in=course_keys)
+        """
+        Rely on the caller (the view) to filter users and prefetch related
+        """
+
+        user_enrollments = user.courseenrollment_set.all()
+
+        # Still in testing, and remarked out to get the first pass PR through:
+        # This is where the ListSerializer helps, by doing the database hit in
+        # one set of queries at the top, then using the results for each. But
+        # it still needs work
+
+        # user_enrollments = user.courseenrollment_set.filter(
+        #     course_id__in=self.parent.course_keys)
 
         return EnrollmentMetricsSerializerV2(user_enrollments, many=True).data
