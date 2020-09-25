@@ -81,6 +81,16 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         view = self.view_class.as_view({'get': action})
         return view(request)
 
+    def matching_enrollment_set_to_course_ids(self, enrollments, course_ids):
+        """
+        enrollment course ids need to be a subset of course_ids
+        It is ok if there are none or fewer enrollments than course_ids because
+        a learner might not be enrolled in all the courses on which we are
+        filtering
+        """
+        enroll_course_ids = set([rec['course_id'] for rec in enrollments])
+        return enroll_course_ids.issubset(set([str(rec) for rec in course_ids]))
+
     def test_list_method_all(self, monkeypatch, lm_test_data):
         """Partial test coverage to check we get all site users
 
@@ -150,6 +160,10 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         expected_user_ids = [obj.user.id for obj in course_enrollments]
         assert set(result_ids) == set(expected_user_ids)
 
+        for rec in results:
+            assert self.matching_enrollment_set_to_course_ids(
+                rec['enrollments'], [our_courses[0].id])
+
     def test_course_param_multiple(self, monkeypatch, lm_test_data):
         """Test that the 'course' query parameter works
 
@@ -185,8 +199,14 @@ class TestLearnerMetricsViewSet(BaseViewTest):
                                                   courses=filtered_courses)
         expected_user_ids = [obj.user.id for obj in expected_enrollments]
         assert set(result_ids) == set(expected_user_ids)
+        for rec in results:
+            assert self.matching_enrollment_set_to_course_ids(
+                rec['enrollments'], [rec.id for rec in filtered_courses])
 
     def invalid_course_ids_raise_404(self, monkeypatch, lm_test_data, query_params):
+        """
+        Helper method to test expected 404 calls
+        """
         us = lm_test_data['us']
         them = lm_test_data['them']
 

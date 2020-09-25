@@ -798,7 +798,7 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
     course_id = serializers.CharField()
     date_enrolled = serializers.DateTimeField(source='created',
                                               format="%Y-%m-%d")
-    is_enrolled = serializers.BooleanField()
+    is_enrolled = serializers.BooleanField(source='is_active')
     progress_percent = serializers.SerializerMethodField()
     progress_details = serializers.SerializerMethodField()
 
@@ -820,14 +820,6 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
         self._lcgm = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
             user=instance.user, course_id=str(instance.course_id))
         return super(EnrollmentMetricsSerializerV2, self).to_representation(instance)
-
-    def get_is_enrolled(self, obj):
-        """
-        CourseEnrollment has to do some work to get this value
-        TODO: inspect CourseEnrollment._get_enrollment_state to see how we
-        can speed this up, avoiding construction of `CourseEnrollmentState`
-        """
-        return CourseEnrollment.is_enrolled(obj.user, obj.course_id)
 
     def get_progress_percent(self, obj):  # pylint: disable=unused-argument
         value = self._lcgm.progress_percent if self._lcgm else 0
@@ -866,7 +858,7 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        # list_serializer_class = LearnerMetricsListSerializer
+        list_serializer_class = LearnerMetricsListSerializer
         fields = ('id', 'username', 'email', 'fullname', 'is_active',
                   'date_joined', 'enrollments')
         read_only_fields = fields
@@ -876,14 +868,14 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
         Rely on the caller (the view) to filter users and prefetch related
         """
 
-        user_enrollments = user.courseenrollment_set.all()
+        # user_enrollments = user.courseenrollment_set.all()
 
         # Still in testing, and remarked out to get the first pass PR through:
         # This is where the ListSerializer helps, by doing the database hit in
         # one set of queries at the top, then using the results for each. But
         # it still needs work
 
-        # user_enrollments = user.courseenrollment_set.filter(
-        #     course_id__in=self.parent.course_keys)
+        user_enrollments = user.courseenrollment_set.filter(
+            course_id__in=self.parent.course_keys)
 
         return EnrollmentMetricsSerializerV2(user_enrollments, many=True).data
