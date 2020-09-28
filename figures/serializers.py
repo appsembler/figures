@@ -865,16 +865,9 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
 
     def get_enrollments(self, user):
         """
-        Rely on the caller (the view) to filter users and prefetch related
+        Use the course ids identified in this serializer's list serializer to
+        filter enrollments
         """
-
-        # user_enrollments = user.courseenrollment_set.all()
-
-        # Still in testing, and remarked out to get the first pass PR through:
-        # This is where the ListSerializer helps, by doing the database hit in
-        # one set of queries at the top, then using the results for each. But
-        # it still needs work
-
         user_enrollments = user.courseenrollment_set.filter(
             course_id__in=self.parent.course_keys)
 
