@@ -8,6 +8,23 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+
+28 Sep 2020 - Figures release 0.3.16
+====================================
+
+* Add Learners Progress Overview to main menu
+
+  * https://github.com/appsembler/figures/pull/256
+
+* Performance and test improvement for LearnerMetricsViewSet
+
+  * https://github.com/appsembler/figures/pull/260
+
+* Fix code that doesn't work on Ginkgo (Django 1.8)
+
+  * https://github.com/appsembler/figures/pull/261
+
+
 11 Sep 2020 - Figures release 0.3.15
 ====================================
 
@@ -24,6 +41,7 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
   * https://github.com/appsembler/figures/pull/248
 
 * Small cosmetic issues in new Learners Progress Overview page
+
   * https://github.com/appsembler/figures/pull/247
 
 
