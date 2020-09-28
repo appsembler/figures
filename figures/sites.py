@@ -136,6 +136,13 @@ def get_organizations_for_site(site):
 
 
 def get_course_keys_for_site(site):
+    """
+
+    Developer note: We could improve this function with caching
+    Question is which is the most efficient way to know cache expiry
+
+    We may also be able to reduce the queries here to also improve performance
+    """
     if figures.helpers.is_multisite():
         orgs = organizations.models.Organization.objects.filter(sites__in=[site])
         org_courses = organizations.models.OrganizationCourse.objects.filter(

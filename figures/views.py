@@ -427,17 +427,44 @@ class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         cid_list = self.request.GET.getlist('course')
         return [CourseKey.from_string(elem.replace(' ', '+')) for elem in cid_list]
 
+    def get_enrolled_users(self, site, course_keys):
+        """Get users enrolled in the specific courses for the specified site
+
+        Args:
+            site: The site for which is being called
+            course_keys: list of Open edX course keys
+
+        Returns:
+            Django QuerySet of users enrolled in the specified courses
+
+        Note:
+            We should move this to `figures.sites`
+        """
+        qs = figures.sites.get_users_for_site(site).filter(
+            courseenrollment__course_id__in=course_keys
+            ).select_related('profile').prefetch_related('courseenrollment_set')
+        return qs
+
     def get_queryset(self):
         """
-        This function has a hack to filter users until we can get the `filter_class`
-        working
+        If one or more course keys are given as query parameters, then
+        * Course key filtering mode is ued. Any invalid keys are filtered out
+          from the list
+        * If no valid course keys are found, then an empty list is returned from
+          this view
         """
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
-        queryset = figures.sites.get_users_for_site(site)
-        course_keys = self.query_param_course_keys()
-        if course_keys:
-            queryset = figures.sites.users_enrolled_in_courses(course_keys)
-        return queryset
+        course_keys = figures.sites.get_course_keys_for_site(site)
+        try:
+            param_course_keys = self.query_param_course_keys()
+        except InvalidKeyError:
+            raise NotFound()
+        if param_course_keys:
+            if not set(param_course_keys).issubset(set(course_keys)):
+                raise NotFound()
+            else:
+                course_keys = param_course_keys
+        return self.get_enrolled_users(site=site, course_keys=course_keys)
 
     def get_serializer_context(self):
         context = super(LearnerMetricsViewSet, self).get_serializer_context()

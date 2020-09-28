@@ -192,11 +192,19 @@ class LearnerCourseGradeMetricsManager(models.Manager):
     """Custom model manager for LearnerCourseGrades model
     """
     def most_recent_for_learner_course(self, user, course_id):
-        queryset = self.filter(user=user, course_id=str(course_id))
-        if queryset:
-            return queryset.order_by('-date_for')[0]
-        else:
-            return None
+        """Gets the most recent record for the given user and course
+
+        We have this because we implement sparse data, meaning we only create
+        new records when data has changed. this means that for a given course,
+        learners may not have the same "most recent date"
+
+        This means we have to be careful of where we use this method in our
+        API as it costs a query per call. We will likely require restructuring
+        or augmenting our data if we need to bulk retrieve
+        """
+        queryset = self.filter(user=user,
+                               course_id=str(course_id)).order_by('-date_for')
+        return queryset[0] if queryset else None
 
     def most_recent_for_course(self, course_id):
         statement = """ \
