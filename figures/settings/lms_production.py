@@ -49,7 +49,7 @@ def update_celerybeat_schedule(celerybeat_schedule_settings, figures_env_tokens)
                 ),
             }
 
-    if figures_env_tokens.get('ENABLE_FIGURES_MONTHLY_METRICS', False):
+    if figures_env_tokens.get('ENABLE_FIGURES_MONTHLY_METRICS', True):
         celerybeat_schedule_settings['figures-monthly-metrics'] = {
             'task': 'figures.tasks.run_figures_monthly_metrics',
             'schedule': crontab(0, 0, day_of_month=1),

@@ -12,6 +12,12 @@
 			outline: none;
 			letter-spacing: inherit;
 			font: inherit;
+			height: auto;
+			padding: calcRem(5);
+
+			&:focus {
+				box-shadow: none;
+			}
 		}
 
 		input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled), button {

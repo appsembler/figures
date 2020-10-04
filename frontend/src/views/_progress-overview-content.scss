@@ -1,0 +1,305 @@
+@import '~base/sass/base/variables';
+@import '~base/sass/base/functions';
+@import '~base/sass/base/grid';
+@import '~base/sass/base/mixins';
+@import '~base/sass/base/stat-cards';
+
+.container-max {
+  padding-left: calcRem(50);
+  padding-right: calcRem(50);
+}
+
+.users-overview-list {
+  padding-top: calcRem(30);
+  display: grid;
+  grid-template-columns: calcRem(200) 1fr;
+}
+
+.list-floating-columns {
+  padding: 0;
+
+  .user-fullname {
+    width: 100%;
+    padding-left: calcRem(15);
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    padding-right: calcRem(15);
+    display: flex;
+    align-items: center;
+  }
+}
+
+.list-scrolling-columns {
+  overflow-x: auto;
+  padding: 0;
+
+  .username {
+    width: calcRem(200);
+    font-size: calcRem(13);
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-left: calcRem(15);
+    padding-right: calcRem(15);
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    display: flex;
+    align-items: center;
+  }
+
+  .email {
+    width: calcRem(300);
+    font-size: calcRem(13);
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-right: calcRem(15);
+    padding-left: calcRem(15);
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    display: flex;
+    align-items: center;
+  }
+
+  .course-info-column, .course-info-column-header, .single-course-progress {
+    width: calcRem(280);
+    text-align: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-right: calcRem(15);
+    padding-left: calcRem(15);
+    padding-top: calcRem(20);
+    padding-bottom: calcRem(20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .course-info-column-header {
+    flex-wrap: wrap;
+
+    .course-name {
+      display: block;
+    }
+
+    .course-id {
+      display: block;
+      margin-top: calcRem(5);
+      font-size: calcRem(11);
+      color: #666;
+    }
+  }
+
+  .single-course-progress {
+
+    .data-group {
+      padding: 0 calcRem(7);
+      text-align: center;
+      width: 33%;
+
+      .data-label {
+        display: block;
+        font-size: calcRem(11);
+        color: #aaa;
+        margin: 0 0 calcRem(5) 0;
+      }
+
+      .data {
+        display: block;
+      }
+
+      .no-data {
+        color: #aaa;
+      }
+    }
+  }
+}
+
+
+
+
+.users-content {
+
+}
+
+.users-list {
+  padding: calcRem(25) 0;
+}
+
+.user-list-item {
+  font-size: calcRem(14);
+  height: calcRem(80);
+  display: flex;
+
+  &:nth-child(even) {
+
+    .user-fullname, .username, .email, .single-course-progress {
+      background-color: #eee;
+    }
+  }
+
+  &.list-header {
+    font-size: calcRem(12);
+  }
+
+  .user-info-value {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .sorting-header-button {
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    outline: none;
+
+    span {
+      margin-right: calcRem(5);
+      text-decoration: underline;
+      font-size: calcRem(12);
+    }
+
+    &:hover, &:focus {
+      cursor: pointer;
+    }
+  }
+
+  .user-fullname-link {
+    color: $primary-color;
+    text-decoration: none;
+  }
+}
+
+button.export-the-csv-button {
+  padding: calcRem(15) calcRem(30);
+  color: #fff;
+  display: inline-block;
+  background-color: $primary-color !important;
+  border: none;
+  outline: none;
+  border-radius: 50px;
+  margin-left: auto;
+  transition: all 0.3s ease-in-out;
+  font-size: calcRem(14);
+
+  &:hover {
+    cursor: pointer;
+    background-color: darken($primary-color, 15%) !important;
+  }
+}
+
+.refining-container {
+  display: flex;
+  align-items: center;
+  padding-bottom: calcRem(40);
+  margin-bottom: calcRem(30);
+  border-bottom: 1px solid #ccc;
+
+  &__filters {
+    width: 50%;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    grid-gap: calcRem(10);
+
+    .list-search .inner-container {
+      max-width: calcRem(600);
+    }
+
+    .multiselect-container {
+      max-width: calcRem(600);
+    }
+  }
+}
+
+.csv-export-content {
+  min-height: calcRem(500);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calcRem(80) calcRem(30);
+
+  h2 {
+    font-size: calcRem(24);
+    text-align: center;
+    margin: 0 0 calcRem(20);
+  }
+
+  .progress-bar {
+    width: 100%;
+    max-width: calcRem(500);
+    height: calcRem(18);
+    border-radius: calcRem(30);
+    padding: 4px;
+    border: 1px solid #ddd;
+    margin: calcRem(40) 0 calcRem(20);
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    display: block;
+    height: 100%;
+    background-color: $primary-color;
+    border-radius: calcRem(30);
+  }
+
+  .percentage {
+    display: block;
+    text-align: center;
+    font-size: calcRem(14);
+    color: #aaa;
+  }
+}
+
+button.close-csv-button {
+  padding: calcRem(15) calcRem(30);
+  color: #fff;
+  display: inline-block;
+  background-color: $primary-color !important;
+  border: none;
+  outline: none;
+  border-radius: 50px;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    background-color: darken($primary-color, 15%) !important;
+  }
+}
+
+.view-controls-container {
+  display: flex;
+  align-items: center;
+
+  .toggle-wide-view-button {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: calcRem(20);
+    padding: calcRem(10) calcRem(10);
+    width: calcRem(200);
+    text-align: center;
+    border: 1px solid #ccc;
+    font-size: calcRem(14);
+    border-radius: calcRem(4);
+    transition: all 0.3s ease-in-out;
+    color: #666;
+
+    &:hover {
+      border-color: $primary-color;
+      color: $primary-color;
+      cursor: pointer;
+    }
+  }
+}
+
+.no-data-message {
+  text-align: center;
+  font-size: calcRem(18);
+  font-weight: bold;
+  color: $primary-color;
+  padding: calcRem(90) calcRem(30);
+}

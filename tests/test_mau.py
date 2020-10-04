@@ -1,13 +1,11 @@
 
 from datetime import datetime
 from freezegun import freeze_time
-from dateutil.relativedelta import relativedelta
 import pytest
-
-from django.utils.timezone import utc
 
 from courseware.models import StudentModule
 
+from figures.helpers import as_datetime, as_date
 from figures.sites import (
     get_student_modules_for_site,
     get_student_modules_for_course_in_site,
@@ -65,31 +63,35 @@ def test_mau_1g_for_month_as_of_day_first_day_next_month(db):
     We want to make sure we get the right records when the query happens on the
     first day of the next month. So we do the following
 
-    * Add a StudentModule record for two months before
-    * Add at least one StudentModule record for the month we want
-    * Add at least one StudentModule record for after the month we want
+    * Add StudentModule records for the month before we want to capture records
+    * Add StudentModule records for the month we want to capture records
+    * Add StudentModule records for the month after we want to capture records
 
     This sets up the scenario that we run the daily pipeline to capture MAU
     "as of" yesterday (the last day of the previous month) to capture MAU for
-    the previous month
+    the previous month and not capture any records before the previous month,
+    nor capture records for the "current month"
     """
-    mock_today = datetime(year=2020, month=4, day=1).replace(tzinfo=utc)
-    month_before = datetime(year=2020, month=2, day=2).replace(tzinfo=utc)
-    in_dates = [datetime(year=2020, month=3, day=1).replace(tzinfo=utc),
-                datetime(year=2020, month=3, day=15).replace(tzinfo=utc),
-                datetime(year=2020, month=3, day=31).replace(tzinfo=utc)]
-    date_for = mock_today.date() - relativedelta(days=1)
+    month_before = [as_datetime('2020-02-02'), as_datetime('2020-02-29')]
+    month_after = [as_datetime('2020-04-01'), as_datetime('2020-04-01 12:00')]
+    in_month = [as_datetime('2020-03-01'),
+                as_datetime('2020-03-15'),
+                as_datetime('2020-03-31'),
+                as_datetime('2020-03-31 12:00')]
+    date_for = as_date('2020-03-31')
 
-    # Create a student module in the month before, and in month after
-    StudentModuleFactory(created=month_before, modified=month_before)
-    StudentModuleFactory(created=mock_today, modified=mock_today)
+    # Create student modules for the month before, month after, and in the
+    # month for which we want to retrieve records
+    [StudentModuleFactory(created=dt, modified=dt) for dt in month_before]
+    [StudentModuleFactory(created=dt, modified=dt) for dt in month_after]
     sm_in = [StudentModuleFactory(created=rec,
-                                  modified=rec) for rec in in_dates]
+                                  modified=rec) for rec in in_month]
     expected_user_ids = [obj.student_id for obj in sm_in]
 
     sm_queryset = StudentModule.objects.all()
     user_ids = mau_1g_for_month_as_of_day(sm_queryset=sm_queryset,
                                           date_for=date_for)
+    assert len(user_ids) == len(in_month)
     assert set([rec['student__id'] for rec in user_ids]) == set(expected_user_ids)
 
 
