@@ -31,6 +31,7 @@ django-countries==5.5
 django-webpack-loader==0.7.0
 django-model-utils==4.0.0
 django-filter==2.3.0
+django-environ==0.4.5
 
 jsonfield==2.1.1
 
@@ -38,7 +39,7 @@ jsonfield==2.1.1
 ## Documentation (Sphinx) dependencies
 ##
 
-Sphinx==3.1.2 #!1.8.1
+Sphinx==3.1.2
 #recommonmark==0.6.0 #! 0.4.0 #caniusepython3 flagged
 
 ##
@@ -68,7 +69,7 @@ pylint==2.4.2
 pylint-django==2.0.11
 pytest==5.3.5
 pytest-django==3.8.0
-pytest-mock==3.2.0 #!1.7.1
+pytest-mock==3.2.0
 pytest-pythonpath==0.7.3 
 pytest-cov==2.8.1
 tox==3.15.0

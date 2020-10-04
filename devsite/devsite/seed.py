@@ -104,7 +104,7 @@ def seed_course_overviews(data=None):
     if not data:
         data = cans.COURSE_OVERVIEW_DATA
         # append with randomly generated course overviews to test pagination
-        new_courses = [generate_course_overview(i, org=FOO_ORG) for i in xrange(20)]
+        new_courses = [generate_course_overview(i, org=FOO_ORG) for i in range(20)]
         data += new_courses
 
     for rec in data:

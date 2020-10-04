@@ -7,6 +7,7 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 from os.path import abspath, dirname, join
+import environ
 import sys
 
 from figures.settings.lms_production import (
@@ -22,8 +23,13 @@ def root(*args):
     """
     return join(abspath(dirname(__file__)), *args)
 
+env = environ.Env(
+    OPENEDX_RELEASE=(str, 'HAWTHORN'),
+)
 
-OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
+environ.Env.read_env()
+
+OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
 
 MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 

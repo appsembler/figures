@@ -16,23 +16,22 @@ from figures.settings.lms_production import (
     update_celerybeat_schedule,
 )
 
-OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
-ENABLE_DEVSITE_CELERY = os.environ.get('ENABLE_DEVSITE_CELERY', 'TRUE').upper()
 
 env = environ.Env(
     FIGURES_IS_MULTISITE=(bool, False),
     SEED_DAYS_BACK=(int, 60),
-    SEED_NUM_LEARNERS_PER_COURSE=(int, 25)
+    SEED_NUM_LEARNERS_PER_COURSE=(int, 25),
+    OPENEDX_RELEASE=(str, 'HAWTHORN'),
+    ENABLE_DEVSITE_CELERY=(bool, True)
 )
 
 environ.Env.read_env()
 
-if ENABLE_DEVSITE_CELERY == 'FALSE':
+OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
+ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
+
+if OPENEDX_RELEASE == 'GINKGO':
     ENABLE_DEVSITE_CELERY = False
-#if OPENEDX_RELEASE == 'GINKGO':
-#    MOCKS_DIR = 'mocks/ginkgo'
-else:
-    ENABLE_DEVSITE_CELERY = True
 
 MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
