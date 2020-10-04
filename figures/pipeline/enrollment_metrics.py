@@ -167,7 +167,7 @@ def collect_metrics_for_enrollment(site, course_enrollment, course_sm, date_for=
     lcgm = LearnerCourseGradeMetrics.objects.filter(
         user=course_enrollment.user,
         course_id=str(course_enrollment.course_id))
-    most_recent_lcgm = lcgm.order_by('date_for').last()  # pylint: disable=E1101
+    most_recent_lcgm = lcgm.order_by('date_for').last()
 
     if _enrollment_metrics_needs_update(most_recent_lcgm, most_recent_sm):
         progress_data = _collect_progress_data(most_recent_sm)

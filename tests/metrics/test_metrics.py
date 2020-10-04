@@ -369,20 +369,6 @@ class TestSiteMetricsGettersStandalone(object):
 
         assert count == self.site_daily_metrics[-1].course_count
 
-    def test_get_total_course_completions_for_time_period(self):
-        '''
-        We're incrementing values for test data, so the last SiteDailyMetrics
-        record will have the max value
-        '''
-
-        cdm = create_course_daily_metrics_data(
-            site=self.site,
-            start_date=self.data_start_date,
-            end_date=self.data_end_date)
-        count = get_total_course_completions_for_time_period(site=self.site,
-                                                             start_date=self.data_start_date,
-                                                             end_date=self.data_end_date)
-        assert count == cdm[-1].num_learners_completed
 
     def test_get_monthly_site_metrics(self):
         '''
@@ -511,21 +497,6 @@ class TestSiteMetricsGettersMultisite(object):
                                                        end_date=self.data_end_date)
         assert count == self.alpha_site_daily_metrics[-1].course_count
 
-    def test_get_total_course_completions_for_time_period(self):
-        '''
-        We're incrementing values for test data, so the last SiteDailyMetrics
-        record will have the max value
-        '''
-
-        cdm = create_course_daily_metrics_data(
-            site=self.alpha_site,
-            start_date=self.data_start_date,
-            end_date=self.data_end_date)
-        count = get_total_course_completions_for_time_period(
-            site=self.alpha_site,
-            start_date=self.data_start_date,
-            end_date=self.data_end_date)
-        assert count == cdm[-1].num_learners_completed
 
     def test_get_monthly_site_metrics(self):
         '''

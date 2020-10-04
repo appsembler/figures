@@ -139,6 +139,13 @@ def get_organizations_for_site(site):
 
 
 def get_course_keys_for_site(site):
+    """
+
+    Developer note: We could improve this function with caching
+    Question is which is the most efficient way to know cache expiry
+
+    We may also be able to reduce the queries here to also improve performance
+    """
     if figures.helpers.is_multisite():
         orgs = organizations.models.Organization.objects.filter(sites__in=[site])
         org_courses = organizations.models.OrganizationCourse.objects.filter(
@@ -211,6 +218,23 @@ def course_enrollments_for_course(course_id):
     Relies on the fact that course_ids are globally unique
     """
     return CourseEnrollment.objects.filter(course_id=as_course_key(course_id))
+
+
+def enrollments_for_course_ids(course_ids):
+    """
+    figures.sites is a temporary home for this function
+    """
+    ckeys = [as_course_key(cid) for cid in course_ids]
+    return CourseEnrollment.objects.filter(course_id__in=ckeys)
+
+
+def users_enrolled_in_courses(course_ids):
+    """
+    figures.sites is a temporary home for this function
+    """
+    enrollments = enrollments_for_course_ids(course_ids)
+    user_ids = enrollments.order_by('user_id').values('user_id').distinct()
+    return get_user_model().objects.filter(id__in=user_ids)
 
 
 def student_modules_for_course_enrollment(ce):

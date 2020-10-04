@@ -56,6 +56,9 @@ class CourseDailyMetrics(TimeStampedModel):
         )
 
     average_days_to_complete = models.IntegerField(blank=True, null=True)
+
+    # As of Figures 0.3.13, this is the total number of certificates granted
+    # for the course as of the "date_for"
     num_learners_completed = models.IntegerField()
 
     class Meta:
@@ -191,11 +194,19 @@ class LearnerCourseGradeMetricsManager(models.Manager):
     """Custom model manager for LearnerCourseGrades model
     """
     def most_recent_for_learner_course(self, user, course_id):
-        queryset = self.filter(user=user, course_id=str(course_id))
-        if queryset:
-            return queryset.order_by('-date_for')[0]  # pylint: disable=E1101
-        else:
-            return None
+        """Gets the most recent record for the given user and course
+
+        We have this because we implement sparse data, meaning we only create
+        new records when data has changed. this means that for a given course,
+        learners may not have the same "most recent date"
+
+        This means we have to be careful of where we use this method in our
+        API as it costs a query per call. We will likely require restructuring
+        or augmenting our data if we need to bulk retrieve
+        """
+        queryset = self.filter(user=user,
+                               course_id=str(course_id)).order_by('-date_for')
+        return queryset[0] if queryset else None
 
     def most_recent_for_course(self, course_id):
         statement = """ \
@@ -236,7 +247,7 @@ class LearnerCourseGradeMetricsManager(models.Manager):
             # We do the string casting in case couse_ids are CourseKey instance
             filter_args['course_id__in'] = [str(key) for key in course_ids]
         if filter_args:
-            qs = qs.filter(**filter_args)  # pylint: disable=E1101
+            qs = qs.filter(**filter_args)
         return qs
 
     def completed_ids_for_site(self, site, **_kwargs):
@@ -406,7 +417,7 @@ class SiteMauMetricsManager(models.Manager):
         If no record found, returns 'None'
         """
         queryset = self.filter(site=site, date_for__year=year, date_for__month=month)
-        return queryset.order_by('-modified').first()  # pylint: disable=no-member
+        return queryset.order_by('-modified').first()
 
 
 @python_2_unicode_compatible
@@ -456,7 +467,7 @@ class CourseMauMetricsManager(models.Manager):
             date_for__year=year,
             date_for__month=month,
         )
-        return queryset.order_by('-modified').first()  # pylint: disable=no-member
+        return queryset.order_by('-modified').first()
 
 
 @python_2_unicode_compatible

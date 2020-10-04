@@ -9,6 +9,8 @@ const apiConfig = {
   learnersGeneral: '/figures/api/users/general/',
   learnersDetailed: '/figures/api/users/detail/',
   reportingCsvReportsApi: '/reporting/api/csv-reports/',
+  coursesIndex: '/figures/api/courses-index/',
+  learnerMetrics: '/figures/api/learner-metrics/',
 }
 
 export default apiConfig;

@@ -333,3 +333,36 @@ def test_site_iterator():
         collected_ids.append(site_id)
 
     assert set(collected_ids) == set([site.id for site in sites])
+
+
+@pytest.mark.django_db
+@pytest.fixture
+def enrollment_data(db):
+    """Test data for course id filtering
+    """
+    course_overviews = [CourseOverviewFactory() for i in range(2)]
+    expected_enrollments = []
+    for co in course_overviews:
+        expected_enrollments += [CourseEnrollmentFactory(course_id=co.id)
+                                 for i in range(2)]
+    # Create enrollment we don't want
+    other_enrollment = CourseEnrollmentFactory()
+    return dict(
+        course_overviews=course_overviews,
+        expected_enrollments=expected_enrollments,
+        other_enrollment=other_enrollment)
+
+
+def test_enrollments_for_course_ids(enrollment_data):
+    course_ids = [co.id for co in enrollment_data['course_overviews']]
+    expected_enrollments = enrollment_data['expected_enrollments']
+    enrollments = figures.sites.enrollments_for_course_ids(course_ids)
+    assert set(enrollments) == set(expected_enrollments)
+
+
+def test_users_enrolled_in_courses(enrollment_data):
+    course_ids = [co.id for co in enrollment_data['course_overviews']]
+    expected_enrollments = enrollment_data['expected_enrollments']
+    expected_users = [ce.user for ce in expected_enrollments]
+    users = figures.sites.users_enrolled_in_courses(course_ids)
+    assert set(users) == set(expected_users)

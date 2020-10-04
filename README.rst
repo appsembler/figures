@@ -8,6 +8,60 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+
+28 Sep 2020 - Figures release 0.3.16
+====================================
+
+* Add Learners Progress Overview to main menu
+
+  * https://github.com/appsembler/figures/pull/256
+
+* Performance and test improvement for LearnerMetricsViewSet
+
+  * https://github.com/appsembler/figures/pull/260
+
+* Fix code that doesn't work on Ginkgo (Django 1.8)
+
+  * https://github.com/appsembler/figures/pull/261
+
+
+11 Sep 2020 - Figures release 0.3.15
+====================================
+
+* Learner progress overview UI improvements
+
+  * https://github.com/appsembler/figures/pull/255
+
+
+24 Aug 2020 - Figures release 0.3.14
+====================================
+
+* Added multi-course filtering to the `learner-metrics` API endpoint
+
+  * https://github.com/appsembler/figures/pull/248
+
+* Small cosmetic issues in new Learners Progress Overview page
+
+  * https://github.com/appsembler/figures/pull/247
+
+
+14 Aug 2020 - Figures release 0.3.13
+====================================
+
+* Learner metrics Prerelease API and UI
+
+  * https://github.com/appsembler/figures/pull/239
+  * https://github.com/appsembler/figures/pull/240
+
+* Improve logging for monthly metrics pipeline and set default to run the monthly metrics pipeline task
+
+  * https://github.com/appsembler/figures/pull/242
+
+* Bug fix: Site level certificate metrics
+
+  * https://github.com/appsembler/figures/pull/244
+
+
 15 Jul 2020 - Figures release 0.3.12
 ====================================
 

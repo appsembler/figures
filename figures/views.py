@@ -69,6 +69,7 @@ from figures.serializers import (
     EnrollmentMetricsSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
+    LearnerMetricsSerializer,
     SiteDailyMetricsSerializer,
     SiteMauMetricsSerializer,
     SiteMauLiveMetricsSerializer,
@@ -403,6 +404,80 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return context
 
 
+class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """Provides user identity and nested enrollment data
+
+    This view is unders active development and subject to change
+
+    TODO: After we get this class tests running, restructure this module:
+    * Group all user model based viewsets together
+    * Make a base user viewset with the `get_queryset` and `get_serializer_context`
+      methods
+    """
+    model = get_user_model()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = LearnerMetricsSerializer
+    filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
+
+    # TODO: Improve this filter
+    filter_class = UserFilterSet
+
+    search_fields = ['username', 'email', 'profile__name']
+    ordering_fields = ['username', 'email', 'profile__name', 'is_active', 'date_joined']
+
+    def query_param_course_keys(self):
+        """
+        TODO: Mixin this
+        """
+        cid_list = self.request.GET.getlist('course')
+        return [CourseKey.from_string(elem.replace(' ', '+')) for elem in cid_list]
+
+    def get_enrolled_users(self, site, course_keys):
+        """Get users enrolled in the specific courses for the specified site
+
+        Args:
+            site: The site for which is being called
+            course_keys: list of Open edX course keys
+
+        Returns:
+            Django QuerySet of users enrolled in the specified courses
+
+        Note:
+            We should move this to `figures.sites`
+        """
+        qs = figures.sites.get_users_for_site(site).filter(
+            courseenrollment__course_id__in=course_keys
+            ).select_related('profile').prefetch_related('courseenrollment_set')
+        return qs
+
+    def get_queryset(self):
+        """
+        If one or more course keys are given as query parameters, then
+        * Course key filtering mode is ued. Any invalid keys are filtered out
+          from the list
+        * If no valid course keys are found, then an empty list is returned from
+          this view
+        """
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        course_keys = figures.sites.get_course_keys_for_site(site)
+        try:
+            param_course_keys = self.query_param_course_keys()
+        except InvalidKeyError:
+            raise NotFound()
+        if param_course_keys:
+            if not set(param_course_keys).issubset(set(course_keys)):
+                raise NotFound()
+            else:
+                course_keys = param_course_keys
+        return self.get_enrolled_users(site=site, course_keys=course_keys)
+
+    def get_serializer_context(self):
+        context = super(LearnerMetricsViewSet, self).get_serializer_context()
+        context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
+        context['course_keys'] = self.query_param_course_keys()
+        return context
+
+
 class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     """Initial viewset for enrollment metrics
 
@@ -433,7 +508,7 @@ class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         The default router does not support hyphen in the custom action, so
         we need to use the underscore until we implement a custom router
         """
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         qs = self.model.objects.completed_ids_for_site(site=site)
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -451,7 +526,7 @@ class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         Return matching LearnerCourseGradeMetric rows that have completed
         enrollments
         """
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         qs = self.model.objects.completed_for_site(site=site)
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -510,7 +585,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         TODO: NEXT Add query params to get data from previous months
         TODO: Add paginagation
         """
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         course_keys = figures.sites.get_course_keys_for_site(site)
         date_for = datetime.utcnow().date()
         month_for = '{}/{}'.format(date_for.month, date_for.year)
@@ -521,7 +596,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
                                                          month_for=month_for))
         return Response(data)
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request, **kwargs):  # pylint: disable=unused-argument
         """
         TODO: Make sure we have a test to handle invalid or empty course id
         """
@@ -535,7 +610,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         return Response(data)
 
     @detail_route()
-    def active_users(self, request, **kwargs):
+    def active_users(self, request, **kwargs):  # pylint: disable=unused-argument
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         date_for = datetime.utcnow().date()
         months_back = 6
@@ -549,7 +624,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         return Response(data)
 
     @detail_route()
-    def course_enrollments(self, request, *args, **kwargs):
+    def course_enrollments(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(course_enrollments=self.historic_data(
             request=request,
@@ -559,7 +634,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         return Response(data)
 
     @detail_route()
-    def num_learners_completed(self, request, *args, **kwargs):
+    def num_learners_completed(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(num_learners_completed=self.historic_data(
             request=request,
@@ -569,7 +644,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         return Response(data)
 
     @detail_route()
-    def avg_days_to_complete(self, request, *args, **kwargs):
+    def avg_days_to_complete(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(avg_days_to_complete=self.historic_data(
             request=request,
@@ -579,7 +654,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         return Response(data)
 
     @detail_route()
-    def avg_progress(self, request, *args, **kwargs):
+    def avg_progress(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(avg_progress=self.historic_data(
             request=request,
@@ -612,13 +687,13 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         Returns site metrics data for current month
         """
 
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         data = metrics.get_current_month_site_metrics(site)
         return Response(data)
 
     @list_route()
     def registered_users(self, request):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         date_for = datetime.utcnow().date()
         months_back = 6
 
@@ -636,7 +711,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         """
         TODO: Rename the metrics module function to "new_users" to match this
         """
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         date_for = datetime.utcnow().date()
         months_back = 6
 
@@ -651,7 +726,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
 
     @list_route()
     def course_completions(self, request):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         date_for = datetime.utcnow().date()
         months_back = 6
 
@@ -666,7 +741,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
 
     @list_route()
     def course_enrollments(self, request):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         date_for = datetime.utcnow().date()
         months_back = 6
 
@@ -681,7 +756,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
 
     @list_route()
     def site_courses(self, request):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         date_for = datetime.utcnow().date()
         months_back = 6
 
@@ -696,7 +771,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
 
     @list_route()
     def active_users(self, request):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         months_back = 6
         active_users = metrics.get_site_mau_history_metrics(site=site,
                                                             months_back=months_back)
@@ -713,10 +788,10 @@ class CourseMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
         """
         pass
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request, **kwargs):
         course_id_str = kwargs.get('pk', '')
         course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
 
         if figures.helpers.is_multisite():
             if site != figures.sites.get_site_for_course(course_key):
@@ -726,8 +801,8 @@ class CourseMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
         serializer = self.serializer_class(data)
         return Response(serializer.data)
 
-    def list(self, request, *args, **kwargs):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+    def list(self, request):
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         course_overviews = figures.sites.get_courses_for_site(site)
         data = []
         for co in course_overviews:
@@ -753,12 +828,12 @@ class SiteMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
         """
         pass
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         """
         We use list instead of retrieve because retrieve requires a resource
         identifier, like a PK
         """
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = django.contrib.sites.shortcuts.get_current_site(request)
         data = retrieve_live_site_mau_data(site)
         serializer = self.serializer_class(data)
         return Response(serializer.data)
