@@ -305,7 +305,10 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     date_for = models.DateField()
     # TODO: We should require the user
     # TODO: Review the most appropriate on_delete behaviour
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             blank=True,
+                             null=True,
+                             on_delete=models.CASCADE)
     course_id = models.CharField(max_length=255, blank=True)
     points_possible = models.FloatField()
     points_earned = models.FloatField()
@@ -381,7 +384,10 @@ class PipelineError(TimeStampedModel):
     # Attributes for convenient querying
     course_id = models.CharField(max_length=255, blank=True)
     # TODO: Review the most appropriate on_delete behaviour
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             blank=True,
+                             null=True,
+                             on_delete=models.CASCADE)
     site = models.ForeignKey(Site, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:

@@ -20,10 +20,9 @@ import organizations
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
 
-from figures.compat import StudentModule
-  
 from student.models import CourseEnrollment  # pylint: disable=import-error
 
+from figures.compat import StudentModule
 from figures.helpers import as_course_key
 import figures.helpers
 

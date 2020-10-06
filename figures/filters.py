@@ -66,7 +66,7 @@ def boolean_method_filter(method):
 
 def date_from_range_filter(field_name):
     """
-    Filter.name renamed to Filter.field_name 
+    Filter.name renamed to Filter.field_name
     https://django-filter.readthedocs.io/en/master/guide/migration.html#filter-name-renamed-to-filter-field-name-792
     First check for old style (pre version 2 Django Filters)
     """
