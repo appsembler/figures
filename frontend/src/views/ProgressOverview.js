@@ -314,8 +314,14 @@ class ProgressOverview extends Component {
         </HeaderAreaLayout>
         {this.state.csvExportProgress ? (
           <div className={cx({ 'container': true, 'csv-export-content': true})}>
-            <h2>Exporting your CSV data...</h2>
-            <p>Please don't close this browser tab.</p>
+            {(this.state.csvExportProgress < 1) ? [
+              <h2>Exporting your CSV data...</h2>,
+              <p>Please don't close this browser tab.</p>
+            ] : [
+              <h2>Export successful!</h2>,
+              <p>Depending on your browser settings, you will either be prompted with a prompt to save the generated file, or the file will be automatically downloaded into your default Downloads folder.</p>,
+              <p>It is now safe to close the exporter.</p>,
+            ]}
             <div className={styles['progress-bar']}>
               <span className={styles['progress-bar-inner']} style={{ width: this.state.csvExportProgress * 100 + '%'}}></span>
             </div>

@@ -229,6 +229,13 @@ button.export-the-csv-button {
     margin: 0 0 calcRem(20);
   }
 
+  p {
+    font-size: calcRem(14);
+    max-width: calcRem(800);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .progress-bar {
     width: 100%;
     max-width: calcRem(500);
@@ -264,6 +271,7 @@ button.close-csv-button {
   outline: none;
   border-radius: 50px;
   transition: all 0.3s ease-in-out;
+  font-size: calcRem(16);
 
   &:hover {
     cursor: pointer;
