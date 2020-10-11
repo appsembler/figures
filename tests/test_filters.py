@@ -3,6 +3,16 @@
 Currently uses Django TestCase style classes instead of pytest style classes
 so that we can use TestCase.assertQuerysetEqual
 
+
+Test Debt
+=========
+Field parameters 'lookup_type' and 'lookup_expr'
+
+We are not adequately testing 'lookup_exr', which is supported only in
+Django Filters 1.0.0 and greater. Prior to Django Filters 1.0.0, 'lookup_type'
+was used.
+
+Open edX Ginkgo uses Django Filteres 0.11.0.
 '''
 
 from dateutil.parser import parse as dateutil_parse
