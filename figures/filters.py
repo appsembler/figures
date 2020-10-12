@@ -14,6 +14,7 @@ TODO: Rename classes so they eiher all end with "Filter" or "FilterSet" then
       update the test class names in "tests/test_filters.py" to match.
 """
 
+from packaging import version
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.models import F
@@ -26,6 +27,7 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 
 from student.models import CourseEnrollment  # pylint: disable=import-error
 
+
 from figures.pipeline.course_daily_metrics import get_enrolled_in_exclude_admins
 from figures.models import (
     CourseDailyMetrics,
@@ -34,6 +36,27 @@ from figures.models import (
     LearnerCourseGradeMetrics,
     SiteMauMetrics,
 )
+
+
+def char_filter(field_name, lookup_expr):
+    """For backwards compatibility.
+
+    We require both `field_name` and `lookup_expr` to minimize the work this
+    function needs to do by not needing to conditionally check for the
+    `field_name` parameter.
+
+    Adapted from this PR:
+    https://github.com/appsembler/figures/pull/264/files#diff-ccfc20c64a04dae3fe94285d727a3aa2R79
+
+    And we'll need to replace the code in PR 264 with this function
+    """
+    django_filters_version = version.parse(django_filters.__version__)
+    if django_filters_version < version.parse('1.0.0'):
+        return django_filters.CharFilter(name=field_name, lookup_type=lookup_expr)
+    elif django_filters_version < version.parse('2.0.0'):
+        return django_filters.CharFilter(name=field_name, lookup_expr=lookup_expr)
+    else:
+        return django_filters.CharFilter(field_name=field_name, lookup_expr=lookup_expr)
 
 
 def char_method_filter(method):
@@ -77,13 +100,14 @@ class CourseOverviewFilter(django_filters.FilterSet):
 
     '''
 
-    display_name = django_filters.CharFilter(lookup_expr='icontains')
-    org = django_filters.CharFilter(
-        name='display_org_with_default', lookup_expr='iexact')
-    number = django_filters.CharFilter(
-        name='display_number_with_default', lookup_expr='iexact')
-    number_contains = django_filters.CharFilter(
-        name='display_number_with_default', lookup_expr='icontains')
+    display_name = char_filter(field_name='display_name',
+                               lookup_expr='icontains')
+    org = char_filter(field_name='display_org_with_default',
+                      lookup_expr='iexact')
+    number = char_filter(field_name='display_number_with_default',
+                         lookup_expr='iexact')
+    number_contains = char_filter(field_name='display_number_with_default',
+                                  lookup_expr='icontains')
 
     class Meta:
         model = CourseOverview
@@ -198,12 +222,11 @@ class UserFilterSet(django_filters.FilterSet):
     is_active = django_filters.BooleanFilter(name='is_active')
     is_staff = django_filters.BooleanFilter(name='is_staff')
     is_superuser = django_filters.BooleanFilter(name='is_superuser')
-    username = django_filters.CharFilter(lookup_expr='icontains')
-    email = django_filters.CharFilter(lookup_expr='icontains')
-    name = django_filters.CharFilter(lookup_expr='icontains', name='profile__name')
+    username = char_filter(field_name='username', lookup_expr='icontains')
+    email = char_filter(field_name='email', lookup_expr='icontains')
+    name = char_filter(field_name='profile__name', lookup_expr='icontains')
 
-    country = django_filters.CharFilter(
-        name='profile__country', lookup_expr='iexact')
+    country = char_filter(field_name='profile__country', lookup_expr='iexact')
     user_ids = char_method_filter(method='filter_user_ids')
     enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
 
@@ -310,8 +333,8 @@ class SiteFilterSet(django_filters.FilterSet):
     """
     Note: The Site filter has no knowledge of a default site, nor should it
     """
-    domain = django_filters.CharFilter(lookup_expr='icontains')
-    name = django_filters.CharFilter(lookup_expr='icontains')
+    domain = char_filter(field_name='domain', lookup_expr='icontains')
+    name = char_filter(field_name='name', lookup_expr='icontains')
 
     class Meta:
         model = Site
