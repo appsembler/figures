@@ -18,11 +18,12 @@ import logging
 
 from django.db import transaction
 from django.utils.timezone import utc
-from figures.compat import StudentModule
+
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
 from student.models import CourseEnrollment  # pylint: disable=import-error
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
 
+from figures.compat import GeneratedCertificate, StudentModule
 from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 import figures.metrics
 from figures.models import CourseDailyMetrics, PipelineError
@@ -30,7 +31,6 @@ from figures.pipeline.logger import log_error
 import figures.pipeline.loaders
 from figures.pipeline.enrollment_metrics import bulk_calculate_course_progress_data
 from figures.serializers import CourseIndexSerializer
-from figures.compat import GeneratedCertificate
 import figures.sites
 
 

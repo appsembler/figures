@@ -56,6 +56,9 @@ ginkgo.pytest:  ## Run Pytest for the Ginkgo environment
 ginkgo.tox:  ## Run tox just for the Ginkgo environment
 	tox -e py27-ginkgo
 
+juniper.pytest:  ## Run Pytest for the Juniper environment
+	OPENEDX_RELEASE=JUNIPER pytest -c pytest-juniper.ini
+
 ### Devsite Docker targets
 
 devsite.docker.prep: ## state needed to run devsite docker

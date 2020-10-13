@@ -3,10 +3,13 @@ Figures URL definitions
 '''
 
 from __future__ import absolute_import
+from django import VERSION as DJANGO_VERSION
 from django.conf.urls import include, url
 from rest_framework import routers
 
 from figures import views
+
+app_name = 'figures'
 
 router = routers.DefaultRouter()
 
@@ -121,9 +124,18 @@ urlpatterns = [
     # UI Templates
     url(r'^$', views.figures_home, name='figures-home'),
 
-    # REST API
-    url(r'^api/', include((router.urls, 'api'), namespace='api')),
+    # Non-router API endpoints
     url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
         name='general-site-metrics'),
+
+    # Reroute all unmatched traffic to Figures main UI page
     url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')
 ]
+
+# Include router endpoints
+# Breaking changes between Django 1.8 and Django 2.0 so we do this
+
+if DJANGO_VERSION[0] < 2:
+    urlpatterns.append(url(r'^api/', include(router.urls, namespace='api')))
+else:
+    urlpatterns.append(url(r'^api/', include((router.urls, 'api'), namespace='api')))
