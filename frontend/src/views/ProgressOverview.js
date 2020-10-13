@@ -32,6 +32,7 @@ class ProgressOverview extends Component {
       ordering: 'profile__name',
       selectedCourseIds: '',
       csvExportProgress: 0,
+      wideView: false,
     };
     this.fetchFullViewData = this.fetchFullViewData.bind(this);
     this.getUsersForCsv = this.getUsersForCsv.bind(this);
@@ -68,7 +69,10 @@ class ProgressOverview extends Component {
     const coursesFilterOptions = courses.map((course, index) => {
       const entry = {
         id: course.id,
-        name: course.name
+        label: `${course.name} | ${course.number} | ${course.id}`,
+        name: course.name,
+        number: course.number,
+        id: course.id,
       }
       return (
         entry
@@ -99,7 +103,7 @@ class ProgressOverview extends Component {
     this.setState({
       perPage: newValue,
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -107,7 +111,7 @@ class ProgressOverview extends Component {
     this.setState({
       searchQuery: newValue
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -115,7 +119,7 @@ class ProgressOverview extends Component {
     this.setState({
       ordering: newValue
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -128,7 +132,7 @@ class ProgressOverview extends Component {
       selectedCourses: selectedList,
       selectedCourseIds: selectedCourseIds,
     }, () => {
-      this.getUsers();
+      (this.state.selectedCourses.length || this.state.searchQuery) && this.getUsers();
     })
   }
 
@@ -194,7 +198,14 @@ class ProgressOverview extends Component {
       coursesFilter.forEach((course, i) => {
         const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course.id);
         if (userProgress) {
-          singleRecord[course.id] = `Progress: ${userProgress.getIn(['progress_percent'])}/1 | Sections: ${userProgress.getIn(['progress_details', 'sections_worked'])}/${userProgress.getIn(['progress_details', 'sections_possible'])} | Points: ${userProgress.getIn(['progress_details', 'points_earned'])}/${userProgress.getIn(['progress_details', 'points_possible'])}`;
+
+          const progressPercent = (userProgress.getIn(['progress_percent'])) ? userProgress.getIn(['progress_percent']).toFixed(2) : '-';
+          const sectionsWorked = (userProgress.getIn(['progress_details', 'sections_worked'])) ? userProgress.getIn(['progress_details', 'sections_worked']).toFixed(1) : '-';
+          const sectionsPossible = (userProgress.getIn(['progress_details', 'sections_possible'])) ? userProgress.getIn(['progress_details', 'sections_possible']).toFixed(1) : '-';
+          const pointsEarned = (userProgress.getIn(['progress_details', 'points_earned'])) ? userProgress.getIn(['progress_details', 'points_earned']).toFixed(1) : '-';
+          const pointsPossible = (userProgress.getIn(['progress_details', 'points_possible'])) ? userProgress.getIn(['progress_details', 'points_possible']).toFixed(1) : '-';
+
+          singleRecord[course.id] = `Progress: ${progressPercent}/1 | Sections: ${sectionsWorked}/${sectionsPossible} | Points: ${pointsEarned}/${pointsPossible}`;
         } else {
           singleRecord[course.id] = '-';
         };
@@ -204,9 +215,14 @@ class ProgressOverview extends Component {
     return csvTestVar;
   }
 
+  toggleWideView = () => {
+    this.setState({
+      wideView: !this.state.wideView
+    })
+  }
+
   componentDidMount() {
     this.getCourses();
-    this.getUsers();
   }
 
   render() {
@@ -215,8 +231,13 @@ class ProgressOverview extends Component {
 
     const headerCourseColumns = coursesFilter.map((course, index) => {
       return(
-        <div className={styles['course-info-column']}>
-          {course['name']}
+        <div className={styles['course-info-column-header']}>
+          <span className={styles['course-name']}>
+            {course['name']}
+          </span>
+          <span className={styles['course-id']}>
+            {course['id']}
+          </span>
         </div>
       )
     })
@@ -229,7 +250,9 @@ class ProgressOverview extends Component {
               className={styles['user-fullname-link']}
               to={'/figures/user/' + user['id']}
             >
-              {user['fullname']}
+              <span className={styles['user-info-value']}>
+                {user['fullname']}
+              </span>
             </Link>
           </div>
         </li>
@@ -246,15 +269,15 @@ class ProgressOverview extends Component {
             {userProgress ? [
               <div className={styles['data-group']}>
                 <span className={styles['data-label']}>Sections</span>
-                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'sections_worked'])}/{userProgress.getIn(['progress_details', 'sections_possible'])}</span>
+                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'sections_worked']) ? userProgress.getIn(['progress_details', 'sections_worked']).toFixed(1) : '-'}/{userProgress.getIn(['progress_details', 'sections_possible']) ? userProgress.getIn(['progress_details', 'sections_possible']).toFixed(1) : '-'}</span>
               </div>,
               <div className={styles['data-group']}>
                 <span className={styles['data-label']}>Points</span>
-                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'points_earned'])}/{userProgress.getIn(['progress_details', 'points_possible'])}</span>
+                <span className={styles['data']}>{userProgress.getIn(['progress_details', 'points_earned']) ? userProgress.getIn(['progress_details', 'points_earned']).toFixed(1) : '-'}/{userProgress.getIn(['progress_details', 'points_possible']) ? userProgress.getIn(['progress_details', 'points_possible']).toFixed(1) : '-'}</span>
               </div>,
               <div className={styles['data-group']}>
                 <span className={styles['data-label']}>Progress</span>
-                <span className={styles['data']}>{userProgress.getIn(['progress_percent'])*100}%</span>
+                <span className={styles['data']}>{(userProgress.getIn(['progress_percent'])*100).toFixed(0)}%</span>
               </div>
             ] : (
               <span className={styles['no-data']}>-</span>
@@ -266,10 +289,14 @@ class ProgressOverview extends Component {
       return (
         <li key={`scrolling+${user['id']}`} className={styles['user-list-item']}>
           <div className={styles['username']}>
-            {user['username']}
+            <span className={styles['user-info-value']}>
+              {user['username']}
+            </span>
           </div>
           <div className={styles['email']}>
-            {user['email']}
+            <span className={styles['user-info-value']}>
+              {user['email']}
+            </span>
           </div>
           {userCoursesRender}
         </li>
@@ -287,8 +314,14 @@ class ProgressOverview extends Component {
         </HeaderAreaLayout>
         {this.state.csvExportProgress ? (
           <div className={cx({ 'container': true, 'csv-export-content': true})}>
-            <h2>Exporting your CSV data...</h2>
-            <p>Please don't close this browser tab.</p>
+            {(this.state.csvExportProgress < 1) ? [
+              <h2>Exporting your CSV data...</h2>,
+              <p>Please don't close this browser tab.</p>
+            ] : [
+              <h2>Export successful!</h2>,
+              <p>Depending on your browser settings, you will either be prompted with a prompt to save the generated file, or the file will be automatically downloaded into your default Downloads folder.</p>,
+              <p>It is now safe to close the exporter.</p>,
+            ]}
             <div className={styles['progress-bar']}>
               <span className={styles['progress-bar-inner']} style={{ width: this.state.csvExportProgress * 100 + '%'}}></span>
             </div>
@@ -306,97 +339,115 @@ class ProgressOverview extends Component {
             )}
           </div>
         ) : (
-          <div className={cx({ 'container-max': true, 'users-content': true})}>
+          <div className={cx({ 'container-max': this.state.wideView, 'container': !this.state.wideView, 'users-content': true})}>
             <div className={styles['refining-container']}>
               <div className={styles['refining-container__filters']}>
                 <ListSearch
                   valueChangeFunction={this.setSearchQuery}
                   inputPlaceholder='Search by users name, username or email...'
                 />
-                <Multiselect
-                  options={this.state.coursesFilterOptions}
-                  selectedValues={this.state.selectedCourses}
-                  onSelect={this.onChangeSelectedCourses}
-                  onRemove={this.onChangeSelectedCourses}
-                  displayValue="name"
-                  placeholder="Filter by courses..."
-                  style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" } }}
-                />
+                <div className={styles['multiselect-container']}>
+                  <Multiselect
+                    options={this.state.coursesFilterOptions}
+                    selectedValues={this.state.selectedCourses}
+                    onSelect={this.onChangeSelectedCourses}
+                    onRemove={this.onChangeSelectedCourses}
+                    displayValue="label"
+                    placeholder="Filter by courses..."
+                    style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" }, option: { "font-size": "14px" } }}
+                  />
+                </div>
               </div>
-              <button
-                className={styles['export-the-csv-button']}
-                onClick = {() => this.startCsvExport()}
-              >
-                Generate a CSV from Current View
-              </button>
+              {(this.state.selectedCourses.length || this.state.searchQuery) ? (
+                <button
+                  className={styles['export-the-csv-button']}
+                  onClick = {() => this.startCsvExport()}
+                >
+                  Generate a CSV from Current View
+                </button>
+              ) : ''}
             </div>
             {this.state.pages ? (
-              <Paginator
-                pageSwitchFunction={this.getUsers}
-                currentPage={this.state.currentPage}
-                perPage={this.state.perPage}
-                pages={this.state.pages}
-                changePerPageFunction={this.setPerPage}
-              />
+              <div className={styles['view-controls-container']}>
+                <Paginator
+                  pageSwitchFunction={this.getUsers}
+                  currentPage={this.state.currentPage}
+                  perPage={this.state.perPage}
+                  pages={this.state.pages}
+                  changePerPageFunction={this.setPerPage}
+                />
+                <button
+                  className={styles['toggle-wide-view-button']}
+                  onClick = {() => this.toggleWideView()}
+                >
+                  {this.state.wideView ? 'Switch to narrow view' : 'Switch to wide view'}
+                </button>
+              </div>
             ) : ''}
-            <div className={styles['users-overview-list']}>
-              <ul className={styles['list-floating-columns']}>
-                <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
-                  <div className={styles['user-fullname']}>
-                    <button
-                      className={styles['sorting-header-button']}
-                      onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
-                    >
-                      <span>
-                        User full name
-                      </span>
-                      {(this.state.ordering === 'profile__name') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleUp} />
-                      ) : (this.state.ordering === '-profile__name') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleDown} />
-                      ) : ''}
-                    </button>
-                  </div>
-                </li>
-                {floatingListItems}
-              </ul>
-              <ul className={styles['list-scrolling-columns']}>
-                <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
-                  <div className={styles['username']}>
-                    <button
-                      className={styles['sorting-header-button']}
-                      onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
-                    >
-                      <span>
-                        Username
-                      </span>
-                      {(this.state.ordering === 'username') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleUp} />
-                      ) : (this.state.ordering === '-username') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleDown} />
-                      ) : ''}
-                    </button>
-                  </div>
-                  <div className={styles['email']}>
-                    <button
-                      className={styles['sorting-header-button']}
-                      onClick={() => (this.state.ordering !== 'email') ? this.setOrdering('email') : this.setOrdering('-email')}
-                    >
-                      <span>
-                        Email
-                      </span>
-                      {(this.state.ordering === 'username') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleUp} />
-                      ) : (this.state.ordering === '-username') ? (
-                        <FontAwesomeIcon icon={faAngleDoubleDown} />
-                      ) : ''}
-                    </button>
-                  </div>
-                  {headerCourseColumns}
-                </li>
-                {scrollingListItems}
-              </ul>
-            </div>
+            {(this.state.selectedCourses.length || this.state.searchQuery) ? (
+              <div className={styles['users-overview-list']}>
+                <ul className={styles['list-floating-columns']}>
+                  <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
+                    <div className={styles['user-fullname']}>
+                      <button
+                        className={styles['sorting-header-button']}
+                        onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
+                      >
+                        <span>
+                          User full name
+                        </span>
+                        {(this.state.ordering === 'profile__name') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleUp} />
+                        ) : (this.state.ordering === '-profile__name') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleDown} />
+                        ) : ''}
+                      </button>
+                    </div>
+                  </li>
+                  {floatingListItems}
+                </ul>
+                <ul className={styles['list-scrolling-columns']}>
+                  <li key='list-header' className={cx(styles['user-list-item'], styles['list-header'])}>
+                    <div className={styles['username']}>
+                      <button
+                        className={styles['sorting-header-button']}
+                        onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
+                      >
+                        <span>
+                          Username
+                        </span>
+                        {(this.state.ordering === 'username') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleUp} />
+                        ) : (this.state.ordering === '-username') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleDown} />
+                        ) : ''}
+                      </button>
+                    </div>
+                    <div className={styles['email']}>
+                      <button
+                        className={styles['sorting-header-button']}
+                        onClick={() => (this.state.ordering !== 'email') ? this.setOrdering('email') : this.setOrdering('-email')}
+                      >
+                        <span>
+                          Email
+                        </span>
+                        {(this.state.ordering === 'email') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleUp} />
+                        ) : (this.state.ordering === '-email') ? (
+                          <FontAwesomeIcon icon={faAngleDoubleDown} />
+                        ) : ''}
+                      </button>
+                    </div>
+                    {headerCourseColumns}
+                  </li>
+                  {scrollingListItems}
+                </ul>
+              </div>
+            ) : (
+              <div className={styles['no-data-message']}>
+                Enter a search term and/or select course(s) to display the data.
+              </div>
+            )}
             {this.state.pages ? (
               <Paginator
                 pageSwitchFunction={this.getUsers}

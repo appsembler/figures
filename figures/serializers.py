@@ -798,7 +798,7 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
     course_id = serializers.CharField()
     date_enrolled = serializers.DateTimeField(source='created',
                                               format="%Y-%m-%d")
-    is_enrolled = serializers.BooleanField()
+    is_enrolled = serializers.BooleanField(source='is_active')
     progress_percent = serializers.SerializerMethodField()
     progress_details = serializers.SerializerMethodField()
 
@@ -821,14 +821,6 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
             user=instance.user, course_id=str(instance.course_id))
         return super(EnrollmentMetricsSerializerV2, self).to_representation(instance)
 
-    def get_is_enrolled(self, obj):
-        """
-        CourseEnrollment has to do some work to get this value
-        TODO: inspect CourseEnrollment._get_enrollment_state to see how we
-        can speed this up, avoiding construction of `CourseEnrollmentState`
-        """
-        return CourseEnrollment.is_enrolled(obj.user, obj.course_id)
-
     def get_progress_percent(self, obj):  # pylint: disable=unused-argument
         value = self._lcgm.progress_percent if self._lcgm else 0
         return float(Decimal(value).quantize(Decimal('.00')))
@@ -839,6 +831,25 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
         return self._lcgm.progress_details if self._lcgm else None
 
 
+class LearnerMetricsListSerializer(serializers.ListSerializer):
+    """
+    See if we need to add to class: # pylint: disable=abstract-method
+    """
+    def __init__(self, instance=None, data=empty, **kwargs):
+        """instance is a queryset of users
+
+        TODO: Ensure that we only have our own site's course keys
+        """
+        self.site = kwargs['context'].get('site')
+        self.course_keys = kwargs['context'].get('course_keys')
+
+        if not self.course_keys:
+            self.course_keys = figures.sites.get_course_keys_for_site(self.site)
+
+        super(LearnerMetricsListSerializer, self).__init__(
+            instance=instance, data=data, **kwargs)
+
+
 class LearnerMetricsSerializer(serializers.ModelSerializer):
     fullname = serializers.CharField(source='profile.name', default=None)
     # enrollments = EnrollmentMetricsSerializerV2(source='courseenrollment_set',
@@ -847,16 +858,17 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
+        list_serializer_class = LearnerMetricsListSerializer
         fields = ('id', 'username', 'email', 'fullname', 'is_active',
                   'date_joined', 'enrollments')
         read_only_fields = fields
 
     def get_enrollments(self, user):
-        site_enrollments = figures.sites.get_course_enrollments_for_site(
-            self.context.get('site'))
-        user_enrollments = site_enrollments.filter(user=user)
-        course_keys = self.context.get('course_keys')
-        if course_keys:
-            user_enrollments = user_enrollments.filter(course_id__in=course_keys)
+        """
+        Use the course ids identified in this serializer's list serializer to
+        filter enrollments
+        """
+        user_enrollments = user.courseenrollment_set.filter(
+            course_id__in=self.parent.course_keys)
 
         return EnrollmentMetricsSerializerV2(user_enrollments, many=True).data
