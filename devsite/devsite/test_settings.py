@@ -5,7 +5,6 @@ Settings file to run automated tests
 
 from __future__ import absolute_import, unicode_literals
 
-import os
 from os.path import abspath, dirname, join
 import environ
 import sys
@@ -22,6 +21,7 @@ def root(*args):
     Get the absolute path of the given path relative to the project root.
     """
     return join(abspath(dirname(__file__)), *args)
+
 
 env = environ.Env(
     OPENEDX_RELEASE=(str, 'HAWTHORN'),

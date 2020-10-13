@@ -43,7 +43,7 @@ def generate_cdm_data_for_course(course_id):
         average_progress = gen_avg_progress(yesterday.get('average_progress', 0))
         average_days_to_complete = randint(10, 30)
         num_learners_completed = gen_num_learners_completed(yesterday)
-        
+
         rec = dict(
             course_id=course_id,
             date_for=dt.strftime('%Y-%m-%d'),

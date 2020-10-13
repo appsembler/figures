@@ -64,11 +64,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    #'django_extensions',
+    # 'django_extensions',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_countries',
     'django_filters',
-    # 'rest_framework.authtoken',
     'debug_toolbar',
     'webpack_loader',
     'organizations',
@@ -99,14 +99,12 @@ else:
     INSTALLED_APPS.append('lms.djangoapps.courseware')
 
 
-
 if OPENEDX_RELEASE == 'JUNIPER':
     MIDDLEWARE = (
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
-        #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'django.middleware.security.SecurityMiddleware',
