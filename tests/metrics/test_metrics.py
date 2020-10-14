@@ -55,7 +55,6 @@ from figures.metrics import (
     get_total_course_completions_for_time_period,
     get_total_enrollments_for_time_period,
     get_total_site_courses_for_time_period,
-    get_total_site_users_for_time_period,
     get_total_site_users_joined_for_time_period,
 
 )
@@ -308,25 +307,7 @@ class TestSiteMetricsGettersStandalone(object):
         count = get_active_users_for_time_period(site=self.site,
                                                  start_date=start_date,
                                                  end_date=end_date)
-        assert count == len(sm_in) -1
-
-    def test_get_total_site_users_for_time_period(self):
-        '''
-        TODO: add users who joined before and after the time period, and
-        compare the count to the users created on or before the end date
-
-        TODO: Create
-        '''
-        users = create_users_joined_over_time(
-            site=self.site,
-            is_multisite=figures.helpers.is_multisite(),
-            start_date=self.data_start_date,
-            end_date=self.data_end_date)
-        count = get_total_site_users_for_time_period(
-            site=self.site,
-            start_date=self.data_start_date,
-            end_date=self.data_end_date)
-        assert count == len(users)
+        assert count == len(sm_in) - 1
 
     def test_get_total_site_users_joined_for_time_period(self):
         '''
@@ -365,7 +346,6 @@ class TestSiteMetricsGettersStandalone(object):
                                                        end_date=self.data_end_date)
 
         assert count == self.site_daily_metrics[-1].course_count
-
 
     def test_get_monthly_site_metrics(self):
         '''
@@ -442,23 +422,6 @@ class TestSiteMetricsGettersMultisite(object):
 
         assert count == len(student_module_sets)
 
-    def test_get_total_site_users_for_time_period(self):
-        '''
-        TODO: add users who joined before and after the time period, and
-        compare the count to the users created on or before the end date
-
-        TODO: Create
-        '''
-        users = create_users_joined_over_time(
-            site=self.alpha_site,
-            is_multisite=figures.helpers.is_multisite(),
-            start_date=self.data_start_date,
-            end_date=self.data_end_date)
-        count = get_total_site_users_for_time_period(site=self.alpha_site,
-                                                     start_date=self.data_start_date,
-                                                     end_date=self.data_end_date)
-        assert count == len(users)
-
     def test_get_total_site_users_joined_for_time_period(self):
         '''
         TODO: add users who joined before and after the time period, and
@@ -493,7 +456,6 @@ class TestSiteMetricsGettersMultisite(object):
                                                        start_date=self.data_start_date,
                                                        end_date=self.data_end_date)
         assert count == self.alpha_site_daily_metrics[-1].course_count
-
 
     def test_get_monthly_site_metrics(self):
         '''
