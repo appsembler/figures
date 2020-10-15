@@ -1,4 +1,4 @@
-'''Tests Figures filter classes
+"""Tests Figures filter classes
 
 Currently uses Django TestCase style classes instead of pytest style classes
 so that we can use TestCase.assertQuerysetEqual
@@ -9,11 +9,22 @@ Test Debt
 Field parameters 'lookup_type' and 'lookup_expr'
 
 We are not adequately testing 'lookup_exr', which is supported only in
-Django Filters 1.0.0 and greater. Prior to Django Filters 1.0.0, 'lookup_type'
+Django Filter 1.0.0 and greater. Prior to Django Filters 1.0.0, 'lookup_type'
 was used.
 
-Open edX Ginkgo uses Django Filteres 0.11.0.
-'''
+* Open edX Ginkgo uses Django Filter 0.11.0
+* Open edX Hawthorn uses Django Filter 1.0.4
+* Open edX Juniper uses Django Fitler 2.2.0
+
+TODO: Create mock view that tests the filters
+
+Doing this instead of directly calling the filter make sure that the execution
+chain is called. One of the defects we find is that our tests currently don't
+adequately tests for method signature differences for our custom filter methods.
+We need to make sure that our custom methods are properly handled by the
+different versions of "Django Filter", as different major relases are used by
+different Open edX releases.
+"""
 
 from dateutil.parser import parse as dateutil_parse
 

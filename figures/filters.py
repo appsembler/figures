@@ -60,12 +60,67 @@ def char_filter(field_name, lookup_expr):
 
 
 def char_method_filter(method):
+    """This function exists to address breaking changes in Django Filter
+
+    Parameters:
+        "method" is the method name string.
+
+    First check for old style (pre  version 1 Django Filter) to see if the
+    `MethodFilter` class exists.
+
+    IIf so, use that, else use `CharFilter`
+
+    First, check if Django Filter is pre 1.0. If so then use our custom method
+    filter class shim, 'CompatMethodFilter'
+    Otherwise, use version 1.0+ `CharFilter` class
+
+    TODO: Check that the versions stated are accurate. Meaning that the breaking
+    changes are at the major version for the differences we observer from 0.11.0
+    to 1.0.4 to 2.2.0 of Django Filter.
+
+    Pre Django Filter 1.0 uses the class, `MethodFilter`. Afterward, it uses the
+    class `CharFilter` with custom method handling.
+
+    With Django Filter 1.0, a new parameter, `name` was introduced and required
+    as a parameter in the custom filter methods.
+
+    Therefore, as a quick fix, we copied and modified the `MethodFilter` class
+    from Django Filter 0.11.0 and added it above in this module.
+
+    Before 1.0, the custom method signature is:
+
+    `(self, queryset, value)`
+
+    With 1.0, the method signature is:
+
+    `(self, queryset, name, value)`
+
+    Version 1.x replaces `MethodFilter` class with `FilterMethod`
+    Version 2.x changes the `name` parameter to `field_name`
     """
-    "method" is the method name string
-    First check for old style (pre  version 1 Django Filters)
-    """
-    if hasattr(django_filters, 'MethodFilter'):
-        return django_filters.MethodFilter(action=method)  # pylint: disable=no-member
+    django_filters_version = version.parse(django_filters.__version__)
+    if django_filters_version < version.parse('1.0.0'):
+        class CompatMethodFilter(django_filters.MethodFilter):  # pylint: disable=no-member
+            def filter(self, qs, value):
+                '''
+                This filter method will act as a proxy for the actual method we want to
+                call.
+
+                It will try to find the method on the parent filterset,
+                if not it attempts to search for the method `field_{{attribute_name}}`.
+                Otherwise it defaults to just returning the queryset.
+                '''
+                parent = getattr(self, 'parent', None)
+                parent_filter_method = getattr(parent, self.parent_action, None)
+                if not parent_filter_method:
+                    func_str = 'filter_{0}'.format(self.name)
+                    parent_filter_method = getattr(parent, func_str, None)
+
+                if parent_filter_method is not None:
+                    return parent_filter_method(qs, self.name, value)
+                return qs
+
+        return CompatMethodFilter(action=method)
     else:
         return django_filters.CharFilter(method=method)
 
