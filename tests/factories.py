@@ -89,7 +89,7 @@ class UserFactory(DjangoModelFactory):
     is_staff = False
     is_superuser = False
     date_joined = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,0o4,0o1, tzinfo=factory.compat.UTC))
+        2018, 4, 1, tzinfo=factory.compat.UTC))
 
     # TODO: Figure out if this can be a SubFactory and the advantages
     profile = factory.RelatedFactory(UserProfileFactory, 'user')
