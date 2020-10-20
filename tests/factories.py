@@ -217,7 +217,7 @@ class StudentModuleFactory(DjangoModelFactory):
     created = fuzzy.FuzzyDateTime(datetime.datetime(
         2018,0o2,0o2, tzinfo=factory.compat.UTC))
     modified = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,0o2,0o2, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=factory.compat.UTC))
 
 
 if OPENEDX_RELEASE == GINKGO:
