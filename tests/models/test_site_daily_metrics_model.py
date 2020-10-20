@@ -56,7 +56,7 @@ class TestSiteDailyMetrics(object):
         default_site = Site.objects.first()
         rec = dict(
             site=Site.objects.first(),
-            date_for=datetime.date(2018, 0o2, 0o2),
+            date_for=datetime.date(2018, 2, 2),
             cumulative_active_user_count=11,
             total_user_count=1,
             course_count=1,
