@@ -215,7 +215,7 @@ class StudentModuleFactory(DjangoModelFactory):
     course_id = factory.Sequence(lambda n: as_course_key(
         COURSE_ID_STR_TEMPLATE.format(n)))
     created = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,0o2,0o2, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=factory.compat.UTC))
     modified = fuzzy.FuzzyDateTime(datetime.datetime(
         2018,2,2, tzinfo=factory.compat.UTC))
 
