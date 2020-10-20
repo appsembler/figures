@@ -174,7 +174,7 @@ def seed_course_enrollments_for_course(course_id, users, max_days_back):
 
     for user in users:
         if VERBOSE:
-            print(('seeding course enrollment for user {}'.format(user.username)))
+            print('seeding course enrollment for user {}'.format(user.username))
 
         CourseEnrollment.objects.update_or_create(
             course_id=course_id,
