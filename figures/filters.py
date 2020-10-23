@@ -14,7 +14,6 @@ TODO: Rename classes so they eiher all end with "Filter" or "FilterSet" then
       update the test class names in "tests/test_filters.py" to match.
 """
 
-from packaging import version
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.models import F
@@ -27,7 +26,6 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 
 from student.models import CourseEnrollment  # pylint: disable=import-error
 
-
 from figures.pipeline.course_daily_metrics import get_enrolled_in_exclude_admins
 from figures.models import (
     CourseDailyMetrics,
@@ -36,6 +34,23 @@ from figures.models import (
     LearnerCourseGradeMetrics,
     SiteMauMetrics,
 )
+
+
+def hack_get_version(version_string):
+    """Get the parsed version string as a list of ints [major, minor, point]
+
+    This works with packages that use only numbers in the format of
+    "major.minor.point"
+
+    This is hopefully a temporary hack. We cannot expect the Open edX deployment
+    to have `packaging` installed, so the original implementation here which
+    used `packaging.versions` to check the version is not supported without
+    requiring the extra step of installing `packaging`
+    """
+    return [int(val) for val in version_string.split('.')]
+
+
+DJANGO_FILTERS_VERSION = hack_get_version(django_filters.__version__)
 
 
 def char_filter(field_name, lookup_expr):
@@ -50,10 +65,9 @@ def char_filter(field_name, lookup_expr):
 
     And we'll need to replace the code in PR 264 with this function
     """
-    django_filters_version = version.parse(django_filters.__version__)
-    if django_filters_version < version.parse('1.0.0'):
+    if DJANGO_FILTERS_VERSION[0] < 1:
         return django_filters.CharFilter(name=field_name, lookup_type=lookup_expr)
-    elif django_filters_version < version.parse('2.0.0'):
+    elif DJANGO_FILTERS_VERSION[0] < 2:
         return django_filters.CharFilter(name=field_name, lookup_expr=lookup_expr)
     else:
         return django_filters.CharFilter(field_name=field_name, lookup_expr=lookup_expr)
@@ -98,8 +112,7 @@ def char_method_filter(method):
     Version 1.x replaces `MethodFilter` class with `FilterMethod`
     Version 2.x changes the `name` parameter to `field_name`
     """
-    django_filters_version = version.parse(django_filters.__version__)
-    if django_filters_version < version.parse('1.0.0'):
+    if DJANGO_FILTERS_VERSION[0] < 1:
         class CompatMethodFilter(django_filters.MethodFilter):  # pylint: disable=no-member
             def filter(self, qs, value):
                 '''
