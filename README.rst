@@ -8,6 +8,15 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+26 Oct 2020 - Figures release 0.3.18
+====================================
+
+* FIX - Removed dependency on 'packaging.versions'
+
+  * https://github.com/appsembler/figures/pull/272
+  * NOTE: This PR updates a previous commit that required the `packaging` package
+
+
 16 Oct 2020 - Figures release 0.3.17
 ====================================
 
