@@ -203,6 +203,46 @@ class TestLearnerMetricsViewSet(BaseViewTest):
             assert self.matching_enrollment_set_to_course_ids(
                 rec['enrollments'], [rec.id for rec in filtered_courses])
 
+    @pytest.mark.parametrize('query_param, field_name', [
+        ('username', 'username'),
+        ('email', 'email'),
+        ])
+    def test_distinct_user(self, monkeypatch, lm_test_data, query_param, field_name):
+        """
+
+        Test data setup:
+        We need to have a user enrolled in multiple courses
+
+        We expect to have just one user record returned with each of the
+        courses for which the user is enrolled
+        """
+        # Set up data
+        us = lm_test_data['us']
+        our_enrollments = us['enrollments']
+        caller = make_caller(us['org'])
+        our_site_users = lm_test_data['us']['users']
+        our_user = our_site_users[-1]
+        user_ce = [rec for rec in our_enrollments if rec.user_id == our_user.id]
+        query_val = getattr(our_user, field_name)
+        query_str = '?{}={}'.format(query_param, query_val)
+
+        # Run test
+        request_path = self.base_request_path + query_str
+        response = self.make_request(request_path=request_path,
+                                     monkeypatch=monkeypatch,
+                                     site=us['site'],
+                                     caller=caller,
+                                     action='list')
+        # Check results
+        # Continue updating here
+        assert response.status_code == status.HTTP_200_OK
+        assert is_response_paginated(response.data)
+        results = response.data['results']
+        found_ce_ids = set([rec['id'] for rec in results[0]['enrollments']])
+        assert len(results) == 1
+        assert results[0]['id'] == our_user.id
+        assert found_ce_ids == set([rec.id for rec in user_ce])
+
     def invalid_course_ids_raise_404(self, monkeypatch, lm_test_data, query_params):
         """
         Helper method to test expected 404 calls
