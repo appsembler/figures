@@ -293,7 +293,7 @@ def get_active_users_for_time_period(site, start_date, end_date, course_ids=None
         **filter_args).values('student__id').distinct().count()
 
 
-def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
+def get_total_site_users_for_time_period(site, start_date, end_date, **_kwargs):
     """
     Returns the maximum number of users who joined before or on the end date
 
@@ -304,28 +304,15 @@ def get_total_site_users_for_time_period(site, start_date, end_date, **kwargs):
     TODO: Consider first trying to get the data from the SiteDailyMetrics
     model. If there are no records, then get the data from the User model
     """
-    def calc_from_user_model():
-        filter_args = dict(
-            date_joined__lt=as_datetime(next_day(end_date)),
-        )
-        users = figures.sites.get_users_for_site(site)
-        return users.filter(**filter_args).count()
 
-    def calc_from_site_daily_metrics():
-        filter_args = dict(
-            site=site,
-            date_for__gt=prev_day(start_date),
-            date_for__lt=next_day(end_date))
-        qs = SiteDailyMetrics.objects.filter(**filter_args)
-        if qs:
-            return qs.aggregate(maxval=Max('total_user_count'))['maxval']
-        else:
-            return 0
-
-    if kwargs.get('calc_from_sdm'):
-        return calc_from_site_daily_metrics()
+    filter_args = dict(site=site,
+                       date_for__gt=prev_day(start_date),
+                       date_for__lt=next_day(end_date))
+    qs = SiteDailyMetrics.objects.filter(**filter_args)
+    if qs:
+        return qs.aggregate(maxval=Max('total_user_count'))['maxval']
     else:
-        return calc_from_user_model()
+        return 0
 
 
 def get_total_site_users_joined_for_time_period(site, start_date, end_date,
@@ -334,6 +321,7 @@ def get_total_site_users_joined_for_time_period(site, start_date, end_date,
 
     NOTE: Untested and not yet used in the general site metrics, but we'll want to add it
     TODO: Rename this function to be "new_users" for consistency with the API endpoint
+    TODO: When we implement this, add data to Figures model space for performance
     """
     def calc_from_user_model():
         filter_args = dict(

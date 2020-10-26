@@ -8,6 +8,35 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+26 Oct 2020 - Figures release 0.3.18
+====================================
+
+* FIX - Removed dependency on 'packaging.versions'
+
+  * https://github.com/appsembler/figures/pull/272
+  * NOTE: This PR updates a previous commit that required the `packaging` package
+
+
+16 Oct 2020 - Figures release 0.3.17
+====================================
+
+* Reworked SiteMonthlyMetrics registered users metric. This was causing the `/figures/api/site-monthly-metrics/registered_users` endpoint to timeout with a 500 error
+
+  * https://github.com/appsembler/figures/pull/268
+
+* Fixed Ginkgo (Django Filter 0.11.0) Backward compatibility issues
+
+  * https://github.com/appsembler/figures/pull/266
+  * https://github.com/appsembler/figures/pull/269
+
+* UI Bug fix: Add success feedback to csv export dialog
+
+  * https://github.com/appsembler/figures/pull/265
+
+* Bump http-proxy from 1.18.0 to 1.18.1 in /frontend
+
+  * https://github.com/appsembler/figures/pull/254
+
 
 28 Sep 2020 - Figures release 0.3.16
 ====================================
