@@ -23,6 +23,8 @@ env:
   - TOXENV=py27-ginkgo
   - TOXENV=py27-hawthorn_community
   - TOXENV=py27-hawthorn_multisite
+  - TOXENV=py35-juniper_community
+  - TOXENV=py38-juniper_community
   - TOXENV=lint
   - TOXENV=edx_lint_check
 
