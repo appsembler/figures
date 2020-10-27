@@ -166,13 +166,6 @@ def date_from_range_filter(field_name):
         return django_filters.DateFromToRangeFilter(field_name=field_name)
 
 
-def char_filter(field_name, lookup_expr):
-    if DJANGO_FILTERS_VERSION[0] < 2:
-        return django_filters.CharFilter(name=field_name, lookup_expr=lookup_expr)
-    else:
-        return django_filters.CharFilter(field_name=field_name, lookup_expr=lookup_expr)
-
-
 def boolean_filter(field_name):
     if DJANGO_FILTERS_VERSION[0] < 2:
         return django_filters.BooleanFilter(name=field_name)
