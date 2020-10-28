@@ -4,12 +4,17 @@ matrix:
   include:
     - python: 2.7
       env: TOXENV=py27-ginkgo
+    - python: 2.7
       env: TOXENV=py27-hawthorn_community
+    - python: 2.7
       env: TOXENV=py27-hawthorn_multisite
+    - python: 2.7
       env: TOXENV=lint
+    - python: 2.7
       env: TOXENV=edx_lint_check
     - python: 3.5
       env: TOXENV=py35-juniper_community
+    - python: 3.8
       env: TOXENV=py38-juniper_community
 
 
