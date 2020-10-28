@@ -1,15 +1,24 @@
 # Disabled pytest coverage to troubleshoot Python 3 support
 language: python
-python:
-  - "2.7"
-  - "3.5"
-  - "3.8"
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27-ginkgo
+      env: TOXENV=py27-hawthorn_community
+      env: TOXENV=py27-hawthorn_multisite
+      env: TOXENV=lint
+      env: TOXENV=edx_lint_check
+    - python: 3.5
+      env: TOXENV=py35-juniper_community
+      env: TOXENV=py38-juniper_community
+
 
 node_js:
   - "node"
 
 # command to install dependencies
 install:
+  - pip install flake8 tox
   # - pip install -r devsite/requirements/hawthorn_community.txt
   # - pip install pytest-cov flake8 tox
   - cd frontend && yarn && cd ..
@@ -22,14 +31,14 @@ script:
   # - bash <(curl -s https://codecov.io/bash)
   - tox
 
-env:
-  - TOXENV=py27-ginkgo
-  - TOXENV=py27-hawthorn_community
-  - TOXENV=py27-hawthorn_multisite
-  - TOXENV=py35-juniper_community
-  - TOXENV=py38-juniper_community
-  - TOXENV=lint
-  - TOXENV=edx_lint_check
+# env:
+#   - TOXENV=py27-ginkgo
+#   - TOXENV=py27-hawthorn_community
+#   - TOXENV=py27-hawthorn_multisite
+#   - TOXENV=py35-juniper_community
+#   - TOXENV=py38-juniper_community
+#   - TOXENV=lint
+#   - TOXENV=edx_lint_check
 
 deploy:
   provider: pypi
