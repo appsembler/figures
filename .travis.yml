@@ -1,22 +1,25 @@
+# Disabled pytest coverage to troubleshoot Python 3 support
 language: python
 python:
   - "2.7"
+  - "3.5"
+  - "3.8"
 
 node_js:
   - "node"
 
 # command to install dependencies
 install:
-  - pip install -r devsite/requirements/hawthorn_community.txt
-  - pip install pytest-cov flake8 tox
+  # - pip install -r devsite/requirements/hawthorn_community.txt
+  # - pip install pytest-cov flake8 tox
   - cd frontend && yarn && cd ..
 
 # command to run tests
 script:
   - cd frontend && yarn && cd ..
   - flake8 figures
-  - py.test --cov=./
-  - bash <(curl -s https://codecov.io/bash)
+  # - py.test --cov=./
+  # - bash <(curl -s https://codecov.io/bash)
   - tox
 
 env:
