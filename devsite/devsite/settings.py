@@ -16,17 +16,16 @@ from figures.settings.lms_production import (
     update_celerybeat_schedule,
 )
 
-OPENEDX_RELEASE = os.environ.get('OPENEDX_RELEASE', 'HAWTHORN').upper()
-
-
 env = environ.Env(
     FIGURES_IS_MULTISITE=(bool, False),
     SEED_DAYS_BACK=(int, 60),
-    SEED_NUM_LEARNERS_PER_COURSE=(int, 25)
+    SEED_NUM_LEARNERS_PER_COURSE=(int, 25),
+    OPENEDX_RELEASE=(str, 'HAWTHORN'),
 )
 
 environ.Env.read_env()
 
+OPENEDX_RELEASE = env('OPENEDX_RELEASE')
 
 if OPENEDX_RELEASE == 'GINKGO':
     MOCKS_DIR = 'mocks/ginkgo'
