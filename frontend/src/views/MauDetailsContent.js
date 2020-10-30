@@ -13,7 +13,7 @@ class MauDetailsContent extends Component {
   render() {
     let previousValue = undefined;
     const mausRender = this.props.mauHistory.map((period, index) => {
-      const difference = previousValue ? (period.value - previousValue) : 'N/A';
+      const difference = (previousValue || (previousValue == 0)) ? (period.value - previousValue) : 'N/A';
       previousValue = period.value;
       return (
         <li key={index} className={styles['content-row']}>
