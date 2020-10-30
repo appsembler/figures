@@ -24,6 +24,9 @@ node_js:
 # command to install dependencies
 install:
   - pip install flake8 tox
+  # Remarking out codecov and leaving here as a reference until we decide what
+  # we are going to do moving forward with running coverage tests in the GitHub
+  # repo
   # - pip install -r devsite/requirements/hawthorn_community.txt
   # - pip install pytest-cov flake8 tox
   - cd frontend && yarn && cd ..
@@ -32,18 +35,12 @@ install:
 script:
   - cd frontend && yarn && cd ..
   - flake8 figures
+  # Remarking out codecov and leaving here as a reference until we decide what
+  # we are going to do moving forward with running coverage tests in the GitHub
+  # repo
   # - py.test --cov=./
   # - bash <(curl -s https://codecov.io/bash)
   - tox
-
-# env:
-#   - TOXENV=py27-ginkgo
-#   - TOXENV=py27-hawthorn_community
-#   - TOXENV=py27-hawthorn_multisite
-#   - TOXENV=py35-juniper_community
-#   - TOXENV=py38-juniper_community
-#   - TOXENV=lint
-#   - TOXENV=edx_lint_check
 
 deploy:
   provider: pypi
