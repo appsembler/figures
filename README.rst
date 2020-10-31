@@ -8,6 +8,18 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+30 Oct 2020 - Figures release 0.3.19
+====================================
+
+* Fix the comparison showing N/A when comparing to zero
+
+  * https://github.com/appsembler/figures/pull/277
+
+* Fix Figures devsite settings
+
+  * https://github.com/appsembler/figures/pull/278
+
+
 26 Oct 2020 - Figures release 0.3.18
 ====================================
 
