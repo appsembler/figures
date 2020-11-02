@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import calendar
 import datetime
 from django.utils.timezone import utc
@@ -23,6 +24,8 @@ from figures.helpers import (
     )
 
 from tests.factories import COURSE_ID_STR_TEMPLATE
+import six
+from six.moves import range
 
 
 class TestCourseKeyHelper(object):
@@ -83,9 +86,9 @@ class TestDateTimeHelper(object):
 
     def test_get_now_from_unicode(self):
         format = '%Y-%m-%d %H:%M:%S'
-        a_datetime_str = unicode(self.now.strftime(format))
+        a_datetime_str = six.text_type(self.now.strftime(format))
         expected = dateutil_parse(a_datetime_str).replace(tzinfo=utc)
-        assert isinstance(a_datetime_str, unicode)
+        assert isinstance(a_datetime_str, six.text_type)
         assert as_datetime(a_datetime_str) == expected
 
     def test_get_now_from_date(self):
@@ -127,9 +130,9 @@ class TestDateHelper(object):
 
     def test_get_now_from_unicode(self):
         format = '%Y-%m-%d'
-        a_date_str = unicode(self.now.strftime(format))
+        a_date_str = six.text_type(self.now.strftime(format))
         expected = self.now.date()
-        assert isinstance(a_date_str, unicode)
+        assert isinstance(a_date_str, six.text_type)
         assert as_date(a_date_str) == expected
 
     def test_get_now_from_date(self):
@@ -157,7 +160,7 @@ class TestDeltaDays(object):
     def setup(self):
         self.now = datetime.datetime(2018, 6, 1)
 
-    @pytest.mark.parametrize('days', range(-2, 3))
+    @pytest.mark.parametrize('days', list(range(-2, 3)))
     def test_days_from(self, days):
         '''TODO: Test with input as a
         - datetime

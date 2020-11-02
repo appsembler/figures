@@ -11,6 +11,7 @@ The core functionality to process MAU data should be in this module.
 See figures.tasks for the Celery tasks that run MAU jobs
 """
 
+from __future__ import absolute_import
 from figures.helpers import as_course_key
 from figures.mau import get_mau_from_student_modules
 from figures.models import CourseMauMetrics

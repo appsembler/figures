@@ -10,6 +10,7 @@ TODO:
 Document how organization site mapping works
 """
 
+from __future__ import absolute_import
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -18,9 +19,10 @@ from django.conf import settings
 import organizations
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
-from courseware.models import StudentModule  # pylint: disable=import-error
+
 from student.models import CourseEnrollment  # pylint: disable=import-error
 
+from figures.compat import StudentModule
 from figures.helpers import as_course_key
 import figures.helpers
 

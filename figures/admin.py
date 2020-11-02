@@ -3,12 +3,19 @@
 Filters are in this module because they are specific to the admin console
 """
 
+from __future__ import absolute_import
 from django.contrib import admin
 from django.contrib.admin.filters import (
     AllValuesFieldListFilter,
     RelatedOnlyFieldListFilter)
-from django.core.urlresolvers import reverse
 from django.utils.html import format_html
+
+try:
+    # Django 2.0+
+    from django.urls import reverse
+except ImportError:
+    # Django <1.9
+    from django.core.urlresolvers import reverse
 
 import figures.models
 

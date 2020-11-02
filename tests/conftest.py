@@ -1,7 +1,10 @@
 
+from __future__ import absolute_import
 from datetime import datetime
 import pytest
 from django.utils.timezone import utc
+from six.moves import range
+from tests.helpers import organizations_support_sites
 
 from tests.factories import (
     CourseEnrollmentFactory,
@@ -12,8 +15,6 @@ from tests.factories import (
     SiteFactory,
     UserFactory,
 )
-from tests.helpers import organizations_support_sites
-
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory

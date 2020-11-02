@@ -2,6 +2,7 @@
 
 '''
 
+from __future__ import absolute_import
 from collections import OrderedDict
 import datetime
 
@@ -90,7 +91,7 @@ class TestLearnerCourseGrades(object):
         '''
         assert isinstance(self.lcg.chapter_grades, dict)
         # get the sub-dict of the first key
-        keys = self.lcg.chapter_grades.keys()
+        keys = list(self.lcg.chapter_grades.keys())
         assert set(self.lcg.chapter_grades[keys[0]].keys()) == set([
             'sections', 'url_name', 'display_name'])
 

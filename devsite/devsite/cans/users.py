@@ -3,8 +3,9 @@
 TODO: Create course staff users
 '''
 
-import faker
+from __future__ import absolute_import
 import random
+import faker
 
 from student.models import UserProfile
 

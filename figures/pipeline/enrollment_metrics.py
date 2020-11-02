@@ -46,6 +46,7 @@ for each learner+course  # See bulk_calculate_course_progress_data
        this module forward ready for reworking `LearnerCourseGradeMetrics`
 """
 
+from __future__ import absolute_import
 from datetime import datetime
 from decimal import Decimal
 

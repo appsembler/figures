@@ -1,6 +1,7 @@
 """
 Settings overrides for Figures in LMS/Production (aka AWS).
 """
+from __future__ import absolute_import
 import os
 from celery.schedules import crontab
 

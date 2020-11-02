@@ -3,6 +3,7 @@
 ./common/lib/xmodule/xmodule/modulestore/django.py
 '''
 
+from __future__ import absolute_import
 from contextlib import contextmanager
 
 

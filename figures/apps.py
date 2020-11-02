@@ -5,6 +5,7 @@ As well as default values for running Figures along with functions to
 add entries to the Django conf settings needed to run Figures.
 """
 
+from __future__ import absolute_import
 from django.apps import AppConfig
 
 try:

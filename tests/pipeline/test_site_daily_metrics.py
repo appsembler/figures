@@ -9,6 +9,7 @@ TODO:
 * Add test coverage for multisite mode
 '''
 
+from __future__ import absolute_import
 import datetime
 import pytest
 
@@ -16,7 +17,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
-from courseware.models import StudentModule
+from figures.compat import StudentModule
 
 from figures.helpers import as_datetime, prev_day, days_from, is_multisite
 from figures.models import SiteDailyMetrics
@@ -34,6 +35,8 @@ from tests.factories import (
 )
 
 from tests.helpers import organizations_support_sites
+import six
+from six.moves import range
 
 
 if organizations_support_sites():
@@ -128,7 +131,7 @@ class TestCourseDailyMetricsMissingCdm(object):
                 site=self.site,
                 course_id=self.course_overviews[1].id),
         ]
-        expected_missing = [unicode(co.id) for co in self.course_overviews[2:]]
+        expected_missing = [six.text_type(co.id) for co in self.course_overviews[2:]]
         actual = pipeline_sdm.missing_course_daily_metrics(
             site=self.site, date_for=self.date_for)
 
@@ -283,7 +286,7 @@ class TestSiteDailyMetricsExtractor(object):
             site=self.site,
             date_for=self.date_for)
 
-        for key, value in expected_results.iteritems():
+        for key, value in six.iteritems(expected_results):
             assert actual[key] == value, 'failed on key: "{}"'.format(key)
 
 
@@ -318,7 +321,7 @@ class TestSiteDailyMetricsLoader(object):
         site_metrics, created = loader.load(site=Site.objects.first())
 
         sdm = SiteDailyMetrics.objects.first()
-        for key, value in self.FIELD_VALUES.iteritems():
+        for key, value in six.iteritems(self.FIELD_VALUES):
             assert getattr(sdm, key) == value, 'failed on key: "{}"'.format(key)
 
     @pytest.mark.skip('Test stub')

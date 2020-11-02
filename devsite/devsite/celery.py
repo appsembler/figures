@@ -2,6 +2,7 @@
 """
 
 from __future__ import absolute_import, unicode_literals
+from __future__ import print_function
 import os
 from celery import Celery
 from django.conf import settings
@@ -38,7 +39,7 @@ app.conf.update(
 
 @app.task(bind=True)
 def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+    print(('Request: {0!r}'.format(self.request)))
 
 
 @app.task(bind=True)
@@ -47,5 +48,5 @@ def celery_check(self, msg):
 
     Returns a value so that we can test Celery results backend configuration
     """
-    print('Called devsite.celery.celery.check with message "{}"'.format(msg))
+    print(('Called devsite.celery.celery.check with message "{}"'.format(msg)))
     return '{prefix}:{msg}'.format(prefix=CELERY_CHECK_MSG_PREFIX, msg=msg)

@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 from django import VERSION as DJANGO_VERSION
 from django.db import migrations, models
 import django.db.models.deletion

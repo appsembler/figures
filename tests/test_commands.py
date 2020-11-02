@@ -1,6 +1,7 @@
 """Test Figures Django management commands
 """
 
+from __future__ import absolute_import
 import mock
 import pytest
 from django.core.management import call_command

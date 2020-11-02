@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from figures.pagination import (
     FiguresLimitOffsetPagination,
     FiguresKiloPagination,

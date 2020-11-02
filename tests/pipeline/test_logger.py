@@ -6,6 +6,7 @@ NOTE: These tests need improvement
 
 '''
 
+from __future__ import absolute_import
 import datetime
 import mock
 import pytest

@@ -3,6 +3,7 @@
 TODO: Create a base "SiteModel" or a "SiteModelMixin"
 """
 
+from __future__ import absolute_import
 from datetime import date
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -33,7 +34,8 @@ class CourseDailyMetrics(TimeStampedModel):
     adding a SiteDailyMetrics foreign key. This is subject to change as the code
     evolves.
     """
-    site = models.ForeignKey(Site)
+    # TODO: Review the most appropriate on_delete behaviour
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
     date_for = models.DateField()
 
     # Leaving as a simple string for initial development
@@ -94,8 +96,8 @@ class SiteDailyMetrics(TimeStampedModel):
     When we upgrade to MAU 2G, we'll add a new field, 'active_users_today'
     and pull the data from the previous day's live active user capture
     """
-
-    site = models.ForeignKey(Site)
+    # TODO: Review the most appropriate on_delete behaviour
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
     # Date for which this record's data are collected
     date_for = models.DateField()
 
@@ -154,8 +156,8 @@ class SiteMonthlyMetrics(TimeStampedModel):
 
 
     """
-
-    site = models.ForeignKey(Site)
+    # TODO: Review the most appropriate on_delete behaviour
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
     # Month for which this record's data are collected
     # Important fields are year and month
     month_for = models.DateField()
@@ -298,10 +300,15 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
         `completed` - This lets us filter on a table column instead of calculating it
     TODO: Add index on 'course_id', 'date_for', 'completed'
     """
-    site = models.ForeignKey(Site)
+    # TODO: Review the most appropriate on_delete behaviour
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
     date_for = models.DateField()
     # TODO: We should require the user
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+    # TODO: Review the most appropriate on_delete behaviour
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             blank=True,
+                             null=True,
+                             on_delete=models.CASCADE)
     course_id = models.CharField(max_length=255, blank=True)
     points_possible = models.FloatField()
     points_earned = models.FloatField()
@@ -376,8 +383,12 @@ class PipelineError(TimeStampedModel):
     error_data = JSONField()
     # Attributes for convenient querying
     course_id = models.CharField(max_length=255, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
-    site = models.ForeignKey(Site, blank=True, null=True)
+    # TODO: Review the most appropriate on_delete behaviour
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             blank=True,
+                             null=True,
+                             on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-created']
@@ -387,7 +398,8 @@ class PipelineError(TimeStampedModel):
 
 
 class BaseDateMetricsModel(TimeStampedModel):
-    site = models.ForeignKey(Site, default=default_site)
+    # TODO: Review the most appropriate on_delete behaviour
+    site = models.ForeignKey(Site, default=default_site, on_delete=models.CASCADE)
     date_for = models.DateField()
 
     class Meta:

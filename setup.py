@@ -14,6 +14,7 @@ to
 
 '''
 
+from __future__ import absolute_import
 import os
 from setuptools import find_packages, setup
 
@@ -25,7 +26,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='Figures',
-    version='0.3.18',
+    version='0.3.19',
     packages=find_packages(),
     include_package_data=True,
     license='MIT',

@@ -3,15 +3,14 @@
 This is initial test coverage
 
 """
+from __future__ import absolute_import
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.utils.timezone import utc
 from freezegun import freeze_time
 import pytest
 
-from courseware.models import StudentModule
-
-from figures.compat import RELEASE_LINE
+from figures.compat import RELEASE_LINE, StudentModule
 from figures.models import SiteMonthlyMetrics
 from figures.pipeline.site_monthly_metrics import fill_month, fill_last_month
 
@@ -19,6 +18,7 @@ from tests.factories import (
     SiteFactory,
     StudentModuleFactory,
 )
+from six.moves import range
 
 
 @pytest.fixture

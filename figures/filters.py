@@ -10,10 +10,15 @@ See the following for breaking changes when upgrading to Django Filter 1.0:
 
 https://django-filter.readthedocs.io/en/master/guide/migration.html#migrating-to-1-0
 
+See the following for breaking changes when upgrading to Django Filter 2.0:
+
+https://django-filter.readthedocs.io/en/master/guide/migration.html#migrating-to-2-0
+
 TODO: Rename classes so they eiher all end with "Filter" or "FilterSet" then
       update the test class names in "tests/test_filters.py" to match.
 """
 
+from __future__ import absolute_import
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.models import F
@@ -150,8 +155,27 @@ def boolean_method_filter(method):
         return django_filters.BooleanFilter(method=method)
 
 
+def date_from_range_filter(field_name):
+    """
+    Filter.name renamed to Filter.field_name
+    https://django-filter.readthedocs.io/en/master/guide/migration.html#filter-name-renamed-to-filter-field-name-792
+    First check for old style (pre version 2 Django Filters)
+    """
+    if DJANGO_FILTERS_VERSION[0] < 2:
+        return django_filters.DateFromToRangeFilter(name=field_name)
+    else:
+        return django_filters.DateFromToRangeFilter(field_name=field_name)
+
+
+def boolean_filter(field_name):
+    if DJANGO_FILTERS_VERSION[0] < 2:
+        return django_filters.BooleanFilter(name=field_name)
+    else:
+        return django_filters.BooleanFilter(field_name=field_name)
+
+
 class CourseOverviewFilter(django_filters.FilterSet):
-    '''Provides filtering for CourseOverview model objects
+    """Provides filtering for CourseOverview model objects
 
     Filters to consider adding:
         description: search/icontains
@@ -167,8 +191,7 @@ class CourseOverviewFilter(django_filters.FilterSet):
             AssertionError: <course id string repr> is not an instance of
             <class 'opaque_keys.edx.keys.CourseKey'>
 
-    '''
-
+    """
     display_name = char_filter(field_name='display_name',
                                lookup_expr='icontains')
     org = char_filter(field_name='display_org_with_default',
@@ -188,7 +211,7 @@ class CourseEnrollmentFilter(django_filters.FilterSet):
 
     '''
     course_id = char_method_filter(method='filter_course_id')
-    is_active = django_filters.BooleanFilter(name='is_active',)
+    is_active = boolean_filter(field_name='is_active')
 
     def filter_course_id(self, queryset, name, value):  # pylint: disable=unused-argument
         '''
@@ -237,7 +260,7 @@ class EnrollmentMetricsFilter(CourseEnrollmentFilter):
     """
     course_ids = char_method_filter(method='filter_course_ids')
     user_ids = char_method_filter(method='filter_user_ids')
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+    date = date_from_range_filter(field_name='date_for')
     only_completed = boolean_method_filter(method='filter_only_completed')
     exclude_completed = boolean_method_filter(method='filter_exclude_completed')
 
@@ -280,17 +303,16 @@ class EnrollmentMetricsFilter(CourseEnrollmentFilter):
 
 
 class UserFilterSet(django_filters.FilterSet):
-    '''Provides filtering for User model objects
+    """Provides filtering for User model objects
 
     Note: User has a 1:1 relationship with the edx-platform LMS
     student.models.UserProfile model
 
     We're starting with a few fields and will add as we find we want/need them
-
-    '''
-    is_active = django_filters.BooleanFilter(name='is_active')
-    is_staff = django_filters.BooleanFilter(name='is_staff')
-    is_superuser = django_filters.BooleanFilter(name='is_superuser')
+    """
+    is_active = boolean_filter(field_name='is_active')
+    is_staff = boolean_filter(field_name='is_staff')
+    is_superuser = boolean_filter(field_name='is_superuser')
     username = char_filter(field_name='username',
                            lookup_expr='icontains',
                            distinct=True)
@@ -300,7 +322,6 @@ class UserFilterSet(django_filters.FilterSet):
     name = char_filter(field_name='profile__name',
                        lookup_expr='icontains',
                        distinct=True)
-
     country = char_filter(field_name='profile__country', lookup_expr='iexact')
     user_ids = char_method_filter(method='filter_user_ids')
     enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
@@ -345,7 +366,8 @@ class CourseDailyMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     '''
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = CourseDailyMetrics
@@ -364,7 +386,8 @@ class SiteDailyMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     '''
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = SiteDailyMetrics
@@ -381,7 +404,8 @@ class CourseMauMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     """
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = CourseMauMetrics
@@ -397,7 +421,8 @@ class SiteMauMetricsFilter(django_filters.FilterSet):
     * ``date_0`` to get records greater than or equal
     * ``date_1`` to get records less than or equal
     """
-    date = django_filters.DateFromToRangeFilter(name='date_for')
+
+    date = date_from_range_filter(field_name='date_for')
 
     class Meta:
         model = SiteMauMetrics

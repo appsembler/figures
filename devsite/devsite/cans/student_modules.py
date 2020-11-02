@@ -1,7 +1,8 @@
 
+from __future__ import absolute_import
 from django.contrib.auth import get_user_model
 
-from courseware.models import StudentModule
+from figures.compat import StudentModule
 
 from figures.helpers import as_course_key, as_datetime
 

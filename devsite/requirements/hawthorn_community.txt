@@ -81,6 +81,8 @@ tox==3.1.0
 freezegun==0.3.12
 edx-lint==0.5.5
 
+# I had to manually install mock
+mock==3.0.5
 # Added to address: TypeError: attrib() got an unexpected keyword argument 'convert'
 attrs==19.1.0
 

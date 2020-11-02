@@ -2,6 +2,7 @@
 
 '''
 
+from __future__ import absolute_import
 import datetime
 from dateutil.parser import parse
 from dateutil.rrule import rrule, DAILY
@@ -11,9 +12,9 @@ from django.contrib.auth import get_user_model
 
 from rest_framework.test import (
     APIRequestFactory,
-    #RequestsClient, Not supported in older  rest_framework versions
+    # RequestsClient, Not supported in older  rest_framework versions
     force_authenticate,
-    )
+)
 
 from figures.models import SiteDailyMetrics
 from figures.pagination import FiguresLimitOffsetPagination
@@ -21,6 +22,7 @@ from figures.views import SiteDailyMetricsViewSet
 from figures.serializers import SiteSerializer
 from tests.factories import SiteDailyMetricsFactory, UserFactory
 from tests.views.base import BaseViewTest
+from tests.helpers import django_filters_pre_v2
 
 
 TEST_DATA = [
@@ -28,10 +30,11 @@ TEST_DATA = [
 
 ]
 
+
 def generate_sdm_series(site, first_day, last_day):
 
-    return [SiteDailyMetricsFactory(site=site, date_for=dt) 
-        for dt in rrule(DAILY, dtstart=first_day, until=last_day)]
+    return [SiteDailyMetricsFactory(site=site, date_for=dt)
+            for dt in rrule(DAILY, dtstart=first_day, until=last_day)]
 
 
 @pytest.mark.django_db
@@ -56,10 +59,10 @@ class TestSiteDailyMetricsView(BaseViewTest):
         super(TestSiteDailyMetricsView, self).setup(db)
         self.first_day = parse('2018-01-01')
         self.last_day = parse('2018-03-31')
-        self.date_fields = set(['date_for', 'created', 'modified',])
+        self.date_fields = set(['date_for', 'created', 'modified', ])
         self.expected_results_keys = set([o.name for o in SiteDailyMetrics._meta.fields])
         field_names = (o.name for o in SiteDailyMetrics._meta.fields
-            if o.name not in self.date_fields )
+                       if o.name not in self.date_fields)
 
         self.metrics = generate_sdm_series(self.site, self.first_day, self.last_day)
 
@@ -76,15 +79,20 @@ class TestSiteDailyMetricsView(BaseViewTest):
 
         TODO: Add more date ranges
         '''
-        endpoint = '{}?date_0={}&date_1={}'.format(
-            self.request_path, first_day, last_day)
+        if django_filters_pre_v2():
+            endpoint = '{}?date_0={}&date_1={}'.format(
+                self.request_path, first_day, last_day)
+        else:
+            endpoint = '{}?date_after={}&date_before={}'.format(
+                self.request_path, first_day, last_day)
 
+        # TODO Is this backward compatible?
         expected_data = SiteDailyMetrics.objects.filter(
             date_for__range=(first_day, last_day))
         factory = APIRequestFactory()
         request = factory.get(endpoint)
         force_authenticate(request, user=self.staff_user)
-        view = self.view_class.as_view({'get':'list'})
+        view = self.view_class.as_view({'get': 'list'})
         response = view(request)
         assert response.status_code == 200
         # Expect the following format for pagination
@@ -97,7 +105,7 @@ class TestSiteDailyMetricsView(BaseViewTest):
         #     ]
         # }
         assert set(response.data.keys()) == set(
-            ['count', 'next', 'previous', 'results',])
+            ['count', 'next', 'previous', 'results', ])
         assert len(response.data['results']) == FiguresLimitOffsetPagination.default_limit
 
         # Hack: Check date and datetime values explicitly
@@ -108,7 +116,7 @@ class TestSiteDailyMetricsView(BaseViewTest):
             assert parse(data['modified']) == db_rec.modified
         check_fields = self.expected_results_keys - self.date_fields - set(['site'])
         for field_name in check_fields:
-            assert data[field_name] == getattr(db_rec,field_name)
+            assert data[field_name] == getattr(db_rec, field_name)
 
     @pytest.mark.xfail
     def test_create(self):
@@ -130,7 +138,7 @@ class TestSiteDailyMetricsView(BaseViewTest):
             course_count=4,
             total_enrollment_count=5,
             mau=6,
-            )
+        )
         # Might not need to set format='json'
         request = APIRequestFactory().post(
             self.request_path, data, format='json')
@@ -139,6 +147,6 @@ class TestSiteDailyMetricsView(BaseViewTest):
         response = view(request)
 
         assert response.status_code == 201
-        assert 'id' in response.data.keys()
+        assert 'id' in list(response.data.keys())
         for key in data.keys():
             assert response.data[key] == data[key]
