@@ -58,7 +58,7 @@ def hack_get_version(version_string):
 DJANGO_FILTERS_VERSION = hack_get_version(django_filters.__version__)
 
 
-def char_filter(field_name, lookup_expr):
+def char_filter(field_name, lookup_expr, **_kwargs):
     """For backwards compatibility.
 
     We require both `field_name` and `lookup_expr` to minimize the work this
@@ -71,11 +71,12 @@ def char_filter(field_name, lookup_expr):
     And we'll need to replace the code in PR 264 with this function
     """
     if DJANGO_FILTERS_VERSION[0] < 1:
-        return django_filters.CharFilter(name=field_name, lookup_type=lookup_expr)
+        return django_filters.CharFilter(name=field_name,
+                                         lookup_type=lookup_expr, **_kwargs)
     elif DJANGO_FILTERS_VERSION[0] < 2:
-        return django_filters.CharFilter(name=field_name, lookup_expr=lookup_expr)
+        return django_filters.CharFilter(name=field_name, lookup_expr=lookup_expr, **_kwargs)
     else:
-        return django_filters.CharFilter(field_name=field_name, lookup_expr=lookup_expr)
+        return django_filters.CharFilter(field_name=field_name, lookup_expr=lookup_expr, **_kwargs)
 
 
 def char_method_filter(method):
@@ -308,14 +309,19 @@ class UserFilterSet(django_filters.FilterSet):
     student.models.UserProfile model
 
     We're starting with a few fields and will add as we find we want/need them
-
     """
     is_active = boolean_filter(field_name='is_active')
     is_staff = boolean_filter(field_name='is_staff')
     is_superuser = boolean_filter(field_name='is_superuser')
-    username = char_filter(field_name='username', lookup_expr='icontains')
-    email = char_filter(field_name='email', lookup_expr='icontains')
-    name = char_filter(field_name='profile__name', lookup_expr='icontains')
+    username = char_filter(field_name='username',
+                           lookup_expr='icontains',
+                           distinct=True)
+    email = char_filter(field_name='email',
+                        lookup_expr='icontains',
+                        distinct=True)
+    name = char_filter(field_name='profile__name',
+                       lookup_expr='icontains',
+                       distinct=True)
     country = char_filter(field_name='profile__country', lookup_expr='iexact')
     user_ids = char_method_filter(method='filter_user_ids')
     enrolled_in_course_id = char_method_filter(method='filter_enrolled_in_course_id')
