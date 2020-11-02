@@ -40,6 +40,7 @@ from figures.helpers import (
 )
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 from figures.pipeline import site_daily_metrics as pipeline_sdm
+from figures.sites import get_organizations_for_site
 
 from devsite import cans
 from six.moves import range
@@ -190,6 +191,45 @@ def seed_course_enrollments():
     for co in CourseOverview.objects.all():
         users = seed_users(cans.users.UserGenerator(NUM_LEARNERS_PER_COURSE))
         seed_course_enrollments_for_course(co.id, users, DAYS_BACK)
+
+
+def seed_course_enrollments_multiple(user_count=10):
+    """Creates a set of users and then creates course enrollments
+
+    This function creates a set of users and creates enrollments for each user
+    for every course in the site. The driver to make this is to test user
+    filtering because the learner-metrics endpoint (using the UserFilterSet)
+    was returning duplicates. It turns out that you need to specify 'distinct'
+    in the filter class constructor.
+
+    See here: https://github.com/appsembler/figures/pull/273
+    """
+    users = seed_users(cans.users.UserGenerator(user_count))
+    for co in CourseOverview.objects.all():
+        seed_course_enrollments_for_course(co.id, users, DAYS_BACK)
+    return users
+
+
+def add_users_to_site(site, users):
+    """Helper function adds users to a site if not already added
+
+    This function creates UserOrganizationMapping records for the given set of
+    users.
+    """
+    orgs = get_organizations_for_site(site)
+    if not orgs:
+        print('Site "{}"" does not have any orgs'.format(site.domain))
+    else:
+        for org in orgs:
+            for user in users:
+                # assign as non-admin users
+                # UserOrganizationMapping.objects.create(user=user,
+                #                                        organization=org,
+                #                                        is_active=True)
+                UserOrganizationMapping.objects.get_or_create(
+                    user=user,
+                    organization=org,
+                    is_active=True)
 
 
 def seed_course_access_roles(data=None):
