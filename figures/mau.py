@@ -2,6 +2,7 @@
 This module provides MAU metrics retrieval functionality
 """
 
+from __future__ import absolute_import
 from datetime import datetime, timedelta
 from django.utils.timezone import utc
 

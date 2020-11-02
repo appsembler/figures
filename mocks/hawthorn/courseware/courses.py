@@ -3,8 +3,10 @@
 ./common/lib/xmodule/xmodule/modulestore
 '''
 
+from __future__ import absolute_import
 from django.http import Http404
 from xmodule.modulestore.django import modulestore
+import six
 
 
 def get_course(course_id, depth=0):
@@ -37,4 +39,4 @@ def get_course_by_id(course_key, depth=0):
     if course:
         return course
     else:
-        raise Http404("Course not found: {}.".format(unicode(course_key)))
+        raise Http404("Course not found: {}.".format(six.text_type(course_key)))

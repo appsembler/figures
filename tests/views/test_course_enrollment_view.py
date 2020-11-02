@@ -1,6 +1,7 @@
 '''Unit tests for the course enrollment view
 '''
 
+from __future__ import absolute_import
 import datetime
 from dateutil.parser import parse
 import pytest
@@ -27,6 +28,7 @@ from tests.factories import(
     UserFactory,
 )
 from tests.views.base import BaseViewTest
+from six.moves import range
 
 def sample_course_id(index=1):
     return CourseKey.from_string(COURSE_ID_STR_TEMPLATE.format(index))

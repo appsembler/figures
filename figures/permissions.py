@@ -1,6 +1,7 @@
 """Provides permissions for Figures views
 
 """
+from __future__ import absolute_import
 from rest_framework.permissions import BasePermission
 
 import django.contrib.sites.shortcuts
@@ -21,7 +22,7 @@ def is_active_staff_or_superuser(request):
     Standalone mode authorization check
     """
     return request.user and request.user.is_active and (
-           request.user.is_staff or request.user.is_superuser)
+        request.user.is_staff or request.user.is_superuser)
 
 
 def is_site_admin_user(request):
@@ -78,6 +79,7 @@ class IsSiteAdminUser(BasePermission):
 
     Would `has_object_permission` help simplify filtering by site?
     """
+
     def has_permission(self, request, view):
         return is_site_admin_user(request)
 
@@ -85,5 +87,6 @@ class IsSiteAdminUser(BasePermission):
 class IsStaffUserOnDefaultSite(BasePermission):
     """Allow access to only global staff or superusers accessing the default site
     """
+
     def has_permission(self, request, view):
         return is_staff_user_on_default_site(request)

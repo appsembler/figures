@@ -6,6 +6,7 @@ course metrics. These data are extracted directly from edx-platform models
 
 '''
 
+from __future__ import absolute_import
 import datetime
 
 from django.utils.timezone import utc

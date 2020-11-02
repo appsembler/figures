@@ -3,6 +3,7 @@ modules: course_daily_metrics, site_daily_metrics
 
 """
 
+from __future__ import absolute_import
 import datetime
 import pytest
 

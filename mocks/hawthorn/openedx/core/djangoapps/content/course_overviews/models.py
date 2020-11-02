@@ -25,6 +25,7 @@ removing these mocks
 
 '''
 
+from __future__ import absolute_import
 from django.db import models
 
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField

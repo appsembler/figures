@@ -29,6 +29,7 @@ Front end expects data to be returned in the following form:
 
 '''
 
+from __future__ import absolute_import
 import pytest
 
 from django.contrib.auth import get_user_model

@@ -10,6 +10,7 @@ a lowercase string, such as 'ginkgo' or 'hawthorn'
 '''
 # pylint: disable=ungrouped-imports,useless-suppression
 
+from __future__ import absolute_import
 try:
     from openedx.core.release import RELEASE_LINE
 except ImportError:
@@ -32,6 +33,24 @@ if RELEASE_LINE == 'ginkgo':
     from certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
 else:
     from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
+
+
+try:
+    from lms.djangoapps.courseware.models import StudentModule  # noqa pylint: disable=unused-import,import-error
+except ImportError:
+    # Backward compatibily for pre-Juniper releases
+    from courseware.models import StudentModule  # noqa pylint: disable=unused-import,import-error
+
+try:
+    from lms.djangoapps.courseware.courses import get_course_by_id  # noqa pylint: disable=unused-import,import-error
+except ImportError:
+    # Backward compatibily for pre-Juniper releases
+    from courseware.courses import get_course_by_id  # noqa pylint: disable=unused-import,import-error
+
+try:
+    from opaque_keys.edx.django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
+except ImportError:
+    from openedx.core.djangoapps.xmodule_django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
 
 
 def course_grade(learner, course):
@@ -57,7 +76,7 @@ def chapter_grade_values(chapter_grades):
     '''
 
     if isinstance(chapter_grades, dict):
-        return chapter_grades.values()
+        return list(chapter_grades.values())
     elif isinstance(chapter_grades, list):
         return chapter_grades
     else:

@@ -2,6 +2,7 @@
 Tests Figures site monthly metrics viewset
 """
 
+from __future__ import absolute_import
 from datetime import datetime
 from faker import Faker
 import pytest
@@ -21,6 +22,8 @@ from tests.factories import (
 )
 from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
+from six.moves import range
+from six.moves import zip
 
 fake = Faker()
 
@@ -63,7 +66,7 @@ def user_reg_test_data():
     users = []
     dates = generate_date_series(months_back=months_back)
     assert dates
-    data_spec = zip(dates, range(months_back))
+    data_spec = list(zip(dates, list(range(months_back))))
 
     for reg_date, reg_count in data_spec:
         users += [UserFactory(date_joined=reg_date) for i in range(reg_count)]
@@ -93,7 +96,7 @@ class TestSiteMonthlyMetricsViewSet(BaseViewTest):
 
     def check_response(self, response, endpoint):
         assert response.status_code == status.HTTP_200_OK
-        assert endpoint in response.data.keys()
+        assert endpoint in list(response.data.keys())
         current_month_count = response.data[endpoint]['current_month']
         history_list = response.data[endpoint]['history']
 

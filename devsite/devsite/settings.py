@@ -16,21 +16,24 @@ from figures.settings.lms_production import (
     update_celerybeat_schedule,
 )
 
+
 env = environ.Env(
     FIGURES_IS_MULTISITE=(bool, False),
     SEED_DAYS_BACK=(int, 60),
     SEED_NUM_LEARNERS_PER_COURSE=(int, 25),
     OPENEDX_RELEASE=(str, 'HAWTHORN'),
+    ENABLE_DEVSITE_CELERY=(bool, True)
 )
 
 environ.Env.read_env()
 
-OPENEDX_RELEASE = env('OPENEDX_RELEASE')
+OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
+ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
 
 if OPENEDX_RELEASE == 'GINKGO':
-    MOCKS_DIR = 'mocks/ginkgo'
-else:
-    MOCKS_DIR = 'mocks/hawthorn'
+    ENABLE_DEVSITE_CELERY = False
+
+MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
 DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
@@ -48,7 +51,7 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 # TODO: Update this to allow environment variable override
-ENABLE_DEVSITE_CELERY = True
+# ENABLE_DEVSITE_CELERY = True
 
 # Adds the mock edx-platform modules to the Python module search path
 sys.path.append(os.path.normpath(os.path.join(PROJECT_ROOT_DIR, MOCKS_DIR)))
@@ -61,11 +64,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'django_extensions',
+    # 'django_extensions',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_countries',
     'django_filters',
-    # 'rest_framework.authtoken',
     'debug_toolbar',
     'webpack_loader',
     'organizations',
@@ -76,7 +79,6 @@ INSTALLED_APPS = [
     # These are apps on which Figures has dependencies
     # See: <figures repo>/tests/mocks/
     # Also note the paths set in edx-figures/pytest.ini
-    'courseware',
     'openedx.core.djangoapps.content.course_overviews',
     'openedx.core.djangoapps.course_groups',
     'student',
@@ -86,24 +88,40 @@ if ENABLE_DEVSITE_CELERY:
     INSTALLED_APPS.append('djcelery')
 
 # certificates app
-
 if OPENEDX_RELEASE == 'GINKGO':
     INSTALLED_APPS.append('certificates')
+    INSTALLED_APPS.append('courseware')
+elif OPENEDX_RELEASE == 'HAWTHORN':
+    INSTALLED_APPS.append('lms.djangoapps.certificates')
+    INSTALLED_APPS.append('courseware')
 else:
     INSTALLED_APPS.append('lms.djangoapps.certificates')
+    INSTALLED_APPS.append('lms.djangoapps.courseware')
 
 
-MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
+if OPENEDX_RELEASE == 'JUNIPER':
+    MIDDLEWARE = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+else:
+    MIDDLEWARE_CLASSES = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
 
 ROOT_URLCONF = 'devsite.urls'
 

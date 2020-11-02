@@ -4,6 +4,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from textwrap import dedent
 
 from django.contrib.sites.models import Site
@@ -17,7 +18,7 @@ def get_site(identifier):
     Let the 'get' fail if record can't be found from the identifier
     """
     try:
-        filter_arg = dict(pk=long(identifier))
+        filter_arg = dict(pk=int(identifier))
     except ValueError:
         filter_arg = dict(domain=identifier)
     return Site.objects.get(**filter_arg)

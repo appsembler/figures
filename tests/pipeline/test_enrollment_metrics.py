@@ -1,12 +1,12 @@
 
+from __future__ import absolute_import
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import mock
 import pytest
 
 from django.utils.timezone import utc
-
-from courseware.models import StudentModule
+from figures.compat import StudentModule
 
 from figures.helpers import is_multisite
 from figures.models import LearnerCourseGradeMetrics
@@ -27,6 +27,7 @@ from tests.factories import (
     SiteFactory,
     StudentModuleFactory,
 )
+from six.moves import range
 
 
 @pytest.mark.django_db

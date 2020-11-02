@@ -2,6 +2,7 @@
 
 """
 
+from __future__ import absolute_import
 from datetime import date
 import pytest
 from figures.models import SiteMonthlyMetrics

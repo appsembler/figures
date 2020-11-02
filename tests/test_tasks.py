@@ -2,6 +2,7 @@
 
 """
 
+from __future__ import absolute_import
 from datetime import date
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -29,6 +30,8 @@ from tests.factories import (
     SiteDailyMetricsFactory,
     SiteMonthlyMetricsFactory,
     )
+
+from six.moves import range
 from tests.helpers import OPENEDX_RELEASE, GINKGO
 
 

@@ -6,6 +6,7 @@ TODO:
 * Test default site is added if not specified in construction
 '''
 
+from __future__ import absolute_import
 import datetime
 from decimal import Decimal
 import pytest
