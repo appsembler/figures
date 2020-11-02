@@ -1,5 +1,6 @@
 """Tests Figures GradesCache model
 """
+from __future__ import absolute_import
 import datetime
 import pytest
 
@@ -16,6 +17,7 @@ from tests.factories import (
     UserFactory,
     COURSE_ID_STR_TEMPLATE
 )
+from six.moves import range
 
 
 def create_sample_completed_lcgm(site, user_count, course_count):

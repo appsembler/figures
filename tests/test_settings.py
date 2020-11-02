@@ -6,6 +6,7 @@ each of the Figures entries to ``WEBPACK_LOADER`` and ``CELERYBEAT_SCHEDULE``
 are correctly assigned
 '''
 
+from __future__ import absolute_import
 import mock
 import pytest
 

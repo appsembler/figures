@@ -20,6 +20,7 @@ https://raw.githubusercontent.com/edx/opaque-keys/9807168660c12e0551c8fdd58fd1bc
 Useful django models for implementing XBlock infrastructure in django.
 If Django is unavailable, none of the classes below will work as intended.
 """
+from __future__ import absolute_import
 import logging
 import warnings
 

@@ -1,6 +1,7 @@
 """Figures views
 """
 
+from __future__ import absolute_import
 from datetime import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -19,13 +20,19 @@ from rest_framework.authentication import (
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
+
 from rest_framework.filters import (
-    DjangoFilterBackend,
     SearchFilter,
-    OrderingFilter
+    OrderingFilter  # TODO Is this backward compatible? fixes test_course_data_view
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+# https://www.django-rest-framework.org/api-guide/filtering/#searchfilter
+try:
+    from django_filters.rest_framework import DjangoFilterBackend
+except ImportError:
+    from rest_framework.filters import DjangoFilterBackend  # pylint: disable=ungrouped-imports
 
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
@@ -676,6 +683,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
     Tradeoff: Additional storage cost to reduced request time
     Perhaps we make this a server setting
     """
+
     def list(self, request):
         """
         Returns site metrics data for current month

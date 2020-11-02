@@ -2,6 +2,7 @@
 
 '''
 
+from __future__ import absolute_import
 import datetime
 from dateutil.parser import parse as dateutil_parse
 from decimal import Decimal
@@ -55,6 +56,7 @@ from tests.factories import (
     )
 
 from tests.helpers import platform_release
+import six
 
 
 class TestSerializableCountryField(object):
@@ -247,7 +249,7 @@ class TestCourseDailyMetricsSerializer(object):
         serializer = CourseDailyMetricsSerializer(instance=obj)
         check_val = Decimal(average_progress).quantize(Decimal('.00'))
         data = serializer.data
-        assert data['average_progress'] == unicode(check_val)
+        assert data['average_progress'] == six.text_type(check_val)
 
     @pytest.mark.xfail
     @pytest.mark.parametrize('average_progress', [-1.0, 9.0])

@@ -7,6 +7,7 @@ Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
 
 '''
 
+from __future__ import absolute_import
 import datetime
 from dateutil.relativedelta import relativedelta
 from django.utils.timezone import utc
@@ -25,14 +26,14 @@ from openedx.core.djangoapps.course_groups.models import (
     CourseUserGroup,
     CohortMembership,
 )
-from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
-from courseware.models import StudentModule
+
+from figures.compat import StudentModule, CourseKeyField, GeneratedCertificate
+
 from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 import organizations
 
-from figures.compat import GeneratedCertificate
 from figures.helpers import as_course_key
 from figures.models import (
     CourseDailyMetrics,
@@ -48,6 +49,7 @@ from tests.helpers import (
     OPENEDX_RELEASE,
     GINKGO,
 )
+import six
 
 
 COURSE_ID_STR_TEMPLATE = 'course-v1:StarFleetAcademy+SFA{}+2161'
@@ -73,7 +75,7 @@ class UserProfileFactory(DjangoModelFactory):
         ['p','m','b','a','hs','jh','el','none', 'other',]
         )
     profile_image_uploaded_at = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,04,01, tzinfo=factory.compat.UTC))
+        2018,0o4,0o1, tzinfo=factory.compat.UTC))
 
 
 class UserFactory(DjangoModelFactory):
@@ -87,7 +89,7 @@ class UserFactory(DjangoModelFactory):
     is_staff = False
     is_superuser = False
     date_joined = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,04,01, tzinfo=factory.compat.UTC))
+        2018, 4, 1, tzinfo=factory.compat.UTC))
 
     # TODO: Figure out if this can be a SubFactory and the advantages
     profile = factory.RelatedFactory(UserProfileFactory, 'user')
@@ -213,9 +215,9 @@ class StudentModuleFactory(DjangoModelFactory):
     course_id = factory.Sequence(lambda n: as_course_key(
         COURSE_ID_STR_TEMPLATE.format(n)))
     created = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,02,02, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=factory.compat.UTC))
     modified = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,02,02, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=factory.compat.UTC))
 
 
 if OPENEDX_RELEASE == GINKGO:
@@ -255,7 +257,7 @@ else:
                 course_id = kwargs.get('course_id')
                 course_overview = None
                 if course_id is not None:
-                    if isinstance(course_id, basestring):
+                    if isinstance(course_id, six.string_types):
                         course_id = as_course_key(course_id)
                         course_kwargs.setdefault('id', course_id)
 

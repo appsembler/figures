@@ -4,11 +4,19 @@ The ``TestFiguresHomeView`` test class requires that ``webpack-stats.json`` exis
 
 '''
 
+from __future__ import absolute_import
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
 from django.test.client import Client
 from django.test import RequestFactory
+
+try: 
+    # Django 2.0+
+    from django.urls import reverse
+except ImportError:
+    # Django <1.9
+    from django.core.urlresolvers import reverse
+
 
 import pytest
 

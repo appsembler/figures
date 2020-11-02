@@ -1,6 +1,7 @@
 """Tests Figures enrollment dta viewset
 """
 
+from __future__ import absolute_import
 from decimal import Decimal
 import mock
 import pytest
@@ -24,6 +25,8 @@ from tests.factories import (
 from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
 from tests.views.helpers import is_response_paginated
+from six.moves import map
+from six.moves import range
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
@@ -321,12 +324,12 @@ class TestEnrollmentMetricsViewSet(BaseViewTest):
         assert is_response_paginated(response.data)
         results = response.data['results']
         # Check that the results have our expected keys and only our expected keys
-        res_keys_list = [elem.keys() for elem in results]
+        res_keys_list = [list(elem.keys()) for elem in results]
         results_key_set = set([item for sublist in res_keys_list for item in sublist])
         assert results_key_set == set(['course_id', 'user_id'])
 
         # Check that we have the data we're looking for
-        results_values = [elem.values() for elem in results]
+        results_values = [list(elem.values()) for elem in results]
         expected_values = [[obj.course_id, obj.user_id] for obj in completed_lcgm]
         assert set(map(tuple, results_values)) == set(map(tuple, expected_values))
 

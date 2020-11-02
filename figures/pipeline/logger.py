@@ -4,6 +4,7 @@ Initial focus is on tracking exceptions for Course
 
 '''
 
+from __future__ import absolute_import
 import logging
 import json
 

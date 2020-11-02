@@ -2,6 +2,7 @@
 
 """
 
+from __future__ import absolute_import
 from datetime import datetime
 from django.utils.timezone import utc
 from dateutil.relativedelta import relativedelta

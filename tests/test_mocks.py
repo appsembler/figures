@@ -2,6 +2,7 @@
 This module tests the mocks and test factories
 """
 
+from __future__ import absolute_import
 import pytest
 
 from tests.factories import (

@@ -29,6 +29,7 @@ Front end expects data to be returned in the following form:
 
 '''
 
+from __future__ import absolute_import
 import mock
 import pytest
 
@@ -60,6 +61,7 @@ from tests.factories import (
 
 from tests.views.base import BaseViewTest
 from tests.helpers import organizations_support_sites
+from six.moves import range
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
@@ -137,7 +139,7 @@ class TestLearnerDetailsViewSetStandalone(BaseViewTest):
     def setup(self, db, settings):
         super(TestLearnerDetailsViewSetStandalone, self).setup(db)
         self.course_overviews = [
-            CourseOverviewFactory() for i in xrange(0,4)
+            CourseOverviewFactory() for i in range(0,4)
         ]
         self.users = [UserFactory() for i in range(3)]
 
@@ -245,7 +247,7 @@ class TestLearnerDetailsViewSetMultisite(BaseViewTest):
         self.other_site_org = OrganizationFactory(sites=[self.other_site])
 
         self.my_course_overviews = [
-            CourseOverviewFactory() for i in xrange(0,4)
+            CourseOverviewFactory() for i in range(0,4)
         ]
 
         for co in self.my_course_overviews:

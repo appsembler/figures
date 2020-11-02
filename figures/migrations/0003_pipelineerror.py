@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 from django.db import migrations, models
 import django.utils.timezone
 import jsonfield.fields
@@ -14,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('figures', '0002_course_daily_metrics'),
     ]
-
+    # TODO Review on_delete behavious
     operations = [
         migrations.CreateModel(
             name='PipelineError',
@@ -25,7 +26,7 @@ class Migration(migrations.Migration):
                 ('error_type', models.CharField(default=b'UNSPECIFIED', max_length=255, choices=[(b'UNSPECIFIED', b'Unspecified data error'), (b'GRADES', b'Grades data error'), (b'COURSE', b'Course data error'), (b'SITE', b'Site data error')])),
                 ('error_data', jsonfield.fields.JSONField()),
                 ('course_id', models.CharField(max_length=255, blank=True)),
-                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,

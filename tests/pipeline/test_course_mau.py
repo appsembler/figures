@@ -4,6 +4,7 @@ Tests Course Monthly Active Users (MAUs)
 * Test pipeline loading MAU data
 """
 
+from __future__ import absolute_import
 from datetime import datetime, date
 import pytest
 from mock import Mock
@@ -26,6 +27,7 @@ from tests.factories import (
 )
 
 from tests.helpers import organizations_support_sites
+from six.moves import range
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory

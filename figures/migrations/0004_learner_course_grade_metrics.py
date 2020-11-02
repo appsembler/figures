@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 from django.db import migrations, models
 import django.utils.timezone
 from django.conf import settings
@@ -13,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('figures', '0003_pipelineerror'),
     ]
-
+    # TODO Review on_delete bahviour
     operations = [
         migrations.CreateModel(
             name='LearnerCourseGradeMetrics',
@@ -27,7 +28,7 @@ class Migration(migrations.Migration):
                 ('points_earned', models.FloatField()),
                 ('sections_worked', models.IntegerField()),
                 ('sections_possible', models.IntegerField()),
-                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('date_for', 'user__username', 'course_id'),

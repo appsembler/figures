@@ -21,6 +21,7 @@ parameter to support multi-tenancy
 
 """
 
+from __future__ import absolute_import
 import datetime
 from decimal import Decimal
 import math
@@ -28,13 +29,12 @@ import math
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Max, Sum
 
-from courseware.courses import get_course_by_id  # pylint: disable=import-error
-from courseware.models import StudentModule  # pylint: disable=import-error
-
 from figures.compat import (
     GeneratedCertificate,
     chapter_grade_values,
     course_grade,
+    StudentModule,
+    get_course_by_id
 )
 from figures.helpers import (
     as_course_key,

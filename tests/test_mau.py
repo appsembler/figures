@@ -1,9 +1,11 @@
 
+from __future__ import absolute_import
 from datetime import datetime
 from freezegun import freeze_time
 import pytest
 
-from courseware.models import StudentModule
+from django.utils.timezone import utc
+from figures.compat import StudentModule
 
 from figures.helpers import as_datetime, as_date
 from figures.sites import (

@@ -37,6 +37,7 @@ test suite so that we can do much more robust data validation with bigger time
 series sets
 
 '''
+from __future__ import absolute_import
 import datetime
 
 from dateutil.rrule import rrule, DAILY
@@ -73,6 +74,8 @@ from tests.factories import (
     UserFactory,
     )
 from tests.helpers import organizations_support_sites
+import six
+from six.moves import range
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
@@ -147,7 +150,7 @@ def create_site_daily_metrics_data(site, start_date, end_date):
             site=site,
             **data))
         data.update(
-            {key: val + incr_func(key) for key, val in data.iteritems()})
+            {key: val + incr_func(key) for key, val in six.iteritems(data)})
     return metrics
 
 
@@ -364,7 +367,7 @@ class TestSiteMetricsGettersStandalone(object):
         actual = get_monthly_site_metrics(site=self.site)
 
         assert set(actual.keys()) == set(expected_top_lvl_keys)
-        for key, val in actual.iteritems():
+        for key, val in six.iteritems(actual):
             assert set(val.keys()) == set(expected_2nd_lvl_keys)
             assert len(val['history']) > 0
             assert set(val['history'][0].keys()) == set(expected_history_elem_keys)
@@ -474,7 +477,7 @@ class TestSiteMetricsGettersMultisite(object):
         actual = get_monthly_site_metrics(site=self.alpha_site)
 
         assert set(actual.keys()) == set(expected_top_lvl_keys)
-        for key, val in actual.iteritems():
+        for key, val in six.iteritems(actual):
             assert set(val.keys()) == set(expected_2nd_lvl_keys)
             assert len(val['history']) > 0
             assert set(val['history'][0].keys()) == set(expected_history_elem_keys)

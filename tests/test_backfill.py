@@ -1,5 +1,6 @@
 """Tests the figures.backfill module
 """
+from __future__ import absolute_import
 from datetime import datetime
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -16,6 +17,8 @@ from tests.factories import (
     StudentModuleFactory,
     SiteFactory)
 from tests.helpers import organizations_support_sites
+from six.moves import range
+from six.moves import zip
 
 
 if organizations_support_sites():

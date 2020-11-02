@@ -7,6 +7,8 @@ It calls the task `devsite.celery.run_celery_check`
 
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 from django.core.management.base import BaseCommand
 
 from devsite.celery import celery_check
@@ -26,12 +28,12 @@ class Command(BaseCommand):
         print('Checking Celery...')
         msg = 'run_devsite_check management command'
         result = celery_check.delay(msg)
-        print('Task called. task_id={}'.format(result.task_id))
+        print(('Task called. task_id={}'.format(result.task_id)))
 
         try:
-            print('result={}'.format(result.get()))
+            print(('result={}'.format(result.get())))
         except NotImplementedError as e:
-            print('Error: {}'.format(e))
+            print(('Error: {}'.format(e)))
 
         print('Done checking Celery')
 

@@ -3,6 +3,7 @@
 Initially developed to support API performance improvements
 """
 
+from __future__ import absolute_import
 from datetime import datetime
 from dateutil.rrule import rrule, MONTHLY
 from dateutil.relativedelta import relativedelta

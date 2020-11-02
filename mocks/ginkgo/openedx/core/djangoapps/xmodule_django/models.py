@@ -16,8 +16,10 @@ https://github.com/edx/edx-platform/blob/open-release/ginkgo.master/openedx/core
 
 '''
 
+from __future__ import absolute_import
 from django.db import models
 from opaque_keys.edx.keys import CourseKey
+import six
 
 def _strip_object(key):
     """
@@ -41,7 +43,7 @@ def _strip_value(value, lookup='exact'):
     return stripped_value
 
 
-class OpaqueKeyField(models.CharField):
+class OpaqueKeyField(six.with_metaclass(models.SubfieldBase, models.CharField)):
     """
     A django field for storing OpaqueKeys.
 
@@ -53,8 +55,6 @@ class OpaqueKeyField(models.CharField):
     to parse the key string, and will return an instance of KEY_CLASS.
     """
     description = "An OpaqueKey object, saved to the DB in the form of a string."
-
-    __metaclass__ = models.SubfieldBase
 
     Empty = object()
     KEY_CLASS = None
@@ -69,13 +69,13 @@ class OpaqueKeyField(models.CharField):
         if value is self.Empty or value is None:
             return None
 
-        assert isinstance(value, (basestring, self.KEY_CLASS)), \
+        assert isinstance(value, (six.string_types, self.KEY_CLASS)), \
             "%s is not an instance of basestring or %s" % (value, self.KEY_CLASS)
         if value == '':
             # handle empty string for models being created w/o fields populated
             return None
 
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             if value.endswith('\n'):
                 # An opaque key with a trailing newline has leaked into the DB.
                 # Log and strip the value.
@@ -107,7 +107,7 @@ class OpaqueKeyField(models.CharField):
         # HACK: Remarking out the assertion until we can investigate why
         # the value is sometimes unicode and sometimes an OpaqueKey/CourseLocator
         #assert isinstance(value, self.KEY_CLASS), "%s is not an instance of %s" % (value, self.KEY_CLASS)
-        serialized_key = unicode(_strip_value(value))
+        serialized_key = six.text_type(_strip_value(value))
         if serialized_key.endswith('\n'):
             # An opaque key object serialized to a string with a trailing newline.
             # Log the value - but do not modify it.

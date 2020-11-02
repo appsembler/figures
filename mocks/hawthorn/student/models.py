@@ -1,4 +1,3 @@
-
 from collections import defaultdict, namedtuple
 from datetime import datetime
 
@@ -16,6 +15,8 @@ from openedx.core.djangoapps.content.course_overviews.models import (
     CourseOverview,
 )
 from openedx.core.djangoapps.xmodule_django.models import CourseKeyField
+import six
+from six.moves import range
 
 class UserProfile(models.Model):
     '''
@@ -34,7 +35,7 @@ class UserProfile(models.Model):
 
     # Optional demographic data we started capturing from Fall 2012
     this_year = datetime.now(UTC).year
-    VALID_YEARS = range(this_year, this_year - 120, -1)
+    VALID_YEARS = list(range(this_year, this_year - 120, -1))
     year_of_birth = models.IntegerField(blank=True, null=True, db_index=True)
 
     GENDER_CHOICES = (
@@ -162,7 +163,7 @@ class CourseEnrollment(models.Model):
 
     @course_id.setter
     def course_id(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             self._course_id = CourseKey.from_string(value)
         else:
             self._course_id = value
