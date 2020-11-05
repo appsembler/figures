@@ -8,6 +8,13 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+TBD Nov 2020 - Figures release 0.4.0 - In development
+=====================================================
+
+* Juniper upgrade
+* MAU 2G
+* Documentation update
+
 30 Oct 2020 - Figures release 0.3.19
 ====================================
 
