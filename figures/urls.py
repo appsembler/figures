@@ -127,9 +127,6 @@ urlpatterns = [
     # Non-router API endpoints
     url(r'^api/general-site-metrics', views.GeneralSiteMetricsView.as_view(),
         name='general-site-metrics'),
-
-    # Reroute all unmatched traffic to Figures main UI page
-    url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all')
 ]
 
 # Include router endpoints
@@ -139,3 +136,6 @@ if DJANGO_VERSION[0] < 2:
     urlpatterns.append(url(r'^api/', include(router.urls, namespace='api')))
 else:
     urlpatterns.append(url(r'^api/', include((router.urls, 'api'), namespace='api')))
+
+# Reroute all unmatched traffic to Figures main UI page
+urlpatterns.append(url(r'^(?:.*)/?$', views.figures_home, name='router-catch-all'))
