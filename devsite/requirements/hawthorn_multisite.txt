@@ -71,7 +71,7 @@ django-debug-toolbar==1.11
 coverage==4.5.4
 factory-boy==2.5.1
 flake8==3.7.9
-pylint==1.9.5
+pylint==1.9.4	# Because "No matching distribution found for pylint==1.9.5"
 pylint-django==0.11.1
 pytest==3.6.2
 pytest-django==3.1.2

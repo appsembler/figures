@@ -28,6 +28,7 @@ python.clean:  ## Removes generated Python bytecode files
 	find devsite -type f -name "*.pyc" -exec rm -f {} \;
 	find mocks -type f -name "*.pyc" -exec rm -f {} \;
 	find tests -type d -name __pycache__ -exec rm -r {} \+
+	find figures -type d -name __pycache__ -exec rm -r {} \+
 	find devsite -type d -name __pycache__ -exec rm -r {} \+
 	find mocks -type d -name __pycache__ -exec rm -r {} \+
 
