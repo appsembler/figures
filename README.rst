@@ -8,12 +8,31 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
-TBD Nov 2020 - Figures release 0.4.0 - In development
-=====================================================
+
+TBD Dec 2020 - Figures release 0.4.0 - prerelease
+=================================================
+
+_WIP release notes for 0.4.0_
 
 * Juniper upgrade
-* MAU 2G
+
+  * https://github.com/appsembler/figures/pull/264
+
+* MAU 2G data model and signal trigger
+
+  * Needs to be added to Figures `master` branch
+
+* Add database indexing
+
+  * WIP
+
+* Fix Figures URL wildcard placement
+
+  * https://github.com/appsembler/figures/pull/284
+
 * Documentation update
+
+  * WIP
 
 30 Oct 2020 - Figures release 0.3.19
 ====================================
