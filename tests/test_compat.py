@@ -27,7 +27,7 @@ try:
 except ImportError:
     pass
 
-from mock import Mock, patch
+from mock import patch
 
 
 def patch_module(module_path, extra_properties=None):
@@ -60,55 +60,105 @@ def patch_module(module_path, extra_properties=None):
     return patch.dict('sys.modules', patch_specs)
 
 
-@patch('openedx.core.release.RELEASE_LINE', 'ginkgo')
-def test_release_line_with_ginkgo():
-    '''Make sure that ``figures.compat.RELEASE_LINE`` is 'ginkgo'
-    '''
-    with patch_module('certificates.models', {'GeneratedCertificate': Mock()}):  # Just to avoid an error
-        import figures.compat
-        reload(figures.compat)
-        assert figures.compat.RELEASE_LINE == 'ginkgo'
-
-
-# For the ginkgo tests, we need to first remove finding the hawthorn module
-
-def test_course_grade_factory_with_ginkgo():
-    hawthorn_key = 'lms.djangoapps.grades.course_grade_factory'
-    with patch.dict('sys.modules', {hawthorn_key: None}):
-        with patch_module('lms.djangoapps.grades.new.course_grade_factory', {'CourseGradeFactory': 'hi'}):
-            import figures.compat
-            reload(figures.compat)
-            assert figures.compat.CourseGradeFactory == 'hi'
-
-
-@patch('openedx.core.release.RELEASE_LINE', 'hawthorn')
-def test_course_grade_factory_with_hawthorn():
-    with patch_module('lms.djangoapps.certificates.models', {'GeneratedCertificate': Mock()}):  # Just to avoid an error
-        with patch_module('lms.djangoapps.grades.course_grade_factory', {'CourseGradeFactory': 'hi'}):
-            import figures.compat
-            reload(figures.compat)
-            assert hasattr(figures.compat, 'CourseGradeFactory')
-            assert figures.compat.CourseGradeFactory == 'hi'
+# TODO: Test with no release line
 
 
 @patch('openedx.core.release.RELEASE_LINE', 'ginkgo')
-def test_generated_certificate_pre_hawthorn():
-    mock =  Mock()
-    with patch_module('certificates.models', {'GeneratedCertificate': mock}):
-        import figures.compat
-        reload(figures.compat)
-        assert hasattr(figures.compat, 'GeneratedCertificate')
-        assert figures.compat.GeneratedCertificate is mock
+def test_compat_module_with_ginkgo():
+    """Test Ginkgo compat path works
+
+    Yes, we have a number of assertions here. We are testing the state of
+    `figures.compat` when we expect Figures to run in Ginkgo. Running in one
+    test also saves execution time as we need to ste up the whole module to
+    import as Ginkgo even if we are only testing one object in the module
+    """
+    with patch_module('lms.djangoapps.grades.new.course_grade_factory',
+                      {'CourseGradeFactory': 'cgf'}):
+        with patch_module('certificates.models', {'GeneratedCertificate': 'gc'}):
+            with patch_module('courseware.models', {'StudentModule': 'sm'}):
+                with patch_module('courseware.courses', {'get_course_by_id': 'gcbid'}):
+                    with patch_module('openedx.core.djangoapps.xmodule_django.models',
+                                      {'CourseKeyField': 'ckf'}):
+                        import figures.compat
+                        reload(figures.compat)
+                        assert figures.compat.RELEASE_LINE == 'ginkgo'
+                        assert hasattr(figures.compat, 'CourseGradeFactory')
+                        assert figures.compat.CourseGradeFactory == 'cgf'
+                        assert hasattr(figures.compat, 'GeneratedCertificate')
+                        assert figures.compat.GeneratedCertificate == 'gc'
+                        assert hasattr(figures.compat, 'StudentModule')
+                        assert figures.compat.StudentModule == 'sm'
+                        assert hasattr(figures.compat, 'get_course_by_id')
+                        assert figures.compat.get_course_by_id == 'gcbid'
+                        assert hasattr(figures.compat, 'CourseKeyField')
+                        assert figures.compat.CourseKeyField == 'ckf'
 
 
 @patch('openedx.core.release.RELEASE_LINE', 'hawthorn')
-def test_generated_certificate_hawthorn():
-    hawthorn_key = 'lms.djangoapps.certificates.models'
-    with patch_module(hawthorn_key, {'GeneratedCertificate': 'hi'}):
-        import figures.compat
-        reload(figures.compat)
-        assert hasattr(figures.compat, 'GeneratedCertificate')
-        assert figures.compat.GeneratedCertificate == 'hi'
+def test_release_line_with_hawthorn():
+    """Test Hawthorn compat path works
+
+    Yes, we have a number of assertions here. We are testing the state of
+    `figures.compat` when we expect Figures to run in Ginkgo. Running in one
+    test also saves execution time as we need to ste up the whole module to
+    import as Ginkgo even if we are only testing one object in the module
+    """
+    with patch_module('lms.djangoapps.grades.course_grade_factory',
+                      {'CourseGradeFactory': 'cgf'}):
+        with patch_module('lms.djangoapps.certificates.models',
+                          {'GeneratedCertificate': 'gc'}):
+            with patch_module('courseware.models', {'StudentModule': 'sm'}):
+                with patch_module('courseware.courses',
+                                  {'get_course_by_id': 'gcbid'}):
+                    with patch_module('opaque_keys.edx.django.models',
+                                      {'CourseKeyField': 'ckf'}):
+                        import figures.compat
+                        reload(figures.compat)
+                        assert figures.compat.RELEASE_LINE == 'hawthorn'
+                        assert hasattr(figures.compat, 'CourseGradeFactory')
+                        assert figures.compat.CourseGradeFactory == 'cgf'
+                        assert hasattr(figures.compat, 'GeneratedCertificate')
+                        assert figures.compat.GeneratedCertificate == 'gc'
+                        assert hasattr(figures.compat, 'StudentModule')
+                        assert figures.compat.StudentModule == 'sm'
+                        assert hasattr(figures.compat, 'get_course_by_id')
+                        assert figures.compat.get_course_by_id == 'gcbid'
+                        assert hasattr(figures.compat, 'CourseKeyField')
+                        assert figures.compat.CourseKeyField == 'ckf'
+
+
+@patch('openedx.core.release.RELEASE_LINE', 'juniper')
+def test_release_line_with_juniper():
+    """Test Hawthorn compat path works
+
+    Yes, we have a number of assertions here. We are testing the state of
+    `figures.compat` when we expect Figures to run in Ginkgo. Running in one
+    test also saves execution time as we need to ste up the whole module to
+    import as Ginkgo even if we are only testing one object in the module
+    """
+    with patch_module('lms.djangoapps.grades.course_grade_factory',
+                      {'CourseGradeFactory': 'cgf'}):
+        with patch_module('lms.djangoapps.certificates.models',
+                          {'GeneratedCertificate': 'gc'}):
+            with patch_module('lms.djangoapps.courseware.models',
+                              {'StudentModule': 'sm'}):
+                with patch_module('lms.djangoapps.courseware.courses',
+                                  {'get_course_by_id': 'gcbid'}):
+                    with patch_module('opaque_keys.edx.django.models',
+                                      {'CourseKeyField': 'ckf'}):
+                        import figures.compat
+                        reload(figures.compat)
+                        assert figures.compat.RELEASE_LINE == 'juniper'
+                        assert hasattr(figures.compat, 'CourseGradeFactory')
+                        assert figures.compat.CourseGradeFactory == 'cgf'
+                        assert hasattr(figures.compat, 'GeneratedCertificate')
+                        assert figures.compat.GeneratedCertificate == 'gc'
+                        assert hasattr(figures.compat, 'StudentModule')
+                        assert figures.compat.StudentModule == 'sm'
+                        assert hasattr(figures.compat, 'get_course_by_id')
+                        assert figures.compat.get_course_by_id == 'gcbid'
+                        assert hasattr(figures.compat, 'CourseKeyField')
+                        assert figures.compat.CourseKeyField == 'ckf'
 
 
 @pytest.mark.parametrize('chapter_grades, expected', [

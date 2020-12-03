@@ -11,46 +11,45 @@ a lowercase string, such as 'ginkgo' or 'hawthorn'
 # pylint: disable=ungrouped-imports,useless-suppression
 
 from __future__ import absolute_import
+
+
+class UnsuportedOpenedXRelease(Exception):
+    pass
+
+
+# Pre-Ginkgo does not define `RELEASE_LINE`
 try:
     from openedx.core.release import RELEASE_LINE
 except ImportError:
-    # we are pre-ginkgo
-    RELEASE_LINE = None
-
-try:
-    # First try to import for the path as of hawthorn
-    from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
-except ImportError:
-    try:
-        # Next try to import for the path as of ginkgo
-        from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
-    except ImportError:
-        # try the pre-ginkgo path
-        from lms.djangoapps.grades.new.course_grade import CourseGradeFactory    # noqa: F401
+    raise UnsuportedOpenedXRelease(
+        'Unidentified Open edX release: '
+        'figures.compat could not import openedx.core.release.RELEASE_LINE')
 
 
 if RELEASE_LINE == 'ginkgo':
+    from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory  # noqa pylint: disable=unused-import,import-error
+else:  # Assume Hawthorn or greater
+    from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory  # noqa pylint: disable=unused-import,import-error
+
+if RELEASE_LINE == 'ginkgo':
     from certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
-else:
+else:  # Assume Hawthorn or greater
     from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
 
-
-try:
-    from lms.djangoapps.courseware.models import StudentModule  # noqa pylint: disable=unused-import,import-error
-except ImportError:
-    # Backward compatibily for pre-Juniper releases
+if RELEASE_LINE in ['ginkgo', 'hawthorn']:
     from courseware.models import StudentModule  # noqa pylint: disable=unused-import,import-error
+else:  # Assume Juniper or greater
+    from lms.djangoapps.courseware.models import StudentModule  # noqa pylint: disable=unused-import,import-error
 
-try:
-    from lms.djangoapps.courseware.courses import get_course_by_id  # noqa pylint: disable=unused-import,import-error
-except ImportError:
-    # Backward compatibily for pre-Juniper releases
+if RELEASE_LINE in ['ginkgo', 'hawthorn']:
     from courseware.courses import get_course_by_id  # noqa pylint: disable=unused-import,import-error
+else:  # Assume Juniper or greater
+    from lms.djangoapps.courseware.courses import get_course_by_id  # noqa pylint: disable=unused-import,import-error
 
-try:
-    from opaque_keys.edx.django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
-except ImportError:
+if RELEASE_LINE == 'ginkgo':
     from openedx.core.djangoapps.xmodule_django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
+else:  # Assume Hawthorn or greater
+    from opaque_keys.edx.django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
 
 
 def course_grade(learner, course):
