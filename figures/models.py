@@ -302,14 +302,14 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     """
     # TODO: Review the most appropriate on_delete behaviour
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    date_for = models.DateField()
+    date_for = models.DateField(db_index=True)
     # TODO: We should require the user
     # TODO: Review the most appropriate on_delete behaviour
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              blank=True,
                              null=True,
                              on_delete=models.CASCADE)
-    course_id = models.CharField(max_length=255, blank=True)
+    course_id = models.CharField(max_length=255, blank=True, db_index=True)
     points_possible = models.FloatField()
     points_earned = models.FloatField()
     sections_worked = models.IntegerField()
