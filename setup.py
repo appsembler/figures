@@ -26,7 +26,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='Figures',
-    version='0.4.0',
+    version='0.4.dev1',
     packages=find_packages(),
     include_package_data=True,
     license='MIT',
@@ -57,4 +57,7 @@ setup(
             'figures = figures.apps:FiguresConfig',
         ],
     },
+    install_requires=[
+        'sqlparse >= 0.2.2',  # This is the requirement specified by Django 2.2+
+    ],
 )
