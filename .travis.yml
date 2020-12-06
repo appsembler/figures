@@ -1,5 +1,6 @@
 # Disabled pytest coverage to troubleshoot Python 3 support
 language: python
+
 matrix:
   include:
     - python: 2.7
@@ -13,10 +14,9 @@ matrix:
     - python: 2.7
       env: TOXENV=edx_lint_check
     - python: 3.5
-      env: TOXENV=py35-juniper_community
+      env: TOXENV=py35-juniper
     - python: 3.8
-      env: TOXENV=py38-juniper_community
-
+      env: TOXENV=py38-juniper
 
 node_js:
   - "node"
