@@ -1,0 +1,7 @@
+# Requirements for developer environment with Python 3.8+
+
+-r juniper_community.txt
+
+# Used to serve OpenAPI docs
+# See Figures docs/source/api.rst
+drf-yasg2==1.19.4
