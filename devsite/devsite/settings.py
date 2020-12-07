@@ -16,16 +16,20 @@ from figures.settings.lms_production import (
     update_celerybeat_schedule,
 )
 
+DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
 
 env = environ.Env(
+    DEBUG=(bool, True),
+    OPENEDX_RELEASE=(str, 'HAWTHORN'),
     FIGURES_IS_MULTISITE=(bool, False),
+    ENABLE_DEVSITE_CELERY=(bool, True),
+    ENABLE_OPENAPI_DOCS=(bool, False),
     SEED_DAYS_BACK=(int, 60),
     SEED_NUM_LEARNERS_PER_COURSE=(int, 25),
-    OPENEDX_RELEASE=(str, 'HAWTHORN'),
-    ENABLE_DEVSITE_CELERY=(bool, True)
 )
 
-environ.Env.read_env()
+environ.Env.read_env(os.path.join(DEVSITE_BASE_DIR, '.env'))
 
 OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
 ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
@@ -35,23 +39,20 @@ if OPENEDX_RELEASE == 'GINKGO':
 
 MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
-DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
-
 # SECURITY WARNING: Use a real key when running in the cloud and keep it secret
 SECRET_KEY = 'insecure-secret-key'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 USE_TZ = True
 TIME_ZONE = 'UTC'
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 # Set the default Site (django.contrib.sites.models.Site)
 SITE_ID = 1
 
 # TODO: Update this to allow environment variable override
-# ENABLE_DEVSITE_CELERY = True
+ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
 
 # Adds the mock edx-platform modules to the Python module search path
 sys.path.append(os.path.normpath(os.path.join(PROJECT_ROOT_DIR, MOCKS_DIR)))
@@ -249,3 +250,8 @@ DEVSITE_SEED = {
     'DAYS_BACK': env('SEED_DAYS_BACK'),
     'NUM_LEARNERS_PER_COURSE': env('SEED_NUM_LEARNERS_PER_COURSE')
 }
+
+ENABLE_OPENAPI_DOCS = env('ENABLE_OPENAPI_DOCS')
+
+if ENABLE_OPENAPI_DOCS:
+    INSTALLED_APPS += ['drf_yasg2']
