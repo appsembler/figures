@@ -6,7 +6,7 @@ matrix:
     - python: 2.7
       env: TOXENV=py27-ginkgo
     - python: 2.7
-      env: TOXENV=py27-hawthorn_community
+      env: TOXENV=py27-hawthorn
     - python: 2.7
       env: TOXENV=py27-hawthorn_multisite
     - python: 2.7

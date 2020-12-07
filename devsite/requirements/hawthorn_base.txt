@@ -1,0 +1,96 @@
+# Base requirements needed for Hawthorn testing and devsite
+#
+# Versions should match those used in Open edX Hawthorn
+#
+
+##
+## General Python packages
+##
+
+jsonfield==2.0.2
+path.py==8.2.1
+python-dateutil==2.7.3
+
+# Yes, this is old but is the one specified by Hawthorn edx-platform
+pytz==2016.10
+
+##
+## Django packages
+##
+
+Django==1.11.29
+djangorestframework==3.6.3
+django-countries==4.6.1
+
+# edx-platform hawthorn does not use django-extensions
+django-extensions==1.5.9
+django-environ==0.4.5
+django-filter==1.0.4
+django-model-utils==3.0.0
+django-webpack-loader==0.6.0
+
+##
+## Celery packages
+##
+
+celery==3.1.25
+django-celery==3.3.1
+
+##
+## Open edX platform package dependencies
+##
+
+edx-drf-extensions==1.5.2
+edx-opaque-keys==0.4.4
+
+##
+## Documentation (Sphinx) dependencies
+##
+
+Sphinx==1.8.1
+recommonmark==0.4.0
+
+##
+## Devsite specific packages
+##
+
+django-debug-toolbar==1.11
+
+##
+## Testing packages
+##
+
+# To address: tox 3.14.2 requires pluggy<1,>=0.12.0, but you'll have pluggy 0.6.0 which is incompatible.
+tox==3.1.0
+coverage==4.5.4
+factory-boy==2.5.1
+flake8==3.7.9
+mock==3.0.5
+
+pytest==3.6.2
+pytest-django==3.1.2
+pytest-mock==1.7.1
+pytest-pythonpath==0.7.2
+pytest-cov==2.6.0
+freezegun==0.3.12
+
+# Faker is used to seed mock data in devsite
+Faker==2.0.3
+
+# Added to address: TypeError: attrib() got an unexpected keyword argument 'convert'
+attrs==19.1.0
+
+##
+## Linting packages
+##
+
+# To address: edx-lint 0.5.5 requires pylint==1.7.1, but you'll have pylint 1.9.5 which is incompatible.
+pylint==1.7.1
+
+# To address edx-lint 0.5.5 requires pylint-django==0.7.2, but you'll have pylint-django 0.11.1 which is incompatible.
+pylint-django==0.7.2
+
+edx-lint==0.5.5
+
+# To address: edx-lint 0.5.5 requires astroid==1.5.2, but you'll have astroid 1.6.6 which is incompatible.
+astroid==1.5.2
