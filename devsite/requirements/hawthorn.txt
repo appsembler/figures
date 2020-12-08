@@ -1,0 +1,6 @@
+# Python packages needed for Hawthorn community (single site operation)
+
+-r hawthorn_base.txt
+
+# Use the community version of edx-organizations
+edx-organizations==0.4.10

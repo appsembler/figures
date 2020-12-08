@@ -36,13 +36,13 @@ class CourseDailyMetrics(TimeStampedModel):
     """
     # TODO: Review the most appropriate on_delete behaviour
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    date_for = models.DateField()
+    date_for = models.DateField(db_index=True)
 
     # Leaving as a simple string for initial development
     # TODO: Follow on to decide if we want to make this an FK to
     # the CourseOverview model or have the course_id be a
     # CourseKeyField
-    course_id = models.CharField(max_length=255)
+    course_id = models.CharField(max_length=255, db_index=True)
     enrollment_count = models.IntegerField()
     active_learners_today = models.IntegerField()
     # Do we want cumulative average progress for the month?
@@ -99,7 +99,7 @@ class SiteDailyMetrics(TimeStampedModel):
     # TODO: Review the most appropriate on_delete behaviour
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     # Date for which this record's data are collected
-    date_for = models.DateField()
+    date_for = models.DateField(db_index=True)
 
     # Under review for deletion
     cumulative_active_user_count = models.IntegerField(blank=True, null=True)
