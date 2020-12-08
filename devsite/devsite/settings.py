@@ -160,20 +160,21 @@ STATICFILES_FINDERS = [
 
 WSGI_APPLICATION = 'devsite.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
+
+# Database setting
+# To select a different database, such as MySQL, add the database url string to
+# as 'DATABASE_URL=<database url string>' in the devsite/.env file
+#
+# Refs:
+#   https://docs.djangoproject.com/en/1.8/ref/settings/#databases
+#   https://github.com/joke2k/django-environ/tree/v0.4.5
+
+DEFAULT_SQLITE_DB_URL = os.path.join(DEVSITE_BASE_DIR,
+                                     'figures-{release}-db.sqlite3'.format(
+                                        release=OPENEDX_RELEASE.lower()))
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(DEVSITE_BASE_DIR,
-                             'figures-{release}-db.sqlite3'.format(
-                                release=OPENEDX_RELEASE.lower())),
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    }
+    'default': env.db(default=DEFAULT_SQLITE_DB_URL)
 }
 
 LOCALE_PATHS = [
