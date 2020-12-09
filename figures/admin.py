@@ -67,6 +67,27 @@ class SiteMonthlyMetricsAdmin(admin.ModelAdmin):
         'month_for')
 
 
+@admin.register(figures.models.EnrollmentData)
+class EnrollmentDataAdmin(admin.ModelAdmin):
+    """Defines the admin interface for the EnrollmentData model
+    """
+    list_display = (
+        'id', 'site', 'user_link', 'course_id', 'date_for', 'date_enrolled',
+        'is_enrolled', 'is_completed', 'progress_percent', 'points_possible',
+        'points_earned', 'sections_worked', 'sections_possible'
+    )
+    read_only_fields = ('site', 'user', 'user_link', 'course_id')
+
+    def user_link(self, obj):
+        if obj.user:
+            return format_html(
+                '<a href="{}">{}</a>',
+                reverse("admin:auth_user_change", args=(obj.user.pk,)),
+                obj.user.email)
+        else:
+            return 'Missing user'
+
+
 @admin.register(figures.models.LearnerCourseGradeMetrics)
 class LearnerCourseGradeMetricsAdmin(admin.ModelAdmin):
     """Defines the admin interface for the LearnerCourseGradeMetrics model

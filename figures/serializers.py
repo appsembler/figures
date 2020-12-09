@@ -594,7 +594,7 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
         course_progress_details = None
 
         try:
-            obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+            obj = LearnerCourseGradeMetrics.objects.latest_lcgm(
                 user=course_enrollment.user,
                 course_id=str(course_enrollment.course_id))
             if obj:
@@ -818,7 +818,7 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
         """
         Get the most recent LCGM record for the enrollment, if it exists
         """
-        self._lcgm = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+        self._lcgm = LearnerCourseGradeMetrics.objects.latest_lcgm(
             user=instance.user, course_id=str(instance.course_id))
         return super(EnrollmentMetricsSerializerV2, self).to_representation(instance)
 

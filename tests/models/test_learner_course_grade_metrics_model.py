@@ -73,7 +73,7 @@ def create_sample_completed_lcgm(site, user_count, course_count):
 
 
 @pytest.mark.django_db
-def test_most_recent_with_data(db):
+def test_latest_lcgm_with_data(db):
     """Make sure the query works with a couple of existing models
 
     We create two LearnerCourseGradeMetrics models and test that the function
@@ -90,13 +90,13 @@ def test_most_recent_with_data(db):
                                                   course_id=str(course_overview.id),
                                                   date_for=second_date)
     assert older_lcgm.date_for != newer_lcgm.date_for
-    obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+    obj = LearnerCourseGradeMetrics.objects.latest_lcgm(
         user=user, course_id=course_overview.id)
     assert obj == newer_lcgm
 
 
 @pytest.mark.django_db
-def test_most_recent_with_empty_table(db):
+def test_latest_lcgm_with_empty_table(db):
     """Make sure the query works when there are no models to find
 
     Tests that the function returns None and does not fail when it cannot find
@@ -105,7 +105,7 @@ def test_most_recent_with_empty_table(db):
     assert not LearnerCourseGradeMetrics.objects.count()
     user = UserFactory()
     course_overview = CourseOverviewFactory()
-    obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+    obj = LearnerCourseGradeMetrics.objects.latest_lcgm(
         user=user, course_id=course_overview.id)
     assert not obj
 
@@ -228,15 +228,15 @@ class TestLearnerCourseGradeMetrics(object):
             self.create_rec['user'].username,
             self.create_rec['course_id'])
 
-    def test_most_recent_for_learner_course_one_rec(self):
+    def test_latest_lcgm_one_rec(self):
         rec = LearnerCourseGradeMetrics.objects.create(**self.create_rec)
         assert LearnerCourseGradeMetrics.objects.count() == 1
-        obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+        obj = LearnerCourseGradeMetrics.objects.latest_lcgm(
             user=self.course_enrollment.user,
             course_id=str(self.course_enrollment.course_id))
         assert rec == obj
 
-    def test_most_recent_for_learner_course_multiple_dates(self):
+    def test_latest_lcgm_multiple_dates(self):
         assert LearnerCourseGradeMetrics.objects.count() == 0
         for date in [datetime.date(2018, 2, day) for day in range(1, 4)]:
             rec = self.create_rec.copy()
@@ -244,7 +244,7 @@ class TestLearnerCourseGradeMetrics(object):
             rec['date_for'] = date
             LearnerCourseGradeMetrics.objects.create(**rec)
 
-        obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+        obj = LearnerCourseGradeMetrics.objects.latest_lcgm(
             user=self.course_enrollment.user,
             course_id=str(self.course_enrollment.course_id))
         assert last_day
