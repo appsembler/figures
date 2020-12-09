@@ -114,10 +114,14 @@ router.register(
     base_name='enrollment-metrics')
 
 router.register(
-    r'learner-metrics',
-    views.LearnerMetricsViewSet,
-    base_name='learner-metrics')
+    r'learner-metrics-v1',
+    views.LearnerMetricsViewSetV1,
+    base_name='learner-metrics-v1')
 
+router.register(
+    r'learner-metrics',
+    views.LearnerMetricsViewSetV2,
+    base_name='learner-metrics')
 
 urlpatterns = [
 

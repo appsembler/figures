@@ -44,6 +44,7 @@ from figures.metrics import (
 from figures.models import (
     CourseDailyMetrics,
     CourseMauMetrics,
+    EnrollmentData,
     SiteDailyMetrics,
     SiteMauMetrics,
     LearnerCourseGradeMetrics,
@@ -873,3 +874,52 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
             course_id__in=self.parent.course_keys)
 
         return EnrollmentMetricsSerializerV2(user_enrollments, many=True).data
+
+# For LPO performance improvement
+
+
+class EnrollmentDataSerializer(serializers.ModelSerializer):
+    """Provides serialization for an enrollment
+
+    This serializer note not identify the learner. It is used in
+    LearnerMetricsSerializer
+    """
+    # course_id = serializers.CharField()
+    date_enrolled = serializers.DateTimeField(format="%Y-%m-%d")
+    progress_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EnrollmentData
+        fields = [
+            'id', 'course_id', 'date_enrolled', 'date_enrolled',
+            'is_enrolled', 'is_completed',
+            'progress_percent', 'progress_details',
+        ]
+        read_only_fields = fields
+
+    def get_progress_details(self, obj):  # pylint: disable=unused-argument
+        """Get progress data for a single enrollment
+        """
+        return obj.progress_details
+
+
+class LearnerMetricsSerializerV2(serializers.ModelSerializer):
+    fullname = serializers.CharField(source='profile.name', default=None)
+    enrollments = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        list_serializer_class = LearnerMetricsListSerializer
+        fields = ('id', 'username', 'email', 'fullname', 'is_active',
+                  'date_joined', 'enrollments')
+        read_only_fields = fields
+
+    def get_enrollments(self, user):
+        """
+        Use the course ids identified in this serializer's list serializer to
+        filter enrollments
+        """
+        user_enrollments = user.enrollmentdata_set.filter(
+            course_id__in=self.parent.course_keys)
+
+        return EnrollmentDataSerializer(user_enrollments, many=True).data
