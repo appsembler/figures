@@ -905,21 +905,11 @@ class EnrollmentDataSerializer(serializers.ModelSerializer):
 
 class LearnerMetricsSerializerV2(serializers.ModelSerializer):
     fullname = serializers.CharField(source='profile.name', default=None)
-    enrollments = serializers.SerializerMethodField()
+    enrollmentdata_set = EnrollmentDataSerializer(many=True, read_only=True)
 
     class Meta:
         model = get_user_model()
         list_serializer_class = LearnerMetricsListSerializer
         fields = ('id', 'username', 'email', 'fullname', 'is_active',
-                  'date_joined', 'enrollments')
+                  'date_joined', 'enrollmentdata_set')
         read_only_fields = fields
-
-    def get_enrollments(self, user):
-        """
-        Use the course ids identified in this serializer's list serializer to
-        filter enrollments
-        """
-        user_enrollments = user.enrollmentdata_set.filter(
-            course_id__in=self.parent.course_keys)
-
-        return EnrollmentDataSerializer(user_enrollments, many=True).data
