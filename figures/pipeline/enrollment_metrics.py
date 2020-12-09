@@ -120,8 +120,10 @@ def calculate_average_progress(progress_percentages):
     TODO: How do we want to handle malformed data?
     """
     if progress_percentages:
-        average_progress = float(sum(progress_percentages)) / float(len(progress_percentages))
-        average_progress = float(Decimal(average_progress).quantize(Decimal('.00')))
+        average_progress = float(
+            sum(progress_percentages)) / float(len(progress_percentages))
+        average_progress = float(
+            Decimal(average_progress).quantize(Decimal('.00')))
     else:
         average_progress = 0.0
     return average_progress
@@ -171,7 +173,7 @@ def collect_metrics_for_enrollment(site, course_enrollment, course_sm, date_for=
 
     if _enrollment_metrics_needs_update(most_recent_lcgm, most_recent_sm):
         progress_data = _collect_progress_data(most_recent_sm)
-        metrics = _add_enrollment_metrics_record(site=site,
+        metrics = _new_enrollment_metrics_record(site=site,
                                                  course_enrollment=course_enrollment,
                                                  progress_data=progress_data,
                                                  date_for=date_for)
@@ -259,7 +261,7 @@ def _enrollment_metrics_needs_update(most_recent_lcgm, most_recent_sm):
     return needs_update
 
 
-def _add_enrollment_metrics_record(site, course_enrollment, progress_data, date_for):
+def _new_enrollment_metrics_record(site, course_enrollment, progress_data, date_for):
     """Convenience function to save progress metrics to Figures
     """
     return LearnerCourseGradeMetrics.objects.create(
