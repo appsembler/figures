@@ -25,6 +25,7 @@ from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 
 from organizations.models import Organization, OrganizationCourse
 
+from figures.backfill import backfill_enrollment_data_for_site
 from figures.compat import RELEASE_LINE, GeneratedCertificate
 from figures.models import (
     CourseDailyMetrics,
@@ -405,6 +406,14 @@ def hotwire_multisite():
         UserOrganizationMapping.objects.create(user=user,
                                                organization=org,
                                                is_active=True)
+
+def backfill_figures_ed():
+    results = dict()
+    for site in Site.objects.all():
+        print('Backfilling enrollment data for site "{}"'.format(site.domain))
+        site_ed = backfill_enrollment_data_for_site(site)
+        results[site.id] = site_ed
+    return results
 
 
 def wipe():

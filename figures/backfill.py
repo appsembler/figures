@@ -10,8 +10,12 @@ from dateutil.relativedelta import relativedelta
 
 from django.utils.timezone import utc
 
-from figures.sites import get_student_modules_for_site
+from figures.sites import (
+  get_course_enrollments_for_site,
+  get_student_modules_for_site
+)
 from figures.pipeline.site_monthly_metrics import fill_month
+from figures.models import EnrollmentData
 
 
 def backfill_monthly_metrics_for_site(site, overwrite=False):
@@ -37,3 +41,20 @@ def backfill_monthly_metrics_for_site(site, overwrite=False):
         backfilled.append(dict(obj=obj, created=created, dt=dt))
 
     return backfilled
+
+
+def backfill_enrollment_data_for_site(site):
+    """Convenience function to fill EnrollmentData records
+
+    This backfills EnrollmentData records for existing CourseEnrollment
+    and LearnerCourseGradeMetrics records
+    """
+    enrollment_data = []
+    site_ce = get_course_enrollments_for_site(site)
+    for rec in site_ce:
+        obj, created = EnrollmentData.objects.set_enrollment_data(
+            site=site,
+            user=rec.user,
+            course_id=rec.course_id)
+        enrollment_data.append((obj, created))
+    return enrollment_data
