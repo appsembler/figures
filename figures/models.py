@@ -204,6 +204,7 @@ class EnrollmentDataManager(models.Manager):
     def set_enrollment_data(self, site, user, course_id, course_enrollment=False):
         """
         This is an expensive call as it needs to call CourseGradeFactory if
+        there is not already a LearnerCourseGradeMetrics record for the learner
         """
         if not course_enrollment:
             # For now, let it raise a `CourseEnrollment.DoesNotExist
