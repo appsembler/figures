@@ -11,6 +11,7 @@ a lowercase string, such as 'ginkgo' or 'hawthorn'
 # pylint: disable=ungrouped-imports,useless-suppression
 
 from __future__ import absolute_import
+from figures.helpers import as_course_key
 
 
 class UnsuportedOpenedXRelease(Exception):
@@ -52,6 +53,12 @@ else:  # Assume Hawthorn or greater
     from opaque_keys.edx.django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
 
 
+# preemptive addition. Added it here to avoid adding to figures.models
+# In fact, we should probably do a refactoring that makes all Figures import it
+# from here
+from student.models import CourseEnrollment  # noqa pylint: disable=unused-import,import-error
+
+
 def course_grade(learner, course):
     """
     Compatibility function to retrieve course grades
@@ -62,6 +69,16 @@ def course_grade(learner, course):
         return CourseGradeFactory().create(learner, course)
     else:  # Assume Hawthorn or greater
         return CourseGradeFactory().read(learner, course)
+
+
+def course_grade_from_course_id(learner, course_id):
+    """
+    Expensive call. Only use in async or pipeline, not in API calls
+    """
+    course = get_course_by_id(course_key=as_course_key(course_id))
+    course._field_data_cache = {}  # pylint: disable=protected-access
+    course.set_grading_policy(course.grading_policy)
+    return course_grade(learner, course)
 
 
 def chapter_grade_values(chapter_grades):
