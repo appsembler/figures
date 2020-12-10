@@ -897,7 +897,7 @@ class EnrollmentDataSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
-    def get_progress_details(self, obj):  # pylint: disable=unused-argument
+    def get_progress_details(self, obj):
         """Get progress data for a single enrollment
         """
         return obj.progress_details
