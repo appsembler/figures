@@ -8,7 +8,7 @@ from __future__ import absolute_import
 from textwrap import dedent
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
-from figures.backfill import backfill_enrollment_data_for_site
+from figures.tasks import update_enrollment_data
 
 
 def get_site(identifier):
@@ -52,8 +52,8 @@ class Command(BaseCommand):
         for site in sites:
             print('Updating EnrollmentData for site "{}"'.format(site.domain))
             if options['no_delay']:
-                backfill_enrollment_data_for_site(site)
+                update_enrollment_data(site)
             else:
-                backfill_enrollment_data_for_site(site).delay()
+                update_enrollment_data.delay(site=site)  # pragma: no cover
 
         print('DONE: Update Figures EnrollmentData')
