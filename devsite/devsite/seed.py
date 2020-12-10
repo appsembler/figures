@@ -29,8 +29,10 @@ from figures.backfill import backfill_enrollment_data_for_site
 from figures.compat import RELEASE_LINE, GeneratedCertificate
 from figures.models import (
     CourseDailyMetrics,
+    EnrollmentData,
     LearnerCourseGradeMetrics,
     SiteDailyMetrics,
+    SiteMonthlyMetrics,
 )
 from figures.helpers import (
     as_course_key,
@@ -407,6 +409,7 @@ def hotwire_multisite():
                                                organization=org,
                                                is_active=True)
 
+
 def backfill_figures_ed():
     results = dict()
     for site in Site.objects.all():
@@ -419,16 +422,24 @@ def backfill_figures_ed():
 def wipe():
     print('Wiping synthetic data...')
     clear_non_admin_users()
+
+    # edx-platform models
     CourseEnrollment.objects.all().delete()
     StudentModule.objects.all().delete()
     CourseOverview.objects.all().delete()
-    CourseDailyMetrics.objects.all().delete()
-    SiteDailyMetrics.objects.all().delete()
-    LearnerCourseGradeMetrics.objects.all().delete()
+
+    # edx-organizations models
     Organization.objects.all().delete()
     OrganizationCourse.objects.all().delete()
     if is_multisite():
         UserOrganizationMapping.objects.all().delete()
+
+    # Figures models
+    CourseDailyMetrics.objects.all().delete()
+    EnrollmentData.objects.all().delete()
+    LearnerCourseGradeMetrics.objects.all().delete()
+    SiteDailyMetrics.objects.all().delete()
+    SiteMonthlyMetrics.objects.all().delete()
 
 
 def seed_all():
@@ -461,3 +472,5 @@ def seed_all():
     seed_course_daily_metrics()
     print("seeding site daily metrics...")
     seed_site_daily_metrics()
+    print('Backfilling Figures EnrollmentData models...')
+    backfill_figures_ed()

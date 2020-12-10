@@ -1,4 +1,4 @@
-'''Figures compatability module
+"""Figures compatability module
 
 This module serves to provide a common access point to functionality that
 differs from  different named Open edX releases
@@ -7,16 +7,33 @@ We can identify the Open edX named release for Ginkgo and later by getting the
 value from openedx.core.release.RELEASE_LINE. This will be the release name as
 a lowercase string, such as 'ginkgo' or 'hawthorn'
 
-'''
-# pylint: disable=ungrouped-imports,useless-suppression
+TODO: Consider wrapping edx-platform's `get_course_by_id` in a function as it
+      raises a django.http.Http404 if the course if not found, which is weird.
+      We can then raise our own `CourseNotFound` which makes exception handling
+      in Figures clearer to handle with a specific exception. Our callers could
+      do the following:
+      ```
+      try:
+          return get_course_by_id(id)
+      except CourseNotFound:
+          handle exception
+      ```
+"""
+# pylint: disable=ungrouped-imports,useless-suppression,wrong-import-position
 
 from __future__ import absolute_import
+from django.http import Http404
 from figures.helpers import as_course_key
 
 
 class UnsuportedOpenedXRelease(Exception):
     pass
 
+
+class CourseNotFound(Exception):
+    """Raised when edx-platform 'course' structure is not found
+    """
+    pass
 
 # Pre-Ginkgo does not define `RELEASE_LINE`
 try:
@@ -72,10 +89,24 @@ def course_grade(learner, course):
 
 
 def course_grade_from_course_id(learner, course_id):
+    """Get the edx-platform's course grade for this enrollment
+
+    IMPORTANT: Do not use in API calls as this is an expensive operation.
+    Only use in async or pipeline.
+
+    We handle the exception so that we return a specific `CourseNotFound`
+    instead of the non-specific `Http404`
+    edx-platform `get_course_by_id` function raises a generic `Http404` if it
+    cannot find a course in modulestore. We trap this and raise our own
+    `CourseNotFound` exception as it is more specific.
+
+    TODO: Consider optional kwarg param or Figures setting to log performance.
+          Bonus points: Make id a decorator
     """
-    Expensive call. Only use in async or pipeline, not in API calls
-    """
-    course = get_course_by_id(course_key=as_course_key(course_id))
+    try:
+        course = get_course_by_id(course_key=as_course_key(course_id))
+    except Http404:
+        raise CourseNotFound('{}'.format(str(course_id)))
     course._field_data_cache = {}  # pylint: disable=protected-access
     course.set_grading_policy(course.grading_policy)
     return course_grade(learner, course)
