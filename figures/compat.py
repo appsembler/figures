@@ -19,7 +19,7 @@ TODO: Consider wrapping edx-platform's `get_course_by_id` in a function as it
           handle exception
       ```
 """
-# pylint: disable=ungrouped-imports,useless-suppression
+# pylint: disable=ungrouped-imports,useless-suppression,wrong-import-position
 
 from __future__ import absolute_import
 from django.http import Http404
@@ -34,7 +34,6 @@ class CourseNotFound(Exception):
     """Raised when edx-platform 'course' structure is not found
     """
     pass
-
 
 # Pre-Ginkgo does not define `RELEASE_LINE`
 try:
