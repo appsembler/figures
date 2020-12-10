@@ -45,6 +45,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+.pytest_cache
 
 # Translations
 *.mo
@@ -53,7 +54,7 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
-devsite/devsite/.env
+devsite/.env
 
 # Flask stuff:
 instance/

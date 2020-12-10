@@ -169,9 +169,9 @@ WSGI_APPLICATION = 'devsite.wsgi.application'
 #   https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 #   https://github.com/joke2k/django-environ/tree/v0.4.5
 
-DEFAULT_SQLITE_DB_URL = os.path.join(DEVSITE_BASE_DIR,
-                                     'figures-{release}-db.sqlite3'.format(
-                                        release=OPENEDX_RELEASE.lower()))
+DEFAULT_SQLITE_DB_URL = 'sqlite:///{}'.format(os.path.join(
+    DEVSITE_BASE_DIR,
+    'figures-{release}-db.sqlite3'.format(release=OPENEDX_RELEASE.lower())))
 
 DATABASES = {
     'default': env.db(default=DEFAULT_SQLITE_DB_URL)

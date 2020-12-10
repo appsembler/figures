@@ -84,7 +84,7 @@ def update_enrollment_data(site_id, **_kwargs):
     This can be an expensive task as it iterates over all th
     """
     try:
-        site = Site.objects.get(site_id)
+        site = Site.objects.get(id=site_id)
         results = backfill_enrollment_data_for_site(site)
         if results.get('errors'):
             for rec in results['errrors']:
