@@ -52,8 +52,8 @@ class Command(BaseCommand):
         for site in sites:
             print('Updating EnrollmentData for site "{}"'.format(site.domain))
             if options['no_delay']:
-                update_enrollment_data(site)
+                update_enrollment_data(site_id=site.id)
             else:
-                update_enrollment_data.delay(site=site)  # pragma: no cover
+                update_enrollment_data.delay(site_id=site.id)  # pragma: no cover
 
         print('DONE: Update Figures EnrollmentData')
