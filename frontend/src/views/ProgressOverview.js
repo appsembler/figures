@@ -344,6 +344,7 @@ class ProgressOverview extends Component {
               <div className={styles['refining-container__filters']}>
                 <ListSearch
                   valueChangeFunction={this.setSearchQuery}
+                  waitInterval={2000}
                   inputPlaceholder='Search by users name, username or email...'
                 />
                 <div className={styles['multiselect-container']}>
