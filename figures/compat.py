@@ -35,6 +35,7 @@ class CourseNotFound(Exception):
     """
     pass
 
+
 # Pre-Ginkgo does not define `RELEASE_LINE`
 try:
     from openedx.core.release import RELEASE_LINE
