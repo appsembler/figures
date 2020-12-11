@@ -452,7 +452,7 @@ class LearnerMetricsViewSetV1(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         qs = figures.sites.get_users_for_site(site).filter(
             courseenrollment__course_id__in=course_keys
             ).select_related('profile').prefetch_related('courseenrollment_set')
-        return qs
+        return qs.distinct()
 
     def get_queryset(self):
         """
@@ -527,7 +527,7 @@ class LearnerMetricsViewSetV2(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         qs = figures.sites.get_users_for_site(site).filter(
             enrollmentdata__course_id__in=course_keys
             ).select_related('profile').prefetch_related('enrollmentdata_set')
-        return qs
+        return qs.distinct()
 
     def get_queryset(self):
         """
