@@ -87,7 +87,7 @@ def update_enrollment_data(site_id, **_kwargs):
         site = Site.objects.get(id=site_id)
         results = backfill_enrollment_data_for_site(site)
         if results.get('errors'):
-            for rec in results['errrors']:
+            for rec in results['errors']:
                 logger.error('figures.tasks.update_enrollment_data. Error:{}'.format(rec))
     except Site.DoesNotExist:
         logger.error(
