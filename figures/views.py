@@ -40,8 +40,8 @@ from opaque_keys.edx.keys import CourseKey
 # Directly including edx-platform objects for early development
 # Follow-on, we'll likely consolidate edx-platform model imports to an adapter
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
-from student.models import CourseEnrollment  # pylint: disable=import-error
 
+from figures.compat import CourseEnrollment
 from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,
@@ -72,6 +72,7 @@ from figures.serializers import (
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
     LearnerMetricsSerializer,
+    LearnerMetricsSerializerV2,
     SiteDailyMetricsSerializer,
     SiteMauMetricsSerializer,
     SiteMauLiveMetricsSerializer,
@@ -406,10 +407,11 @@ class LearnerDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return context
 
 
-class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+class LearnerMetricsViewSetV1(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     """Provides user identity and nested enrollment data
 
-    This view is unders active development and subject to change
+    Renamed class by appending 'V1' as we are retaining it only to compare for
+    performance testing and verify identical results from the new viewset
 
     TODO: After we get this class tests running, restructure this module:
     * Group all user model based viewsets together
@@ -450,7 +452,7 @@ class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         qs = figures.sites.get_users_for_site(site).filter(
             courseenrollment__course_id__in=course_keys
             ).select_related('profile').prefetch_related('courseenrollment_set')
-        return qs
+        return qs.distinct()
 
     def get_queryset(self):
         """
@@ -474,7 +476,82 @@ class LearnerMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         return self.get_enrolled_users(site=site, course_keys=course_keys)
 
     def get_serializer_context(self):
-        context = super(LearnerMetricsViewSet, self).get_serializer_context()
+        context = super(LearnerMetricsViewSetV1, self).get_serializer_context()
+        context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
+        context['course_keys'] = self.query_param_course_keys()
+        return context
+
+
+class LearnerMetricsViewSetV2(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """Provides user identity and nested enrollment data
+
+    Version 2 of this viewset. We'll remove the old view
+    This view is unders active development and subject to change
+
+    TODO: After we get this class tests running, restructure this module:
+    * Group all user model based viewsets together
+    * Make a base user viewset with the `get_queryset` and `get_serializer_context`
+      methods
+    """
+    model = get_user_model()
+    pagination_class = FiguresLimitOffsetPagination
+    serializer_class = LearnerMetricsSerializerV2
+    filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
+
+    # TODO: Improve this filter
+    filter_class = UserFilterSet
+
+    search_fields = ['username', 'email', 'profile__name']
+    ordering_fields = ['username', 'email', 'profile__name', 'is_active', 'date_joined']
+
+    def query_param_course_keys(self):
+        """
+        TODO: Mixin this
+        """
+        cid_list = self.request.GET.getlist('course')
+        return [CourseKey.from_string(elem.replace(' ', '+')) for elem in cid_list]
+
+    def get_enrolled_users(self, site, course_keys):
+        """Get users enrolled in the specific courses for the specified site
+
+        Args:
+            site: The site for which is being called
+            course_keys: list of Open edX course keys
+
+        Returns:
+            Django QuerySet of users enrolled in the specified courses
+
+        Note:
+            We should move this to `figures.sites`
+        """
+        qs = figures.sites.get_users_for_site(site).filter(
+            enrollmentdata__course_id__in=course_keys
+            ).select_related('profile').prefetch_related('enrollmentdata_set')
+        return qs.distinct()
+
+    def get_queryset(self):
+        """
+        If one or more course keys are given as query parameters, then
+        * Course key filtering mode is ued. Any invalid keys are filtered out
+          from the list
+        * If no valid course keys are found, then an empty list is returned from
+          this view
+        """
+        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        course_keys = figures.sites.get_course_keys_for_site(site)
+        try:
+            param_course_keys = self.query_param_course_keys()
+        except InvalidKeyError:
+            raise NotFound()
+        if param_course_keys:
+            if not set(param_course_keys).issubset(set(course_keys)):
+                raise NotFound()
+            else:
+                course_keys = param_course_keys
+        return self.get_enrolled_users(site=site, course_keys=course_keys)
+
+    def get_serializer_context(self):
+        context = super(LearnerMetricsViewSetV2, self).get_serializer_context()
         context['site'] = django.contrib.sites.shortcuts.get_current_site(self.request)
         context['course_keys'] = self.query_param_course_keys()
         return context

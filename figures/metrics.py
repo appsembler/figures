@@ -64,7 +64,6 @@ def period_str(month_tuple, fmt='%Y/%m'):
     """
     return datetime.date(*month_tuple).strftime(fmt)
 
-
 #
 # Learner specific data/metrics
 #

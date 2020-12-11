@@ -44,6 +44,7 @@ from figures.metrics import (
 from figures.models import (
     CourseDailyMetrics,
     CourseMauMetrics,
+    EnrollmentData,
     SiteDailyMetrics,
     SiteMauMetrics,
     LearnerCourseGradeMetrics,
@@ -594,7 +595,7 @@ class LearnerCourseDetailsSerializer(serializers.ModelSerializer):
         course_progress_details = None
 
         try:
-            obj = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+            obj = LearnerCourseGradeMetrics.objects.latest_lcgm(
                 user=course_enrollment.user,
                 course_id=str(course_enrollment.course_id))
             if obj:
@@ -818,7 +819,7 @@ class EnrollmentMetricsSerializerV2(serializers.ModelSerializer):
         """
         Get the most recent LCGM record for the enrollment, if it exists
         """
-        self._lcgm = LearnerCourseGradeMetrics.objects.most_recent_for_learner_course(
+        self._lcgm = LearnerCourseGradeMetrics.objects.latest_lcgm(
             user=instance.user, course_id=str(instance.course_id))
         return super(EnrollmentMetricsSerializerV2, self).to_representation(instance)
 
@@ -873,3 +874,42 @@ class LearnerMetricsSerializer(serializers.ModelSerializer):
             course_id__in=self.parent.course_keys)
 
         return EnrollmentMetricsSerializerV2(user_enrollments, many=True).data
+
+# For LPO performance improvement
+
+
+class EnrollmentDataSerializer(serializers.ModelSerializer):
+    """Provides serialization for an enrollment
+
+    This serializer note not identify the learner. It is used in
+    LearnerMetricsSerializer
+    """
+    # course_id = serializers.CharField()
+    date_enrolled = serializers.DateTimeField(format="%Y-%m-%d")
+    progress_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EnrollmentData
+        fields = [
+            'id', 'course_id', 'date_enrolled', 'date_enrolled',
+            'is_enrolled', 'is_completed',
+            'progress_percent', 'progress_details',
+        ]
+        read_only_fields = fields
+
+    def get_progress_details(self, obj):
+        """Get progress data for a single enrollment
+        """
+        return obj.progress_details
+
+
+class LearnerMetricsSerializerV2(serializers.ModelSerializer):
+    fullname = serializers.CharField(source='profile.name', default=None)
+    enrollmentdata_set = EnrollmentDataSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        list_serializer_class = LearnerMetricsListSerializer
+        fields = ('id', 'username', 'email', 'fullname', 'is_active',
+                  'date_joined', 'enrollmentdata_set')
+        read_only_fields = fields

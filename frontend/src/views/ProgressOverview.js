@@ -194,7 +194,7 @@ class ProgressOverview extends Component {
       singleRecord['date_joined'] = user['date_joined'];
 
       const coursesFilter = this.state.selectedCourses.length ? this.state.selectedCourses : this.state.coursesFilterOptions;
-      const userCoursesImmutable = Immutable.fromJS(user['enrollments']);
+      const userCoursesImmutable = Immutable.fromJS(user['enrollmentdata_set']);
       coursesFilter.forEach((course, i) => {
         const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course.id);
         if (userProgress) {
@@ -261,7 +261,7 @@ class ProgressOverview extends Component {
 
     const scrollingListItems = this.state.learnersList.map((user, index) => {
 
-      const userCoursesImmutable = Immutable.fromJS(user['enrollments']);
+      const userCoursesImmutable = Immutable.fromJS(user['enrollmentdata_set']);
       const userCoursesRender = coursesFilter.map((course, i) => {
         const userProgress = userCoursesImmutable.find(singleCourse => singleCourse.get('course_id') === course.id);
         return (

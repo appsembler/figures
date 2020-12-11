@@ -12,7 +12,7 @@ from figures.sites import (
     get_course_keys_for_site,
     users_enrolled_in_courses,
 )
-from figures.views import LearnerMetricsViewSet
+from figures.views import LearnerMetricsViewSetV1
 
 from tests.helpers import organizations_support_sites
 from tests.views.base import BaseViewTest
@@ -25,7 +25,7 @@ def filter_enrollments(enrollments, courses):
 
 
 @pytest.mark.django_db
-class TestLearnerMetricsViewSet(BaseViewTest):
+class TestLearnerMetricsViewSetV1(BaseViewTest):
     """Tests the learner metrics viewset
 
     The tests are incomplete
@@ -58,14 +58,14 @@ class TestLearnerMetricsViewSet(BaseViewTest):
         }
     ```
     """
-    base_request_path = 'api/learner-metrics/'
-    view_class = LearnerMetricsViewSet
+    base_request_path = 'api/learner-metrics-v1/'
+    view_class = LearnerMetricsViewSetV1
 
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
         if organizations_support_sites():
             settings.FEATURES['FIGURES_IS_MULTISITE'] = True
-        super(TestLearnerMetricsViewSet, self).setup(db)
+        super(TestLearnerMetricsViewSetV1, self).setup(db)
 
     def make_request(self, monkeypatch, request_path, site, caller, action):
         """Convenience method to make the API request

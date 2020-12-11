@@ -38,6 +38,7 @@ from figures.helpers import as_course_key
 from figures.models import (
     CourseDailyMetrics,
     CourseMauMetrics,
+    EnrollmentData,
     LearnerCourseGradeMetrics,
     SiteDailyMetrics,
     SiteMonthlyMetrics,
@@ -301,6 +302,29 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
     average_progress = 0.50
     average_days_to_complete = 10
     num_learners_completed = 5
+
+
+class EnrollmentDataFactory(DjangoModelFactory):
+    class Meta:
+        model = EnrollmentData
+
+    site = factory.SubFactory(SiteFactory)
+    user = factory.SubFactory(UserFactory)
+    course_id = factory.Sequence(lambda n:
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    date_for = factory.Sequence(lambda n:
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(
+            days=n)).replace(tzinfo=utc).date())
+    date_enrolled = factory.Sequence(lambda n:
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(
+            days=n)).replace(tzinfo=utc).date())
+    is_enrolled = True
+    is_completed = False
+    progress_percent = 0.50
+    points_possible = 30.0
+    points_earned = 15.0
+    sections_worked = 5
+    sections_possible = 10
 
 
 class LearnerCourseGradeMetricsFactory(DjangoModelFactory):
