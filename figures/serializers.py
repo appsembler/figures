@@ -854,8 +854,6 @@ class LearnerMetricsListSerializer(serializers.ListSerializer):
 
 class LearnerMetricsSerializer(serializers.ModelSerializer):
     fullname = serializers.CharField(source='profile.name', default=None)
-    # enrollments = EnrollmentMetricsSerializerV2(source='courseenrollment_set',
-    #     many=True)
     enrollments = serializers.SerializerMethodField()
 
     class Meta:
@@ -884,7 +882,6 @@ class EnrollmentDataSerializer(serializers.ModelSerializer):
     This serializer note not identify the learner. It is used in
     LearnerMetricsSerializer
     """
-    # course_id = serializers.CharField()
     date_enrolled = serializers.DateTimeField(format="%Y-%m-%d")
     progress_details = serializers.SerializerMethodField()
 
@@ -909,7 +906,6 @@ class LearnerMetricsSerializerV2(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        list_serializer_class = LearnerMetricsListSerializer
         fields = ('id', 'username', 'email', 'fullname', 'is_active',
                   'date_joined', 'enrollmentdata_set')
         read_only_fields = fields

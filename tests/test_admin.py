@@ -79,4 +79,4 @@ class TestLearnerCourseGradeMetricsAdmin(object):
         assert data == '<a href="{url}">{email}</a>'.format(url=mock_uri,
                                                             email=lcg_metrics[0].user.email)
         data = admin_obj.user_link(LearnerCourseGradeMetricsFactory(user=None))
-        assert data == 'no user in this record'
+        assert data == 'Missing user'
