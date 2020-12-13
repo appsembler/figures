@@ -200,8 +200,11 @@ class TestHandlersForMultisiteMode(object):
         course_overview = CourseOverviewFactory()
         OrganizationCourseFactory(organization=self.organization,
                                   course_id=str(course_overview.id))
+        uoms = [UserOrganizationMappingFactory(
+            organization=self.organization) for i in range(ce_count)]
         expected_ce = [CourseEnrollmentFactory(
-            course_id=course_overview.id) for i in range(ce_count)]
+            course_id=course_overview.id,
+            user=uoms[i].user) for i in range(ce_count)]
         course_enrollments = figures.sites.get_course_enrollments_for_site(self.site)
         assert set([ce.id for ce in course_enrollments]) == set(
                    [ce.id for ce in expected_ce])

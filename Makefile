@@ -31,6 +31,7 @@ python.clean:  ## Removes generated Python bytecode files
 	find figures -type d -name __pycache__ -exec rm -r {} \+
 	find devsite -type d -name __pycache__ -exec rm -r {} \+
 	find mocks -type d -name __pycache__ -exec rm -r {} \+
+	find . -type d -name .pytest_cache -exec rm -r {} \+
 
 # Clean the Python dist build
 python.build.clean:  ## Removes Python packaging build files
