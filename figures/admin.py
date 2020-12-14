@@ -67,16 +67,15 @@ class SiteMonthlyMetricsAdmin(admin.ModelAdmin):
         'month_for')
 
 
-@admin.register(figures.models.EnrollmentData)
-class EnrollmentDataAdmin(admin.ModelAdmin):
-    """Defines the admin interface for the EnrollmentData model
+class UserRelatedMixin(object):
+    """Provides search box on user properties and a user link method
+
+    To use:
+    1. Include this class in the base classes
+    2. add 'user_link' to 'list_display'
+
     """
-    list_display = (
-        'id', 'site', 'user_link', 'course_id', 'date_for', 'date_enrolled',
-        'is_enrolled', 'is_completed', 'progress_percent', 'points_possible',
-        'points_earned', 'sections_worked', 'sections_possible'
-    )
-    read_only_fields = ('site', 'user', 'user_link', 'course_id')
+    search_fields = ('user__username', 'user__email', 'user__profile__name')
 
     def user_link(self, obj):
         if obj.user:
@@ -88,8 +87,27 @@ class EnrollmentDataAdmin(admin.ModelAdmin):
             return 'Missing user'
 
 
+@admin.register(figures.models.EnrollmentData)
+class EnrollmentDataAdmin(UserRelatedMixin, admin.ModelAdmin):
+    """Defines the admin interface for the EnrollmentData model
+    """
+    list_display = (
+        'id', 'site', 'user_link', 'course_id', 'date_enrolled', 'date_for',
+        'is_enrolled', 'is_completed', 'progress_percent', 'points_earned',
+        'points_possible', 'sections_worked', 'sections_possible'
+    )
+    read_only_fields = ('site', 'user', 'user_link', 'course_id')
+    list_filter = (
+        ('site', RelatedOnlyDropdownFilter),
+        ('course_id', AllValuesDropdownFilter),
+        'date_for',
+        'date_enrolled',
+        'is_enrolled',
+        'is_completed')
+
+
 @admin.register(figures.models.LearnerCourseGradeMetrics)
-class LearnerCourseGradeMetricsAdmin(admin.ModelAdmin):
+class LearnerCourseGradeMetricsAdmin(UserRelatedMixin, admin.ModelAdmin):
     """Defines the admin interface for the LearnerCourseGradeMetrics model
     """
     list_display = ('id', 'date_for', 'site', 'user_link', 'course_id',
@@ -98,18 +116,8 @@ class LearnerCourseGradeMetricsAdmin(admin.ModelAdmin):
     list_filter = (
         ('site', RelatedOnlyDropdownFilter),
         ('course_id', AllValuesDropdownFilter),
-        ('user', RelatedOnlyFieldListFilter),
         'date_for')
     read_only_fields = ('user', 'user_link')
-
-    def user_link(self, obj):
-        if obj.user:
-            return format_html(
-                '<a href="{}">{}</a>',
-                reverse("admin:auth_user_change", args=(obj.user.pk,)),
-                obj.user.email)
-        else:
-            return 'no user in this record'
 
 
 @admin.register(figures.models.PipelineError)

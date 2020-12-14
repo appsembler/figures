@@ -137,6 +137,13 @@ def get_organizations_for_site(site):
     return organizations.models.Organization.objects.filter(sites__in=[site])
 
 
+def site_course_ids(site):
+    """Return a list of string course ids for the site
+    """
+    return organizations.models.OrganizationCourse.objects.filter(
+            organization__sites__in=[site]).values_list('course_id', flat=True)
+
+
 def get_course_keys_for_site(site):
     """
 
@@ -146,10 +153,7 @@ def get_course_keys_for_site(site):
     We may also be able to reduce the queries here to also improve performance
     """
     if figures.helpers.is_multisite():
-        orgs = organizations.models.Organization.objects.filter(sites__in=[site])
-        org_courses = organizations.models.OrganizationCourse.objects.filter(
-            organization__in=orgs)
-        course_ids = org_courses.values_list('course_id', flat=True)
+        course_ids = site_course_ids(site)
     else:
         course_ids = CourseOverview.objects.all().values_list('id', flat=True)
     return [as_course_key(cid) for cid in course_ids]
@@ -169,14 +173,8 @@ def get_courses_for_site(site):
 
 
 def get_user_ids_for_site(site):
-    """
-    We can use organization_instance.users instead
-    """
     if figures.helpers.is_multisite():
-        orgs = organizations.models.Organization.objects.filter(sites__in=[site])
-        mappings = organizations.models.UserOrganizationMapping.objects.filter(
-            organization__in=orgs)
-        user_ids = mappings.values_list('user', flat=True)
+        return get_users_for_site(site).values_list('id', flat=True)
     else:
         user_ids = get_user_model().objects.all().values_list('id', flat=True)
     return user_ids
@@ -184,16 +182,17 @@ def get_user_ids_for_site(site):
 
 def get_users_for_site(site):
     if figures.helpers.is_multisite():
-        user_ids = get_user_ids_for_site(site)
-        users = get_user_model().objects.filter(id__in=user_ids)
+        return get_user_model().objects.filter(organizations__sites__in=[site])
     else:
         users = get_user_model().objects.all()
     return users
 
 
 def get_course_enrollments_for_site(site):
-    course_keys = get_course_keys_for_site(site)
-    return CourseEnrollment.objects.filter(course_id__in=course_keys)
+    if figures.helpers.is_multisite():
+        return CourseEnrollment.objects.filter(user__organizations__sites__in=[site])
+    else:
+        return CourseEnrollment.objects.all()
 
 
 def get_student_modules_for_course_in_site(site, course_id):
