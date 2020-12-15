@@ -300,6 +300,15 @@ class GeneralCourseDataSerializer(serializers.Serializer):
             return []
 
     def get_metrics(self, obj):
+        """
+        Will return None if there is not a CourseDailyMetrics model
+
+        This will happen for courses that are created after the last daily
+        pipeline ran
+
+        TODO:  Add unit tests for this and decide if we want to continue to
+        return None or if we return "zero" data
+        """
         qs = CourseDailyMetrics.objects.filter(course_id=str(obj.id))
         if qs:
             return CourseDailyMetricsSerializer(qs.order_by('-date_for')[0]).data
