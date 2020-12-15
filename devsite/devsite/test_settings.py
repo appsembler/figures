@@ -16,6 +16,9 @@ from figures.settings.lms_production import (
 )
 
 
+COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+(/|\+)[^/+]+(/|\+)[^/?]+)'
+
+
 def root(*args):
     """
     Get the absolute path of the given path relative to the project root.
