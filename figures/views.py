@@ -3,6 +3,8 @@
 
 from __future__ import absolute_import
 from datetime import datetime
+import logging
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django.contrib.sites.shortcuts
@@ -69,6 +71,7 @@ from figures.serializers import (
     CourseIndexSerializer,
     CourseMauMetricsSerializer,
     CourseMauLiveMetricsSerializer,
+    CourseOverviewSerializer,
     EnrollmentMetricsSerializer,
     GeneralCourseDataSerializer,
     LearnerDetailsSerializer,
@@ -98,10 +101,12 @@ from figures.mau import (
 
 UNAUTHORIZED_USER_REDIRECT_URL = '/'
 
+logger = logging.getLogger(__name__)
 
 #
 # UI Template rendering views
 #
+
 
 @ensure_csrf_cookie
 @login_required
@@ -160,39 +165,77 @@ class StaffUserOnDefaultSiteAuthMixin(object):
         figures.permissions.IsStaffUserOnDefaultSite,
     )
 
-#
-# Views for data in edX platform
-#
 
-
-# @view_auth_classes(is_authenticated=True)
-class CoursesIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
-    '''Provides a list of courses with abbreviated details
-
-    Uses figures.filters.CourseOverviewFilter to select subsets of
-    CourseOverview objects
-
-    We want to be able to filter on
-    - org: exact and search
-    - name: exact and search
-    - description search
-    - enrollment start
-    - enrollment end
-    - start
-    - end
-
-    '''
+class CourseOverviewViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """Base class for ViewSet classes that are based on CourseOverview
+    """
     model = CourseOverview
+    serializer_class = CourseOverviewSerializer
     pagination_class = FiguresLimitOffsetPagination
-    serializer_class = CourseIndexSerializer
-
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseOverviewFilter
+    lookup_value_regex = settings.COURSE_ID_PATTERN
 
     def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         queryset = figures.sites.get_courses_for_site(site)
         return queryset
+
+    def get_course_key(self, course_id_str):
+        """
+        Initial quick refactoring. Next, make this a decorator we can use for
+        the methods that need to derive a course_key from a course id string
+
+        TODO: Look at the `site_course_helper` method further down in
+        `CourseMonthlyMetricsViewSet`. It checks if a course is in a site. If
+        not, then raises NotFound.
+        """
+        try:
+            return CourseKey.from_string(course_id_str.replace(' ', '+'))
+        except InvalidKeyError:
+            label = self.__class__.__name__
+            logger.error('figures {}: InvalidKeyError: {}'.format(label,
+                                                                  course_id_str))
+            raise NotFound()
+
+    def retrieve(self, request, *args, **kwargs):
+        course_key = self.get_course_key(
+            kwargs.get('pk', ''))
+        site = django.contrib.sites.shortcuts.get_current_site(request)
+        if figures.helpers.is_multisite():
+            if site != figures.sites.get_site_for_course(course_key):
+                # Raising NotFound instead of PermissionDenied
+                raise NotFound()
+        course_overview = get_object_or_404(CourseOverview, pk=course_key)
+        return Response(self.get_serializer_class()(course_overview).data)
+
+
+class CoursesIndexViewSet(CourseOverviewViewSet):
+    """Provides a list of courses with abbreviated details
+    """
+    serializer_class = CourseIndexSerializer
+
+
+class GeneralCourseDataViewSet(CourseOverviewViewSet):
+    """General course data
+    """
+    serializer_class = GeneralCourseDataSerializer
+    # The "kilo paginator"  is a tempoarary hack to return all course to not
+    # have to change the front end until Figures "Level 2"
+    pagination_class = FiguresKiloPagination
+    filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
+    search_fields = ['display_name', 'id']
+    ordering_fields = ['display_name', 'self_paced', 'date_joined']
+
+
+class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
+    """Detailed course data
+    """
+    serializer_class = CourseDetailsSerializer
+    # The "kilo paginator"  is a tempoarary hack to return all course to not
+    # have to change the front end until Figures "Level 2"
+    pagination_class = FiguresKiloPagination
+    filter_backends = (DjangoFilterBackend, )
 
 
 class UserIndexViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
@@ -224,15 +267,10 @@ class CourseEnrollmentViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         queryset = figures.sites.get_course_enrollments_for_site(site)
         return queryset
 
-#
-# Views for Figures models
-#
-
 
 class CourseDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
 
     model = CourseDailyMetrics
-    # queryset = CourseDailyMetrics.objects.all()
     pagination_class = FiguresLimitOffsetPagination
     serializer_class = CourseDailyMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
@@ -256,11 +294,6 @@ class SiteDailyMetricsViewSet(CommonAuthMixin, viewsets.ModelViewSet):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
         queryset = SiteDailyMetrics.objects.filter(site=site)
         return queryset
-
-
-#
-# Views for the front end
-#
 
 
 class GeneralSiteMetricsView(CommonAuthMixin, APIView):
@@ -299,69 +332,6 @@ class GeneralSiteMetricsView(CommonAuthMixin, APIView):
                 'error': 'no metrics data available',
             }
         return Response(data)
-
-
-class GeneralCourseDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
-    """Viewset intended for Figures Web UI
-    """
-    model = CourseOverview
-
-    # The "kilo paginator"  is a tempoarary hack to return all course to not
-    # have to change the front end until Figures "Level 2"
-    pagination_class = FiguresKiloPagination
-    serializer_class = GeneralCourseDataSerializer
-    filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
-    filter_class = CourseOverviewFilter
-    search_fields = ['display_name', 'id']
-    ordering_fields = ['display_name', 'self_paced', 'date_joined']
-
-    def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
-        queryset = figures.sites.get_courses_for_site(site)
-        return queryset
-
-    def retrieve(self, request, *args, **kwargs):
-        course_id_str = kwargs.get('pk', '')
-        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-        site = django.contrib.sites.shortcuts.get_current_site(request)
-        if figures.helpers.is_multisite():
-            if site != figures.sites.get_site_for_course(course_key):
-                # Raising NotFound instead of PermissionDenied
-                raise NotFound()
-        course_overview = get_object_or_404(CourseOverview, pk=course_key)
-        return Response(GeneralCourseDataSerializer(course_overview).data)
-
-
-class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
-    '''
-
-    '''
-    model = CourseOverview
-
-    # The "kilo paginator"  is a tempoarary hack to return all course to not
-    # have to change the front end until Figures "Level 2"
-    pagination_class = FiguresKiloPagination
-    serializer_class = CourseDetailsSerializer
-    filter_backends = (DjangoFilterBackend, )
-    filter_class = CourseOverviewFilter
-
-    def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
-        queryset = figures.sites.get_courses_for_site(site)
-        return queryset
-
-    def retrieve(self, request, *args, **kwargs):
-        # NOTE: Duplicating code in GeneralCourseDataViewSet. Candidate to dry up
-        # Make it a decorator
-        course_id_str = kwargs.get('pk', '')
-        course_key = CourseKey.from_string(course_id_str.replace(' ', '+'))
-        site = django.contrib.sites.shortcuts.get_current_site(request)
-        if figures.helpers.is_multisite():
-            if site != figures.sites.get_site_for_course(course_key):
-                # Raising NotFound instead of PermissionDenied
-                raise NotFound()
-        course_overview = get_object_or_404(CourseOverview, pk=course_key)
-        return Response(CourseDetailsSerializer(course_overview).data)
 
 
 class GeneralUserDataViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
@@ -600,10 +570,8 @@ class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
 
 
 class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
-    """
 
-    """
-
+    lookup_value_regex = settings.COURSE_ID_PATTERN
     # TODO: Make 'months_back' be a query parameter.
     # We will also need to either set a limit or paginate history results
     months_back = 6
@@ -843,6 +811,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
 
 class CourseMauLiveMetricsViewSet(CommonAuthMixin, viewsets.GenericViewSet):
     serializer_class = CourseMauLiveMetricsSerializer
+    lookup_value_regex = settings.COURSE_ID_PATTERN
 
     def get_queryset(self):
         """
@@ -907,6 +876,7 @@ class CourseMauMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = CourseMauMetricsSerializer
     filter_backends = (DjangoFilterBackend, )
     filter_class = CourseMauMetricsFilter
+    lookup_value_regex = settings.COURSE_ID_PATTERN
 
     def get_queryset(self):
         site = django.contrib.sites.shortcuts.get_current_site(self.request)
