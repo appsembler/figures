@@ -96,7 +96,7 @@ def update_enrollment_data(site_id, **_kwargs):
         logger.error(
             'figurs.tasks.update_enrollment_data: site_id={} does not exist'.format(
                 site_id))
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         msg = ('FIGURES:FAIL daily metrics:update_enrollment_data'
                ' for site_id={}'.format(site_id))
         logger.exception(msg)
@@ -165,12 +165,12 @@ def populate_daily_metrics(date_for=None, force_update=False):
             # Until we implement signal triggers
             try:
                 update_enrollment_data(site_id=site.id)
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 msg = ('FIGURES:FAIL figures.tasks update_enrollment_data '
                        ' unhandled exception. site[{}]:{}')
                 logger.exception(msg.format(site.id, site.domain))
 
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             msg = ('FIGURES:FAIL populate_daily_metrics unhandled site level'
                    ' exception for site[{}]={}')
             logger.exception(msg.format(site.id, site.domain))

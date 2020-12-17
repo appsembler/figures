@@ -273,7 +273,7 @@ class CourseDailyMetricsExtractor(object):
             progress_data = bulk_calculate_course_progress_data(course_id=course_id,
                                                                 date_for=date_for)
             data['average_progress'] = progress_data['average_progress']
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             # Broad exception for starters. Refine as we see what gets caught
             # Make sure we set the average_progres to None so that upstream
             # does not think things are normal
