@@ -15,8 +15,7 @@ from django.db import models
 from django.utils.timezone import utc
 from rest_framework.exceptions import ValidationError
 
-from student.models import CourseEnrollment
-
+from figures.compat import CourseEnrollment
 from figures.models import (
     CourseDailyMetrics,
     CourseMauMetrics,
