@@ -13,6 +13,7 @@ from celery import chord
 from celery.app import shared_task
 from celery.utils.log import get_task_logger
 
+# TODO: import CourseOverview from figures.compat
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
 from student.models import CourseEnrollment  # pylint: disable=import-error
 
@@ -43,6 +44,8 @@ logger = get_task_logger(__name__)
 @shared_task
 def populate_single_cdm(course_id, date_for=None, force_update=False):
     '''Populates a CourseDailyMetrics record for the given date and course
+
+    TODO: cdm needs to handle course_id as the string
     '''
     if date_for:
         date_for = as_date(date_for)
@@ -93,6 +96,10 @@ def update_enrollment_data(site_id, **_kwargs):
         logger.error(
             'figurs.tasks.update_enrollment_data: site_id={} does not exist'.format(
                 site_id))
+    except Exception:  # pylint: disable=broad-except
+        msg = ('FIGURES:FAIL daily metrics:update_enrollment_data'
+               ' for site_id={}'.format(site_id))
+        logger.exception(msg)
 
 
 @shared_task
@@ -124,42 +131,51 @@ def populate_daily_metrics(date_for=None, force_update=False):
 
     sites_count = Site.objects.count()
     for i, site in enumerate(Site.objects.all()):
-        for course in figures.sites.get_courses_for_site(site):
+        try:
+            for course in figures.sites.get_courses_for_site(site):
+                try:
+                    populate_single_cdm(
+                        course_id=course.id,
+                        date_for=date_for,
+                        force_update=force_update)
+                except Exception as e:  # pylint: disable=broad-except
+                    logger.exception('figures.tasks.populate_daily_metrics failed')
+                    # Always capture CDM load exceptions to the Figures pipeline
+                    # error table
+                    error_data = dict(
+                        date_for=date_for,
+                        msg='figures.tasks.populate_daily_metrics failed',
+                        exception_class=e.__class__.__name__,
+                        )
+                    if hasattr(e, 'message_dict'):
+                        error_data['message_dict'] = e.message_dict  # pylint: disable=no-member
+                    log_error_to_db(
+                        error_data=error_data,
+                        error_type=PipelineError.COURSE_DATA,
+                        course_id=str(course.id),
+                        site=site,
+                        logger=logger,
+                        log_pipeline_errors_to_db=True,
+                        )
+            populate_site_daily_metrics(
+                site_id=site.id,
+                date_for=date_for,
+                force_update=force_update)
+
+            # Until we implement signal triggers
             try:
-                populate_single_cdm(
-                    course_id=course.id,
-                    date_for=date_for,
-                    force_update=force_update)
-            except Exception as e:  # pylint: disable=broad-except
-                logger.exception('figures.tasks.populate_daily_metrics failed')
-                # Always capture CDM load exceptions to the Figures pipeline
-                # error table
-                error_data = dict(
-                    date_for=date_for,
-                    msg='figures.tasks.populate_daily_metrics failed',
-                    exception_class=e.__class__.__name__,
-                    )
-                if hasattr(e, 'message_dict'):
-                    error_data['message_dict'] = e.message_dict  # pylint: disable=no-member
-                log_error_to_db(
-                    error_data=error_data,
-                    error_type=PipelineError.COURSE_DATA,
-                    course_id=str(course.id),
-                    site=site,
-                    logger=logger,
-                    log_pipeline_errors_to_db=True,
-                    )
-        populate_site_daily_metrics(
-            site_id=site.id,
-            date_for=date_for,
-            force_update=force_update)
+                update_enrollment_data(site_id=site.id)
+            except Exception:  # pylint: disable=broad-except
+                msg = ('FIGURES:FAIL figures.tasks update_enrollment_data '
+                       ' unhandled exception. site[{}]:{}')
+                logger.exception(msg.format(site.id, site.domain))
 
-        # Until we implement signal triggers
-        update_enrollment_data(site_id=site.id)
-
+        except Exception:  # pylint: disable=broad-except
+            msg = ('FIGURES:FAIL populate_daily_metrics unhandled site level'
+                   ' exception for site[{}]={}')
+            logger.exception(msg.format(site.id, site.domain))
         logger.info("figures.populate_daily_metrics: finished Site {:04d} of {:04d}".format(
             i, sites_count))
-
     logger.info('Finished task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
 
