@@ -72,6 +72,30 @@ def test_populate_site_daily_metrics(transactional_db, monkeypatch):
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
                     reason='Broken test. Apparent Django 1.8 incompatibility')
+def test_populate_daily_metrics_site_level_error(transactional_db,
+                                                 monkeypatch,
+                                                 caplog):
+    date_for = '2019-01-02'
+    error_message = dict(message=[u'expected failure'])
+    assert not CourseOverview.objects.count()
+
+    def mock_get_courses_fail(site):
+        raise Exception(message=error_message)
+
+    assert SiteDailyMetrics.objects.count() == 0
+    assert CourseDailyMetrics.objects.count() == 0
+    monkeypatch.setattr(
+        figures.sites, 'get_courses_for_site', mock_get_courses_fail)
+
+    figures.tasks.populate_daily_metrics(date_for=date_for)
+
+    last_log = caplog.records[-1]
+    assert last_log.message.startswith(
+        'FIGURES:FAIL populate_daily_metrics unhandled site level exception for site')
+
+
+@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
+                    reason='Broken test. Apparent Django 1.8 incompatibility')
 def test_populate_daily_metrics_error(transactional_db, monkeypatch):
     date_for = '2019-01-02'
     error_message = dict(message=[u'expected failure'])
@@ -97,6 +121,42 @@ def test_populate_daily_metrics_error(transactional_db, monkeypatch):
     assert PipelineError.objects.count() == 1
     error_data = PipelineError.objects.first().error_data
     assert error_data['message_dict']['message'] == error_message['message']
+
+
+@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
+                    reason='Broken test. Apparent Django 1.8 incompatibility')
+def test_populate_daily_metrics_enrollment_data_error(transactional_db,
+                                                      monkeypatch,
+                                                      caplog):
+    date_for = '2019-01-02'
+    error_message = dict(message=[u'expected failure'])
+    assert not CourseOverview.objects.count()
+
+    def mock_get_courses(site):
+        CourseOverviewFactory()
+        return CourseOverview.objects.all()
+
+    def mock_pop_single_cdm(**kwargs):
+        pass
+
+    def mock_update_enrollment_data_fails(**kwargs):
+        # TODO: test with different exceptions
+        # At least one with and without `message_dict`
+        raise Exception(message=error_message)
+
+    assert SiteDailyMetrics.objects.count() == 0
+    assert CourseDailyMetrics.objects.count() == 0
+    monkeypatch.setattr(
+        figures.sites, 'get_courses_for_site', mock_get_courses)
+    monkeypatch.setattr(
+        figures.tasks, 'populate_single_cdm', mock_pop_single_cdm)
+    monkeypatch.setattr(
+        figures.tasks, 'update_enrollment_data', mock_update_enrollment_data_fails)
+
+    figures.tasks.populate_daily_metrics(date_for=date_for)
+    last_log = caplog.records[-1]
+    assert last_log.message.startswith(
+        'FIGURES:FAIL figures.tasks update_enrollment_data')
 
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
@@ -195,6 +255,7 @@ def test_populate_monthly_metrics_for_site(transactional_db, monkeypatch):
     """
     expected_site = SiteFactory()
     sites_visited = []
+
     def mock_fill_last_smm_month(site):
         assert site == expected_site
         sites_visited.append(site)
