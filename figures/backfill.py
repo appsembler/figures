@@ -67,7 +67,7 @@ def backfill_enrollment_data_for_site(site):
             enrollment_data.append((obj, created))
         except CourseNotFound:
             errors.append('CourseNotFound for course "{}". '
-                          ' CourseEnrollment ID='.format(str(rec.course_id,
-                                                         rec.id)))
+                          ' CourseEnrollment ID='.format(str(rec.course_id),
+                                                         rec.id))
 
     return dict(results=enrollment_data, errors=errors)
