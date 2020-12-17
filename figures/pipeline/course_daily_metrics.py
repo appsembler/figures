@@ -56,7 +56,7 @@ def get_enrolled_in_exclude_admins(course_id, date_for=None):
     staff = CourseStaffRole(course_locator).users_with_role()
     admins = CourseInstructorRole(course_locator).users_with_role()
     coaches = CourseCcxCoachRole(course_locator).users_with_role()
-    filter_args = dict(course_id=course_id, is_active=1)
+    filter_args = dict(course_id=course_locator, is_active=1)
 
     if date_for:
         filter_args.update(dict(created__lt=as_datetime(next_day(date_for))))
@@ -269,9 +269,18 @@ class CourseDailyMetricsExtractor(object):
         data['active_learners_today'] = active_learners_today
 
         # Average progress
-        progress_data = bulk_calculate_course_progress_data(course_id=course_id,
-                                                            date_for=date_for)
-        data['average_progress'] = progress_data['average_progress']
+        try:
+            progress_data = bulk_calculate_course_progress_data(course_id=course_id,
+                                                                date_for=date_for)
+            data['average_progress'] = progress_data['average_progress']
+        except Exception:
+            # Broad exception for starters. Refine as we see what gets caught
+            # Make sure we set the average_progres to None so that upstream
+            # does not think things are normal
+            data['average_progress'] = None
+            msg = ('FIGURES:FAIL bulk_calculate_course_progress_data'
+                   ' date_for={date_for}, course_id="{course_id}"')
+            logger.exception(msg.format(date_for=date_for, course_id=course_id))
 
         data['average_days_to_complete'] = get_average_days_to_complete(
             course_id, date_for,)
