@@ -19,11 +19,12 @@ import logging
 from django.db import transaction
 from django.utils.timezone import utc
 
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
-from student.models import CourseEnrollment  # pylint: disable=import-error
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
 
-from figures.compat import GeneratedCertificate, StudentModule
+from figures.compat import (CourseEnrollment,
+                            CourseOverview,
+                            GeneratedCertificate,
+                            StudentModule)
 from figures.helpers import as_course_key, as_datetime, next_day, prev_day
 import figures.metrics
 from figures.models import CourseDailyMetrics, PipelineError

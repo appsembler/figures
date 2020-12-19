@@ -27,12 +27,13 @@ from django_countries import Countries
 from rest_framework import serializers
 from rest_framework.fields import empty
 
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
 from openedx.core.djangoapps.user_api.accounts.serializers import AccountLegacyProfileSerializer  # noqa pylint: disable=import-error
 
-from student.models import CourseAccessRole, CourseEnrollment  # pylint: disable=import-error
-
-from figures.compat import RELEASE_LINE, GeneratedCertificate
+from figures.compat import (RELEASE_LINE,
+                            CourseAccessRole,
+                            CourseEnrollment,
+                            CourseOverview,
+                            GeneratedCertificate)
 from figures.helpers import as_course_key
 from figures.metrics import (
     get_course_enrolled_users_for_time_period,

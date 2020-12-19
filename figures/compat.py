@@ -1,7 +1,9 @@
 """Figures compatability module
 
-This module serves to provide a common access point to functionality that
-differs from  different named Open edX releases
+This module serves to provide a common access point to edx-platform objects.
+
+It was originally intended to encapsulate functionality that differs from
+different named Open edX releases
 
 We can identify the Open edX named release for Ginkgo and later by getting the
 value from openedx.core.release.RELEASE_LINE. This will be the release name as
@@ -74,7 +76,8 @@ else:  # Assume Hawthorn or greater
 # preemptive addition. Added it here to avoid adding to figures.models
 # In fact, we should probably do a refactoring that makes all Figures import it
 # from here
-from student.models import CourseEnrollment  # noqa pylint: disable=unused-import,import-error
+from student.models import CourseAccessRole, CourseEnrollment  # noqa pylint: disable=unused-import,import-error
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=unused-import,import-error
 
 
 def course_grade(learner, course):

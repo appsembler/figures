@@ -39,11 +39,7 @@ except ImportError:
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
-# Directly including edx-platform objects for early development
-# Follow-on, we'll likely consolidate edx-platform model imports to an adapter
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
-
-from figures.compat import CourseEnrollment
+from figures.compat import CourseEnrollment, CourseOverview
 from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,

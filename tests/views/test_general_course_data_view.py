@@ -7,19 +7,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.db.models import F
 
-
-
 from rest_framework.test import (
     APIRequestFactory,
     #RequestsClient, Not supported in older  rest_framework versions
     force_authenticate,
     )
 
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
-from student.models import CourseEnrollment
-
+from figures.compat import CourseEnrollment, CourseOverview
 import figures.helpers
 from figures.helpers import as_course_key, is_multisite
 from figures.views import GeneralCourseDataViewSet

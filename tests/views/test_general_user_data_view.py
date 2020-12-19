@@ -41,8 +41,7 @@ from rest_framework.test import (
     force_authenticate,
     )
 
-from student.models import CourseEnrollment
-
+from figures.compat import CourseEnrollment
 from figures.helpers import is_multisite
 from figures.views import GeneralUserDataViewSet
 

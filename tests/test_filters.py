@@ -34,9 +34,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.test import TestCase
 
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from student.models import CourseEnrollment
-
+from figures.compat import CourseEnrollment, CourseOverview
 from figures.filters import (
     CourseDailyMetricsFilter,
     CourseEnrollmentFilter,

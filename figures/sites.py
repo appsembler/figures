@@ -18,13 +18,13 @@ from django.conf import settings
 # TODO: Add exception handling
 import organizations
 
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
-
-from student.models import CourseEnrollment  # pylint: disable=import-error
-
-from figures.compat import StudentModule
-from figures.helpers import as_course_key
-import figures.helpers
+from figures.compat import (
+    CourseEnrollment,
+    CourseOverview,
+    GeneratedCertificate,
+    StudentModule,
+)
+from figures.helpers import as_course_key, is_multisite
 
 
 class CrossSiteResourceError(Exception):
@@ -106,7 +106,7 @@ def get_site_for_course(course_id):
     TODO: Figure out how we want to handle ``DoesNotExist``
     whether to let it raise back up raw or handle with a custom exception
     """
-    if figures.helpers.is_multisite():
+    if is_multisite():
         org_courses = organizations.models.OrganizationCourse.objects.filter(
             course_id=str(course_id))
         if org_courses:
@@ -152,7 +152,7 @@ def get_course_keys_for_site(site):
 
     We may also be able to reduce the queries here to also improve performance
     """
-    if figures.helpers.is_multisite():
+    if is_multisite():
         course_ids = site_course_ids(site)
     else:
         course_ids = CourseOverview.objects.all().values_list('id', flat=True)
@@ -164,7 +164,7 @@ def get_courses_for_site(site):
 
     This function relies on Appsembler's fork of edx-organizations
     """
-    if figures.helpers.is_multisite():
+    if is_multisite():
         course_keys = get_course_keys_for_site(site)
         courses = CourseOverview.objects.filter(id__in=course_keys)
     else:
@@ -173,7 +173,7 @@ def get_courses_for_site(site):
 
 
 def get_user_ids_for_site(site):
-    if figures.helpers.is_multisite():
+    if is_multisite():
         return get_users_for_site(site).values_list('id', flat=True)
     else:
         user_ids = get_user_model().objects.all().values_list('id', flat=True)
@@ -181,7 +181,7 @@ def get_user_ids_for_site(site):
 
 
 def get_users_for_site(site):
-    if figures.helpers.is_multisite():
+    if is_multisite():
         return get_user_model().objects.filter(organizations__sites__in=[site])
     else:
         users = get_user_model().objects.all()
@@ -189,14 +189,14 @@ def get_users_for_site(site):
 
 
 def get_course_enrollments_for_site(site):
-    if figures.helpers.is_multisite():
+    if is_multisite():
         return CourseEnrollment.objects.filter(user__organizations__sites__in=[site])
     else:
         return CourseEnrollment.objects.all()
 
 
 def get_student_modules_for_course_in_site(site, course_id):
-    if figures.helpers.is_multisite():
+    if is_multisite():
         site_id = site.id
         check_site = get_site_for_course(course_id)
         if not check_site or site_id != check_site.id:
@@ -241,3 +241,25 @@ def student_modules_for_course_enrollment(ce):
     Relies on the fact that course_ids are globally unique
     """
     return StudentModule.objects.filter(student=ce.user, course_id=ce.course_id)
+
+
+def site_certificates(site):
+    """
+    If we want to be clever, we can abstract a function:
+    ```
+    def site_user_related(site, model_class):
+        if is_multisite():
+            return model_class.objects.filter(user__organizations__sites__in=[site])
+        else:
+            return model_class.objects.all()
+
+    def site_certificates(site):
+        return site_user_related(GeneratedCertificate)
+    ```
+    Then:
+    """
+    if is_multisite():
+        return GeneratedCertificate.objects.filter(
+            user__organizations__sites__in=[site])
+    else:
+        return GeneratedCertificate.objects.all()

@@ -10,10 +10,8 @@ import pytest
 
 from django.core.exceptions import PermissionDenied, ValidationError
 
-from student.models import CourseEnrollment, CourseAccessRole
-
+from figures.compat import CourseAccessRole, CourseEnrollment
 from figures.helpers import as_datetime, next_day, prev_day
-
 from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 import figures.sites

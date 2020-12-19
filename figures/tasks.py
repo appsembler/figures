@@ -6,6 +6,8 @@ from __future__ import absolute_import
 import datetime
 import time
 
+import six
+
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
@@ -13,11 +15,8 @@ from celery import chord
 from celery.app import shared_task
 from celery.utils.log import get_task_logger
 
-# TODO: import CourseOverview from figures.compat
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=import-error
-from student.models import CourseEnrollment  # pylint: disable=import-error
-
 from figures.backfill import backfill_enrollment_data_for_site
+from figures.compat import CourseEnrollment, CourseOverview
 from figures.helpers import as_course_key, as_date
 from figures.log import log_exec_time
 from figures.models import PipelineError
@@ -27,7 +26,6 @@ import figures.sites
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
 from figures.pipeline.logger import log_error_to_db
-import six
 
 
 logger = get_task_logger(__name__)

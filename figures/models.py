@@ -116,6 +116,8 @@ class SiteDailyMetrics(TimeStampedModel):
     # Should change this to default value of 0
     mau = models.IntegerField(blank=True, null=True)
 
+    # TODO: Add field for number of CDMs reported
+
     class Meta:
         """
         SiteDailyMetrics view and serializer tests fail when we include 'site'

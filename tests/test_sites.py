@@ -31,10 +31,7 @@ from django.contrib.sites.models import Site
 
 import organizations
 
-from openedx.core.djangoapps.content.course_overviews.models import (
-    CourseOverview,
-)
-
+from figures.compat import CourseOverview
 import figures.helpers
 import figures.sites
 

@@ -1,4 +1,4 @@
-'''Tests Figures UserIndexView class
+"""Tests Figures UserIndexView class
 
 TODO: make reasonable endpoint
 
@@ -27,7 +27,7 @@ Front end expects data to be returned in the following form:
 ]
 
 
-'''
+"""
 
 from __future__ import absolute_import
 import mock
@@ -42,8 +42,7 @@ from rest_framework.test import (
     force_authenticate,
     )
 
-from student.models import CourseEnrollment
-
+from figures.compat import CourseEnrollment
 from figures.helpers import as_course_key
 from figures.serializers import LearnerCourseDetailsSerializer
 from figures.sites import get_course_enrollments_for_site

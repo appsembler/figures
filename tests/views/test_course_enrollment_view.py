@@ -14,8 +14,7 @@ from rest_framework.test import (
 
 from opaque_keys.edx.keys import CourseKey
 
-from student.models import CourseEnrollment
-
+from figures.compat import CourseEnrollment
 from figures.helpers import is_multisite
 from figures.views import CourseEnrollmentViewSet
 
