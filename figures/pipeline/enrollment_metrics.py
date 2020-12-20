@@ -49,18 +49,20 @@ for each learner+course  # See bulk_calculate_course_progress_data
 from __future__ import absolute_import
 from datetime import datetime
 from decimal import Decimal
+import logging
 
 from django.utils.timezone import utc
 
 from figures.metrics import LearnerCourseGrades
-from figures.models import LearnerCourseGradeMetrics, PipelineError
-from figures.pipeline.logger import log_error
+from figures.models import LearnerCourseGradeMetrics
 from figures.sites import (
     get_site_for_course,
-    get_student_modules_for_course_in_site,
     course_enrollments_for_course,
+    student_modules_for_course_enrollment,
     UnlinkedCourseError,
     )
+
+logger = logging.getLogger(__name__)
 
 
 def bulk_calculate_course_progress_data(course_id, date_for=None):
@@ -68,7 +70,7 @@ def bulk_calculate_course_progress_data(course_id, date_for=None):
 
     How it works
     1. collects progress percent for each course enrollment
-        1.1. If up to date enrollment metrics record already exists, use that
+        1.1. If an up to date enrollment metrics record already exists, use that
     2. calculate and return the average of these enrollments
 
     TODO: Update to filter on active users
@@ -78,7 +80,6 @@ def bulk_calculate_course_progress_data(course_id, date_for=None):
 
     """
     progress_percentages = []
-
     if not date_for:
         date_for = datetime.utcnow().replace(tzinfo=utc).date()
 
@@ -86,28 +87,21 @@ def bulk_calculate_course_progress_data(course_id, date_for=None):
     if not site:
         raise UnlinkedCourseError('No site found for course "{}"'.format(course_id))
 
-    course_sm = get_student_modules_for_course_in_site(site=site,
-                                                       course_id=course_id)
+    # We might be able to make this more efficient by finding only the learners
+    # in the course with StudentModule (SM) records then get their course
+    # enrollment (CE) records as we can ignore any learners without SM records
+    # since that means they don't have any course progress
     for ce in course_enrollments_for_course(course_id):
-        metrics = collect_metrics_for_enrollment(site=site,
-                                                 course_enrollment=ce,
-                                                 course_sm=course_sm,
-                                                 date_for=date_for)
-        if metrics:
-            progress_percentages.append(metrics.progress_percent)
-        else:
-            # Log this for troubleshooting
-            error_data = dict(
-                msg=('Unable to create or retrieve enrollment metrics ' +
-                     'for user {} and course {}'.format(ce.user.username,
-                                                        str(ce.course_id)))
-            )
-            log_error(
-                error_data=error_data,
-                error_type=PipelineError.COURSE_DATA,
-                user=ce.user,
-                course_id=str(course_id)
-            )
+        sm = student_modules_for_course_enrollment(
+            site=site,
+            course_enrollment=ce).order_by('-modified')
+        if sm:
+            metrics = collect_metrics_for_enrollment(site=site,
+                                                     course_enrollment=ce,
+                                                     date_for=date_for,
+                                                     student_modules=sm)
+            if metrics:
+                progress_percentages.append(metrics.progress_percent)
 
     return dict(
         average_progress=calculate_average_progress(progress_percentages),
@@ -129,17 +123,30 @@ def calculate_average_progress(progress_percentages):
     return average_progress
 
 
-def collect_metrics_for_enrollment(site, course_enrollment, course_sm, date_for=None):
+def collect_metrics_for_enrollment(site, course_enrollment, date_for, student_modules=None):
     """Collect metrics for enrollment (learner+course)
+
+    NOTE: We pass in the student_modules for the learner to save excution time
+    However, there is the issue that the caller could pass them in out of proper order
+    Therefore we will revisit if we really need to open this up for error or
+    if we can accept calling the query twice for the sake of data integrity.
+
+    One compromise is to implement a "most recent sm function in sites"
+    Eventually (and maybe sooner rather than later), this concern should go
+    away as we move toward live data capture into Figures 'EnrollmentData' and
+    the succcessor to LearnerCourseGradeMetrics to snapshot learner progress
+    over time (either live capture or frequent scheduled snapshot checks)
 
     This function performs course enrollment merics collection for the given
     unique enrollment identified by the learner and course. It is initial code
     in refactoring the pipeline for learner progress
 
     Important models here are:
-    * StudentModule (SM)
-    * LearnerCourseGradeMetrics (LCGM)
-    * CourseEnrollment (CE)
+    * Platform models:
+        * CourseEnrollment (CE)
+        * StudentModule (SM)
+    * Figures models:
+        * LearnerCourseGradeMetrics (LCGM)
 
     # Workflow
 
@@ -153,23 +160,28 @@ def collect_metrics_for_enrollment(site, course_enrollment, course_sm, date_for=
     * else return the existing LearnerCourseGradesMetics record if it exists
     * else return None if no existing LearnerCourseGradesMetics record
     """
-    if not date_for:
-        date_for = datetime.utcnow().replace(tzinfo=utc).date()
 
     # The following are two different ways to avoide the dreaded error
     #     "Instance of 'list' has no 'order_by' member (no-member)"
     # See: https://github.com/PyCQA/pylint-django/issues/165
-    student_modules = course_sm.filter(
-        student_id=course_enrollment.user.id).order_by('-modified')
-    if student_modules:
-        most_recent_sm = student_modules[0]
-    else:
-        most_recent_sm = None
 
-    lcgm = LearnerCourseGradeMetrics.objects.filter(
+    if not student_modules:
+        student_modules = student_modules_for_course_enrollment(
+            site=site,
+            course_enrollment=course_enrollment).order_by('-modified')
+
+    # check if there are any StudentModule records for the enrollment
+    # if not, no progress to report
+
+    # If there are no student module records, then the learner had no activity
+    # in this course, so we return None
+    if not student_modules:
+        return None
+
+    most_recent_sm = student_modules[0]
+    most_recent_lcgm = LearnerCourseGradeMetrics.objects.latest_lcgm(
         user=course_enrollment.user,
-        course_id=str(course_enrollment.course_id))
-    most_recent_lcgm = lcgm.order_by('date_for').last()
+        course_id=course_enrollment.course_id)
 
     if _enrollment_metrics_needs_update(most_recent_lcgm, most_recent_sm):
         progress_data = _collect_progress_data(most_recent_sm)
@@ -195,7 +207,7 @@ def _enrollment_metrics_needs_update(most_recent_lcgm, most_recent_sm):
         pass
 
 
-    def rec_matches_user_and_course(lcgm, sm):
+    def rec_matches_user_and_couprse(lcgm, sm):
         return lcgm.user == sm.student and lcgm.course_id == sm.course_id
     ```
 
@@ -230,33 +242,19 @@ def _enrollment_metrics_needs_update(most_recent_lcgm, most_recent_sm):
         needs_update = True
     elif most_recent_lcgm and not most_recent_sm:
         # This shouldn't happen. We log this state as an error
-
-        # using 'COURSE_DATA' for the pipeline error type. Although we should
-        # revisit logging and error tracking in Figures to define a clear
-        # approach that has clear an intuitive contexts for the logging event
+        # This case is an artifact from before enrollment metrics were reworked.
+        # Figures used to collect an LCGM record for every enrollment every day.
+        # Now we only create a new LCGM record when there is a new or changed
+        # StudentModule record
+        # However, this condition will occur until all the "unlinked" LCGM
+        # records are deleted
         #
-        # We neede to decide:
-        #
-        # 1. Is this always an error state? Could this condition happen naturally?
-        #
-        # 2. Which error type should be created and what is the most applicable
-        #    context
-        #    Candidates
-        #    - Enrollment (learner+course) context
-        #    - Data state context - Why would we have an LCGM
-        #
-        # So we hold off updating PipelineError error choises initially until
-        # we can think carefully on how we tag pipeline errors
-        #
-        error_data = dict(
-            msg='LearnerCourseGradeMetrics record exists without StudentModule',
-        )
-        log_error(
-            error_data=error_data,
-            error_type=PipelineError.COURSE_DATA,
-            user=most_recent_lcgm.user,
-            course_id=str(most_recent_lcgm.course_id)
-        )
+        # We log
+        msg = ('FIGURES:PIPELINE:LCGM record exists without StudentModule'
+               ' lcgm_id={lcgm_id}, user_id={user_id}, course_id={course_id}')
+        logger.warning(msg.format(lcgm_id=most_recent_lcgm.id,
+                                  user_id=most_recent_lcgm.user_id,
+                                  course_id=most_recent_lcgm.course_id))
         needs_update = False
     return needs_update
 

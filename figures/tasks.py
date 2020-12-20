@@ -102,7 +102,7 @@ def update_enrollment_data(site_id, **_kwargs):
 
 @shared_task
 def populate_daily_metrics(date_for=None, force_update=False):
-    '''Populates the daily metrics models for the given date
+    """Populates the daily metrics models for the given date
 
     This method populates CourseDailyMetrics for all the courses in the site,
     then populates SiteDailyMetrics
@@ -118,17 +118,22 @@ def populate_daily_metrics(date_for=None, force_update=False):
 
     TODO: Add error handling and error logging
     TODO: Create and add decorator to assign 'date_for' if None
-    '''
+    """
+
+    # are there times of day when this is not "datetime.date.today()"?
+    today = datetime.datetime.utcnow().replace(tzinfo=utc).date()
+
     if date_for:
         date_for = as_date(date_for)
     else:
-        date_for = datetime.datetime.utcnow().replace(tzinfo=utc).date()
+        date_for = today
 
     logger.info('Starting task "figures.populate_daily_metrics" for date "{}"'.format(
         date_for))
 
     sites_count = Site.objects.count()
     for i, site in enumerate(Site.objects.all()):
+        logger.info('FIGURES:PIPELINE:DAILY')
         try:
             for course in figures.sites.get_courses_for_site(site):
                 try:
@@ -160,16 +165,22 @@ def populate_daily_metrics(date_for=None, force_update=False):
                 date_for=date_for,
                 force_update=force_update)
 
-            # Until we implement signal triggers
-            try:
-                update_enrollment_data(site_id=site.id)
-            except Exception:  # pylint: disable=broad-except
-                msg = ('FIGURES:FAIL figures.tasks update_enrollment_data '
-                       ' unhandled exception. site[{}]:{}')
-                logger.exception(msg.format(site.id, site.domain))
+            if date_for == today:
+                # Until we implement signal triggers
+                try:
+                    update_enrollment_data(site_id=site.id)
+                except Exception:  # pylint: disable=broad-except
+                    msg = ('FIGURES:PIPELINE:DAILY:FAIL figures.tasks update_enrollment_data '
+                           ' unhandled exception. site[{site_id}]:{domain}')
+                    logger.exception(msg.format(site_id=site.id,
+                                                domain=site.domain))
+            else:
+                msg = ('FIGURES:PIPELINE:DAILY:BACKFILL:SKIP update_enrollment_data'
+                       ' for date {date_for} and site {site}')
+                logger.info(msg.format(date_for=date_for, site=site.domain))
 
         except Exception:  # pylint: disable=broad-except
-            msg = ('FIGURES:FAIL populate_daily_metrics unhandled site level'
+            msg = ('FIGURES:PIPELINE:DAILY:FAIL populate_daily_metrics unhandled site level'
                    ' exception for site[{}]={}')
             logger.exception(msg.format(site.id, site.domain))
         logger.info("figures.populate_daily_metrics: finished Site {:04d} of {:04d}".format(
