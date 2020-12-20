@@ -293,8 +293,7 @@ class CourseDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = CourseDailyMetrics
     site = factory.SubFactory(SiteFactory)
-    date_for = factory.Sequence(lambda n:
-        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
+    date_for = fuzzy.FuzzyDate(datetime.date(2018, 1, 1))
     course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     enrollment_count = factory.Sequence(lambda n: n)
@@ -312,9 +311,7 @@ class EnrollmentDataFactory(DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
-    date_for = factory.Sequence(lambda n:
-        (datetime.datetime(2018, 1, 1) + datetime.timedelta(
-            days=n)).replace(tzinfo=utc).date())
+    date_for = fuzzy.FuzzyDate(datetime.date(2018, 1, 1))
     date_enrolled = factory.Sequence(lambda n:
         (datetime.datetime(2018, 1, 1) + datetime.timedelta(
             days=n)).replace(tzinfo=utc).date())
@@ -331,8 +328,7 @@ class LearnerCourseGradeMetricsFactory(DjangoModelFactory):
     class Meta:
         model = LearnerCourseGradeMetrics
     site = factory.SubFactory(SiteFactory)
-    date_for = factory.Sequence(lambda n:
-        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
+    date_for = fuzzy.FuzzyDate(datetime.date(2018, 1, 1))
     user = factory.SubFactory(UserFactory)
     course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
@@ -346,8 +342,9 @@ class SiteDailyMetricsFactory(DjangoModelFactory):
     class Meta:
         model = SiteDailyMetrics
     site = factory.SubFactory(SiteFactory)
-    date_for = factory.Sequence(lambda n:
-        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
+    date_for = fuzzy.FuzzyDate(datetime.date(2018, 1, 1))
+    # date_for = factory.Sequence(lambda n:
+    #     (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc).date())
     cumulative_active_user_count = factory.Sequence(lambda n: n)
     total_user_count = factory.Sequence(lambda n: n)
     course_count = factory.Sequence(lambda n: n)
@@ -370,9 +367,7 @@ class CourseMauMetricsFactory(DjangoModelFactory):
         model = CourseMauMetrics
 
     site = factory.SubFactory(SiteFactory)
-    date_for = factory.Sequence(lambda n: (
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(
-            tzinfo=utc).date())
+    date_for = fuzzy.FuzzyDate(datetime.date(2018, 1, 1))
     course_id = factory.Sequence(lambda n:
         'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
     mau = factory.Sequence(lambda n: n*10)
@@ -383,9 +378,7 @@ class SiteMauMetricsFactory(DjangoModelFactory):
         model = SiteMauMetrics
 
     site = factory.SubFactory(SiteFactory)
-    date_for = factory.Sequence(lambda n: (
-        datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(
-            tzinfo=utc).date())
+    date_for = fuzzy.FuzzyDate(datetime.date(2018, 1, 1))
     mau = factory.Sequence(lambda n: n*10)
 
 
