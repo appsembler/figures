@@ -235,12 +235,16 @@ def users_enrolled_in_courses(course_ids):
     return get_user_model().objects.filter(id__in=user_ids)
 
 
-def student_modules_for_course_enrollment(ce):
-    """Return a queryset of all `StudentModule` records for a `CourseEnrollment`1
-
-    Relies on the fact that course_ids are globally unique
+def student_modules_for_course_enrollment(site, course_enrollment):
+    """Return a queryset of all `StudentModule` records for a `CourseEnrollment`
     """
-    return StudentModule.objects.filter(student=ce.user, course_id=ce.course_id)
+    qs = StudentModule.objects.filter(student=course_enrollment.user,
+                                      course_id=course_enrollment.course_id)
+    if is_multisite():
+        # We _could eamake this generic if 'StudentModule' didn't go all snowflake
+        # and decided that 'user' had to be 'student'
+        qs = qs.filter(student__organizations__sites__in=[site])
+    return qs
 
 
 def site_certificates(site):
