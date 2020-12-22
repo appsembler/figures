@@ -25,7 +25,7 @@ from figures.compat import (CourseEnrollment,
                             CourseOverview,
                             GeneratedCertificate,
                             StudentModule)
-from figures.helpers import as_course_key, as_datetime, next_day, prev_day
+from figures.helpers import as_course_key, as_date, as_datetime, next_day, prev_day
 import figures.metrics
 from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
@@ -345,10 +345,13 @@ class CourseDailyMetricsLoader(object):
         course daily metrics model instance
         """
         if not date_for:
+            # Figures works in UTC
             date_for = prev_day(
-                datetime.datetime.utcnow().replace(tzinfo=utc).date())
+                datetime.datetime.utcnow().replace(tzinfo=utc))
         else:
-            date_for = as_datetime(date_for).replace(tzinfo=utc)
+            # Needs to be a date object and not a datetime
+            # TODO: Add timezone test coverage
+            date_for = as_date(date_for)
         try:
             cdm = CourseDailyMetrics.objects.get(course_id=self.course_id,
                                                  date_for=date_for)

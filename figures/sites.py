@@ -134,14 +134,23 @@ def get_organizations_for_site(site):
     """
     TODO: Refactor the functions in this module that make this call
     """
-    return organizations.models.Organization.objects.filter(sites__in=[site])
+    if is_multisite():
+        return organizations.models.Organization.objects.filter(sites__in=[site])
+    else:
+
+        return organizations.models.Organization.all()
 
 
 def site_course_ids(site):
     """Return a list of string course ids for the site
     """
-    return organizations.models.OrganizationCourse.objects.filter(
-            organization__sites__in=[site]).values_list('course_id', flat=True)
+    if is_multisite():
+        return organizations.models.OrganizationCourse.objects.filter(
+                organization__sites__in=[site]).values_list('course_id', flat=True)
+    else:
+        # Needs work. See about returning a queryset
+        return [str(key) for key in CourseOverview.objects.all().values_list(
+            'id', flat=True)]
 
 
 def get_course_keys_for_site(site):
@@ -174,7 +183,7 @@ def get_courses_for_site(site):
 
 def get_user_ids_for_site(site):
     if is_multisite():
-        return get_users_for_site(site).values_list('id', flat=True)
+        user_ids = get_users_for_site(site).values_list('id', flat=True)
     else:
         user_ids = get_user_model().objects.all().values_list('id', flat=True)
     return user_ids
@@ -182,7 +191,7 @@ def get_user_ids_for_site(site):
 
 def get_users_for_site(site):
     if is_multisite():
-        return get_user_model().objects.filter(organizations__sites__in=[site])
+        users = get_user_model().objects.filter(organizations__sites__in=[site])
     else:
         users = get_user_model().objects.all()
     return users
@@ -190,9 +199,11 @@ def get_users_for_site(site):
 
 def get_course_enrollments_for_site(site):
     if is_multisite():
-        return CourseEnrollment.objects.filter(user__organizations__sites__in=[site])
+        course_enrollments = CourseEnrollment.objects.filter(
+            user__organizations__sites__in=[site])
     else:
-        return CourseEnrollment.objects.all()
+        course_enrollments = CourseEnrollment.objects.all()
+    return course_enrollments
 
 
 def get_student_modules_for_course_in_site(site, course_id):
@@ -206,13 +217,14 @@ def get_student_modules_for_course_in_site(site, course_id):
 
 
 def get_student_modules_for_site(site):
-    course_ids = get_course_keys_for_site(site)
-    return StudentModule.objects.filter(course_id__in=course_ids)
+    course_keys = get_course_keys_for_site(site)
+    return StudentModule.objects.filter(course_id__in=course_keys)
 
 
 def course_enrollments_for_course(course_id):
     """Return a queryset of all `CourseEnrollment` records for a course
 
+    TODO: Update this to require the site
     Relies on the fact that course_ids are globally unique
     """
     return CourseEnrollment.objects.filter(course_id=as_course_key(course_id))
@@ -220,7 +232,7 @@ def course_enrollments_for_course(course_id):
 
 def enrollments_for_course_ids(course_ids):
     """
-    figures.sites is a temporary home for this function
+    TODO: Update this to require the site
     """
     ckeys = [as_course_key(cid) for cid in course_ids]
     return CourseEnrollment.objects.filter(course_id__in=ckeys)
@@ -228,19 +240,23 @@ def enrollments_for_course_ids(course_ids):
 
 def users_enrolled_in_courses(course_ids):
     """
-    figures.sites is a temporary home for this function
+    TODO: Update this to require the site
     """
     enrollments = enrollments_for_course_ids(course_ids)
     user_ids = enrollments.order_by('user_id').values('user_id').distinct()
     return get_user_model().objects.filter(id__in=user_ids)
 
 
-def student_modules_for_course_enrollment(ce):
-    """Return a queryset of all `StudentModule` records for a `CourseEnrollment`1
-
-    Relies on the fact that course_ids are globally unique
+def student_modules_for_course_enrollment(site, course_enrollment):
+    """Return a queryset of all `StudentModule` records for a `CourseEnrollment`
     """
-    return StudentModule.objects.filter(student=ce.user, course_id=ce.course_id)
+    qs = StudentModule.objects.filter(student=course_enrollment.user,
+                                      course_id=course_enrollment.course_id)
+    if is_multisite():
+        # We _could eamake this generic if 'StudentModule' didn't go all snowflake
+        # and decided that 'user' had to be 'student'
+        qs = qs.filter(student__organizations__sites__in=[site])
+    return qs
 
 
 def site_certificates(site):

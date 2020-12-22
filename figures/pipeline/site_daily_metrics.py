@@ -12,7 +12,7 @@ import datetime
 from django.utils.timezone import utc
 from django.db.models import Sum
 
-from figures.helpers import as_course_key, as_datetime, next_day, prev_day
+from figures.helpers import as_course_key, as_date, as_datetime, next_day, prev_day
 from figures.mau import site_mau_1g_for_month_as_of_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 from figures.sites import (
@@ -165,11 +165,14 @@ class SiteDailyMetricsLoader(object):
         * Course acess groups
         '''
         if not date_for:
+            # Figures works in UTC
             date_for = prev_day(
                 datetime.datetime.utcnow().replace(tzinfo=utc).date()
             )
         else:
-            date_for = as_datetime(date_for).replace(tzinfo=utc)
+            # Needs to be a date object and not a datetime
+            # TODO: Add timezone test coverage
+            date_for = as_date(date_for)
         # if we already have a record for the date_for and force_update is False
         # then skip getting data
         if not force_update:
