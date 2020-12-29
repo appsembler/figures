@@ -48,12 +48,24 @@ def backfill_enrollment_data_for_site(site):
     """Convenience function to fill EnrollmentData records
 
     This backfills EnrollmentData records for existing CourseEnrollment
-    and LearnerCourseGradeMetrics records
+    and LearnerCourseGradeMetrics records.
 
-    ```
+    The only exception it handles is `figures.compat.CourseNotFound`. All other
+    exceptions are passed through this function to its caller.
 
     Potential improvements: iterate by course id within site, have a function
     specific to a course. more queries, but breaks up the work
+
+    TODO: move the contents of this function to
+      `figures.tasks.update_enrollment_data`
+
+    TODO: Performance and handling improvement:
+      * Get course ids for which the site has enrollments (Skip over courses
+        without enrollments)
+      * Check if the course actually exists
+      * If so, iterate over enrollments for the course
+      * Else log the error. This is a good candidate to track in a Figures
+        model, like a future reworked 'PipelineError'
     """
     enrollment_data = []
     errors = []
