@@ -40,6 +40,11 @@ class CourseLearnersList extends Component {
     }
   }
 
+  /** Render the learners list for the course page
+
+   API endpoint source of data:
+     figures/api/users/detail/?enrolled_in_course_id=<course-id>
+   */
   render() {
 
     const learnersRender = this.props.learnersData.map((user, index) => {
@@ -52,7 +57,7 @@ class CourseLearnersList extends Component {
           <span className={styles['date-enrolled']}>{moment(courseSpecificData.getIn(['date_enrolled'])).format('LL')}</span>
           <span className={styles['course-progress']}>{(courseSpecificData.getIn(['progress_data', 'course_progress'], 0)*100).toFixed(2)}%</span>
           <span className={styles['course-completed']}>{courseSpecificData.getIn(['progress_data', 'course_completed'], false) && <FontAwesomeIcon icon={faCheck} className={styles['completed-icon']} />}</span>
-          <span className={styles['date-completed']}>{courseSpecificData.getIn(['progress_data', 'course_completed'], false) ? moment(courseSpecificData.getIn(['progress_data', 'date_completed'])).format('LL') : '-'}</span>
+          <span className={styles['date-completed']}>{courseSpecificData.getIn(['progress_data', 'course_completed'], false) ? moment(courseSpecificData.getIn(['progress_data', 'course_completed'])).format('LL') : '-'}</span>
         </li>
       )
     })
