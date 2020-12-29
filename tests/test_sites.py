@@ -366,3 +366,48 @@ def test_users_enrolled_in_courses(enrollment_data):
     expected_users = [ce.user for ce in expected_enrollments]
     users = figures.sites.users_enrolled_in_courses(course_ids)
     assert set(users) == set(expected_users)
+
+
+@pytest.mark.django_db
+def test_site_course_ids(monkeypatch):
+    site = SiteFactory()
+    course_overviews = [CourseOverviewFactory() for i in range(2)]
+    if organizations_support_sites():
+        monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
+        our_org = OrganizationFactory(sites=[site])
+        # associate the course overviews with our org
+        for co in course_overviews:
+            OrganizationCourseFactory(course_id=co.id, organization=our_org)
+        other_org = OrganizationFactory(sites=[SiteFactory()])
+        # create a course associated with another org
+        co = CourseOverviewFactory()
+        OrganizationCourseFactory(course_id=co.id, organization=other_org)
+        
+    course_ids = figures.sites.site_course_ids(site)
+    assert set(course_ids) == set([str(co.id) for co in course_overviews])
+
+
+@pytest.mark.django_db
+def test_student_modules_for_course_enrollment(monkeypatch):
+    """Test we get the correct student modules for the given course enrollment
+    """
+    site = SiteFactory()
+    ce = CourseEnrollmentFactory()
+    ce_sm = [StudentModuleFactory(student=ce.user, course_id=ce.course_id)]
+    # Create another student module record to make sure this is not in our
+    # query results
+    StudentModuleFactory()
+
+    if organizations_support_sites():
+        monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
+        our_org = OrganizationFactory(sites=[site])
+        other_org = OrganizationFactory(sites=[SiteFactory()])
+        other_org_ce = CourseEnrollmentFactory()
+        other_sm = StudentModuleFactory(student=other_org_ce.user,
+                                        course_id=other_org_ce.course_id)
+        UserOrganizationMappingFactory(user=ce.user,organization=our_org)
+        UserOrganizationMappingFactory(user=other_org_ce.user,
+                                       organization=other_org)
+
+    sm = figures.sites.student_modules_for_course_enrollment(site, ce)
+    assert set(sm) == set(ce_sm)

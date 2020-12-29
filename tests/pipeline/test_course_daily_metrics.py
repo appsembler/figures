@@ -235,6 +235,7 @@ class TestCourseDailyMetricsExtractor(object):
     def setup(self, db):
         self.course_enrollments = [CourseEnrollmentFactory() for i in range(1, 5)]
         self.student_module = StudentModuleFactory()
+        self.date_for = datetime.datetime.utcnow().date()
 
     def test_extract(self, monkeypatch):
         course_id = self.course_enrollments[0].course_id
@@ -242,7 +243,8 @@ class TestCourseDailyMetricsExtractor(object):
                             'bulk_calculate_course_progress_data',
                             lambda **_kwargs: dict(average_progress=0.5))
 
-        results = pipeline_cdm.CourseDailyMetricsExtractor().extract(course_id)
+        results = pipeline_cdm.CourseDailyMetricsExtractor().extract(
+            course_id, self.date_for)
         assert results
 
     def test_when_bulk_calculate_course_progress_data_fails(self,
@@ -257,7 +259,8 @@ class TestCourseDailyMetricsExtractor(object):
                             'bulk_calculate_course_progress_data',
                             mock_bulk)
 
-        results = pipeline_cdm.CourseDailyMetricsExtractor().extract(course_id)
+        results = pipeline_cdm.CourseDailyMetricsExtractor().extract(
+            course_id, self.date_for)
 
         last_log = caplog.records[-1]
         assert last_log.message.startswith(

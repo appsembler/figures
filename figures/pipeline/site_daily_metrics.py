@@ -1,18 +1,16 @@
-'''This module populates the figures.models.SiteDailyMetrics model
+"""This module populates the figures.models.SiteDailyMetrics model
 
 
 Most of the data are from CourseDailyMetrics. Some data are not captured in
 course metrics. These data are extracted directly from edx-platform models
 
-'''
+"""
 
 from __future__ import absolute_import
-import datetime
 
-from django.utils.timezone import utc
 from django.db.models import Sum
 
-from figures.helpers import as_course_key, as_datetime, next_day, prev_day
+from figures.helpers import as_course_key, as_datetime, next_day
 from figures.mau import site_mau_1g_for_month_as_of_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 from figures.sites import (
@@ -20,6 +18,7 @@ from figures.sites import (
     get_users_for_site,
     get_student_modules_for_site,
 )
+from figures.pipeline.helpers import pipeline_date_for_rule
 
 
 #
@@ -112,18 +111,13 @@ class SiteDailyMetricsExtractor(object):
     def __init__(self):
         pass
 
-    def extract(self, site, date_for=None, **kwargs):  # pylint: disable=unused-argument
+    def extract(self, site, date_for, **kwargs):  # pylint: disable=unused-argument
         '''
         We get the count from the User model since there can be registered users
         who have not enrolled.
 
         TODO: Exclude non-students from the user count
         '''
-        if not date_for:
-            date_for = prev_day(
-                datetime.datetime.utcnow().replace(tzinfo=utc).date()
-            )
-
         data = dict()
 
         site_users = get_users_for_site(site)
@@ -153,7 +147,7 @@ class SiteDailyMetricsLoader(object):
         self.extractor = extractor or SiteDailyMetricsExtractor()
 
     def load(self, site, date_for=None, force_update=False, **_kwargs):
-        '''
+        """
         Architectural note:
         Initially, we're going to be explicit, requiring callers to specify the
         site model instance to be associated with the site specific metrics
@@ -163,13 +157,9 @@ class SiteDailyMetricsLoader(object):
         Add filtering for
         * Multi-tenancy
         * Course acess groups
-        '''
-        if not date_for:
-            date_for = prev_day(
-                datetime.datetime.utcnow().replace(tzinfo=utc).date()
-            )
-        else:
-            date_for = as_datetime(date_for).replace(tzinfo=utc)
+        """
+        date_for = pipeline_date_for_rule(date_for)
+
         # if we already have a record for the date_for and force_update is False
         # then skip getting data
         if not force_update:

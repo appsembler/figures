@@ -12,12 +12,10 @@ Future: add a remote mode to pull data via REST API
 # TODO: Move extractors to figures.pipeline.extract module
 """
 from __future__ import absolute_import
-import datetime
 from decimal import Decimal
 import logging
 
 from django.db import transaction
-from django.utils.timezone import utc
 
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
 
@@ -25,7 +23,7 @@ from figures.compat import (CourseEnrollment,
                             CourseOverview,
                             GeneratedCertificate,
                             StudentModule)
-from figures.helpers import as_course_key, as_datetime, next_day, prev_day
+from figures.helpers import as_course_key, as_datetime, next_day
 import figures.metrics
 from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
@@ -33,6 +31,7 @@ import figures.pipeline.loaders
 from figures.pipeline.enrollment_metrics import bulk_calculate_course_progress_data
 from figures.serializers import CourseIndexSerializer
 import figures.sites
+from figures.pipeline.helpers import pipeline_date_for_rule
 
 
 logger = logging.getLogger(__name__)
@@ -226,7 +225,7 @@ class CourseDailyMetricsExtractor(object):
     BUT, we will then need to find a transform
     """
 
-    def extract(self, course_id, date_for=None, **_kwargs):
+    def extract(self, course_id, date_for, **_kwargs):
         """
             defaults = dict(
                 enrollment_count=data['enrollment_count'],
@@ -239,12 +238,6 @@ class CourseDailyMetricsExtractor(object):
         Add lazy loading method to load course enrollments
         - Create a method for each metric field
         """
-
-        # Update args if not assigned
-        if not date_for:
-            date_for = prev_day(
-                datetime.datetime.utcnow().replace(tzinfo=utc).date()
-            )
 
         # We can turn this series of calls into a parallel
         # set of calls defined in a ruleset instead of hardcoded here after
@@ -344,11 +337,7 @@ class CourseDailyMetricsLoader(object):
         Raises ValidationError if invalid data is attempted to be saved to the
         course daily metrics model instance
         """
-        if not date_for:
-            date_for = prev_day(
-                datetime.datetime.utcnow().replace(tzinfo=utc).date())
-        else:
-            date_for = as_datetime(date_for).replace(tzinfo=utc)
+        date_for = pipeline_date_for_rule(date_for)
         try:
             cdm = CourseDailyMetrics.objects.get(course_id=self.course_id,
                                                  date_for=date_for)
