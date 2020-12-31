@@ -21,6 +21,12 @@ def platform_release():
 OPENEDX_RELEASE = platform_release()
 
 
+class FakeException(Exception):
+    """Exception used for testing
+    """
+    pass
+
+
 def make_course_key_str(org, number, run='test-run'):
     """
     Helper method to create a string representation of a CourseKey
@@ -52,6 +58,7 @@ def django_filters_pre_v1():
     """
     import django_filters
     return version.parse(django_filters.__version__) < version.parse('1.0.0')
+
 
 def django_filters_pre_v2():
     """Returns `True` if the installed Django Filters package is before '1.0.0'

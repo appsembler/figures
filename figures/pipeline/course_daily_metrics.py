@@ -308,7 +308,7 @@ class CourseDailyMetricsLoader(object):
         """
 
         cdm, created = CourseDailyMetrics.objects.update_or_create(
-            course_id=self.course_id,
+            course_id=str(self.course_id),
             site=self.site,
             date_for=date_for,
             defaults=dict(
@@ -339,7 +339,7 @@ class CourseDailyMetricsLoader(object):
         """
         date_for = pipeline_date_for_rule(date_for)
         try:
-            cdm = CourseDailyMetrics.objects.get(course_id=self.course_id,
+            cdm = CourseDailyMetrics.objects.get(course_id=str(self.course_id),
                                                  date_for=date_for)
             # record found, only update if force update flag is True
             if not force_update:
