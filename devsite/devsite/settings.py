@@ -33,10 +33,11 @@ env = environ.Env(
 environ.Env.read_env(os.path.join(DEVSITE_BASE_DIR, '.env'))
 
 OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
-ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
 
 if OPENEDX_RELEASE == 'GINKGO':
     ENABLE_DEVSITE_CELERY = False
+else:
+    ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
 
 MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
 
@@ -52,8 +53,6 @@ ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 # Set the default Site (django.contrib.sites.models.Site)
 SITE_ID = 1
 
-# TODO: Update this to allow environment variable override
-ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
 
 # Adds the mock edx-platform modules to the Python module search path
 sys.path.append(os.path.normpath(os.path.join(PROJECT_ROOT_DIR, MOCKS_DIR)))

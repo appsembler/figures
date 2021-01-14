@@ -75,6 +75,13 @@ INSTALLED_APPS = [
     'organizations'
 ]
 
+if OPENEDX_RELEASE != 'GINGKO':
+    INSTALLED_APPS.append('djcelery')
+
+    # We need this in order for figures.tasks unit tests to not fail with:
+    #   "error: [Errno 61] Connection refused"
+    CELERY_ALWAYS_EAGER = True
+
 if OPENEDX_RELEASE == 'GINKGO':
     INSTALLED_APPS.append('certificates')
     INSTALLED_APPS.append('courseware')
