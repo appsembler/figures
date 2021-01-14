@@ -169,9 +169,6 @@ def test_populate_daily_metrics_for_site_error_on_cdm(transactional_db,
         # At least one with and without `message_dict`
         raise FakeException('Hey!')
 
-    # def fake_pop_single_sdm(**_kwargs):
-    #     pass
-
     monkeypatch.setattr('figures.tasks.site_course_ids',
                         lambda site: fake_course_ids)
     monkeypatch.setattr('figures.tasks.populate_single_cdm',
@@ -192,12 +189,34 @@ def test_populate_daily_metrics_for_site_error_on_cdm(transactional_db,
 
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Broken test. Apparent Django 1.8 incompatibility')
+                    reason='Apparent Django 1.8 incompatibility')
+def test_populate_daily_metrics_for_site_site_dne(transactional_db,
+                                                  monkeypatch,
+                                                  caplog):
+    """
+    If there is an invalid site id, logs error and raises it
+    """
+    bad_site_id = Site.objects.order_by('id').last().id + 1
+    date_for = date.today()
+    assert not Site.objects.filter(id=bad_site_id).exists()
+
+    with pytest.raises(Exception) as e:
+        populate_daily_metrics_for_site(site_id=bad_site_id, date_for=date_for)
+
+    assert str(e.value) == 'Site matching query does not exist.'
+    last_log = caplog.records[-1]
+    expected_message = ('FIGURES:PIPELINE:DAILY:SITE:FAIL:'
+                        'populate_daily_metrics_for_site:site_id: {} does not exist')
+    assert last_log.message == expected_message.format(bad_site_id)
+
+
+@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
+                    reason='Apparent Django 1.8 incompatibility')
 def test_populate_daily_metrics_site_level_error(transactional_db,
                                                  monkeypatch,
                                                  caplog):
     """
-    Test that the first site fails but we can process the second site
+    Generic test that the first site fails but we can process the second site
     """
     assert Site.objects.count() == 1  # Because we always have 'example.com'
 
@@ -235,7 +254,7 @@ def test_populate_daily_metrics_site_level_error(transactional_db,
 
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Broken test. Apparent Django 1.8 incompatibility')
+                    reason='Apparent Django 1.8 incompatibility')
 def test_populate_daily_metrics_enrollment_data_error(transactional_db,
                                                       monkeypatch,
                                                       caplog):

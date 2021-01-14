@@ -105,6 +105,13 @@ def get_site_for_course(course_id):
     There should be only one organization per course.
     TODO: Figure out how we want to handle ``DoesNotExist``
     whether to let it raise back up raw or handle with a custom exception
+
+    Figures 0.4.dev7 - This is called in the pipeline and in the serializers
+    and views. The pipeline does exception handling. It should only fail for
+    sites that have multiple organizations
+
+    For Figures views and serializers, this should only fail when called for
+    a specific site that has mulitple orgs
     """
     if is_multisite():
         org_courses = organizations.models.OrganizationCourse.objects.filter(
@@ -143,6 +150,9 @@ def get_organizations_for_site(site):
 
 def site_course_ids(site):
     """Return a list of string course ids for the site
+
+    TODO: Need to fix how this works as multisite gets a queryset and
+    standalone gets a list
     """
     if is_multisite():
         return organizations.models.OrganizationCourse.objects.filter(

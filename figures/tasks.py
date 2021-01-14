@@ -88,15 +88,15 @@ def populate_single_sdm(site_id, date_for, force_update=False):
 
 @shared_task
 def populate_daily_metrics_for_site(site_id, date_for, force_update=False):
-    """
-
+    """Collect metrics for the given site and date
     """
     try:
         site = Site.objects.get(id=site_id)
-    except Site.DoesNotExist:
-        msg = 'add errro message'
-        logger.exception(msg)
-        return
+    except Site.DoesNotExist as e:
+        msg = ('{prefix}:SITE:FAIL:populate_daily_metrics_for_site:site_id: '
+               '{site_id} does not exist')
+        logger.exception(msg.format(prefix=FPD_LOG_PREFIX, site_id=site_id))
+        raise e
 
     for course_id in site_course_ids(site):
         try:
@@ -158,7 +158,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
     It iterates over each site to populate CourseDailyMetrics records for the
     courses in each site, then populates that site's SiteDailyMetrics record.
 
-    Deveoper note: Errors need to be handled at each layer in the call chain
+    Developer note: Errors need to be handled at each layer in the call chain
     1. Site
     2. Course
     3. Learner
