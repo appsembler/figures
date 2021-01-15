@@ -13,6 +13,7 @@ from django.core.management.base import BaseCommand
 from figures.backfill import backfill_monthly_metrics_for_site
 from figures.sites import get_sites
 
+
 def get_site(identifier):
     """Quick-n-dirty function to let the caller choose the site id or domain
     Let the 'get' fail if record can't be found from the identifier
