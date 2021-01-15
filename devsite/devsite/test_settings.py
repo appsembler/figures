@@ -143,8 +143,10 @@ CELERYBEAT_SCHEDULE = {}
 FEATURES = {}
 
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
-# We have an empty dict here to replicate behavior in the LMS
-ENV_TOKENS = {}
+# We have an (mostly) empty dict here to replicate behavior in the LMS
+ENV_TOKENS = {
+    'FIGURES': {},  # This variable is patched by the Figures' `lms_production.py` settings module.
+}
 
 # TODO: https://appsembler.atlassian.net/browse/RED-673
 # update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
