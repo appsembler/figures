@@ -411,3 +411,44 @@ def test_student_modules_for_course_enrollment(monkeypatch):
 
     sm = figures.sites.student_modules_for_course_enrollment(site, ce)
     assert set(sm) == set(ce_sm)
+
+
+@pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')
+@pytest.mark.django_db
+def test_get_sites_default_behaviour():
+    default_site = Site.objects.get()  # gets the example site
+    another_site = SiteFactory()
+    all_sites = figures.sites.get_sites()
+    assert list(all_sites) == [default_site, another_site], 'Should return all sites.'
+
+
+@pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')
+@pytest.mark.django_db
+def test_get_sites_custom_backend(settings):
+    _orange_site = SiteFactory(name='orange site')
+    blue_site_1 = SiteFactory(name='blue site 1')
+    blue_site_2 = SiteFactory(name='blue site 2')
+
+    blue_sites = Site.objects.filter(name__startswith='blue site')
+
+    settings.ENV_TOKENS = {
+        'FIGURES': {
+            'SITES_BACKEND': 'organizations:get_blue_sites'
+        }
+    }
+    with mock.patch('organizations.get_blue_sites', create=True, return_value=blue_sites):
+        all_sites = figures.sites.get_sites()
+    assert list(all_sites) == [blue_site_1, blue_site_2], 'Should return just blue sites.'
+
+
+@pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')
+@pytest.mark.django_db
+def test_get_sites_broken_backend(settings):
+    settings.ENV_TOKENS = {
+        'FIGURES': {
+            'SITES_BACKEND': 'organizations:broken_backend'
+        }
+    }
+    with mock.patch('organizations.broken_backend', create=True, side_effect=ValueError):
+        with pytest.raises(ValueError):
+            figures.sites.get_sites()  # Should fail if the SITES_BACKEND fails

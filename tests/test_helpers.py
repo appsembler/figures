@@ -21,6 +21,7 @@ from figures.helpers import (
     prev_day,
     previous_months_iterator,
     first_last_days_for_month,
+    import_from_path,
     )
 
 from tests.factories import COURSE_ID_STR_TEMPLATE
@@ -220,3 +221,30 @@ def test_first_last_days_for_month():
     assert last_day.year == year
     assert first_day.day == 1
     assert last_day.day == 29
+
+
+def test_import_from_path_working():
+    utc_tz_path = 'django.utils.timezone:utc'
+    imported_utc = import_from_path(utc_tz_path)
+    assert imported_utc is utc, 'Should import the utc variable correctly'
+
+
+def test_import_from_path_failing():
+    utc_tz_path = 'django.utils.timezone:non_existent_variable'
+    with pytest.raises(AttributeError):
+        # Should raise an AttributeError because the helper is using getattr()
+        import_from_path(utc_tz_path)
+
+
+def test_import_from_path_missing_module():
+    utc_tz_path = 'non_existent_module.submodule:some_variable'
+    with pytest.raises(ImportError):
+        # Should raise an ImportError because the module does not exist
+        import_from_path(utc_tz_path)
+
+
+def test_import_from_bad_syntax():
+    utc_tz_path = 'not a path'
+    with pytest.raises(ValueError):
+        # Malformed path
+        import_from_path(utc_tz_path)
