@@ -44,11 +44,6 @@ class Command(BaseCommand):
         if options['site']:
             sites = [get_site(options['site'])]
         else:
-            # Would be great to be able to filter out dead sites
-            # Would be really great to be able to filter out dead sites
-            # Would be really Really great to be able to filter out dead sites
-            # Would be really Really REALLY great to be able to filter out dead sites
-
             sites = get_sites()
         for site in sites:
             print('Updating EnrollmentData for site "{}"'.format(site.domain))
