@@ -86,6 +86,11 @@ def import_from_path(path):
     """
     Import a function or class from a its string Python path.
 
+    Note: This help does _not_ attempt to handle exceptions well.
+      Instead it throws them as is. The rationale is that such exceptions are
+      only fixable at the deploy time and attempting to handle such errors
+      would risk hiding the errors and making it more difficult to fix.
+
     :param path: string path in the format "module.submodule:variable".
     :return object
     """
