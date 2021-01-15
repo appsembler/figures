@@ -23,7 +23,7 @@ from figures.helpers import as_course_key, as_date
 from figures.log import log_exec_time
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
-from figures.sites import site_course_ids
+from figures.sites import get_sites, site_course_ids
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.helpers import DateForCannotBeFutureError
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month

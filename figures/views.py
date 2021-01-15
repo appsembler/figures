@@ -905,4 +905,4 @@ class SiteViewSet(StaffUserOnDefaultSiteAuthMixin, viewsets.ReadOnlyModelViewSet
     filter_class = SiteFilterSet
 
     def get_queryset(self):
-        return get_sites()
+        return figures.sites.get_sites()

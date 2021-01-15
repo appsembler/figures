@@ -9,6 +9,7 @@ from textwrap import dedent
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 from figures.tasks import update_enrollment_data
+from figures.sites import get_sites
 
 
 def get_site(identifier):

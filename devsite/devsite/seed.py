@@ -43,7 +43,7 @@ from figures.helpers import (
 )
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 from figures.pipeline import site_daily_metrics as pipeline_sdm
-from figures.sites import get_organizations_for_site
+from figures.sites import get_organizations_for_site, get_sites
 
 from devsite import cans
 from six.moves import range

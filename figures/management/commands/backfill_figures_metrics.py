@@ -11,7 +11,7 @@ from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 
 from figures.backfill import backfill_monthly_metrics_for_site
-
+from figures.sites import get_sites
 
 def get_site(identifier):
     """Quick-n-dirty function to let the caller choose the site id or domain
