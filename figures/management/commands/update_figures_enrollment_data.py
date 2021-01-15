@@ -48,7 +48,7 @@ class Command(BaseCommand):
             # Would be really Really great to be able to filter out dead sites
             # Would be really Really REALLY great to be able to filter out dead sites
 
-            sites = Site.objects.all()
+            sites = get_sites()
         for site in sites:
             print('Updating EnrollmentData for site "{}"'.format(site.domain))
             if options['no_delay']:

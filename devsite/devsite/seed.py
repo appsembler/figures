@@ -412,7 +412,7 @@ def hotwire_multisite():
 
 def backfill_figures_ed():
     results = dict()
-    for site in Site.objects.all():
+    for site in get_sites():
         print('Backfilling enrollment data for site "{}"'.format(site.domain))
         site_ed = backfill_enrollment_data_for_site(site)
         results[site.id] = site_ed

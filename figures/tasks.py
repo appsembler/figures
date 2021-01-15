@@ -188,9 +188,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
         date_for = today
 
     do_update_enrollment_data = False if date_for < today else True
-    # TODO: replace with helper function to abstract site filtering like a
-    # `figures.sites.active_sites`
-    sites = Site.objects.all()
+    sites = get_sites()
     sites_count = sites.count()
 
     # This is our task entry log message
@@ -356,7 +354,7 @@ def populate_all_mau():
     Initially, run it every day to observe monthly active user accumulation for
     the month and evaluate the results
     """
-    for site in Site.objects.all():
+    for site in get_sites():
         populate_mau_metrics_for_site(site_id=site.id, force_update=False)
 
 
@@ -378,8 +376,8 @@ def populate_monthly_metrics_for_site(site_id):
 @shared_task
 def run_figures_monthly_metrics():
     """
-    TODO: only run for active sites. Requires knowing which sites we can skip
+    Populate monthly metrics for all sites.
     """
     logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
-    for site in Site.objects.all():
+    for site in get_sites():
         populate_monthly_metrics_for_site.delay(site_id=site.id)
