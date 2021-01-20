@@ -48,6 +48,7 @@ home for functionality.
 from __future__ import absolute_import
 import calendar
 import datetime
+from importlib import import_module
 from django.conf import settings
 from django.utils.timezone import utc
 
@@ -79,6 +80,23 @@ def log_pipeline_errors_to_db():
     TODO: This is an environment/setting "getter". Should be moved to `figures.settings`
     """
     return bool(settings.FEATURES.get('FIGURES_LOG_PIPELINE_ERRORS_TO_DB', True))
+
+
+def import_from_path(path):
+    """
+    Import a function or class from a its string Python path.
+
+    Note: This help does _not_ attempt to handle exceptions well.
+      Instead it throws them as is. The rationale is that such exceptions are
+      only fixable at the deploy time and attempting to handle such errors
+      would risk hiding the errors and making it more difficult to fix.
+
+    :param path: string path in the format "module.submodule:variable".
+    :return object
+    """
+    module_path, variable_name = path.split(':', 1)
+    module = import_module(module_path)
+    return getattr(module, variable_name)
 
 
 def as_course_key(course_id):

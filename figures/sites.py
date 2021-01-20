@@ -24,7 +24,7 @@ from figures.compat import (
     GeneratedCertificate,
     StudentModule,
 )
-from figures.helpers import as_course_key, is_multisite
+from figures.helpers import as_course_key, is_multisite, import_from_path
 
 
 class CrossSiteResourceError(Exception):
@@ -289,3 +289,31 @@ def site_certificates(site):
             user__organizations__sites__in=[site])
     else:
         return GeneratedCertificate.objects.all()
+
+
+def _get_all_sites():
+    """
+    Return all sites. Do not use this helper directly, but use `get_sites()`.
+
+    Default backend for get_sites() in multi-site mode.
+    """
+    return Site.objects.all()
+
+
+def get_sites():
+    """
+    Get a list of sites for Figures purposes in a configurable manner.
+
+    This functions makes use of the `SITES_BACKEND` setting if configured, otherwise
+    it defaults to  _get_all_sites().
+
+    :return list of Site (QuerySet)
+    """
+    sites_backend_path = settings.ENV_TOKENS['FIGURES'].get('SITES_BACKEND')
+    if sites_backend_path:
+        sites_backend = import_from_path(sites_backend_path)
+        sites = sites_backend()
+    else:
+        sites = _get_all_sites()
+
+    return sites

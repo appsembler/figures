@@ -11,6 +11,7 @@ from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 
 from figures.backfill import backfill_monthly_metrics_for_site
+from figures.sites import get_sites
 
 
 def get_site(identifier):
@@ -63,12 +64,7 @@ class Command(BaseCommand):
         if options['site']:
             sites = [get_site(options['site'])]
         else:
-            # Would be great to be able to filter out dead sites
-            # Would be really great to be able to filter out dead sites
-            # Would be really Really great to be able to filter out dead sites
-            # Would be really Really REALLY great to be able to filter out dead sites
-
-            sites = Site.objects.all()
+            sites = get_sites()
         for site in sites:
             backfill_site(site, overwrite=options['overwrite'])
 
