@@ -8,31 +8,33 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
+TBD Q1 2021 - Figures release 0.4 "Official"
+============================================
 
-TBD Dec 2020 - Figures release 0.4.0 - prerelease
-=================================================
+**Most recent release**: "0.4.dev8" on January 21, 2021
 
-_WIP release notes for 0.4.0_
+Figures is iterating through "0.4.dev" development releases on the way to
+an official 0.4 release.
 
-* Juniper upgrade
+The Figures 0.4.dev releases support Open edX Juniper, Hawthorn, and Ginkgo
 
-  * https://github.com/appsembler/figures/pull/264
+* The reason for "dev" (development) instead of "rc" (release candidate) is that
+  the 'dev' label lets us be free to make breaking changes, whereas an "rc"
+  label is about making sure a release is stable for general community use
 
-* MAU 2G data model and signal trigger
+* Appsembler deploys "0.4.dev" releases to Tahoe production and Figures is used
+  by our customers. This is similar to how Open edX deploys "master/main" to
+  "edx.org" then creates named releases
 
-  * Needs to be added to Figures `master` branch
+* Most of the ongoing work is in the following areas
+  
+  * Improving the daily pipeline tasks for accuracy, reliability, and
+    performance
+  * Improving API performance
+  * Bug fixing
 
-* Add database indexing
+Please visit Figures `releases page <https://github.com/appsembler/figures/releases>`__ for details on specific releases.
 
-  * WIP
-
-* Fix Figures URL wildcard placement
-
-  * https://github.com/appsembler/figures/pull/284
-
-* Documentation update
-
-  * WIP
 
 30 Oct 2020 - Figures release 0.3.19
 ====================================
