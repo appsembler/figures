@@ -61,6 +61,8 @@ from datetime import date
 import pytest
 from six.moves import range
 from django.contrib.sites.models import Site
+from waffle.testutils import override_switch
+
 from figures.helpers import as_date, as_datetime
 from figures.models import (CourseDailyMetrics,
                             SiteDailyMetrics)
@@ -101,6 +103,26 @@ def test_populate_single_cdm(transactional_db, monkeypatch):
 
     assert CourseDailyMetrics.objects.count() == 1
     assert as_date(CourseDailyMetrics.objects.first().date_for) == as_date(date_for)
+
+
+@override_switch('figures.disable_pipeline', True)
+def test_populate_single_cdm_waffle_switch(transactional_db, monkeypatch):
+    assert not CourseDailyMetrics.objects.count()
+    date_for = '2019-01-02'
+    course_id = "course-v1:certs-appsembler+001+2019"
+    created = False
+
+    def mock_cdm_load(self, date_for, **kwargs):
+        return (CourseDailyMetricsFactory(date_for=date_for), created, )
+
+    monkeypatch.setattr('figures.sites.get_site_for_course',
+                        lambda val: SiteFactory())
+    monkeypatch.setattr(
+        'figures.pipeline.course_daily_metrics.CourseDailyMetricsLoader.load',
+        mock_cdm_load)
+
+    populate_single_cdm(course_id, date_for)
+    assert not CourseDailyMetrics.objects.count(), 'Should not run the task if the waffle switch is active'
 
 
 def test_populate_single_sdm(transactional_db, monkeypatch):

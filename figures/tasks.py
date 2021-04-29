@@ -9,6 +9,7 @@ import datetime
 import time
 
 import six
+import waffle
 
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
@@ -42,6 +43,7 @@ FPM_LOG_PREFIX = 'FIGURES:PIPELINE:MONTHLY'
 # TODO: Make this configurable in the settings
 # logger.setLevel('INFO')
 
+WAFFLE_DISABLE_PIPELINE = 'figures.disable_pipeline'
 
 @shared_task
 def populate_single_cdm(course_id, date_for=None, force_update=False):
@@ -50,6 +52,10 @@ def populate_single_cdm(course_id, date_for=None, force_update=False):
     The calling function is responsible for error handling calls to this
     function
     """
+    if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
+        logger.info('%s: Disabled due to %s being active.', populate_single_cdm.__name__, WAFFLE_DISABLE_PIPELINE)
+        return
+
     if date_for:
         date_for = as_date(date_for)
 
