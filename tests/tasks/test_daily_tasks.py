@@ -58,9 +58,12 @@ Of secondary importance is testing log output
 """
 from __future__ import absolute_import
 from datetime import date
+import logging
 import pytest
 from six.moves import range
 from django.contrib.sites.models import Site
+from waffle.testutils import override_switch
+
 from figures.helpers import as_date, as_datetime
 from figures.models import (CourseDailyMetrics,
                             SiteDailyMetrics)
@@ -101,6 +104,28 @@ def test_populate_single_cdm(transactional_db, monkeypatch):
 
     assert CourseDailyMetrics.objects.count() == 1
     assert as_date(CourseDailyMetrics.objects.first().date_for) == as_date(date_for)
+
+
+@pytest.mark.django_db
+def test_disable_populate_daily_metrics(caplog):
+    """Test figures.tasks.populate_daily_metrics
+
+    Tests that when WAFFLE_DISABLE_PIPELINE is active, the disabled warning msg is logged
+    """
+    with override_switch('figures.disable_pipeline', active=True):
+        populate_daily_metrics()
+        assert 'disabled' in caplog.text
+
+
+@pytest.mark.django_db
+def test_enable_populate_daily_metrics(caplog):
+    """Test figures.tasks.populate_daily_metrics
+
+    Tests that when WAFFLE_DISABLE_PIPELINE is not active, the disabled warning msg is not logged
+    """
+    with override_switch('figures.disable_pipeline', active=False):
+        populate_daily_metrics()
+        assert 'disabled' not in caplog.text
 
 
 def test_populate_single_sdm(transactional_db, monkeypatch):

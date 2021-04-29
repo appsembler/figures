@@ -21,6 +21,7 @@ pytz==2016.10
 Django==1.11.29
 djangorestframework==3.6.3
 django-countries==4.6.1
+django-waffle==0.12.0 
 
 # edx-platform hawthorn does not use django-extensions
 django-extensions==1.5.9
