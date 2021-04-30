@@ -45,6 +45,7 @@ FPM_LOG_PREFIX = 'FIGURES:PIPELINE:MONTHLY'
 
 WAFFLE_DISABLE_PIPELINE = 'figures.disable_pipeline'
 
+
 @shared_task
 def populate_single_cdm(course_id, date_for=None, force_update=False):
     """Populates a CourseDailyMetrics record for the given date and course
