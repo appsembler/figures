@@ -395,7 +395,7 @@ def run_figures_monthly_metrics():
     """
     #Waffle Switch
     if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
-        logger.info('%s: Disabled due to %s being active.', populate_daily_metrics.__name__,
+        logger.info('Figures pipeline is disabled due to %s being active.',
             WAFFLE_DISABLE_PIPELINE)
         return
 
