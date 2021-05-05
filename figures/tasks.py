@@ -178,7 +178,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
 
     #Waffle Switch
     if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
-        logger.info('%s: Disabled due to %s being active.', populate_single_cdm.__name__, 
+        logger.warning('%s: Disabled due to %s being active.', populate_single_cdm.__name__, 
     WAFFLE_DISABLE_PIPELINE)
         return
 

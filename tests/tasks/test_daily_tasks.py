@@ -62,8 +62,8 @@ import pytest
 from six.moves import range
 from django.contrib.sites.models import Site
 from waffle.testutils import override_switch
-# from mock import patch
-from unittest.mock import patch
+from mock import patch
+import logging
 
 from figures.helpers import as_date, as_datetime
 from figures.models import (CourseDailyMetrics,
@@ -73,7 +73,8 @@ from figures.tasks import (FPD_LOG_PREFIX,
                            populate_single_cdm,
                            populate_single_sdm,
                            populate_daily_metrics_for_site,
-                           populate_daily_metrics)
+                           populate_daily_metrics
+                           )
 from tests.factories import (CourseDailyMetricsFactory,
                              CourseOverviewFactory,
                              SiteDailyMetricsFactory,
@@ -107,49 +108,17 @@ def test_populate_single_cdm(transactional_db, monkeypatch):
     assert as_date(CourseDailyMetrics.objects.first().date_for) == as_date(date_for)
 
 
-# @override_switch('figures.disable_pipeline', True)
-# def test_populate_single_cdm_waffle_switch(transactional_db, monkeypatch):
-#     assert not CourseDailyMetrics.objects.count()
-#     date_for = '2019-01-02'
-#     course_id = "course-v1:certs-appsembler+001+2019"
-#     created = False
 
-#     def mock_cdm_load(self, date_for, **kwargs):
-#         return (CourseDailyMetricsFactory(date_for=date_for), created, )
-
-#     monkeypatch.setattr('figures.sites.get_site_for_course',
-#                         lambda val: SiteFactory())
-#     monkeypatch.setattr(
-#         'figures.pipeline.course_daily_metrics.CourseDailyMetricsLoader.load',
-#         mock_cdm_load)
-
-#     populate_single_cdm(course_id, date_for)
-#     assert not CourseDailyMetrics.objects.count(), 'Should not run the task if the waffle switch is active'
-
-
-
-'''
-https://docs.python.org/3/library/unittest.mock.html
->>> from unittest.mock import patch
->>> @patch('module.ClassName2')
-... @patch('module.ClassName1')
-... def test(MockClass1, MockClass2):
-...     module.ClassName1()
-...     module.ClassName2()
-...     assert MockClass1 is module.ClassName1
-...     assert MockClass2 is module.ClassName2
-...     assert MockClass1.called
-...     assert MockClass2.called
-'''
-
-@patch('figures.tasks.populate_daily_metrics')
 @override_switch('figures.disable_pipeline', True)
-def test_switch_populate_daily_metrics(mock):
-    module.mock()
-    if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
-        asssertTrue(mock.called)
-    else:
-        None
+def test_disable_populate_daily_metrics(transactional_db, caplog):
+    populate_daily_metrics()
+    assert 'Disabled' in caplog.text
+
+
+@override_switch('figures.disable_pipeline', False)
+def test_enable_populate_daily_metrics(transactional_db, caplog):
+    populate_daily_metrics()
+    assert 'Disabled' not in caplog.text
 
 
 def test_populate_single_sdm(transactional_db, monkeypatch):
