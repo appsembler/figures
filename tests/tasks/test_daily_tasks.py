@@ -111,14 +111,22 @@ def test_populate_single_cdm(transactional_db, monkeypatch):
 
 @override_switch('figures.disable_pipeline', True)
 def test_disable_populate_daily_metrics(transactional_db, caplog):
+    """Test figures.tasks.populate_daily_metrics
+
+    Tests that when WAFFLE_DISABLE_PIPELINE is active, the disabled warning msg is logged
+    """
     populate_daily_metrics()
-    assert 'Disabled' in caplog.text
+    assert 'disabled' in caplog.text
 
 
 @override_switch('figures.disable_pipeline', False)
 def test_enable_populate_daily_metrics(transactional_db, caplog):
+    """Test figures.tasks.populate_daily_metrics
+
+    Tests that when WAFFLE_DISABLE_PIPELINE is not active, the disabled warning msg is not logged
+    """
     populate_daily_metrics()
-    assert 'Disabled' not in caplog.text
+    assert 'disabled' not in caplog.text
 
 
 def test_populate_single_sdm(transactional_db, monkeypatch):
