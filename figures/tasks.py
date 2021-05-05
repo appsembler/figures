@@ -178,8 +178,7 @@ def populate_daily_metrics(date_for=None, force_update=False):
 
     #Waffle Switch
     if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
-        logger.warning('%s: Disabled due to %s being active.', populate_single_cdm.__name__, 
-    WAFFLE_DISABLE_PIPELINE)
+        logger.warning('Figures pipeline is disabled due to %s being active.', WAFFLE_DISABLE_PIPELINE)
         return
 
     # The date_for handling is very similar to the new rule we ahve in
