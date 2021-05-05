@@ -30,7 +30,7 @@ env = environ.Env(
     OPENEDX_RELEASE=(str, 'HAWTHORN'),
 )
 
-environ.Env.read_env()
+environ.Env.read_env(join(dirname(dirname(__file__)), '.env'))
 
 OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
 
