@@ -176,9 +176,10 @@ def populate_daily_metrics(date_for=None, force_update=False):
     This function will get reworked so that each site runs in its own
     """
 
-    #Waffle Switch
+    # Waffle Switch
     if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
-        logger.warning('Figures pipeline is disabled due to %s being active.', WAFFLE_DISABLE_PIPELINE)
+        logger.warning('Figures pipeline is disabled due to %s being active.',
+                       WAFFLE_DISABLE_PIPELINE)
         return
 
     # The date_for handling is very similar to the new rule we ahve in
@@ -393,10 +394,10 @@ def run_figures_monthly_metrics():
     """
     Populate monthly metrics for all sites.
     """
-    #Waffle Switch
+    # Waffle Switch
     if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
         logger.info('Figures pipeline is disabled due to %s being active.',
-            WAFFLE_DISABLE_PIPELINE)
+                    WAFFLE_DISABLE_PIPELINE)
         return
 
     logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
