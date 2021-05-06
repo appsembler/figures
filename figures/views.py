@@ -15,7 +15,6 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework import viewsets
 from rest_framework.authentication import (
-    BasicAuthentication,
     SessionAuthentication,
     TokenAuthentication,
 )
@@ -137,7 +136,6 @@ class CommonAuthMixin(object):
     TODO: Consider moving this to figures.permissions
     '''
     authentication_classes = (
-        BasicAuthentication,
         SessionAuthentication,
         TokenAuthentication,
     )
@@ -152,7 +150,6 @@ class StaffUserOnDefaultSiteAuthMixin(object):
     TODO: Consider moving this to figures.permissions
     '''
     authentication_classes = (
-        BasicAuthentication,
         SessionAuthentication,
         TokenAuthentication,
     )
