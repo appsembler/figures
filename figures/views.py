@@ -137,7 +137,6 @@ class CommonAuthMixin(object):
     TODO: Consider moving this to figures.permissions
     '''
     authentication_classes = (
-        BasicAuthentication,
         SessionAuthentication,
         TokenAuthentication,
     )
