@@ -24,7 +24,7 @@ pytz==2020.1
 ## Django package dependencies
 ##
 
-Django==2.2.15
+Django==2.2.16
 
 djangorestframework==3.9.4
 django-countries==5.5
@@ -34,6 +34,9 @@ django-filter==2.3.0
 django-environ==0.4.5
 
 jsonfield==2.1.1
+
+# For
+
 
 ##
 ## Documentation (Sphinx) dependencies
@@ -49,7 +52,6 @@ Sphinx==3.1.2
 edx-opaque-keys[django]==2.1.0
 #edx-drf-extensions==6.0.0
 
-edx-organizations==5.2.0
 
 ##
 ## Devsite 
@@ -75,3 +77,4 @@ pytest-cov==2.8.1
 tox==3.15.0
 freezegun==0.3.12
 edx-lint==1.4.1
+mock==3.0.5

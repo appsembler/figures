@@ -1,0 +1,6 @@
+# Requirements needed for Juniper multisite environment
+
+-r juniper_base.txt
+
+# Organization/site mapping requires Appsembler's fork
+git+https://github.com/appsembler/edx-organizations.git@5.2.0-appsembler13
