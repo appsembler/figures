@@ -6,10 +6,13 @@ unless the '--site' option is used. Then it will update just that site
 from __future__ import print_function
 from __future__ import absolute_import
 from textwrap import dedent
+
 from django.contrib.sites.models import Site
-from django.core.management.base import BaseCommand
-from figures.tasks import update_enrollment_data
+
 from figures.sites import get_sites
+from figures.tasks import update_enrollment_data
+
+from . import BaseBackfillCommand
 
 
 def get_site(identifier):
@@ -23,23 +26,13 @@ def get_site(identifier):
     return Site.objects.get(**filter_arg)
 
 
-class Command(BaseCommand):
-    """Populate Figures metrics models
-
-    Improvements
+class Command(BaseBackfillCommand):
+    """Backfill Figures EnrollmentData model.
     """
     help = dedent(__doc__).strip()
 
-    def add_arguments(self, parser):
-        parser.add_argument('--no-delay',
-                            action='store_true',
-                            default=False,
-                            help='Disable the celery "delay" directive')
-        parser.add_argument('--site',
-                            help='backfill a specific site. provide id or domain name')
-
     def handle(self, *args, **options):
-        print('BEGIN: Update Figures EnrollmentData')
+        print('BEGIN: Backfill Figures EnrollmentData')
 
         if options['site']:
             sites = [get_site(options['site'])]
@@ -52,4 +45,4 @@ class Command(BaseCommand):
             else:
                 update_enrollment_data.delay(site_id=site.id)  # pragma: no cover
 
-        print('DONE: Update Figures EnrollmentData')
+        print('DONE: Backfill Figures EnrollmentData')
