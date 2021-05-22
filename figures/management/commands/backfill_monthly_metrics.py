@@ -5,7 +5,6 @@
 from __future__ import print_function
 
 from __future__ import absolute_import
-from textwrap import dedent
 
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
@@ -44,22 +43,10 @@ def backfill_site(site, overwrite):
 
 
 class Command(BaseCommand):
-    """Populate Figures metrics models
-
-    Improvements
+    """Backfill Figures monthly metrics models.
     """
-    help = dedent(__doc__).strip()
-
-    def add_arguments(self, parser):
-        parser.add_argument('--overwrite',
-                            action='store_true',
-                            default=False,
-                            help='overwrite existing data in SiteMonthlyMetrics')
-        parser.add_argument('--site',
-                            help='backfill a specific site. provide id or domain name')
-
     def handle(self, *args, **options):
-        print('BEGIN: Backfill Figures Metrics')
+        print('BEGIN: Backfill Figures Monthly Metrics')
 
         if options['site']:
             sites = [get_site(options['site'])]
@@ -68,4 +55,4 @@ class Command(BaseCommand):
         for site in sites:
             backfill_site(site, overwrite=options['overwrite'])
 
-        print('DONE: Backfill Figures Metrics')
+        print('END: Backfill Figures Metrics')
