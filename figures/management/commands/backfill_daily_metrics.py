@@ -33,7 +33,7 @@ class Command(BaseBackfillCommand):
             help=('Run with Celery workflows (Warning: This is still under'
                   ' development and likely to get stuck/hung jobs')
         )
-        super(Command, self).add_arguments(self)
+        super(Command, self).add_arguments(parser)
 
     def handle(self, *args, **options):
         '''
