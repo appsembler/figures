@@ -13,7 +13,7 @@ from figures.sites import get_sites
 class BaseBackfillCommand(BaseCommand):
     '''Base class for Figures backfill management commands with common options.
     '''
-    def get_sites(identifier=None):
+    def get_sites(self, identifier=None):
         """Quick-n-dirty function to let the caller choose the site id or domain.
         If no identifier is passed, return all available Sites.
         Let the 'get' fail if record can't be found from the identifier.
@@ -27,13 +27,13 @@ class BaseBackfillCommand(BaseCommand):
                 filter_arg = dict(domain=identifier)
             return Site.objects.filter(**filter_arg)
 
-    def get_date(date_str=None):
+    def get_date(self, date_str=None):
         '''Return a datetime.date from a string or NoneType.
         '''
         try:
-            return parser.parse(date_str).date
+            return parser.parse(date_str).date()
         except AttributeError:
-            return datetime.today()
+            return datetime.today().date()
 
     def add_arguments(self, parser):
         '''
@@ -45,11 +45,11 @@ class BaseBackfillCommand(BaseCommand):
         )
         parser.add_argument(
             '--date_start',
-            help='date for which we start backfilling data, in yyyy-mm-dd format',
+            help='date for which we start backfilling data',
         )
         parser.add_argument(
             '--date_end',
-            help='date for which we end backfilling data, in yyyy-mm-dd format',
+            help='date for which we end backfilling data',
         )
         parser.add_argument(
             '--no-delay',
