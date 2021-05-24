@@ -27,7 +27,7 @@ class BaseBackfillCommand(BaseCommand):
                 filter_arg = dict(domain=identifier)
             return Site.objects.filter(**filter_arg)
 
-    def get_date(date_str=None):
+    def get_date(self, date_str=None):
         '''Return a datetime.date from a string or NoneType.
         '''
         try:
@@ -45,11 +45,11 @@ class BaseBackfillCommand(BaseCommand):
         )
         parser.add_argument(
             '--date_start',
-            help='date for which we start backfilling data, in yyyy-mm-dd format',
+            help='date for which we start backfilling data',
         )
         parser.add_argument(
             '--date_end',
-            help='date for which we end backfilling data, in yyyy-mm-dd format',
+            help='date for which we end backfilling data',
         )
         parser.add_argument(
             '--no-delay',
