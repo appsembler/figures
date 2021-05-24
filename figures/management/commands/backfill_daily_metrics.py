@@ -25,6 +25,16 @@ class Command(BaseBackfillCommand):
 
     help = dedent(__doc__).strip()
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--experimental',
+            action='store_true',
+            default=False,
+            help=('Run with Celery workflows (Warning: This is still under'
+                  ' development and likely to get stuck/hung jobs')
+        )
+        super(Command, self).add_arguments(self)
+
     def handle(self, *args, **options):
         '''
         Note the '# pragma: no cover' lines below. This is because we are not
