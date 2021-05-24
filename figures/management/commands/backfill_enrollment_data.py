@@ -5,6 +5,7 @@ unless the '--site' option is used. Then it will update just that site
 """
 from __future__ import print_function
 from __future__ import absolute_import
+
 from textwrap import dedent
 
 from figures.tasks import update_enrollment_data

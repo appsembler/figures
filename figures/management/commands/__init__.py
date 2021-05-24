@@ -1,9 +1,6 @@
 """
 Management commands for Figures.
 """
-import datetime
-from textwrap import dedent
-
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 
@@ -13,8 +10,6 @@ from figures.sites import get_sites
 class BaseBackfillCommand(BaseCommand):
     '''Base class for Figures backfill management commands with common options.
     '''
-    help = dedent(__doc__).strip()
-
     def get_sites(identifier=None):
         """Quick-n-dirty function to let the caller choose the site id or domain.
         If no identifier is passed, return all available Sites.

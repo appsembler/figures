@@ -9,6 +9,7 @@ from __future__ import absolute_import
 
 import datetime
 from dateutil.rrule import rrule, DAILY
+from textwrap import dedent
 
 from figures.tasks import (
     populate_daily_metrics,
@@ -21,6 +22,9 @@ from . import BaseBackfillCommand
 class Command(BaseBackfillCommand):
     '''Populate Figures daily metrics models
     '''
+
+    help = dedent(__doc__).strip()
+
     def handle(self, *args, **options):
         '''
         Note the '# pragma: no cover' lines below. This is because we are not

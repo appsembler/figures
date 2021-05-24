@@ -3,8 +3,9 @@
 """
 
 from __future__ import print_function
-
 from __future__ import absolute_import
+
+from textwrap import dedent
 
 from figures.backfill import backfill_monthly_metrics_for_site
 
@@ -32,6 +33,8 @@ def backfill_site(site, overwrite):
 class Command(BaseBackfillCommand):
     """Backfill Figures monthly metrics models.
     """
+    help = dedent(__doc__).strip()
+
     def handle(self, *args, **options):
         print('BEGIN: Backfill Figures Monthly Metrics')
 
