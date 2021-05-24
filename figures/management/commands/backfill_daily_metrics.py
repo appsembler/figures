@@ -50,7 +50,7 @@ class Command(BaseBackfillCommand):
         # populate daily metrics one day at a time for date range
         for dt in rrule(DAILY, dtstart=date_start, until=date_end):
 
-            print('BEGIN: Backfill Figures daily metrics metrics for: '.format(dt))
+            print('BEGIN: Backfill Figures daily metrics metrics for: {}'.format(dt))
 
             kwargs = dict(
                 sites=self.get_sites(options['site']),
