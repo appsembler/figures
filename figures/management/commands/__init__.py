@@ -1,6 +1,9 @@
 """
 Management commands for Figures.
 """
+from datetime import datetime
+from dateutil import parser
+
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 
@@ -23,6 +26,14 @@ class BaseBackfillCommand(BaseCommand):
             except ValueError:
                 filter_arg = dict(domain=identifier)
             return Site.objects.filter(**filter_arg)
+
+    def get_date(date_str=None):
+        '''Return a datetime.date from a string or NoneType.
+        '''
+        try:
+            return parser.parse(date_str).date
+        except AttributeError:
+            return datetime.today()
 
     def add_arguments(self, parser):
         '''
