@@ -40,11 +40,10 @@ class Command(BaseBackfillCommand):
         Note the '# pragma: no cover' lines below. This is because we are not
         yet mocking celery for test coverage
         '''
-        date_start = options['date_start'] or datetime.date.today()
-        date_end = options['date_end'] or datetime.date.today()
+        date_start = self.get_date(options['date_start'])
+        date_end = self.get_date(options['date_end'])
 
         experimental = options['experimental']
-        options.pop('experimental')
 
         print('BEGIN RANGE: Backfilling Figures daily metrics for dates {} to {}'.format(date_start, date_end))
 
