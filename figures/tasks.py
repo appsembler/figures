@@ -153,7 +153,7 @@ def update_enrollment_data(site_id, **_kwargs):
 
 
 @shared_task
-def populate_daily_metrics(date_for=None, force_update=False):
+def populate_daily_metrics(sites, date_for=None, force_update=False):
     """Runs Figures daily metrics collection
 
     This is a top level Celery task run every 24 hours to collect metrics.
@@ -197,7 +197,6 @@ def populate_daily_metrics(date_for=None, force_update=False):
         date_for = today
 
     do_update_enrollment_data = False if date_for < today else True
-    sites = get_sites()
     sites_count = sites.count()
 
     # This is our task entry log message

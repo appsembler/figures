@@ -40,13 +40,17 @@ class Command(BaseBackfillCommand):
             print('BEGIN: Backfill Figures daily metrics metrics for: '.format(dt))
 
             kwargs = dict(
+                sites=self.get_sites(options['site']),
                 date_for=dt,
-                force_update=options['overwrite'],
+                force_update=options['overwrite']
             )
 
             metrics_func = experimental_populate_daily_metrics if experimental else populate_daily_metrics
             # try:
-            metrics_func(**kwargs) if options['no_delay'] else metrics_func.delay(**kwargs)  # pragma: no cover
+            if options['no_delay']:
+                metrics_func(**kwargs)
+            else:
+                metrics_func.delay(**kwargs)  # pragma: no cover
             # except Exception as e:  # pylint: disable=bare-except
             #     if options['ignore_exceptions']:
             #         self.print_exc("daily", dt, e.message)

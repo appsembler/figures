@@ -4,7 +4,10 @@ Management commands for Figures.
 import datetime
 from textwrap import dedent
 
+from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
+
+from figures.sites import get_sites
 
 
 class BaseBackfillCommand(BaseCommand):
@@ -12,12 +15,26 @@ class BaseBackfillCommand(BaseCommand):
     '''
     help = dedent(__doc__).strip()
 
+    def get_sites(identifier=None):
+        """Quick-n-dirty function to let the caller choose the site id or domain.
+        If no identifier is passed, return all available Sites.
+        Let the 'get' fail if record can't be found from the identifier.
+        """
+        if not identifier:
+            return get_sites()
+        else:
+            try:
+                filter_arg = dict(pk=int(identifier))
+            except ValueError:
+                filter_arg = dict(domain=identifier)
+            return Site.objects.filter(**filter_arg)
+
     def add_arguments(self, parser):
         '''
         '''
         parser.add_argument(
             '--site',
-            help='backfill a specific site. provide id or domain name',
+            help='backfill a specific site. provide numeric id or domain name',
             default=None
         )
         parser.add_argument(
