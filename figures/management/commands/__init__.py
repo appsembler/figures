@@ -13,7 +13,7 @@ from figures.sites import get_sites
 class BaseBackfillCommand(BaseCommand):
     '''Base class for Figures backfill management commands with common options.
     '''
-    def get_sites(identifier=None):
+    def get_sites(self, identifier=None):
         """Quick-n-dirty function to let the caller choose the site id or domain.
         If no identifier is passed, return all available Sites.
         Let the 'get' fail if record can't be found from the identifier.
