@@ -35,12 +35,10 @@ class BaseBackfillCommand(BaseCommand):
         parser.add_argument(
             '--date_start',
             help='date for which we start backfilling data, in yyyy-mm-dd format',
-            action='store_true'
         )
         parser.add_argument(
             '--date_end',
             help='date for which we end backfilling data, in yyyy-mm-dd format',
-            action='store_true'
         )
         parser.add_argument(
             '--no-delay',
