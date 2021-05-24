@@ -31,9 +31,9 @@ class BaseBackfillCommand(BaseCommand):
         '''Return a datetime.date from a string or NoneType.
         '''
         try:
-            return parser.parse(date_str).date
+            return parser.parse(date_str).date()
         except AttributeError:
-            return datetime.today()
+            return datetime.today().date()
 
     def add_arguments(self, parser):
         '''
