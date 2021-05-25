@@ -64,12 +64,6 @@ class BaseBackfillCommand(BaseCommand):
             default=False,
             help='Overwrite metrics records if they exist for the given date'
         )
-        # parser.add_argument(
-        #     '--ignore_exceptions',
-        #     action='store_true',
-        #     default=False,
-        #     help='Print exceptions if thrown, and continue processing'
-        # )
 
     def print_exc(metrics_type, date, exc_message):
         print("Could not populate {} for {}. Exception was {}".format(

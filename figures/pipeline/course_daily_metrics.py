@@ -267,6 +267,8 @@ class CourseDailyMetricsExtractor(object):
         # without using StudentModuleHistory so we skip getting this data if running
         # for a past date (i.e., not during daily update of CDMs), especially since 
         # it is so expensive to calculate.
+        # Note that Avg() applied across null and decimal vals for aggregate average_progress
+        # will correctly ignore nulls
         # TODO: Reconsider this if we implement either StudentModuleHistory-based queries
         # (if so, you will need to add any types you want to StudentModuleHistory.HISTORY_SAVING_TYPES)
         # TODO: Reconsider this once we switch to using Persistent Grades
@@ -274,7 +276,7 @@ class CourseDailyMetricsExtractor(object):
             data['average_progress'] = None
             msg = ('FIGURES:PIPELINE:CDM Declining to calculate average progress for a past date'
                    ' date_for={date_for}, course_id="{course_id}"')
-            logger.warning(msg.format(date_for=date_for, course_id=course_id))
+            logger.debug(msg.format(date_for=date_for, course_id=course_id))
         else:
             try:
                 progress_data = bulk_calculate_course_progress_data(course_id=course_id,
