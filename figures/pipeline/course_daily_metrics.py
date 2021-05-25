@@ -319,18 +319,20 @@ class CourseDailyMetricsLoader(object):
         Raises django.core.exceptions.ValidationError if the record fails
         validation
         """
+        defaults = dict(
+            enrollment_count=data['enrollment_count'],
+            active_learners_today=data['active_learners_today'],
+            average_days_to_complete=int(round(data['average_days_to_complete'])),
+            num_learners_completed=data['num_learners_completed'],
+        )
+        if data['average_progress'] is not None:
+            defaults['average_progress'] = str(data['average_progress'])
 
         cdm, created = CourseDailyMetrics.objects.update_or_create(
             course_id=str(self.course_id),
             site=self.site,
             date_for=date_for,
-            defaults=dict(
-                enrollment_count=data['enrollment_count'],
-                active_learners_today=data['active_learners_today'],
-                average_progress=str(data['average_progress']),
-                average_days_to_complete=int(round(data['average_days_to_complete'])),
-                num_learners_completed=data['num_learners_completed'],
-            )
+            defaults=defaults
         )
         cdm.clean_fields()
         return (cdm, created,)
