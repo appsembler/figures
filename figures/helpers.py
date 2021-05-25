@@ -194,6 +194,11 @@ def days_in_month(month_for):
     return num_days_in_month
 
 
+def is_past_date(val):
+    return val.date() < datetime.date.today()
+
+
+
 # TODO: Consider changing name to 'months_back_iterator' or similar
 def previous_months_iterator(month_for, months_back):
     """Iterator returns a year,month tuple for n months including the month_for
