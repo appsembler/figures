@@ -19,8 +19,8 @@ from figures.pipeline.site_monthly_metrics import fill_month
 from figures.models import EnrollmentData
 
 
-def backfill_monthly_metrics_for_site(site, overwrite=False):
-    """Backfill all historical site metrics for the specified site
+def backfill_monthly_metrics_for_site(site, month_for=None, overwrite=False):
+    """Backfill specified months' historical site metrics for the specified site
     """
     site_sm = get_student_modules_for_site(site)
     if not site_sm:
