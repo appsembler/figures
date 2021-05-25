@@ -195,8 +195,7 @@ def days_in_month(month_for):
 
 
 def is_past_date(val):
-    return val.date() < datetime.date.today()
-
+    return as_date(val) < datetime.date.today()
 
 
 # TODO: Consider changing name to 'months_back_iterator' or similar
