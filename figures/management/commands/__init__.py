@@ -43,6 +43,7 @@ class BaseBackfillCommand(BaseCommand):
             help='backfill a specific site. provide numeric id or domain name',
             default=None
         )
+        # TODO: handle date start later than date end
         parser.add_argument(
             '--date_start',
             help='date for which we start backfilling data',
