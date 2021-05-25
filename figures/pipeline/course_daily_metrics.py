@@ -274,7 +274,7 @@ class CourseDailyMetricsExtractor(object):
             data['average_progress'] = None
             msg = ('FIGURES:PIPELINE:CDM Declining to calculate average progress for a past date'
                    ' date_for={date_for}, course_id="{course_id}"')
-            logger.warning(msg.format(date_for=date_for, course_id=course_id))
+            logger.debug(msg.format(date_for=date_for, course_id=course_id))
         else:
             try:
                 progress_data = bulk_calculate_course_progress_data(course_id=course_id,

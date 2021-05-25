@@ -20,7 +20,7 @@ from celery.utils.log import get_task_logger
 
 from figures.backfill import backfill_enrollment_data_for_site
 from figures.compat import CourseEnrollment, CourseOverview
-from figures.helpers import as_course_key, as_date
+from figures.helpers import as_course_key, as_date, is_past_date
 from figures.log import log_exec_time
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
@@ -204,6 +204,11 @@ def populate_daily_metrics(sites, date_for=None, force_update=False):
     logger.info(msg.format(prefix=FPD_LOG_PREFIX,
                            date_for=date_for,
                            site_count=sites_count))
+
+    if is_past_date(date_for):
+        msg = ('FIGURES: Skipping calculations of CourseDailyMetrics.average_progress '
+               'for past date {date_for}')
+        logger.warning(msg.format(date_for=date_for))
 
     for i, site in enumerate(sites):
 
