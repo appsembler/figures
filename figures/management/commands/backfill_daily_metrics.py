@@ -70,6 +70,6 @@ class Command(BaseBackfillCommand):
             #     else:
             #         raise
 
-            print('END: Backfill Figures daily metrics metrics for: '.format(options['date'] or 'today'))
+            print('END: Backfill Figures daily metrics metrics for: '.format(dt))
 
         print('END RANGE: Backfilling Figures daily metrics for dates {} to {}'.format(date_start, date_end))
