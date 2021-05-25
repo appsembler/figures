@@ -2,11 +2,11 @@
 Management commands for Figures.
 """
 from datetime import datetime
-from dateutil import parser
 
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 
+from figures import helpers
 from figures.sites import get_sites
 
 
@@ -31,8 +31,8 @@ class BaseBackfillCommand(BaseCommand):
         '''Return a datetime.date from a string or NoneType.
         '''
         try:
-            return parser.parse(date_str).date()
-        except AttributeError:
+            return helpers.as_date(date_str)
+        except TypeError:
             return datetime.today().date()
 
     def add_arguments(self, parser):
