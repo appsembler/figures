@@ -1,6 +1,6 @@
-'''Management command to manually populate course metrics
+'''Management command to manually populate course and site daily metrics
 
-see the model ``edx_figures.models.CourseDailyMetrics``
+see the models ``figures.models.CourseDailyMetrics`` and ``figures.models.SiteDailyMetrics``
 '''
 
 from __future__ import print_function
@@ -20,7 +20,11 @@ from . import BaseBackfillCommand
 
 
 class Command(BaseBackfillCommand):
-    '''Populate Figures daily metrics models
+    '''Populate Figures daily metrics models (``CourseDailyMetrics`` and ``SiteDailyMetrics``).  
+    
+    Note that correctly populating cumulative user and course count for ``SiteDailyMetrics``
+    relies on running this sequentially forward from the first date for which StudentModule records
+    are present.
     '''
 
     help = dedent(__doc__).strip()
@@ -70,6 +74,6 @@ class Command(BaseBackfillCommand):
             #     else:
             #         raise
 
-            print('END: Backfill Figures daily metrics metrics for: '.format(dt))
+            print('END: Backfill Figures daily metrics metrics for: {}'.format(dt))
 
         print('END RANGE: Backfilling Figures daily metrics for dates {} to {}'.format(date_start, date_end))
