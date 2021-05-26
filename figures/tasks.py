@@ -206,9 +206,9 @@ def populate_daily_metrics(sites, date_for=None, force_update=False):
                            site_count=sites_count))
 
     if is_past_date(date_for):
-        msg = ('FIGURES: Skipping calculations of CourseDailyMetrics.average_progress '
-               'for past date {date_for}')
-        logger.warning(msg.format(date_for=date_for))
+        msg = ('{prefix}:INFO - CourseDailyMetrics.average_progress will not be '
+               'calculated for past date {date_for}')
+        logger.info(msg.format(date_for=date_for, prefix=FPD_LOG_PREFIX))
 
     for i, site in enumerate(sites):
 
