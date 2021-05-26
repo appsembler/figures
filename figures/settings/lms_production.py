@@ -6,19 +6,31 @@ import os
 from celery.schedules import crontab
 
 
+def get_build_label(release_line):
+    if release_line in ['ginkgo', 'hawthorn']:
+        return 'rb10'
+    else:
+        return 'rb16'
+
+
 def update_webpack_loader(webpack_loader_settings, figures_env_tokens):
     """
     Update the WEBPACK_LOADER in the settings.
     """
     # Specify the 'figures' package directory
-    figures_app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+    from openedx.core.release import RELEASE_LINE  # noqa pylint: disable=import-error
+
+    build_label = get_build_label(RELEASE_LINE)
+    figures_app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    figures_static_build_dir = 'static/figures/{label}'.format(label=build_label)
     # Define our webpack asset bundling constants
     # TODO: https://appsembler.atlassian.net/browse/RED-673
     webpack_stats_file = figures_env_tokens.get('WEBPACK_STATS_FILE', 'webpack-stats.json')
-    webpack_stats_full_path = os.path.abspath(os.path.join(figures_app_dir, webpack_stats_file))
+    webpack_stats_full_path = os.path.abspath(
+        os.path.join(figures_app_dir, figures_static_build_dir, webpack_stats_file))
     webpack_loader_settings.update(FIGURES_APP={
-        'BUNDLE_DIR_NAME': 'figures/',
+        'BUNDLE_DIR_NAME': 'figures/{label}/'.format(label=build_label),
         'STATS_FILE': webpack_stats_full_path,
     })
 
