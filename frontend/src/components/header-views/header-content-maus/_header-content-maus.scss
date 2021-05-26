@@ -18,14 +18,14 @@
     .number {
       display: block;
       font-weight: 900;
-      font-size: calcRem(64);
+      font-size: 64px;
       line-height: 120%;
     }
 
     .text {
       display: block;
       font-weight: 900;
-      font-size: calcRem(18);
+      font-size: 18px;
       line-height: 120%;
     }
   }
@@ -103,19 +103,19 @@
     }
 
     .tooltip-value {
-      font-size: calcRem(14);
+      font-size: 14px;
       font-weight: bold;
     }
 
     p {
       margin: 0;
-      font-size: calcRem(10);
+      font-size: 10px;
     }
   }
 
   .graph-container {
-    margin-left: calcRem(-20);
-    margin-right: calcRem(-20);
+    margin-left: -20px;
+    margin-right: -20px;
   }
 }
 
@@ -126,5 +126,5 @@
   height: 100%;
   font-style: italic;
   opacity: 0.6;
-  font-size: 1.4rem;
+  font-size: 14px;
 }

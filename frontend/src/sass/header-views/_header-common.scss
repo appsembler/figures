@@ -33,7 +33,7 @@
 }
 
 button.header-option-button {
-  font-size: calcRem(14);
+  font-size: 14px;
   font-weight: 400;
   color: pick-visible-color($primary-color, #fff, $base-text-color);
   background-color: $primary-color;
@@ -52,7 +52,7 @@ button.header-option-button {
 }
 
 .header-more-options-button {
-  font-size: calcRem(14);
+  font-size: 14px;
   font-weight: 400;
   color: pick-visible-color($primary-color, #fff, $base-text-color);
   background-color: $primary-color;

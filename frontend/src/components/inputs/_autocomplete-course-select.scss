@@ -9,12 +9,12 @@
 button.selector-trigger-button {
   @include override-edx-styles;
   border-radius: $elements-border-radius;
-  padding: calcRem(12) calcRem(20);
+  padding: 10px;
   font-size: $base-font-size;
   font-family: $font-family;
   font-weight: 600;
   transition: all 0.2s ease-in-out;
-  margin-left: calcRem(20);
+  margin-left: 10px;
 
   &.positive {
     border: calcRem(2) solid $primary-color;

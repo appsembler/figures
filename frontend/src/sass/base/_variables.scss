@@ -1,7 +1,7 @@
 @import '~base/sass/base/functions';
 
 $rem-base-size: 10 !default;
-$base-font-size: calcRem(14) !default;
+$base-font-size: 14px !default;
 $max-grid-width: calcRem(1180);
 $mobile-breakpoint: calcRem(420);
 $half-screen-breakpoint: calcRem(639);

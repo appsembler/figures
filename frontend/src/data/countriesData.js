@@ -146,7 +146,7 @@ const countriesWithCodes = {
   "MC": "Monaco",
   "MN": "Mongolia",
   "MS": "Montserrat",
-  "MA": "Morocco",
+  "MA": "Maroc",
   "MZ": "Mozambique",
   "MM": "Myanmar",
   "NA": "Namibia",

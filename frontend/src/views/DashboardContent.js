@@ -33,31 +33,31 @@ class DashboardContent extends Component {
           <BaseStatCard
             mainValue={this.props.generalData.getIn(['registeredUsers', 'current_month'], 0)}
             valueHistory={this.props.generalData.getIn(['registeredUsers', 'history'], [])}
-            cardTitle='Registered learners'
+            cardTitle='Utilisateurs enregistrés'
           />
           <BaseStatCard
             mainValue={this.props.generalData.getIn(['newUsers', 'current_month'], 0)}
             valueHistory={this.props.generalData.getIn(['newUsers', 'history'], [])}
-            cardTitle='New learners'
+            cardTitle='Nouveaux utilisateurs'
           />
           <BaseStatCard
             mainValue={this.props.generalData.getIn(['courseEnrollments', 'current_month'], 0)}
             valueHistory={this.props.generalData.getIn(['courseEnrollments', 'history'], [])}
-            cardTitle='Course enrollments'
+            cardTitle='Enregistrement aux cours'
           />
           <BaseStatCard
             mainValue={this.props.generalData.getIn(['courseCompletions', 'current_month'], 0)}
             valueHistory={this.props.generalData.getIn(['courseCompletions', 'history'], [])}
-            cardTitle='Course completions'
+            cardTitle='Achèvemennt des cours'
           />
         </div>
         <div className={cx({ 'container': true, 'functionality-callout': true})}>
-          <h3>Quickly access a data for a specific course using the <strong>"Jump to a course"</strong> widget on top, or <strong>Browse all the courses</strong> on the following screen:</h3>
+          <h3>Accedez rapidement à un cours en utilisant <strong>"Recherche cours"</strong> sur le menu en haut, ou <strong>Parcourir tous les cours</strong> ci dessous:</h3>
           <NavLink
             to="/figures/courses"
             className={styles['functionality-callout-cta']}
           >
-            Browse Courses
+            Parcourir tous les cours
           </NavLink>
         </div>
       </div>

@@ -30,21 +30,21 @@ class CoursesListItem extends Component {
           <span className={styles['course-name']}>{this.props.courseName}</span>
           {this.props.courseIsSelfPaced ? (
             <div className={styles['label-value']}>
-              <span className={styles['label']}>Course dates:</span>
-              <span className={styles['value']}>This course is self-paced</span>
+              <span className={styles['label']}>Dates du cours:</span>
+              <span className={styles['value']}>Ce cours est auto-rythmé</span>
             </div>
           ) : [
             <div key='startDate' className={styles['label-value']}>
-              <span className={styles['label']}>Start date:</span>
+              <span className={styles['label']}>Date début:</span>
               <span className={styles['value']}>{parseCourseDate(this.props.startDate)}</span>
             </div>,
             <div key='endDate' className={styles['label-value']}>
-              <span className={styles['label']}>End date:</span>
+              <span className={styles['label']}>Date fin:</span>
               <span className={styles['value']}>{parseCourseDate(this.props.startDate)}</span>
             </div>
           ]}
           <div className={styles['label-value']}>
-            <span className={styles['label']}>Course staff:</span>
+            <span className={styles['label']}>Staff du cours:</span>
             {courseStaff}
           </div>
         </div>
@@ -53,7 +53,7 @@ class CoursesListItem extends Component {
           <div className={styles['stats-section-inner']}>
             <div className={styles['single-stat']}>
               <span className={styles['stat-label']}>
-                Learners enrolled:
+                Utilisateurs inscrits:
               </span>
               <span className={styles['stat-value']}>
                 {this.props.learnersEnrolled}
@@ -61,7 +61,7 @@ class CoursesListItem extends Component {
             </div>
             <div className={styles['single-stat']}>
               <span className={styles['stat-label']}>
-                Average progress:
+                Moyenne progression:
               </span>
               <span className={styles['stat-value']}>
                 {(this.props.averageProgress*100).toFixed(2)}%
@@ -69,7 +69,7 @@ class CoursesListItem extends Component {
             </div>
             <div className={styles['single-stat']}>
               <span className={styles['stat-label']}>
-                Average days to complete:
+                Moy. jours pour achèvement:
               </span>
               <span className={styles['stat-value']}>
                 {this.props.averageCompletionTime ? this.props.averageCompletionTime : 'n/a'}
@@ -77,7 +77,7 @@ class CoursesListItem extends Component {
             </div>
             <div className={styles['single-stat']}>
               <span className={styles['stat-label']}>
-                No. of learners to complete:
+                Nbr util. qui ont achevé:
               </span>
               <span className={styles['stat-value']}>
                 {this.props.numberLearnersCompleted}
@@ -87,7 +87,7 @@ class CoursesListItem extends Component {
         </div>
         <span className={styles['sections-separator']} />
         <div className={styles['button-section']}>
-          <Link to={'/figures/course/' + this.props.courseId} className={styles['course-button']}>Course details</Link>
+          <Link to={'/figures/course/' + this.props.courseId} className={styles['course-button']}>Détails du cours</Link>
         </div>
       </Link>
     )

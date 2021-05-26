@@ -25,9 +25,9 @@ const educationLevelsDict = {
 }
 
 const genderDict = {
-  "m": "Male",
-  "f": "Female",
-  "o": "Other / Prefer not to say"
+  "m": "Homme",
+  "f": "Femme",
+  "o": "Autre / non precisé"
 }
 
 let cx = classNames.bind(styles);
@@ -75,39 +75,39 @@ class SingleUserContent extends Component {
             </div>
             <ul className={styles['user-details']}>
               <li>
-                <span className={styles['label']}>Username:</span>
+                <span className={styles['label']}>Nom d'utilisateur:</span>
                 <span className={styles['value']}>{this.state.userData.getIn(['username'])}</span>
               </li>
               <li>
-                <span className={styles['label']}>Year of birth:</span>
+                <span className={styles['label']}>Date de naissance:</span>
                 <span className={styles['value']}>{this.state.userData.getIn(['year_of_birth'])}</span>
               </li>
               <li>
-                <span className={styles['label']}>Gender:</span>
+                <span className={styles['label']}>Genre:</span>
                 <span className={styles['value']}>{genderDict[this.state.userData.getIn(['gender'])]}</span>
               </li>
               <li>
-                <span className={styles['label']}>Date joined:</span>
+                <span className={styles['label']}>Date d'inscription:</span>
                 <span className={styles['value']}>{dateJoined.toUTCString()}</span>
               </li>
               <li>
-                <span className={styles['label']}>Account activated:</span>
-                <span className={styles['value']}>{this.state.userData.getIn(['is_active'], false) ? 'Account activated' : 'Not activated'}</span>
+                <span className={styles['label']}>Compte activé:</span>
+                <span className={styles['value']}>{this.state.userData.getIn(['is_active'], false) ? 'Actif' : 'Inactif'}</span>
               </li>
               <li>
-                <span className={styles['label']}>Courses enrolled:</span>
+                <span className={styles['label']}>Cours suivis:</span>
                 <span className={styles['value']}>{this.state.userData.getIn(['courses']) ? this.state.userData.getIn(['courses']).length : ""}</span>
               </li>
               <li>
-                <span className={styles['label']}>Country:</span>
+                <span className={styles['label']}>Pays:</span>
                 <span className={styles['value']}>{this.state.userData.getIn(['country']) ? countries.getName(this.state.userData.getIn(['country']), "en") : "Not Available"}</span>
               </li>
               <li>
-                <span className={styles['label']}>Level of education:</span>
+                <span className={styles['label']}>Niveau d'éducation:</span>
                 <span className={styles['value']}>{this.state.userData.getIn(['level_of_education']) ? educationLevelsDict[this.state.userData.getIn(['level_of_education'])] : 'Not Available'}</span>
               </li>
               <li>
-                <span className={styles['label']}>Email address:</span>
+                <span className={styles['label']}>Email:</span>
                 <span className={styles['value']}><a href={"mailto:" + this.state.userData.getIn(['email'])}>{this.state.userData.getIn(['email'])}</a></span>
               </li>
             </ul>

@@ -169,14 +169,14 @@ class UsersList extends Component {
       <div className="ef--layout-root">
         <HeaderAreaLayout>
           <HeaderContentStatic
-            title='Users list'
-            subtitle={'This view allows you to browse your sites users. Total number of results: ' + this.state.count + '.'}
+            title='Liste utilisateurs'
+            subtitle={'Cette vue permet de parcourir les utilisateurs du site. Nombre total de résultats: ' + this.state.count + '.'}
           />
         </HeaderAreaLayout>
         <div className={cx({ 'container': true, 'users-content': true})}>
           <ListSearch
             valueChangeFunction={this.setSearchQuery}
-            inputPlaceholder='Search by users name, username or email...'
+            inputPlaceholder="Recherche par email, nom, nom d'utilisateur..."
           />
           {this.state.pages ? (
             <Paginator
@@ -195,7 +195,7 @@ class UsersList extends Component {
                   onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
                 >
                   <span>
-                    User full name
+                    Nom complet
                   </span>
                   {(this.state.ordering === 'profile__name') ? (
                     <FontAwesomeIcon icon={faAngleDoubleUp} />
@@ -210,7 +210,7 @@ class UsersList extends Component {
                   onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
                 >
                   <span>
-                    Username
+                    Nom d'utilisateur
                   </span>
                   {(this.state.ordering === 'username') ? (
                     <FontAwesomeIcon icon={faAngleDoubleUp} />
@@ -225,7 +225,7 @@ class UsersList extends Component {
                   onClick={() => (this.state.ordering !== 'is_active') ? this.setOrdering('is_active') : this.setOrdering('-is_active')}
                 >
                   <span>
-                    Is activated
+                    Actif
                   </span>
                   {(this.state.ordering === 'is_active') ? (
                     <FontAwesomeIcon icon={faAngleDoubleUp} />
@@ -240,7 +240,7 @@ class UsersList extends Component {
                   onClick={() => (this.state.ordering !== 'date_joined') ? this.setOrdering('date_joined') : this.setOrdering('-date_joined')}
                 >
                   <span>
-                    Date joined
+                    Date inscription
                   </span>
                   {(this.state.ordering === 'date_joined') ? (
                     <FontAwesomeIcon icon={faAngleDoubleUp} />
@@ -250,7 +250,7 @@ class UsersList extends Component {
                 </button>
               </div>
               <div className={styles['number-of-courses']}>
-                Courses enroled in:
+                Cours suivis:
               </div>
               <div className={styles['action-container']}>
 

@@ -126,8 +126,8 @@ class AutoCompleteUserSelect extends Component {
 
 AutoCompleteUserSelect.defaultProps = {
   negativeStyleButton: false,
-  buttonText: 'Select a user',
-  inputPlaceholder: 'Start typing to search...',
+  buttonText: 'Recherche utilisateur',
+  inputPlaceholder: 'Saisir pour rechercher...',
 }
 
 AutoCompleteUserSelect.propTypes = {

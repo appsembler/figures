@@ -174,7 +174,7 @@ class ProgressOverview extends Component {
       decimalSeparator: '.',
       showLabels: true,
       showTitle: true,
-      title: 'Learners progress overview',
+      title: 'Progrès des utilisateurs',
       filename: 'CSV Export',
       useTextFile: false,
       useBom: true,
@@ -308,19 +308,19 @@ class ProgressOverview extends Component {
       <div className="ef--layout-root">
         <HeaderAreaLayout>
           <HeaderContentStatic
-            title='Learners progress overview'
-            subtitle={'This view allows you to view a snapshot of your sites learners progress. Total number of results in current view is: ' + this.state.count + '. You can also filter down the results in the view, then export the data in the view as a CSV file on-the-fly.'}
+            title='Progression des utilisateurs'
+            subtitle={'Cette vue permet de voir la progression des utilisateurs dans chaque cours. Nombre total de résultats: ' + this.state.count + '. Vous pouvez aussi filtrer les résultats et exporter au format CSV.'}
           />
         </HeaderAreaLayout>
         {this.state.csvExportProgress ? (
           <div className={cx({ 'container': true, 'csv-export-content': true})}>
             {(this.state.csvExportProgress < 1) ? [
-              <h2>Exporting your CSV data...</h2>,
-              <p>Please don't close this browser tab.</p>
+              <h2>Export CSV en cours...</h2>,
+              <p>Merci de ne pas fermer cette page</p>
             ] : [
-              <h2>Export successful!</h2>,
-              <p>Depending on your browser settings, you will either be prompted with a prompt to save the generated file, or the file will be automatically downloaded into your default Downloads folder.</p>,
-              <p>It is now safe to close the exporter.</p>,
+              <h2>Export terminé!</h2>,
+              <p>Le téléchargement va commencer automatiquement.</p>,
+              <p>Vous pouvez maintenant fermer cette page.</p>,
             ]}
             <div className={styles['progress-bar']}>
               <span className={styles['progress-bar-inner']} style={{ width: this.state.csvExportProgress * 100 + '%'}}></span>
@@ -345,7 +345,7 @@ class ProgressOverview extends Component {
                 <ListSearch
                   valueChangeFunction={this.setSearchQuery}
                   waitInterval={2000}
-                  inputPlaceholder='Search by users name, username or email...'
+                  inputPlaceholder="Recherche par email, nom, nom d'utilisateur..."
                 />
                 <div className={styles['multiselect-container']}>
                   <Multiselect
@@ -354,7 +354,7 @@ class ProgressOverview extends Component {
                     onSelect={this.onChangeSelectedCourses}
                     onRemove={this.onChangeSelectedCourses}
                     displayValue="label"
-                    placeholder="Filter by courses..."
+                    placeholder="Filtrer par cours..."
                     style={{ chips: { background: "#0090c1" }, searchBox: { border: "none", "border-bottom": "1px solid #ccc", "border-radius": "0px", "font-size": "14px", "padding-top": "13px", "padding-bottom": "13px" }, option: { "font-size": "14px" } }}
                   />
                 </div>
@@ -364,7 +364,7 @@ class ProgressOverview extends Component {
                   className={styles['export-the-csv-button']}
                   onClick = {() => this.startCsvExport()}
                 >
-                  Generate a CSV from Current View
+                  Générer un CSV depuis ces résultats
                 </button>
               ) : ''}
             </div>
@@ -381,7 +381,7 @@ class ProgressOverview extends Component {
                   className={styles['toggle-wide-view-button']}
                   onClick = {() => this.toggleWideView()}
                 >
-                  {this.state.wideView ? 'Switch to narrow view' : 'Switch to wide view'}
+                  {this.state.wideView ? 'Passer à la vue étroite' : 'Passer à la vue large'}
                 </button>
               </div>
             ) : ''}
@@ -395,7 +395,7 @@ class ProgressOverview extends Component {
                         onClick={() => (this.state.ordering !== 'profile__name') ? this.setOrdering('profile__name') : this.setOrdering('-profile__name')}
                       >
                         <span>
-                          User full name
+                          Nom complet
                         </span>
                         {(this.state.ordering === 'profile__name') ? (
                           <FontAwesomeIcon icon={faAngleDoubleUp} />
@@ -415,7 +415,7 @@ class ProgressOverview extends Component {
                         onClick={() => (this.state.ordering !== 'username') ? this.setOrdering('username') : this.setOrdering('-username')}
                       >
                         <span>
-                          Username
+                          Nom d'utilisateur
                         </span>
                         {(this.state.ordering === 'username') ? (
                           <FontAwesomeIcon icon={faAngleDoubleUp} />
@@ -446,7 +446,7 @@ class ProgressOverview extends Component {
               </div>
             ) : (
               <div className={styles['no-data-message']}>
-                Enter a search term and/or select course(s) to display the data.
+                Effectuez une recherche et/ou sélectionnez un cours pour afficher les résultats.
               </div>
             )}
             {this.state.pages ? (

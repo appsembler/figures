@@ -106,12 +106,12 @@ class BaseStatCard extends Component {
             {(this.props.compareToPrevious && !this.props.singleValue) && (
               <div className={styles['previous-comparison']}>
                 <span className={styles['comparison-value']}>{this.state.comparisonValue}</span>
-                <span className={styles['comparison-text']}>since last month</span>
+                <span className={styles['comparison-text']}>depuis mois dernier</span>
               </div>
             )}
           </div>
           {(this.props.enableHistory && !this.props.singleValue) ? (
-            <button onClick={this.historyToggle} className={styles['history-toggle']}>{this.state.historyExpanded ? 'hide history' : 'see history'}</button>
+            <button onClick={this.historyToggle} className={styles['history-toggle']}>{this.state.historyExpanded ? 'fermer historique' : 'voir historique'}</button>
           ) : (
             <span className={styles['history-toggle-faux']}></span>
           )}
@@ -139,7 +139,7 @@ BaseStatCard.defaultProps = {
   enableHistory: true,
   singleValue: false,
   dataMainValueKey: 'current_month',
-  dataHistoryKey: 'history',
+  dataHistoryKey: 'historique',
 }
 
 BaseStatCard.propTypes = {

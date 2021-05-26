@@ -33,15 +33,15 @@ class MauDetailsContent extends Component {
           <section className={styles['mau-history-list']}>
             <div className={styles['header']}>
               <div className={styles['header-title']}>
-                Monthly Active Users history
+                Utilisateurs mensuels actifs
               </div>
             </div>
             <div className={cx({ 'stat-card': true, 'span-2': false, 'span-3': false, 'span-4': true, 'mau-table-container': true})}>
               <ul className={styles['mau-table']}>
                 <li key="header" className={styles['header-row']}>
-                  <span className={styles['period']}>Period</span>
-                  <span className={styles['mau-count']}>Monthly active users</span>
-                  <span className={styles['difference']}>Difference vs. previous period</span>
+                  <span className={styles['period']}>Période</span>
+                  <span className={styles['mau-count']}>Utilisateurs mensuels actifs</span>
+                  <span className={styles['difference']}>Différence vs. période précédente</span>
                 </li>
                 {mausRender.reverse()}
               </ul>

@@ -51,9 +51,9 @@ class HeaderContentCourse extends Component {
             <span className={styles['course-code']}>{this.props.courseCode}</span>
             <span className={styles['course-info-separator']}>|</span>
             {this.props.isSelfPaced ? (
-              <span className={styles['course-date']}>This course is self-paced</span>
+              <span className={styles['course-date']}>Ce cours est en auto-rythme</span>
             ) : [
-              <span key='courseStart' className={styles['course-date']}>Starts: {parseCourseDate(this.props.startDate)}</span>,
+              <span key='courseStart' className={styles['course-date']}>Débute: {parseCourseDate(this.props.startDate)}</span>,
               this.props.endDate && <span key='separator' className={styles['course-info-separator']}>|</span>,
               this.props.endDate && <span key='courseEnd' className={styles['course-date']}>Ends: {parseCourseDate(this.props.endDate)}</span>,
             ]}

@@ -72,16 +72,16 @@ class CourseLearnersList extends Component {
         <div className={cx({ 'stat-card': true, 'span-2': false, 'span-3': false, 'span-4': true, 'learners-table-container': true})}>
           <ul className={styles['learners-table']}>
             <li key="header" className={styles['header-row']}>
-              <span className={styles['name']}>Learner</span>
-              <span className={styles['country']}>Country</span>
-              <span className={styles['date-enrolled']}>Date enrolled</span>
-              <span className={styles['course-progress']}>Course progress</span>
-              <span className={styles['course-completed']}>Course completed</span>
-              <span className={styles['date-completed']}>Date completed</span>
+              <span className={styles['name']}>Utilisateur</span>
+              <span className={styles['country']}>Pays</span>
+              <span className={styles['date-enrolled']}>Date inscription</span>
+              <span className={styles['course-progress']}>Progression cours</span>
+              <span className={styles['course-completed']}>cours achevé</span>
+              <span className={styles['date-completed']}>Date achèvement</span>
             </li>
             {learnersRender}
           </ul>
-          {!this.state.allLearnersLoaded && <button className={styles['load-more-button']} onClick={() => this.paginationLoadMore()}>Load more</button>}
+          {!this.state.allLearnersLoaded && <button className={styles['load-more-button']} onClick={() => this.paginationLoadMore()}>Charger plus</button>}
         </div>
       </section>
     )
@@ -89,7 +89,7 @@ class CourseLearnersList extends Component {
 }
 
 CourseLearnersList.defaultProps = {
-  listTitle: 'Per learner info:',
+  listTitle: 'Statistiques par utilisateur:',
 }
 
 CourseLearnersList.propTypes = {
