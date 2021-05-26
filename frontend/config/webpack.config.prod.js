@@ -56,7 +56,8 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
     { publicPath: Array(cssFilename.split('/').length).join('../') }
   : {};
 
-const figuresAppBuild = process.env.FIGURES_APP_BUILD ||  '../figures/static/figures';
+// Default to the REM_BASE=16
+const figuresAppBuild = process.env.FIGURES_APP_BUILD ||  '../figures/static/figures/rb16';
 const webpackStatsFile = figuresAppBuild + '/webpack-stats.json';
 
 // This is the production configuration.
