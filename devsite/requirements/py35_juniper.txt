@@ -1,4 +1,0 @@
-
--r juniper_base.txt
-
-mock==3.0.5

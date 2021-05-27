@@ -56,6 +56,10 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
     { publicPath: Array(cssFilename.split('/').length).join('../') }
   : {};
 
+// Default to the REM_BASE=16
+const figuresAppBuild = process.env.FIGURES_APP_BUILD ||  '../figures/static/figures/rb16';
+const webpackStatsFile = figuresAppBuild + '/webpack-stats.json';
+
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
 // The development configuration is different and lives in a separate file.
@@ -76,7 +80,11 @@ module.exports = {
     filename: 'static/js/[name].[chunkhash:8].js',
     chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js',
     // We inferred the "public path" (such as / or /my-project) from homepage.
-    publicPath: publicPath,
+
+    // Remarked out 'pubilcPath' so that it would not be included in webpack-stats.json.
+    // This is done so that Django's 'staticfiles_storage.url' can resolve the asset URL.
+    // publicPath: publicPath,
+
     // Point sourcemap entries to original disk location (format as URL on Windows)
     devtoolModuleFilenameTemplate: info =>
       path
@@ -334,7 +342,8 @@ module.exports = {
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     // Make sure the webpack stats file can be read by Django Webpack Loader
     // when Figures is packaged for release on PyPI
-    new BundleTracker({filename: '../figures/webpack-stats.json'}),
+
+    new BundleTracker({filename: webpackStatsFile}),
     new ExtractTextPlugin({ filename: 'styles.css', allChunks: true }),
   ],
   // Some libraries import Node modules but don't use them in the browser.

@@ -15,9 +15,9 @@ jobs:
           - python: 2.7
             tox-env: py27-hawthorn_multisite
           - python: 3.5
-            tox-env: py35-juniper
-          - python: 3.8
-            tox-env: py38-juniper
+            tox-env: py35-juniper_community
+          - python: 3.5
+            tox-env: py35-juniper_multisite
           - python: 3.8
             tox-env: lint
           - python: 3.8
