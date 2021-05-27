@@ -25,7 +25,7 @@ pytz==2016.7
 ## Django package dependencies
 ##
 
-Django==1.8.18
+Django==2.2.20
 django-extensions==1.5.9
 # ./edx/base.txt:git+https://github.com/edx/django-rest-framework.git@3c72cb5ee5baebc4328947371195eae2077197b0#egg=djangorestframework==3.2.3
 djangorestframework==3.2.3
