@@ -40,7 +40,7 @@ class Command(BaseBackfillCommand):
         '''
         site = self.get_sites(options['site']),
 
-        print('FIGURES: Repairing backfilled CDM.average_progress for site'.format(site))
+        print('FIGURES: Repairing backfilled CDM.average_progress for site {}'.format(site))
 
         backfills = CourseDailyMetrics.objects.filter(
             created__gt=F('date_for') + timedelta(days=2)
@@ -52,8 +52,8 @@ class Command(BaseBackfillCommand):
             'FIGURES: Found {count} records from dates between {date_start} and {date_end} from courses {courses}'
             'to update with None values for average_progress'.format(
                 count=num_backfills,
-                date_start=backfills.earliest(),
-                date_end=backfills.latest(),
+                date_start=backfills.earliest('date_for'),
+                date_end=backfills.latest('date_for'),
                 courses=', \n'.join(backfills.values('course_id').distinct())
             )
         )
