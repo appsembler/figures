@@ -43,20 +43,21 @@ class Command(BaseBackfillCommand):
         print('FIGURES: Repairing backfilled CDM.average_progress for site {}'.format(site))
 
         backfills = CourseDailyMetrics.objects.filter(
-            site=site, created__gt=F('date_for') + timedelta(days=2)
+            site=site, created__gt=F('date_for') + timedelta(days=2),
+            average_progress__isnull=False
         ).annotate(courses_count=Count('course_id', distinct=True))
 
         num_backfills = backfills.count()
 
         logmsg = (
             'FIGURES: Found {count} records from dates between {date_start} and {date_end} '
-            'to update with None values for average_progress, from courses:\n\n{courses}.\n'
+            'to update with None values for average_progress, from courses:\n\n{courses}.'
             '{dry_run_msg}'.format(
                 count=num_backfills,
                 date_start=backfills.earliest('date_for').date_for,
                 date_end=backfills.latest('date_for').date_for,
                 courses='\n'.join(set(backfills.values_list('course_id', flat=True))),
-                dry_run_msg = 'DRY RUN.  Not updating records.' if options['dry_run'] else ''
+                dry_run_msg = '\n\nDRY RUN.  Not updating records.' if options['dry_run'] else ''
             )
         )
         print(logmsg)
