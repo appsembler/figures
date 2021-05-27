@@ -49,12 +49,14 @@ class Command(BaseBackfillCommand):
         num_backfills = backfills.count()
 
         logmsg = (
-            'FIGURES: Found {count} records from dates between {date_start} and {date_end} from courses:\n\n{courses}'
-            'to update with None values for average_progress'.format(
+            'FIGURES: Found {count} records from dates between {date_start} and {date_end} '
+            'to update with None values for average_progress, from courses:\n\n{courses}.\n'
+            '{dry_run_msg}'.format(
                 count=num_backfills,
                 date_start=backfills.earliest('date_for').date_for,
                 date_end=backfills.latest('date_for').date_for,
-                courses=', \n'.join(set(backfills.values_list('course_id', flat=True)))
+                courses=', \n'.join(set(backfills.values_list('course_id', flat=True))),
+                dry_run_msg = 'DRY RUN.  Not updating records.' if options['dry_run'] else ''
             )
         )
         print(logmsg)
