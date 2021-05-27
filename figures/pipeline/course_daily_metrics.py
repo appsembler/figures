@@ -267,6 +267,8 @@ class CourseDailyMetricsExtractor(object):
         # without using StudentModuleHistory so we skip getting this data if running
         # for a past date (i.e., not during daily update of CDMs), especially since 
         # it is so expensive to calculate.
+        # Note that Avg() applied across null and decimal vals for aggregate average_progress
+        # will correctly ignore nulls
         # TODO: Reconsider this if we implement either StudentModuleHistory-based queries
         # (if so, you will need to add any types you want to StudentModuleHistory.HISTORY_SAVING_TYPES)
         # TODO: Reconsider this once we switch to using Persistent Grades
