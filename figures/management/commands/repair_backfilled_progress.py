@@ -49,6 +49,10 @@ class Command(BaseBackfillCommand):
 
         num_backfills = backfills.count()
 
+        if num_backfills == 0:
+            logmsg = 'FIGURES: Found no CDM records with average_progress to repair.'
+            return
+
         logmsg = (
             'FIGURES: Found {count} records from dates between {date_start} and {date_end} '
             'to update with None values for average_progress, from courses:\n\n{courses}.'
