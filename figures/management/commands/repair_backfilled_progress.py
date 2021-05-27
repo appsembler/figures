@@ -55,7 +55,7 @@ class Command(BaseBackfillCommand):
                 count=num_backfills,
                 date_start=backfills.earliest('date_for').date_for,
                 date_end=backfills.latest('date_for').date_for,
-                courses=', \n'.join(set(backfills.values_list('course_id', flat=True))),
+                courses='\n'.join(set(backfills.values_list('course_id', flat=True))),
                 dry_run_msg = 'DRY RUN.  Not updating records.' if options['dry_run'] else ''
             )
         )
