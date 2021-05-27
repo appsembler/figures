@@ -38,7 +38,7 @@ class Command(BaseBackfillCommand):
     def handle(self, *args, **options):
         '''
         '''
-        site = self.get_sites(options['site'])[0],
+        site = self.get_sites(options['site'])[0]
 
         print('FIGURES: Repairing backfilled CDM.average_progress for site {}'.format(site))
 
