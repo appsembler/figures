@@ -102,7 +102,7 @@ class TestSiteMonthlyMetricsViewSet(BaseViewTest):
 
         # check that we have the current month and an element for each prior
         # month for N months back where N is `months_back`
-        assert len(history_list) == self.months_back + 1
+        assert len(history_list) == self.months_back
         for rec in history_list:
             assert all (key in rec for key in ('period', 'value'))
         return True
