@@ -11,6 +11,10 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 const envPublicUrl = process.env.PUBLIC_URL;
 
+// For managing multiple asset builds. Defaults to rb16
+const appBuildDirectory = process.env.FIGURES_APP_BUILD || '../figures/static/figures/rb16';
+
+
 function ensureSlash(path, needsSlash) {
   const hasSlash = path.endsWith('/');
   if (hasSlash && !needsSlash) {
@@ -41,7 +45,7 @@ function getServedPath(appPackageJson) {
 // config after eject: we're in ./config/
 module.exports = {
   dotenv: resolveApp('.env'),
-  appBuild: resolveApp('../figures/static/figures'),
+  appBuild: resolveApp(appBuildDirectory),
   appPublic: resolveApp('public'),
   appHtml: resolveApp('public/index.html'),
   appIndexJs: resolveApp('src/index.js'),
