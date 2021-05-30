@@ -57,8 +57,11 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
   : {};
 
 // Default to the REM_BASE=16
+// This needs to be a relative path. If it is an absolute path then the build
+// creates the full path as a subdirectory of <figures-repo>/frontend directory
 const figuresAppBuild = process.env.FIGURES_APP_BUILD ||  '../figures/static/figures/rb16';
 const webpackStatsFile = figuresAppBuild + '/webpack-stats.json';
+
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
