@@ -51,7 +51,7 @@ class App extends Component {
                   <Route exact path="/figures/learners-progress-overview" component={ProgressOverview} />
                   {(process.env.ENABLE_CSV_REPORTS === "enabled") && <Route exact path="/figures/csv-reports" component={CsvReports} />}
                   {/* course-v..-like course ids */}
-                  <Route path="/figures/course/(?!(\/))" render={({ match }) => <SingleCourseContent courseId={match.params[0]} />}/>
+                  <Route path={/(\/figures\/course\/)((?:(?!\/).)*$)/} render={({ match }) => <SingleCourseContent courseId={match.params[1]} />}/>
                   {/* old slash-separated course id style */}
                   <Route path="/figures/course/:courseOrg/:courseNum/:courseRun" render={({ match }) => <SingleCourseContent courseId={`${match.params.courseOrg}/${match.params.courseNum}/${match.params.courseRun}`} />}/>
                   <Route path="/figures/user/:userId" render={({ match }) => <SingleUserContent userId={match.params.userId} />}/>
