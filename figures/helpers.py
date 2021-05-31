@@ -212,7 +212,7 @@ def previous_months_iterator(month_for, months_back):
     if isinstance(month_for, (datetime.datetime, datetime.date)):
         start_month = month_for - relativedelta(months=months_back)
 
-    for n_months in range(months_back - 1):
+    for n_months in range(months_back):
         dt = start_month + relativedelta(months=n_months)
         yield (dt.year, dt.month, dt.day)
 
