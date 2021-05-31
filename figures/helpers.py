@@ -206,9 +206,10 @@ def previous_months_iterator(month_for, months_back):
         # TODO make sure we've got just two values in the tuple
         month_for = datetime.date(year=month_for[0], month=month_for[1], day=1)
     if isinstance(month_for, (datetime.datetime, datetime.date)):
-        start_month = month_for - relativedelta(months=months_back)
+        start_month = month_for - relativedelta(months=(months_back - 1))
 
-    for dt in rrule(freq=MONTHLY, dtstart=start_month, until=month_for):
+    for n_months in range(months_back):
+        dt = start_month + relativedelta(months=n_months)
         last_day_of_month = days_in_month(month_for=dt)
         yield (dt.year, dt.month, last_day_of_month)
 
