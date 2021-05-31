@@ -212,9 +212,9 @@ def previous_months_iterator(month_for, months_back):
     if isinstance(month_for, (datetime.datetime, datetime.date)):
         start_month = month_for - relativedelta(months=months_back)
 
-    for dt in rrule(freq=MONTHLY, dtstart=start_month, until=month_for):
-        last_day_of_month = days_in_month(month_for=dt)
-        yield (dt.year, dt.month, last_day_of_month)
+    for n_months in range(months_back - 1):
+        dt = start_month + relativedelta(months=n_months)
+        yield (dt.year, dt.month, dt.day)
 
 
 def first_last_days_for_month(month_for):
