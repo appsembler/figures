@@ -264,7 +264,7 @@ def populate_daily_metrics(site_id=None, date_for=None, force_update=False):
 
 
 @shared_task
-def experimental_populate_daily_metrics(date_for=None, force_update=False):
+def experimental_populate_daily_metrics(site_id=None, date_for=None, force_update=False):
     '''Experimental task to populate daily metrics
 
     WARNING: In Ginkgo devstack, this task tends to gets stuck in the middle of
