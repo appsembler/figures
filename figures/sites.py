@@ -317,3 +317,10 @@ def get_sites():
         sites = _get_all_sites()
 
     return sites
+
+
+def get_sites_by_id(site_ids):
+    """
+    Convenience function to get a QuerySet of Sites by id.
+    """
+    return Site.objects.filter(id=site_ids)

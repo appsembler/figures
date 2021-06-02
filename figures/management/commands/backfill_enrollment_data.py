@@ -21,11 +21,11 @@ class Command(BaseBackfillCommand):
     def handle(self, *args, **options):
         print('BEGIN: Backfill Figures EnrollmentData')
 
-        for site in self.get_sites(options['site']):
-            print('Updating EnrollmentData for site "{}"'.format(site.domain))
+        for site_id in self.get_site_ids(options['site']):
+            print('Updating EnrollmentData for site {}'.format(site_id))
             if options['no_delay']:
-                update_enrollment_data(site_id=site.id)
+                update_enrollment_data(site_ids=(site_id))
             else:
-                update_enrollment_data.delay(site_id=site.id)  # pragma: no cover
+                update_enrollment_data.delay(site_ids=(site_id))  # pragma: no cover
 
         print('DONE: Backfill Figures EnrollmentData')

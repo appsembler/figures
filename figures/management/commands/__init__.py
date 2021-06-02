@@ -13,19 +13,22 @@ from figures.sites import get_sites
 class BaseBackfillCommand(BaseCommand):
     '''Base class for Figures backfill management commands with common options.
     '''
-    def get_sites(self, identifier=None):
+    def get_site_ids(self, identifier=None):
         """Quick-n-dirty function to let the caller choose the site id or domain.
         If no identifier is passed, return all available Sites.
         Let the 'get' fail if record can't be found from the identifier.
+        Returns Site ids for passing to Celery tasks.
+        Note that at present, none of the tasks handle more than one specified Site.
         """
         if not identifier:
-            return get_sites()
+            sites = get_sites()
         else:
             try:
                 filter_arg = dict(pk=int(identifier))
             except ValueError:
                 filter_arg = dict(domain=identifier)
-            return Site.objects.filter(**filter_arg)
+            sites = Site.objects.filter(**filter_arg)
+        return [site.id for site in sites]
 
     def get_date(self, date_str=None):
         '''Return a datetime.date from a string or NoneType.

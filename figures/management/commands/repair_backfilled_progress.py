@@ -12,7 +12,8 @@ from __future__ import absolute_import, print_function
 from datetime import timedelta
 from textwrap import dedent
 
-from django.db.models import Count, F, Max, Min
+from django.contrib.sites.models import Site
+from django.db.models import Count, F
 
 from figures.models import CourseDailyMetrics
 
@@ -38,7 +39,8 @@ class Command(BaseBackfillCommand):
     def handle(self, *args, **options):
         '''
         '''
-        site = self.get_sites(options['site'])[0]
+        site_id = self.get_site_ids(options['site'])[0]
+        site = Site.objects.get(id=site_id)
 
         print('FIGURES: Repairing backfilled CDM.average_progress for site {}'.format(site))
 
