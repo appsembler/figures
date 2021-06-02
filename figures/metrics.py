@@ -427,7 +427,7 @@ def total_site_certificates_as_of_date(site, date_for):
         return 0
 
 
-def get_total_course_completions_for_time_period(site, end_date, **_kwargs):
+def get_total_course_completions_for_time_period(site, start_date, end_date):
     """
     We're keeping the method signature for now because there is significant
     enough rework that is out of scope of this fix
