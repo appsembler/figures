@@ -57,7 +57,7 @@ class Command(BaseBackfillCommand):
 
             kwargs = dict(
                 site_ids=self.get_site_ids(options['site']),
-                date_for=dt,
+                date_for=str(dt),
                 force_update=options['overwrite']
             )
 
