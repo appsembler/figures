@@ -214,7 +214,8 @@ def previous_months_iterator(month_for, months_back):
 
     for n_months in range(months_back):
         dt = start_month + relativedelta(months=n_months)
-        yield (dt.year, dt.month, dt.day)
+        last_day_of_month = days_in_month(month_for=dt)
+        yield (dt.year, dt.month, last_day_of_month)
 
 
 def first_last_days_for_month(month_for):
