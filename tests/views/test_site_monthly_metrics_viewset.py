@@ -92,7 +92,7 @@ class TestSiteMonthlyMetricsViewSet(BaseViewTest):
         if organizations_support_sites():
             settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         super(TestSiteMonthlyMetricsViewSet, self).setup(db)
-        self.months_back = 6
+        self.months_back = 7
 
     def check_response(self, response, endpoint):
         assert response.status_code == status.HTTP_200_OK
