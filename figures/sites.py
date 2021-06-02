@@ -323,4 +323,4 @@ def get_sites_by_id(site_ids):
     """
     Convenience function to get a QuerySet of Sites by id.
     """
-    return Site.objects.filter(id=site_ids)
+    return Site.objects.filter(id__in=site_ids)
