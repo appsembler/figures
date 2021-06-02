@@ -6,6 +6,7 @@ We're starting with the monthly metrics
 from __future__ import print_function
 
 from __future__ import absolute_import
+
 from textwrap import dedent
 
 from django.core.management.base import BaseCommand

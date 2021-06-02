@@ -7,6 +7,8 @@ from __future__ import absolute_import
 
 from textwrap import dedent
 
+from django.contrib.sites.models import Site
+
 from figures.backfill import backfill_monthly_metrics_for_site
 
 from . import BaseBackfillCommand
@@ -14,7 +16,7 @@ from . import BaseBackfillCommand
 
 def backfill_site(site, overwrite):
 
-    print('Backfilling monthly metrics for site id="{}" domain={}'.format(
+    print('Backfilling monthly metrics for site id={} domain={}'.format(
         site.id,
         site.domain))
     backfilled = backfill_monthly_metrics_for_site(site=site,
@@ -38,7 +40,8 @@ class Command(BaseBackfillCommand):
     def handle(self, *args, **options):
         print('BEGIN: Backfill Figures Monthly Metrics')
 
-        for site in self.get_sites(options['site']):
+        for site_id in self.get_site_ids(options['site']):
+            site = Site.objects.get(id=site_id)
             backfill_site(site, overwrite=options['overwrite'])
 
         print('END: Backfill Figures Metrics')

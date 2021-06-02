@@ -24,7 +24,7 @@ from figures.helpers import as_course_key, as_date, is_past_date
 from figures.log import log_exec_time
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
-from figures.sites import get_sites, site_course_ids
+from figures.sites import get_sites, get_sites_by_id, site_course_ids
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.helpers import DateForCannotBeFutureError
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
@@ -153,7 +153,7 @@ def update_enrollment_data(site_id, **_kwargs):
 
 
 @shared_task
-def populate_daily_metrics(sites, date_for=None, force_update=False):
+def populate_daily_metrics(site_id=None, date_for=None, force_update=False):
     """Runs Figures daily metrics collection
 
     This is a top level Celery task run every 24 hours to collect metrics.
@@ -197,6 +197,10 @@ def populate_daily_metrics(sites, date_for=None, force_update=False):
         date_for = today
 
     do_update_enrollment_data = False if date_for < today else True
+    if site_id is not None:
+        sites = get_sites_by_id((site_id, ))
+    else:
+        sites = get_sites()
     sites_count = sites.count()
 
     # This is our task entry log message
