@@ -318,7 +318,7 @@ Open edX has different roles, such as, but not limited to learner (or student), 
 To get a list of users with summary data:
 
 ```
-/figures/api/users/general/
+/figures/api/users-general/
 ```
 
 ### User Details
@@ -328,25 +328,25 @@ To get a list of users with summary data:
 To get details for all users:
 
 ```
-/figures/api/users/detail/
+/figures/api/users-detail/
 ```
 
 To get details for a specific user, provide the user id:
 
 ```
-/figures/users/detail/10
+/figures/users-detail/10
 ```
 
 To select a set of users, add the `user_ids` query parameter followed by a list of ids:
 
 ```
-/figures/api/users/detail/?user_ids=1,2,3
+/figures/api/users-detail/?user_ids=1,2,3
 ```
 
 To get all the users (learner) enrolled in a course, provide the course id in the `enrolled_in_course_id` query param:
 
 ```
-/fgures/api/users/detail/?enrolled_in_course_id=course-v1:edX+DemoX+Demo_Course
+/fgures/api/users-detail/?enrolled_in_course_id=course-v1:edX+DemoX+Demo_Course
 ```
 
 
