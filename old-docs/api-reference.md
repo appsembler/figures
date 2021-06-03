@@ -278,7 +278,7 @@ To get the set of general site metrics:
 To get a list of all courses with general (summary) metrics for each:
 
 ```
-/figures/api/courses/general/
+/figures/api/courses-general/
 ```
 
 ### Course Details
@@ -286,7 +286,7 @@ To get a list of all courses with general (summary) metrics for each:
 This endpoint provides a combination of course information and learner activity
 
 ```
-/figures/api/courses/detail/
+/figures/api/courses-detail/
 ```
 
 To get the data for a specific course:
@@ -298,13 +298,13 @@ To get the data for a specific course:
 Example:
 
 ```
-/figures/api/courses/detail/course-v1:edX+DemoX+Demo_Course/
+/figures/api/courses-detail/course-v1:edX+DemoX+Demo_Course/
 ```
 
 You can also filter on org:
 
 ```
-/figures/api/courses/detail/?org=edX
+/figures/api/courses-detail/?org=edX
 ```
 
 

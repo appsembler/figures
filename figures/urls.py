@@ -77,12 +77,12 @@ router.register(
     base_name='courses-index')
 
 router.register(
-    r'courses/general',
+    r'courses-general',
     views.GeneralCourseDataViewSet,
     base_name='courses-general')
 
 router.register(
-    r'courses/detail',
+    r'courses-detail',
     views.CourseDetailsViewSet,
     base_name='courses-detail')
 
