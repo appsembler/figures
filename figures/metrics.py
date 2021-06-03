@@ -477,7 +477,10 @@ def get_course_average_progress_for_time_period(site, start_date, end_date, cour
     qs = CourseDailyMetrics.objects.filter(**filter_args)
     if qs:
         value = qs.aggregate(average=Avg('average_progress'))['average']
-        return float(Decimal(value).quantize(Decimal('.00')))
+        try:
+            return float(Decimal(value).quantize(Decimal('.00')))
+        except TypeError:  # if value is None
+            return 0.0
     else:
         return 0.0
 
