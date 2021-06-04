@@ -54,7 +54,6 @@ from django.utils.timezone import utc
 
 from dateutil.parser import parse as dateutil_parse
 from dateutil.relativedelta import relativedelta
-from dateutil.rrule import rrule, MONTHLY
 
 from opaque_keys.edx.keys import CourseKey
 import six
