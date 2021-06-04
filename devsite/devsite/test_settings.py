@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_countries',
     'django_filters',
+    'waffle',
     'devsite',
     'webpack_loader',
     'figures',

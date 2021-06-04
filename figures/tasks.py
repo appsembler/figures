@@ -9,6 +9,7 @@ import datetime
 import time
 
 import six
+import waffle
 
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
@@ -41,6 +42,8 @@ FPM_LOG_PREFIX = 'FIGURES:PIPELINE:MONTHLY'
 #
 # TODO: Make this configurable in the settings
 # logger.setLevel('INFO')
+
+WAFFLE_DISABLE_PIPELINE = 'figures.disable_pipeline'
 
 
 @shared_task
@@ -167,12 +170,18 @@ def populate_daily_metrics(date_for=None, force_update=False):
 
     This function will get reworked so that each site runs in its own
     """
+    if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
+        logger.warning('Figures pipeline is disabled due to %s being active.',
+                       WAFFLE_DISABLE_PIPELINE)
+        return
+
     # The date_for handling is very similar to the new rule we ahve in
     # `figures.pipeline.helpers.pipeline_data_for_rule`
     # The difference is the following code does not set 'date_for' as yesterday
     # So we likely want to rework the pipeline rule function and this code
     # so that we have a generalized date_for rule that can take an optional
     # transform function, like `prev_day`
+
     today = datetime.datetime.utcnow().replace(tzinfo=utc).date()
     # TODO: Decide if/how we want any special logging if we get an exception
     # on 'casting' the date_for argument as a datetime.date object
@@ -378,6 +387,11 @@ def run_figures_monthly_metrics():
     """
     Populate monthly metrics for all sites.
     """
+    if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
+        logger.info('Figures pipeline is disabled due to %s being active.',
+                    WAFFLE_DISABLE_PIPELINE)
+        return
+
     logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
     all_sites_jobs = group(populate_monthly_metrics_for_site.s(site.id) for site in get_sites())
     all_sites_jobs.delay()

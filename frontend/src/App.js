@@ -50,7 +50,10 @@ class App extends Component {
                   <Route exact path="/figures/courses" component={CoursesList} />
                   <Route exact path="/figures/learners-progress-overview" component={ProgressOverview} />
                   {(process.env.ENABLE_CSV_REPORTS === "enabled") && <Route exact path="/figures/csv-reports" component={CsvReports} />}
-                  <Route path="/figures/course/:courseId" render={({ match }) => <SingleCourseContent courseId={match.params.courseId} />}/>
+                  {/* course-v..-like course ids */}
+                  <Route path={/(\/figures\/course\/)((?:(?!\/).)*$)/} render={({ match }) => <SingleCourseContent courseId={match.params[1]} />}/>
+                  {/* old slash-separated course id style */}
+                  <Route path="/figures/course/:courseOrg/:courseNum/:courseRun" render={({ match }) => <SingleCourseContent courseId={`${match.params.courseOrg}/${match.params.courseNum}/${match.params.courseRun}`} />}/>
                   <Route path="/figures/user/:userId" render={({ match }) => <SingleUserContent userId={match.params.userId} />}/>
                   <Route path="/figures/report/:reportId" render={({ match }) => <SingleReportContent reportId={match.params.reportId} />}/>
                   <Route component={DashboardContent} />
