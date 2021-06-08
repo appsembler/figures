@@ -11,7 +11,7 @@
 
 celery==3.1.26.post2
 django-celery==3.3.1
-six==1.14.0
+six==1.15.0
 
 # Faker is used to seed mock data in devsite
 Faker==4.1.0 
