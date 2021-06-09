@@ -29,6 +29,7 @@ from figures.serializers import (
     CourseEnrollmentSerializer,
     CourseMauMetricsSerializer,
     CourseMauLiveMetricsSerializer,
+    EnrollmentDataSerializer,
     GeneralCourseDataSerializer,
     GeneralUserDataSerializer,
     LearnerCourseDetailsSerializer,
@@ -46,6 +47,7 @@ from tests.factories import (
     CourseEnrollmentFactory,
     CourseMauMetricsFactory,
     CourseOverviewFactory,
+    EnrollmentDataFactory,
     GeneratedCertificateFactory,
     LearnerCourseGradeMetricsFactory,
     SiteDailyMetricsFactory,
@@ -320,6 +322,29 @@ class TestSiteDailyMetricsSerializer(object):
         assert serializer.is_valid()
         serializer.save()
         assert SiteDailyMetrics.objects.count() == 2
+
+
+@pytest.mark.django_db
+class TestEnrollmentDataSerializer(object):
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.enrollment_data = EnrollmentDataFactory()
+        self.expected_fields = [
+            'id', 'course_id', 'date_enrolled', 'is_enrolled', 'is_completed',
+            'progress_percent', 'progress_details',
+        ]
+        self.date_enrolled_format = '%Y-%m-%d'
+
+    def test_serialize(self):
+        """Test Serializing EnrollmentData model with EnrollmentDataSerializer
+
+        Minimal test after bug fix for https://github.com/appsembler/figures/issues/364
+        """
+        expected_date_enrolled = self.enrollment_data.date_enrolled.strftime(
+            self.date_enrolled_format)
+        serializer = EnrollmentDataSerializer(self.enrollment_data)
+        assert set(serializer.data.keys()) == set(self.expected_fields)
+        assert serializer.data['date_enrolled'] == expected_date_enrolled
 
 
 @pytest.mark.django_db
