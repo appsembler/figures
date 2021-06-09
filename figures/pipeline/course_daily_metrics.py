@@ -15,6 +15,7 @@ from __future__ import absolute_import
 from decimal import Decimal
 import logging
 
+from dateutil.relativedelta import relativedelta
 from django.db import transaction
 
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
@@ -263,16 +264,16 @@ class CourseDailyMetricsExtractor(object):
         data['active_learners_today'] = active_learners_today
 
         # Average progress
-        # Progress data cannot be reliable for backfills or for any date prior to today 
+        # Progress data cannot be reliable for backfills or for any date prior to yesterday 
         # without using StudentModuleHistory so we skip getting this data if running
-        # for a past date (i.e., not during daily update of CDMs), especially since 
-        # it is so expensive to calculate.
+        # for a day earlier than previous day (i.e., not during daily update of CDMs),
+        #  especially since it is so expensive to calculate.
         # Note that Avg() applied across null and decimal vals for aggregate average_progress
         # will correctly ignore nulls
         # TODO: Reconsider this if we implement either StudentModuleHistory-based queries
         # (if so, you will need to add any types you want to StudentModuleHistory.HISTORY_SAVING_TYPES)
         # TODO: Reconsider this once we switch to using Persistent Grades
-        if is_past_date(date_for):
+        if is_past_date(date_for + relativedelta(days=1)):  # more than 1 day in past
             data['average_progress'] = None
             msg = ('FIGURES:PIPELINE:CDM Declining to calculate average progress for a past date'
                    ' date_for={date_for}, course_id="{course_id}"')
