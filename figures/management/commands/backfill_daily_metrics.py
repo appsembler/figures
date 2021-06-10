@@ -20,7 +20,6 @@ from . import BaseBackfillCommand
 
 class Command(BaseBackfillCommand):
     '''Populate Figures daily metrics models (``CourseDailyMetrics`` and ``SiteDailyMetrics``).  
-    
     Note that correctly populating cumulative user and course count for ``SiteDailyMetrics``
     relies on running this sequentially forward from the first date for which StudentModule records
     are present.
