@@ -54,7 +54,6 @@ from django.utils.timezone import utc
 
 from dateutil.parser import parse as dateutil_parse
 from dateutil.relativedelta import relativedelta
-from dateutil.rrule import rrule, MONTHLY
 
 from opaque_keys.edx.keys import CourseKey
 import six
@@ -196,7 +195,9 @@ def days_in_month(month_for):
 
 # TODO: Consider changing name to 'months_back_iterator' or similar
 def previous_months_iterator(month_for, months_back):
-    """Iterator returns a year,month tuple for n months including the month_for
+    """Iterator returns a year,month tuple for n months including the month_for.
+    months_back is a misnomer as iteration includes the start month.  The actual
+    number of previous months iterated is months_back minus one.
 
     month_for is either a date, datetime, or tuple with year and month
     months back is the number of months to iterate
@@ -206,9 +207,10 @@ def previous_months_iterator(month_for, months_back):
         # TODO make sure we've got just two values in the tuple
         month_for = datetime.date(year=month_for[0], month=month_for[1], day=1)
     if isinstance(month_for, (datetime.datetime, datetime.date)):
-        start_month = month_for - relativedelta(months=months_back)
+        start_month = month_for - relativedelta(months=(max(0, months_back - 1)))
 
-    for dt in rrule(freq=MONTHLY, dtstart=start_month, until=month_for):
+    for n_months in range(max(1, months_back)):
+        dt = start_month + relativedelta(months=n_months)
         last_day_of_month = days_in_month(month_for=dt)
         yield (dt.year, dt.month, last_day_of_month)
 
