@@ -97,15 +97,3 @@ class TestBackfillDailyMetrics(object):
             with mock.patch(self.PLAIN_PATH) as mock_populate:
                 call_command('backfill_daily_metrics', no_delay=True)
                 assert mock_populate.called_with(site_id=1)
-
-
-@pytest.mark.skip()
-def test_mau_no_delay(self):
-    """
-    We test that `populate_figures_metrics` command executes the method,
-    `figures.tasks.populate_all_mau` in immediate mode "no delay"
-    """
-    path = 'figures.management.commands.populate_figures_metrics.populate_all_mau'
-    with mock.patch(path) as mock_populate_all_mau:
-        call_command('populate_figures_metrics', '--no-delay', '--mau')
-        mock_populate_all_mau.assert_called()

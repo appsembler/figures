@@ -1,14 +1,15 @@
 '''Management command to manually populate course and site daily metrics
 
-see the models ``figures.models.CourseDailyMetrics`` and ``figures.models.SiteDailyMetrics``
+See the models ``figures.models.CourseDailyMetrics`` and ``figures.models.SiteDailyMetrics``
 '''
 
 from __future__ import print_function
 
 from __future__ import absolute_import
 
-from dateutil.rrule import rrule, DAILY
 from textwrap import dedent
+
+from dateutil.rrule import rrule, DAILY
 
 from figures.tasks import (
     populate_daily_metrics,
@@ -19,7 +20,7 @@ from . import BaseBackfillCommand
 
 
 class Command(BaseBackfillCommand):
-    '''Populate Figures daily metrics models (``CourseDailyMetrics`` and ``SiteDailyMetrics``).  
+    '''Populate Figures daily metrics models (``CourseDailyMetrics`` and ``SiteDailyMetrics``).
     Note that correctly populating cumulative user and course count for ``SiteDailyMetrics``
     relies on running this sequentially forward from the first date for which StudentModule records
     are present.
@@ -47,7 +48,9 @@ class Command(BaseBackfillCommand):
 
         experimental = options['experimental']
 
-        print('BEGIN RANGE: Backfilling Figures daily metrics for dates {} to {}'.format(date_start, date_end))
+        print('BEGIN RANGE: Backfilling Figures daily metrics for dates {} to {}'.format(
+            date_start, date_end
+        ))
 
         # populate daily metrics one day at a time for date range
         for dt in rrule(DAILY, dtstart=date_start, until=date_end):
@@ -60,7 +63,10 @@ class Command(BaseBackfillCommand):
                 force_update=options['overwrite']
             )
 
-            metrics_func = experimental_populate_daily_metrics if experimental else populate_daily_metrics
+            if experimental:
+                metrics_func = experimental_populate_daily_metrics
+            else:
+                metrics_func = populate_daily_metrics
             # try:
             if options['no_delay']:
                 metrics_func(**kwargs)
@@ -74,4 +80,6 @@ class Command(BaseBackfillCommand):
 
             print('END: Backfill Figures daily metrics metrics for: {}'.format(dt))
 
-        print('END RANGE: Backfilling Figures daily metrics for dates {} to {}'.format(date_start, date_end))
+        print('END RANGE: Backfilling Figures daily metrics for dates {} to {}'.format(
+            date_start, date_end
+        ))

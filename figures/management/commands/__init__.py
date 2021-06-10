@@ -68,7 +68,7 @@ class BaseBackfillCommand(BaseCommand):
             help='Overwrite metrics records if they exist for the given date'
         )
 
-    def print_exc(metrics_type, date, exc_message):
+    def print_exc(self, metrics_type, date, exc_message):
         print("Could not populate {} for {}. Exception was {}".format(
             metrics_type, date, exc_message)
         )
