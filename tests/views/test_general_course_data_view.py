@@ -101,7 +101,7 @@ class TestGeneralCourseDataViewSet(BaseViewTest):
     '''Tests the UserIndexView view class
     '''
 
-    request_path = 'api/courses/general'
+    request_path = 'api/courses-general'
     view_class = GeneralCourseDataViewSet
 
     @pytest.fixture(autouse=True)
