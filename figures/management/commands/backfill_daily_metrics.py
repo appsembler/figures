@@ -65,6 +65,7 @@ class Command(BaseBackfillCommand):
 
             if experimental:
                 metrics_func = experimental_populate_daily_metrics
+                del kwargs['site_id']  # not implemented for experimental
             else:
                 metrics_func = populate_daily_metrics
             # try:
