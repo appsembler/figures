@@ -15,9 +15,8 @@ from textwrap import dedent
 from django.contrib.sites.models import Site
 from django.db.models import Count, F
 
+from figures.management.base import BaseBackfillCommand
 from figures.models import CourseDailyMetrics
-
-from . import BaseBackfillCommand
 
 
 class Command(BaseBackfillCommand):

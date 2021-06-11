@@ -11,12 +11,11 @@ from textwrap import dedent
 
 from dateutil.rrule import rrule, DAILY
 
+from figures.management.base import BaseBackfillCommand
 from figures.tasks import (
     populate_daily_metrics,
     experimental_populate_daily_metrics
 )
-
-from . import BaseBackfillCommand
 
 
 class Command(BaseBackfillCommand):

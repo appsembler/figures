@@ -8,9 +8,8 @@ from __future__ import absolute_import
 
 from textwrap import dedent
 
+from figures.management.base import BaseBackfillCommand
 from figures.tasks import update_enrollment_data
-
-from . import BaseBackfillCommand
 
 
 class Command(BaseBackfillCommand):

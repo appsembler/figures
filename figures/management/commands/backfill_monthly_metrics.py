@@ -10,8 +10,7 @@ from textwrap import dedent
 from django.contrib.sites.models import Site
 
 from figures.backfill import backfill_monthly_metrics_for_site
-
-from . import BaseBackfillCommand
+from figures.management.base import BaseBackfillCommand
 
 
 def backfill_site(site, overwrite):

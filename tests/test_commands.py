@@ -10,7 +10,8 @@ import pytest
 from django.contrib.sites.models import Site
 from django.core.management import call_command
 
-from figures.management.commands import BaseBackfillCommand
+from figures.management.base import BaseBackfillCommand
+
 from tests.factories import SiteFactory
 
 
@@ -36,7 +37,7 @@ class TestBaseBackfillCommand(object):
         SiteFactory.reset_sequence(0)
         site1 = SiteFactory()  # site-0.example.com
         site2 = SiteFactory()  # site-1.example.com
-        with mock.patch('figures.management.commands.get_sites') as mock_get_sites:
+        with mock.patch('figures.management.base.get_sites') as mock_get_sites:
             mock_get_sites.return_value = [example_site, site1, site2]
             site_ids = BaseBackfillCommand().get_site_ids(site)
             assert site_ids == expected_result
@@ -92,7 +93,7 @@ class TestBackfillDailyMetrics(object):
 
     def test_backfill_daily_for_site(self):
         """Test that proper site id gets passed to task func.  Doesn't exercise get_side_ids."""
-        with mock.patch('figures.management.commands.BaseBackfillCommand.get_site_ids') as mock_get_site_ids:
+        with mock.patch('figures.management.base.BaseBackfillCommand.get_site_ids') as mock_get_site_ids:
             mock_get_site_ids.return_value = [1,]
             with mock.patch(self.PLAIN_PATH) as mock_populate:
                 call_command('backfill_daily_metrics', no_delay=True)
