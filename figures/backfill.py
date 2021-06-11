@@ -12,8 +12,8 @@ from django.utils.timezone import utc
 
 from figures.compat import CourseNotFound
 from figures.sites import (
-  get_course_enrollments_for_site,
-  get_student_modules_for_site
+    get_course_enrollments_for_site,
+    get_student_modules_for_site
 )
 from figures.pipeline.site_monthly_metrics import fill_month
 from figures.models import EnrollmentData

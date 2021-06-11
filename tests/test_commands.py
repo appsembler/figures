@@ -45,9 +45,9 @@ class TestBaseBackfillCommand(object):
 
 @pytest.mark.django_db
 class TestBackfillDailyMetrics(object):
-    """Exercise backfill_daily_metrics command."""
+    """Exercise backfill_figures_daily_metrics command."""
 
-    BASE_PATH = 'figures.management.commands.backfill_daily_metrics'
+    BASE_PATH = 'figures.management.commands.backfill_figures_daily_metrics'
     PLAIN_PATH = BASE_PATH + '.populate_daily_metrics'
     DELAY_PATH = PLAIN_PATH + '.delay'
     EXP_PATH = BASE_PATH + '.experimental_populate_daily_metrics'
@@ -56,17 +56,17 @@ class TestBackfillDailyMetrics(object):
         """Test backfill daily regular and experimental.
         """
         with mock.patch(self.PLAIN_PATH) as mock_populate:
-            call_command('backfill_daily_metrics', no_delay=True)
+            call_command('backfill_figures_daily_metrics', no_delay=True)
             mock_populate.assert_called()
         with mock.patch(self.EXP_PATH) as mock_populate_exp:
-            call_command('backfill_daily_metrics', experimental=True, no_delay=True)
+            call_command('backfill_figures_daily_metrics', experimental=True, no_delay=True)
             mock_populate_exp.assert_called()
 
     def test_backfill_daily_delay(self):
         """Test backfill daily called without no_delay uses Celery task delay.
         """
         with mock.patch(self.DELAY_PATH) as mock_populate:
-            call_command('backfill_daily_metrics')
+            call_command('backfill_figures_daily_metrics')
             mock_populate.assert_called()
 
     def test_backfill_daily_dates(self):
@@ -78,7 +78,7 @@ class TestBackfillDailyMetrics(object):
         end_dt = parser.parse(end)
         exp_days = abs((end_dt - start_dt).days) + 1
         with mock.patch(self.PLAIN_PATH) as mock_populate:
-            call_command('backfill_daily_metrics', date_start=start, date_end=end, no_delay=True)
+            call_command('backfill_figures_daily_metrics', date_start=start, date_end=end, no_delay=True)
             assert mock_populate.call_count == exp_days
 
     def test_backfill_daily_same_day(self):
@@ -88,7 +88,7 @@ class TestBackfillDailyMetrics(object):
         end = '2021-06-08'
         exp_days = 1
         with mock.patch(self.PLAIN_PATH) as mock_populate:
-            call_command('backfill_daily_metrics', date_start=start, date_end=end, no_delay=True)
+            call_command('backfill_figures_daily_metrics', date_start=start, date_end=end, no_delay=True)
             assert mock_populate.call_count == exp_days
 
     def test_backfill_daily_for_site(self):
@@ -96,5 +96,5 @@ class TestBackfillDailyMetrics(object):
         with mock.patch('figures.management.base.BaseBackfillCommand.get_site_ids') as mock_get_site_ids:
             mock_get_site_ids.return_value = [1,]
             with mock.patch(self.PLAIN_PATH) as mock_populate:
-                call_command('backfill_daily_metrics', no_delay=True)
+                call_command('backfill_figures_daily_metrics', no_delay=True)
                 assert mock_populate.called_with(site_id=1)
