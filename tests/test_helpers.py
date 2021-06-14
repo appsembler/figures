@@ -189,26 +189,22 @@ class TestDeltaDays(object):
 
 class TestMonthIterator(object):
 
-    @pytest.mark.parametrize('month_for, months_back, first_month', [
-        ((2018, 1, 31), 0, datetime.date(2018, 1, 1)),
-        ((2018, 1, 31), 6, datetime.date(2017, 7, 1)),
-        ])
-    def test_previous_months_iterator(self, month_for, months_back, first_month):
-
-        def as_month_tuple(month):
-            return (month.year, month.month)
+    @pytest.mark.parametrize('month_for, months_back', [
+        ((2018, 1, 31), 0),
+        ((2018, 1, 31), 6),
+        ((2020, 4, 30), 2),  # let's use a leap year
+    ])
+    def test_previous_months_iterator(self, month_for, months_back):
         expected_vals = []
-        for i in range(months_back):
-            a_month = first_month+relativedelta(months=i)
+        month_for = datetime.date(year=month_for[0], month=month_for[1], day=month_for[2])
+        for i in range(max(1, months_back), 0, -1):  # e.g., 6, 5, 4, 3, 2, 1
+            a_month = month_for - relativedelta(months=i - 1)
             last_day_in_month = calendar.monthrange(a_month.year, a_month.month)[1]
             expected_vals.append(
                 (a_month.year, a_month.month, last_day_in_month)
-                )
-        expected_vals.append(month_for)
-
+            )
         vals = list(previous_months_iterator(month_for, months_back))
         assert vals == expected_vals
-
 
 def test_first_last_days_for_month():
     month_for = '2/2020'

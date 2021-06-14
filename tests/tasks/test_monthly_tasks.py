@@ -79,14 +79,14 @@ def test_run_figures_monthly_metrics_with_faked_subtask(transactional_db, monkey
     Faking the subtask for the function under test
     """
     expected_sites = Site.objects.all()
-    assert expected_sites.count()
+    assert expected_sites
     sites_visited = []
 
-    def fake_populate_monthly_metrics_for_site(site_id):
-        sites_visited.append(site_id)
+    def fake_populate_monthly_metrics_for_site(celery_task_group):
+        for t in celery_task_group.tasks:
+            sites_visited.extend(t.args)
 
-    monkeypatch.setattr('figures.tasks.populate_monthly_metrics_for_site.delay',
-                        fake_populate_monthly_metrics_for_site)
+    monkeypatch.setattr('celery.group.delay', fake_populate_monthly_metrics_for_site)
 
     run_figures_monthly_metrics()
 

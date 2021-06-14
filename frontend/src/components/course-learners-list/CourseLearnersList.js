@@ -43,7 +43,7 @@ class CourseLearnersList extends Component {
   /** Render the learners list for the course page
 
    API endpoint source of data:
-     figures/api/users/detail/?enrolled_in_course_id=<course-id>
+     figures/api/users-detail/?enrolled_in_course_id=<course-id>
    */
   render() {
 

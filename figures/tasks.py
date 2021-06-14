@@ -14,7 +14,7 @@ import waffle
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
-from celery import chord
+from celery import chord, group
 from celery.app import shared_task
 from celery.utils.log import get_task_logger
 
@@ -393,5 +393,5 @@ def run_figures_monthly_metrics():
         return
 
     logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
-    for site in get_sites():
-        populate_monthly_metrics_for_site.delay(site_id=site.id)
+    all_sites_jobs = group(populate_monthly_metrics_for_site.s(site.id) for site in get_sites())
+    all_sites_jobs.delay()

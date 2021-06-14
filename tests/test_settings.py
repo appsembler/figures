@@ -118,7 +118,7 @@ class TestDailyMauPipelineSettings(object):
         self.settings.ENV_TOKENS['FIGURES'] = { 'ENABLE_DAILY_MAU_IMPORT': True }
         plugin_settings(self.settings)
         assert self.TASK_NAME in self.settings.CELERYBEAT_SCHEDULE
-        assert set(['task', 'schedule']) == set(
+        assert set(['task', 'schedule', 'options']) == set(
             self.settings.CELERYBEAT_SCHEDULE[self.TASK_NAME].keys())
 
     def test_daily_mau_pipeline_flag_disabled(self):
