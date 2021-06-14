@@ -72,7 +72,6 @@ class ProgressOverview extends Component {
         label: `${course.name} | ${course.number} | ${course.id}`,
         name: course.name,
         number: course.number,
-        id: course.id,
       }
       return (
         entry
