@@ -50,7 +50,7 @@
     "react": "^16.5.2",
     "react-autosuggest": "^9.4.2",
     "react-css-transition-replace": "^3.0.3",
-    "react-dev-utils": "^5.0.2",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "^16.5.2",
     "react-grid-layout": "^0.16.6",
     "react-promise-tracker": "^2.0.5",
