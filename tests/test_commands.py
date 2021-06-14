@@ -98,3 +98,70 @@ class TestBackfillDailyMetrics(object):
             with mock.patch(self.PLAIN_PATH) as mock_populate:
                 call_command('backfill_figures_daily_metrics', no_delay=True)
                 assert mock_populate.called_with(site_id=1)
+
+
+class TestPopulateFiguresMetricsCommand(object):
+    """Test that command gives a pending deprecation warning and that it calls the correct
+    substitute management commands based on passed options.
+    """
+
+    def test_pending_deprecation(self):
+        mock_call_path = 'figures.management.commands.populate_figures_metrics.call_command'
+        with mock.patch(mock_call_path):
+            with pytest.warns(PendingDeprecationWarning):
+                call_command('populate_figures_metrics')
+
+    @pytest.mark.parametrize('options, subst_command, subst_call_options', [
+        (
+            {'mau': True, 'no_delay': None, 'date': '2021-06-14', 'experimental': None},
+            'run_figures_mau_metrics',
+            {'no_delay': None}
+        ),
+        (
+            {
+                'mau': False, 'no_delay': True, 'date': '2021-06-14',
+                'experimental': True, 'force_update': True
+            },
+            'backfill_figures_daily_metrics',
+            {
+                'no_delay': True, 'experimental': True, 'overwrite': True,
+                'date_start': '2021-06-14', 'date_end': '2021-06-14'
+            }
+        )
+    ])
+    def test_correct_subtitute_commands_called(self, options, subst_command, subst_call_options):
+        old_pop_cmd = 'figures.management.commands.populate_figures_metrics.call_command'
+        with mock.patch(old_pop_cmd) as mock_call_cmd:
+            call_command('populate_figures_metrics', **options)  # this isn't the patched version of call_command
+            mock_call_cmd.assert_called_with(subst_command, **subst_call_options)
+
+
+class TestBackfillFiguresMetricsCommand(object):
+    """Test that command gives a pending deprecation warning and that it calls the correct
+    substitute management commands based on passed options.
+    """
+
+    def test_pending_deprecation(self):
+        mock_call_path = 'figures.management.commands.backfill_figures_metrics.call_command'
+        with mock.patch(mock_call_path):
+            with pytest.warns(PendingDeprecationWarning):
+                call_command('backfill_figures_metrics')
+
+    @pytest.mark.parametrize('options, subst_call_options', [
+        (
+            {'site': 1, 'overwrite': None},
+            {'site': 1, 'overwrite': None}
+        ),
+        (
+            {'overwrite': True},
+            {'site': None, 'overwrite': True}
+        ),
+    ])
+    def test_correct_subtitute_commands_called(self, options, subst_call_options):
+        old_pop_cmd = 'figures.management.commands.backfill_figures_metrics.call_command'
+        with mock.patch(old_pop_cmd) as mock_call_cmd:
+            call_command('backfill_figures_metrics', **options)  # this isn't the patched version of call_command
+            dailycmd = 'backfill_figures_daily_metrics'
+            monthlycmd = 'backfill_figures_monthly_metrics'
+            mock_call_cmd.assert_any_call(dailycmd, **subst_call_options)
+            mock_call_cmd.assert_any_call(monthlycmd, **subst_call_options)

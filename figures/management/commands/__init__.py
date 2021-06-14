@@ -1,3 +1,2 @@
-"""
-Management commands for Figures.
+"""Django management commands for Figures.
 """

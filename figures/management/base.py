@@ -41,6 +41,7 @@ class BaseBackfillCommand(BaseCommand):
     def add_arguments(self, parser):
         '''
         '''
+        # TODO: allow passing the queue to use.  Warn if no_delay specified.
         parser.add_argument(
             '--site',
             help='backfill a specific site. provide numeric id or domain name',
