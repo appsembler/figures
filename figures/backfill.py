@@ -12,15 +12,15 @@ from django.utils.timezone import utc
 
 from figures.compat import CourseNotFound
 from figures.sites import (
-  get_course_enrollments_for_site,
-  get_student_modules_for_site
+    get_course_enrollments_for_site,
+    get_student_modules_for_site
 )
 from figures.pipeline.site_monthly_metrics import fill_month
 from figures.models import EnrollmentData
 
 
 def backfill_monthly_metrics_for_site(site, overwrite=False):
-    """Backfill all historical site metrics for the specified site
+    """Backfill specified months' historical site metrics for the specified site
     """
     site_sm = get_student_modules_for_site(site)
     if not site_sm:

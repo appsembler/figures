@@ -20,11 +20,11 @@ from celery.utils.log import get_task_logger
 
 from figures.backfill import backfill_enrollment_data_for_site
 from figures.compat import CourseEnrollment, CourseOverview
-from figures.helpers import as_course_key, as_date
+from figures.helpers import as_course_key, as_date, is_past_date
 from figures.log import log_exec_time
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
-from figures.sites import get_sites, site_course_ids
+from figures.sites import get_sites, get_sites_by_id, site_course_ids
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.helpers import DateForCannotBeFutureError
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
@@ -153,7 +153,7 @@ def update_enrollment_data(site_id, **_kwargs):
 
 
 @shared_task
-def populate_daily_metrics(date_for=None, force_update=False):
+def populate_daily_metrics(site_id=None, date_for=None, force_update=False):
     """Runs Figures daily metrics collection
 
     This is a top level Celery task run every 24 hours to collect metrics.
@@ -197,7 +197,10 @@ def populate_daily_metrics(date_for=None, force_update=False):
         date_for = today
 
     do_update_enrollment_data = False if date_for < today else True
-    sites = get_sites()
+    if site_id is not None:
+        sites = get_sites_by_id((site_id, ))
+    else:
+        sites = get_sites()
     sites_count = sites.count()
 
     # This is our task entry log message
@@ -205,6 +208,11 @@ def populate_daily_metrics(date_for=None, force_update=False):
     logger.info(msg.format(prefix=FPD_LOG_PREFIX,
                            date_for=date_for,
                            site_count=sites_count))
+
+    if is_past_date(date_for):
+        msg = ('{prefix}:INFO - CourseDailyMetrics.average_progress will not be '
+               'calculated for past date {date_for}')
+        logger.info(msg.format(date_for=date_for, prefix=FPD_LOG_PREFIX))
 
     for i, site in enumerate(sites):
 

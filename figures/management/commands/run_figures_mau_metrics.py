@@ -1,6 +1,4 @@
-"""Figures management command to manually start Celery tasks from the shell
-
-We're starting with the monthly metrics
+"""Figures management command to run course MAU metrics for all courses, all Sites.
 """
 
 from __future__ import print_function
@@ -12,7 +10,7 @@ from textwrap import dedent
 from django.core.management.base import BaseCommand
 
 from figures.tasks import (
-    run_figures_monthly_metrics
+    populate_all_mau
 )
 
 
@@ -28,11 +26,11 @@ class Command(BaseCommand):
                             help='Disable the celery "delay" directive')
 
     def handle(self, *args, **options):
-        print('Starting Figures monthly metrics...')
+        print('Starting Figures MAU metrics for all Sites...')
 
         if options['no_delay']:
-            run_figures_monthly_metrics()
+            populate_all_mau()
         else:
-            run_figures_monthly_metrics.delay()
+            populate_all_mau.delay()
 
         print('Done.')
