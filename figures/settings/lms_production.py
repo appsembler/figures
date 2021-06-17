@@ -11,7 +11,6 @@ class FiguresRouter(object):
     def __init__(self, figures_tasks_queue_name):
         self.figures_tasks_queue_name = figures_tasks_queue_name
 
-
     def route_for_task(self, task, args=None, kwargs=None):  # pylint: disable=unused-argument
         if task.startswith("figures.tasks."):
             return self.figures_tasks_queue_name
