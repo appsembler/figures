@@ -15,6 +15,7 @@ from __future__ import absolute_import
 from decimal import Decimal
 import logging
 
+from dateutil.relativedelta import relativedelta
 from django.db import transaction
 
 from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
@@ -23,7 +24,7 @@ from figures.compat import (CourseEnrollment,
                             CourseOverview,
                             GeneratedCertificate,
                             StudentModule)
-from figures.helpers import as_course_key, as_datetime, next_day
+from figures.helpers import as_course_key, as_datetime, is_past_date, next_day
 import figures.metrics
 from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
@@ -263,18 +264,34 @@ class CourseDailyMetricsExtractor(object):
         data['active_learners_today'] = active_learners_today
 
         # Average progress
-        try:
-            progress_data = bulk_calculate_course_progress_data(course_id=course_id,
-                                                                date_for=date_for)
-            data['average_progress'] = progress_data['average_progress']
-        except Exception:  # pylint: disable=broad-except
-            # Broad exception for starters. Refine as we see what gets caught
-            # Make sure we set the average_progres to None so that upstream
-            # does not think things are normal
+        # Progress data cannot be reliable for backfills or for any date prior to yesterday
+        # without using StudentModuleHistory so we skip getting this data if running
+        # for a day earlier than previous day (i.e., not during daily update of CDMs),
+        #  especially since it is so expensive to calculate.
+        # Note that Avg() applied across null and decimal vals for aggregate average_progress
+        # will correctly ignore nulls
+        # TODO: Reconsider this if we implement either StudentModuleHistory-based queries
+        # (if so, you will need to add any types you want to
+        # StudentModuleHistory.HISTORY_SAVING_TYPES)
+        # TODO: Reconsider this once we switch to using Persistent Grades
+        if is_past_date(date_for + relativedelta(days=1)):  # more than 1 day in past
             data['average_progress'] = None
-            msg = ('FIGURES:FAIL bulk_calculate_course_progress_data'
+            msg = ('FIGURES:PIPELINE:CDM Declining to calculate average progress for a past date'
                    ' date_for={date_for}, course_id="{course_id}"')
-            logger.exception(msg.format(date_for=date_for, course_id=course_id))
+            logger.debug(msg.format(date_for=date_for, course_id=course_id))
+        else:
+            try:
+                progress_data = bulk_calculate_course_progress_data(course_id=course_id,
+                                                                    date_for=date_for)
+                data['average_progress'] = progress_data['average_progress']
+            except Exception:  # pylint: disable=broad-except
+                # Broad exception for starters. Refine as we see what gets caught
+                # Make sure we set the average_progres to None so that upstream
+                # does not think things are normal
+                data['average_progress'] = None
+                msg = ('FIGURES:FAIL bulk_calculate_course_progress_data'
+                       ' date_for={date_for}, course_id="{course_id}"')
+                logger.exception(msg.format(date_for=date_for, course_id=course_id))
 
         data['average_days_to_complete'] = get_average_days_to_complete(
             course_id, date_for,)
@@ -306,18 +323,20 @@ class CourseDailyMetricsLoader(object):
         Raises django.core.exceptions.ValidationError if the record fails
         validation
         """
+        defaults = dict(
+            enrollment_count=data['enrollment_count'],
+            active_learners_today=data['active_learners_today'],
+            average_days_to_complete=int(round(data['average_days_to_complete'])),
+            num_learners_completed=data['num_learners_completed'],
+        )
+        if data['average_progress'] is not None:
+            defaults['average_progress'] = str(data['average_progress'])
 
         cdm, created = CourseDailyMetrics.objects.update_or_create(
             course_id=str(self.course_id),
             site=self.site,
             date_for=date_for,
-            defaults=dict(
-                enrollment_count=data['enrollment_count'],
-                active_learners_today=data['active_learners_today'],
-                average_progress=str(data['average_progress']),
-                average_days_to_complete=int(round(data['average_days_to_complete'])),
-                num_learners_completed=data['num_learners_completed'],
-            )
+            defaults=defaults
         )
         cdm.clean_fields()
         return (cdm, created,)

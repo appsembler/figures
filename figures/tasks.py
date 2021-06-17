@@ -9,21 +9,22 @@ import datetime
 import time
 
 import six
+import waffle
 
 from django.contrib.sites.models import Site
 from django.utils.timezone import utc
 
-from celery import chord
+from celery import chord, group
 from celery.app import shared_task
 from celery.utils.log import get_task_logger
 
 from figures.backfill import backfill_enrollment_data_for_site
 from figures.compat import CourseEnrollment, CourseOverview
-from figures.helpers import as_course_key, as_date
+from figures.helpers import as_course_key, as_date, is_past_date
 from figures.log import log_exec_time
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
-from figures.sites import get_sites, site_course_ids
+from figures.sites import get_sites, get_sites_by_id, site_course_ids
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.helpers import DateForCannotBeFutureError
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
@@ -41,6 +42,8 @@ FPM_LOG_PREFIX = 'FIGURES:PIPELINE:MONTHLY'
 #
 # TODO: Make this configurable in the settings
 # logger.setLevel('INFO')
+
+WAFFLE_DISABLE_PIPELINE = 'figures.disable_pipeline'
 
 
 @shared_task
@@ -150,7 +153,7 @@ def update_enrollment_data(site_id, **_kwargs):
 
 
 @shared_task
-def populate_daily_metrics(date_for=None, force_update=False):
+def populate_daily_metrics(site_id=None, date_for=None, force_update=False):
     """Runs Figures daily metrics collection
 
     This is a top level Celery task run every 24 hours to collect metrics.
@@ -167,12 +170,18 @@ def populate_daily_metrics(date_for=None, force_update=False):
 
     This function will get reworked so that each site runs in its own
     """
+    if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
+        logger.warning('Figures pipeline is disabled due to %s being active.',
+                       WAFFLE_DISABLE_PIPELINE)
+        return
+
     # The date_for handling is very similar to the new rule we ahve in
     # `figures.pipeline.helpers.pipeline_data_for_rule`
     # The difference is the following code does not set 'date_for' as yesterday
     # So we likely want to rework the pipeline rule function and this code
     # so that we have a generalized date_for rule that can take an optional
     # transform function, like `prev_day`
+
     today = datetime.datetime.utcnow().replace(tzinfo=utc).date()
     # TODO: Decide if/how we want any special logging if we get an exception
     # on 'casting' the date_for argument as a datetime.date object
@@ -188,7 +197,10 @@ def populate_daily_metrics(date_for=None, force_update=False):
         date_for = today
 
     do_update_enrollment_data = False if date_for < today else True
-    sites = get_sites()
+    if site_id is not None:
+        sites = get_sites_by_id((site_id, ))
+    else:
+        sites = get_sites()
     sites_count = sites.count()
 
     # This is our task entry log message
@@ -196,6 +208,11 @@ def populate_daily_metrics(date_for=None, force_update=False):
     logger.info(msg.format(prefix=FPD_LOG_PREFIX,
                            date_for=date_for,
                            site_count=sites_count))
+
+    if is_past_date(date_for):
+        msg = ('{prefix}:INFO - CourseDailyMetrics.average_progress will not be '
+               'calculated for past date {date_for}')
+        logger.info(msg.format(date_for=date_for, prefix=FPD_LOG_PREFIX))
 
     for i, site in enumerate(sites):
 
@@ -378,6 +395,11 @@ def run_figures_monthly_metrics():
     """
     Populate monthly metrics for all sites.
     """
+    if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
+        logger.info('Figures pipeline is disabled due to %s being active.',
+                    WAFFLE_DISABLE_PIPELINE)
+        return
+
     logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
-    for site in get_sites():
-        populate_monthly_metrics_for_site.delay(site_id=site.id)
+    all_sites_jobs = group(populate_monthly_metrics_for_site.s(site.id) for site in get_sites())
+    all_sites_jobs.delay()

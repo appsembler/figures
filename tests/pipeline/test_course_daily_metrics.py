@@ -8,6 +8,8 @@ import datetime
 import mock
 import pytest
 
+from dateutil.relativedelta import relativedelta
+
 from django.core.exceptions import PermissionDenied, ValidationError
 
 from figures.compat import CourseAccessRole, CourseEnrollment
@@ -334,6 +336,16 @@ class TestCourseDailyMetricsLoader(object):
             cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load()
             assert CourseDailyMetrics.objects.count() == 0
             assert 'average_progress' in execinfo.value.message_dict
+
+    @pytest.mark.parametrize(['days_back', 'expected_val'], [(1, 1), (2, None)])
+    def test_average_progress_yesterday_or_prior(self, monkeypatch, days_back, expected_val):
+        monkeypatch.setattr(figures.pipeline.course_daily_metrics,
+                            'bulk_calculate_course_progress_data',
+                            lambda **_kwargs: dict(average_progress=1))
+        course_id = self.course_enrollments[0].course_id
+        date_for = datetime.datetime.today().date() - relativedelta(days=days_back)
+        cdm, created = pipeline_cdm.CourseDailyMetricsLoader(course_id).load(date_for=date_for)
+        assert cdm.average_progress == expected_val
 
     @pytest.mark.skip('Implement me!')
     def test_load_force_update(self):

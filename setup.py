@@ -26,7 +26,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='Figures',
-    version='0.4.dev8',
+    version='0.4.dev12',
     packages=find_packages(),
     include_package_data=True,
     license='MIT',

@@ -132,7 +132,7 @@ class TestLearnerDetailsViewSetStandalone(BaseViewTest):
     '''Tests the UserIndexView view class
     '''
 
-    request_path = 'api/users/detail/'
+    request_path = 'api/users-detail/'
     view_class = LearnerDetailsViewSet
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):
@@ -231,7 +231,7 @@ class TestLearnerDetailsViewSetMultisite(BaseViewTest):
     '''Tests the UserIndexView view class
     '''
 
-    request_path = 'api/users/detail/'
+    request_path = 'api/users-detail/'
     view_class = LearnerDetailsViewSet
     @pytest.fixture(autouse=True)
     def setup(self, db, settings):

@@ -1,4 +1,9 @@
-"""Backfills Figures historical metrics
+"""Deprecated:
+Please call instead one of:
+backfill_figures_daily_metrics, backfill_figures_monthly_metrics, or
+backfill_figures_enrollment_data
+
+Backfills Figures historical metrics
 
 """
 
@@ -6,47 +11,14 @@ from __future__ import print_function
 
 from __future__ import absolute_import
 from textwrap import dedent
+import warnings
 
-from django.contrib.sites.models import Site
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
-
-from figures.backfill import backfill_monthly_metrics_for_site
-from figures.sites import get_sites
-
-
-def get_site(identifier):
-    """Quick-n-dirty function to let the caller choose the site id or domain
-    Let the 'get' fail if record can't be found from the identifier
-    """
-    try:
-        filter_arg = dict(pk=int(identifier))
-    except ValueError:
-        filter_arg = dict(domain=identifier)
-    return Site.objects.get(**filter_arg)
-
-
-def backfill_site(site, overwrite):
-
-    print('Backfilling monthly metrics for site id="{}" domain={}'.format(
-        site.id,
-        site.domain))
-    backfilled = backfill_monthly_metrics_for_site(site=site,
-                                                   overwrite=overwrite)
-    if backfilled:
-        for rec in backfilled:
-            obj = rec['obj']
-            print('Backfilled site "{}" for {} with active user count {}'.format(
-                obj.site.domain,
-                obj.month_for,
-                obj.active_user_count))
-    else:
-        print('No student modules for site "{}"'.format(site.domain))
 
 
 class Command(BaseCommand):
-    """Populate Figures metrics models
-
-    Improvements
+    """Pending Deprecation: Populate Figures metrics models
     """
     help = dedent(__doc__).strip()
 
@@ -59,13 +31,27 @@ class Command(BaseCommand):
                             help='backfill a specific site. provide id or domain name')
 
     def handle(self, *args, **options):
+        '''
+        Pending deprecation.  Passes handling off to new commands.
+        '''
+        warnings.warn(
+            "backfill_figures_metrics is pending deprecation and will be removed in "
+            "Figures 1.0. Please use one of backfill_figures_daily_metrics, "
+            "backfill_figures_monthly_metrics, or backfill_figures_enrollment_data, "
+            "instead.",
+            PendingDeprecationWarning
+        )
         print('BEGIN: Backfill Figures Metrics')
 
-        if options['site']:
-            sites = [get_site(options['site'])]
-        else:
-            sites = get_sites()
-        for site in sites:
-            backfill_site(site, overwrite=options['overwrite'])
+        call_command(
+            'backfill_figures_monthly_metrics',
+            overwrite=options['overwrite'],
+            site=options['site']
+        )
+        call_command(
+            'backfill_figures_daily_metrics',
+            overwrite=options['overwrite'],
+            site=options['site']
+        )
 
         print('DONE: Backfill Figures Metrics')

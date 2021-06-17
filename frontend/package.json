@@ -78,7 +78,9 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "build": "npm run build-rb10 && npm run build-rb16",
+    "build-rb10": "REM_BASE=10 FIGURES_APP_BUILD=../figures/static/figures/rb10 node scripts/build.js",
+    "build-rb16": "REM_BASE=16 FIGURES_APP_BUILD=../figures/static/figures/rb16 node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom"
   },
   "jest": {
