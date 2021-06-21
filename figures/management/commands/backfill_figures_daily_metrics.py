@@ -57,7 +57,7 @@ class Command(BaseBackfillCommand):
             print('BEGIN: Backfill Figures daily metrics metrics for: {}'.format(dt))
 
             kwargs = dict(
-                site_id=self.get_site_ids(options['site'])[0],
+                site_id=options['site'],
                 date_for=str(dt),
                 force_update=options['overwrite']
             )
