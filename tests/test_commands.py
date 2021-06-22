@@ -92,12 +92,10 @@ class TestBackfillDailyMetrics(object):
             assert mock_populate.call_count == exp_days
 
     def test_backfill_daily_for_site(self):
-        """Test that proper site id gets passed to task func.  Doesn't exercise get_side_ids."""
-        with mock.patch('figures.management.base.BaseBackfillCommand.get_site_ids') as mock_get_site_ids:
-            mock_get_site_ids.return_value = [1,]
-            with mock.patch(self.PLAIN_PATH) as mock_populate:
-                call_command('backfill_figures_daily_metrics', no_delay=True)
-                assert mock_populate.called_with(site_id=1)
+        """Test that proper site id gets passed to task func."""
+        with mock.patch(self.PLAIN_PATH) as mock_populate:
+            call_command('backfill_figures_daily_metrics', no_delay=True)
+            assert mock_populate.called_with(site_id=1)
 
 
 class TestPopulateFiguresMetricsCommand(object):
