@@ -78,7 +78,10 @@ class TestBackfillDailyMetrics(object):
         end_dt = parser.parse(end)
         exp_days = abs((end_dt - start_dt).days) + 1
         with mock.patch(self.PLAIN_PATH) as mock_populate:
-            call_command('backfill_figures_daily_metrics', date_start=start, date_end=end, no_delay=True)
+            call_command(
+                'backfill_figures_daily_metrics', 
+                date_start=start, date_end=end, no_delay=True
+            )
             assert mock_populate.call_count == exp_days
 
     def test_backfill_daily_same_day(self):
@@ -88,14 +91,31 @@ class TestBackfillDailyMetrics(object):
         end = '2021-06-08'
         exp_days = 1
         with mock.patch(self.PLAIN_PATH) as mock_populate:
-            call_command('backfill_figures_daily_metrics', date_start=start, date_end=end, no_delay=True)
+            call_command(
+                'backfill_figures_daily_metrics', 
+                date_start=start, date_end=end, no_delay=True
+            )
             assert mock_populate.call_count == exp_days
 
-    def test_backfill_daily_for_site(self):
-        """Test that proper site id gets passed to task func."""
+    def test_backfill_daily_with_site_id(self):
+        """Test that proper site id gets passed to task func when passing integer."""
+        with mock.patch(self.PLAIN_PATH) as mock_populate:
+            call_command('backfill_figures_daily_metrics', site=1, no_delay=True)
+            assert mock_populate.called_with(site_id=1)
+
+    def test_backfill_daily_with_site_domain(self):
+        """Test that proper site id gets passed to task func when passing integer."""
+        SiteFactory.reset_sequence(0)
+        site2 = SiteFactory()  # site-0.example.com
+        with mock.patch(self.PLAIN_PATH) as mock_populate:
+            call_command('backfill_figures_daily_metrics', site="site-0.example.com", no_delay=True)
+            assert mock_populate.called_with(site_id=2)
+
+    def test_backfill_daily_without_site_id(self):
+        """Test that proper site id gets passed to task func when passing integer."""
         with mock.patch(self.PLAIN_PATH) as mock_populate:
             call_command('backfill_figures_daily_metrics', no_delay=True)
-            assert mock_populate.called_with(site_id=1)
+            assert mock_populate.called_with(site_id=None)
 
 
 class TestPopulateFiguresMetricsCommand(object):
