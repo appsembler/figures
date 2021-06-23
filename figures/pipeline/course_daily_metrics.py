@@ -163,7 +163,16 @@ def get_days_to_complete(course_id, date_for):
                      course_id=course_id,
                      user_id=cert.user.id,
                      ))
-        days.append((cert.created_date - ce[0].created).days)
+        try:
+            days.append((cert.created_date - ce[0].created).days)
+        except IndexError:
+            # sometimes a course enrollment is deleted after the cert is generated.  why, who knows?
+            # in which case just leave out that data
+            errors.append(
+                dict(msg='No CourseEnrollment matching user course certificate',
+                     course_id=course_id,
+                     user_id=cert.user.id,
+                     ))
     return dict(days=days, errors=errors)
 
 
