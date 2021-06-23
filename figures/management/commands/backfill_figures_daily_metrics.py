@@ -51,13 +51,16 @@ class Command(BaseBackfillCommand):
             date_start, date_end
         ))
 
+        # don't pass multiple site ids to tasks
+        site_id = None if not options['site'] else self.get_site_ids(options['site'])
+
         # populate daily metrics one day at a time for date range
         for dt in rrule(DAILY, dtstart=date_start, until=date_end):
 
             print('BEGIN: Backfill Figures daily metrics metrics for: {}'.format(dt))
 
             kwargs = dict(
-                site_id=options['site'],
+                site_id=site_id,
                 date_for=str(dt),
                 force_update=options['overwrite']
             )
