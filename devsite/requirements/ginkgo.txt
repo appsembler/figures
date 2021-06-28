@@ -52,8 +52,9 @@ recommonmark==0.4.0
 ##
 
 edx-opaque-keys==0.4
-# edx-organizations 0.4.4 requires edx-drf-extensions<1.0.0,>=0.5.1, but you'll have edx-drf-extensions 1.2.2 which is incompatible.
-edx-drf-extensions==1.2.2
+# edx-organizations 0.4.4 requires edx-drf-extensions<1.0.0,>=0.5.1, but 
+# Ginkgo edx-platform open release specifies edx-drf-extensions 1.2.2 which is incompatible.  We will use what's compatible with edx-organizations.
+edx-drf-extensions==0.5.1
 edx-organizations==0.4.4
 
 
