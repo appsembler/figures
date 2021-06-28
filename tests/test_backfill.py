@@ -72,7 +72,6 @@ def backfill_test_data(db):
     )
 
 
-@pytest.mark.xfail  # See: https://github.com/appsembler/figures/issues/354
 def test_backfill_monthly_metrics_for_site(backfill_test_data):
     """Simple coverage and data validation check for the function under test
 
