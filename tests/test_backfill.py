@@ -72,6 +72,7 @@ def backfill_test_data(db):
     )
 
 
+@pytest.mark.freeze_time('2019-09-01 12:00:00')
 def test_backfill_monthly_metrics_for_site(backfill_test_data):
     """Simple coverage and data validation check for the function under test
 
