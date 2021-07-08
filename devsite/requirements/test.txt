@@ -1,0 +1,2 @@
+# Shared testing requirements
+pytest-freezegun==0.4.2
