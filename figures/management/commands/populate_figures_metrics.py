@@ -1,20 +1,20 @@
-'''Management command to manually populate course metrics
+"""
+Deprecated:
+Please call instead backfill_figures_daily_metrics.
+
+Management command to manually populate course metrics
 
 see the model ``edx_figures.models.CourseDailyMetrics``
-'''
+"""
 
 from __future__ import print_function
 
 from __future__ import absolute_import
 from textwrap import dedent
+import warnings
 
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
-
-from figures.tasks import (
-    populate_daily_metrics,
-    experimental_populate_daily_metrics,
-    populate_all_mau,
-)
 
 
 class Command(BaseCommand):
@@ -48,39 +48,31 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         '''
-        Note the '# pragma: no cover' lines below. This is because we are not
-        yet mocking celery for test coverage
+        Pending deprecation.  Passes handling off to new commands.
 
         The 'mau' conditional check in this method is a quick hack to run the
         MAU task from this command. What we probably want is a 'figures_cli'
         command with subcommands.
         '''
+        warnings.warn(
+            "populate_figures_metrics is pending deprecation and will be removed in "
+            "Figures 1.0. Please use backfill_figures_daily_metrics, instead; or, "
+            "if you were calling with --mau option, use populate_figures_mau_metrics.",
+            PendingDeprecationWarning
+        )
         print('populating Figures metrics...')
 
-        kwargs = dict(
-            date_for=options['date'],
-            force_update=options['force_update'],
-            )
-
         if options['mau']:
-            if options['no_delay']:
-                populate_all_mau()
-            else:
-                populate_all_mau.delay()  # pragma: no cover
+            call_command('run_figures_mau_metrics', no_delay=options['no_delay'])
         else:
-            experimental = options['experimental']
-            options.pop('experimental')
-
-            if experimental:
-                if options['no_delay']:
-                    experimental_populate_daily_metrics(**kwargs)
-                else:
-                    experimental_populate_daily_metrics.delay(**kwargs)  # pragma: no cover
-            else:
-                if options['no_delay']:
-                    populate_daily_metrics(**kwargs)
-                else:
-                    populate_daily_metrics.delay(**kwargs)  # pragma: no cover
+            call_command(
+                'backfill_figures_daily_metrics',
+                no_delay=options['no_delay'],
+                date_start=options['date'],
+                date_end=options['date'],
+                overwrite=options['force_update'],
+                experimental=options['experimental']
+            )
 
         # TODO: improve this message to say 'today' when options['date'] is None
         print('Management command populate_figures_metrics complete. date_for: {}'.format(

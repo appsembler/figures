@@ -13,6 +13,7 @@ from figures.settings.lms_production import (
     update_celerybeat_schedule,
     # TODO: https://appsembler.atlassian.net/browse/RED-673
     # update_webpack_loader,
+    update_celery_routes,
 )
 
 
@@ -30,7 +31,7 @@ env = environ.Env(
     OPENEDX_RELEASE=(str, 'HAWTHORN'),
 )
 
-environ.Env.read_env()
+environ.Env.read_env(join(dirname(dirname(__file__)), '.env'))
 
 OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
 
@@ -62,6 +63,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_countries',
     'django_filters',
+    'waffle',
     'devsite',
     'webpack_loader',
     'figures',
@@ -148,6 +150,13 @@ ENV_TOKENS = {
     'FIGURES': {},  # This variable is patched by the Figures' `lms_production.py` settings module.
 }
 
+PRJ_SETTINGS = {
+    'CELERY_ROUTES': "app.celery.routes"
+}
+
+FIGURES_PIPELINE_TASKS_ROUTING_KEY = ""
+
 # TODO: https://appsembler.atlassian.net/browse/RED-673
 # update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
-update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
+update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS, FIGURES_PIPELINE_TASKS_ROUTING_KEY)
+update_celery_routes(PRJ_SETTINGS, ENV_TOKENS, FIGURES_PIPELINE_TASKS_ROUTING_KEY)

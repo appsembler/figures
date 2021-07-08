@@ -5,7 +5,7 @@
 
 This document guides you through getting Figures setup on your development machine.
 
-Requirements are that you have Python 2.7.x installed on your development machine. It is also highly recommended that you install [virtualenv](https://virtualenv.pypa.io/).
+Requirements are that you have Python 3.5.x installed on your development machine. It is also highly recommended that you install [virtualenv](https://virtualenv.pypa.io/).
 
 ## 2. Create a virtualenv
 
@@ -29,15 +29,15 @@ On your development machine, open a terminal (command line shell) and create or 
 In the terminal, run the following:
 
 ```
-git clone -b develop https://github.com/appsembler/figures.git
+git clone https://github.com/appsembler/figures.git
 cd figures
-pip install -r devsite/requirements/hawthorn.txt
+pip install -r devsite/requirements/py35_juniper.txt
 ```
 
 now we'll run [pytest](https://docs.pytest.org/) to make sure that the tests pass:
 
 ```
-pytest
+OPENEDX_RELEASE=JUNIPER pytest -c pytest-juniper.ini
 ```
 
 ## 4. Build front end assets
@@ -110,6 +110,7 @@ _Section incomplete_
 
 Pages of interest:
 
+* http://127.0.0.1:8000/admin/
 * http://127.0.0.1:8000/figures/
 * http://127.0.0.1:8000/figures/api/
 * http://127.0.0.1:8000/admin/figures/

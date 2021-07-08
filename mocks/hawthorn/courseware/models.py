@@ -33,7 +33,7 @@ class StudentModule(models.Model):
 
     #! module_state_key = LocationKeyField(max_length=255, db_index=True, db_column='module_id')
 
-    student = models.ForeignKey(User, db_index=True)
+    student = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE,)
 
     course_id = CourseKeyField(max_length=255, db_index=True)
 

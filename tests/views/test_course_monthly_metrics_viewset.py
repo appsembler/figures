@@ -129,7 +129,6 @@ class TestCourseMonthlyMetricsViewSet(BaseViewTest):
         if organizations_support_sites():
             settings.FEATURES['FIGURES_IS_MULTISITE'] = True
         super(TestCourseMonthlyMetricsViewSet, self).setup(db)
-        # self.months_back = 6
 
     def check_response(self, response, endpoint):
         """Helper method to reduce duplication

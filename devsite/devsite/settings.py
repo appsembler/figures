@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'webpack_loader',
     'organizations',
+    'waffle',
     'devsite',
     'figures',
 

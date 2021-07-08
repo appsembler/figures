@@ -892,14 +892,13 @@ class EnrollmentDataSerializer(serializers.ModelSerializer):
     This serializer note not identify the learner. It is used in
     LearnerMetricsSerializer
     """
-    date_enrolled = serializers.DateTimeField(format="%Y-%m-%d")
+    date_enrolled = serializers.DateField(format="%Y-%m-%d")
     progress_details = serializers.SerializerMethodField()
 
     class Meta:
         model = EnrollmentData
         fields = [
-            'id', 'course_id', 'date_enrolled', 'date_enrolled',
-            'is_enrolled', 'is_completed',
+            'id', 'course_id', 'date_enrolled', 'is_enrolled', 'is_completed',
             'progress_percent', 'progress_details',
         ]
         read_only_fields = fields
