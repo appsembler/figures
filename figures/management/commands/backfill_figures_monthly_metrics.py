@@ -19,7 +19,8 @@ def backfill_site(site, overwrite):
         site.id,
         site.domain))
     backfilled = backfill_monthly_metrics_for_site(site=site,
-                                                   overwrite=overwrite)
+                                                   overwrite=overwrite,
+                                                   use_raw_sql=use_raw_sql)
     if backfilled:
         for rec in backfilled:
             obj = rec['obj']
@@ -35,6 +36,17 @@ class Command(BaseBackfillCommand):
     """Backfill Figures monthly metrics models.
     """
     help = dedent(__doc__).strip()
+
+    def add_arguments(self, parser):
+        '''
+        '''
+        parser.add_argument(
+            '--use_raw_sql',
+            help='Use raw SQL for query performance with large number of StudentModules, where supported.',
+            default=False,
+            action="store_true"
+        )
+        super(Command, self).add_arguments(parser)
 
     def handle(self, *args, **options):
         print('BEGIN: Backfill Figures Monthly Metrics')

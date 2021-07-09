@@ -73,7 +73,8 @@ def backfill_test_data(db):
 
 
 @pytest.mark.freeze_time('2019-09-01 12:00:00')
-def test_backfill_monthly_metrics_for_site(backfill_test_data):
+@pytest.mark.parametrize('use_raw_sql', (True, False))
+def test_backfill_monthly_metrics_for_site(backfill_test_data, use_raw_sql):
     """Simple coverage and data validation check for the function under test
 
     Example backfilled results
@@ -101,7 +102,7 @@ def test_backfill_monthly_metrics_for_site(backfill_test_data):
     site = backfill_test_data['site']
     count_check = backfill_test_data['count_check']
     assert not SiteMonthlyMetrics.objects.count()
-    backfilled = backfill_monthly_metrics_for_site(site=site, overwrite=True)
+    backfilled = backfill_monthly_metrics_for_site(site=site, overwrite=True, use_raw_sql=use_raw_sql)
     assert len(backfilled) == backfill_test_data['months_back']
     assert len(backfilled) == SiteMonthlyMetrics.objects.count()
     assert len(backfilled) == len(count_check)
