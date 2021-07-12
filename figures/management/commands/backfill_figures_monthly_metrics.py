@@ -13,7 +13,7 @@ from figures.backfill import backfill_monthly_metrics_for_site
 from figures.management.base import BaseBackfillCommand
 
 
-def backfill_site(site, overwrite):
+def backfill_site(site, overwrite, use_raw_sql):
 
     print('Backfilling monthly metrics for site id={} domain={}'.format(
         site.id,
@@ -42,7 +42,8 @@ class Command(BaseBackfillCommand):
         '''
         parser.add_argument(
             '--use_raw_sql',
-            help='Use raw SQL for query performance with large number of StudentModules, where supported.',
+            help=('Use raw SQL for query performance with large number of StudentModules, '
+                  'where supported.'),
             default=False,
             action="store_true"
         )
@@ -53,6 +54,6 @@ class Command(BaseBackfillCommand):
 
         for site_id in self.get_site_ids(options['site']):
             site = Site.objects.get(id=site_id)
-            backfill_site(site, overwrite=options['overwrite'])
+            backfill_site(site, overwrite=options['overwrite'], use_raw_sql=options['use_raw_sql'])
 
         print('END: Backfill Figures Metrics')

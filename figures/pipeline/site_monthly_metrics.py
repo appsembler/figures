@@ -5,11 +5,25 @@
 from __future__ import absolute_import
 from datetime import datetime
 from django.db import connection
+from django.db.models import IntegerField
 from django.utils.timezone import utc
 from dateutil.relativedelta import relativedelta
 
+from figures.compat import RELEASE_LINE
 from figures.models import SiteMonthlyMetrics
 from figures.sites import get_student_modules_for_site
+
+
+def _get_fill_month_raw_sql_for_month(site_ids, month_for):
+    """Return a string for the raw SQL statement to get distinct student_id counts.
+    """
+    # this is just a separate function so it can be patched in test to acccommodate sqlite
+    return """\
+    SELECT COUNT(DISTINCT student_id) from courseware_studentmodule
+    where id in {}
+    and MONTH(modified) = {}
+    and YEAR(modified) = {}
+    """.format(site_ids, month_for.month, month_for.year)
 
 
 def fill_month(site, month_for, student_modules=None, overwrite=False, use_raw=False):
@@ -25,25 +39,20 @@ def fill_month(site, month_for, student_modules=None, overwrite=False, use_raw=F
             mau_count = month_sm.values_list('student_id',
                                              flat=True).distinct().count()
         else:
-            site_ids = tuple(student_modules.values_list('id', flat=True).distinct())
-            year = month_for.year
-            if (connection.vendor == 'sqlite'):  # for tests, ugh. suggestions welcome  :/
-                month = str(month_for.month).zfill(2)
-                statement = """\
-                SELECT COUNT(DISTINCT student_id) from courseware_studentmodule
-                where id in {}
-                and strftime('%m', datetime(modified)) = '{}'
-                and strftime('%Y', datetime(modified)) = '{}'
-                """.format(site_ids, month, year)
+            if RELEASE_LINE == 'ginkgo':
+                site_ids = tuple(
+                    [int(sid) for sid in student_modules.values_list('id', flat=True).distinct()]
+                )
             else:
-                month = month_for.month
-                statement = """\
-                SELECT COUNT(DISTINCT student_id) from courseware_studentmodule
-                where id in {}
-                and MONTH(modified) = {}
-                and YEAR(modified) = {}
-                """.format(site_ids, month, year)
+                # make sure we get integers and not longints from db
+                from django.db.models.functions import Cast
+                site_ids = tuple(
+                    student_modules.annotate(
+                        id_as_int=Cast('id', IntegerField())
+                    ).values_list('id_as_int', flat=True).distinct()
+                )
 
+            statement = _get_fill_month_raw_sql_for_month(site_ids, month_for)
             with connection.cursor() as cursor:
                 cursor.execute(statement)
                 row = cursor.fetchone()
