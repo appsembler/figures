@@ -288,7 +288,9 @@ def site_certificates(site):
     """
     if is_multisite():
         return GeneratedCertificate.objects.filter(
-            user__organizations__sites__in=[site])
+            user__organizations__sites__in=[site],
+            course_id__in=get_course_keys_for_site(site)
+        )
     else:
         return GeneratedCertificate.objects.all()
 
