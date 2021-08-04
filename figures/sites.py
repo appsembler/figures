@@ -210,7 +210,9 @@ def get_users_for_site(site):
 def get_course_enrollments_for_site(site):
     if is_multisite():
         course_enrollments = CourseEnrollment.objects.filter(
-            user__organizations__sites__in=[site])
+            user__organizations__sites__in=[site],
+            course_id__in=get_course_keys_for_site(site)
+        )
     else:
         course_enrollments = CourseEnrollment.objects.all()
     return course_enrollments

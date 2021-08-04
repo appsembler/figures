@@ -208,8 +208,6 @@ class TestHandlersForMultisiteMode(object):
         assert set([ce.id for ce in course_enrollments]) == set(
                    [ce.id for ce in expected_ce])
 
-    # TODO: remove xfail after fixing filtering get_course_enrollments_for_site by Site
-    @pytest.mark.xfail  # for now, since this is just for TDD at this point.  
     def test_get_course_enrollments_for_site_exclude_same_user_different_site(self):
         """
         Test that CEs are not returned from course from another Site, in cases where a user has
