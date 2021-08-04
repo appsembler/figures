@@ -134,7 +134,9 @@ class TestHandlersForMultisiteMode(object):
         is_multisite = figures.helpers.is_multisite()
         assert is_multisite
         self.site = SiteFactory(domain='foo.test')
+        self.default_site = Site.objects.get(id=1)
         self.organization = OrganizationFactory(sites=[self.site])
+        self.default_site_org = OrganizationFactory(sites=[self.default_site])
         assert Site.objects.count() == 2
         self.features = {'FIGURES_IS_MULTISITE': True}
 
@@ -193,18 +195,42 @@ class TestHandlersForMultisiteMode(object):
 
     @pytest.mark.parametrize('ce_count', [0, 1, 2])
     def test_get_course_enrollments_for_site(self, ce_count):
-
         course_overview = CourseOverviewFactory()
         OrganizationCourseFactory(organization=self.organization,
                                   course_id=str(course_overview.id))
         uoms = [UserOrganizationMappingFactory(
             organization=self.organization) for i in range(ce_count)]
+
         expected_ce = [CourseEnrollmentFactory(
             course_id=course_overview.id,
             user=uoms[i].user) for i in range(ce_count)]
         course_enrollments = figures.sites.get_course_enrollments_for_site(self.site)
         assert set([ce.id for ce in course_enrollments]) == set(
                    [ce.id for ce in expected_ce])
+
+    # TODO: remove xfail after fixing filtering get_course_enrollments_for_site by Site
+    @pytest.mark.xfail  # for now, since this is just for TDD at this point.  
+    def test_get_course_enrollments_for_site_exclude_same_user_different_site(self):
+        """
+        Test that CEs are not returned from course from another Site, in cases where a user has
+        CEs in desired Site, but also in another Site.
+        """
+        course_overviews = [CourseOverviewFactory() for i in range(2)]
+        OrganizationCourseFactory(organization=self.organization,
+                                  course_id=str(course_overviews[0].id))
+        OrganizationCourseFactory(organization=self.default_site_org,
+                                  course_id=str(course_overviews[1].id))
+        uom_our_site = UserOrganizationMappingFactory(organization=self.organization)
+
+        # enroll same user in a course associated w/ an Organization not connected to our Site
+        uom_other_site = UserOrganizationMappingFactory(user=uom_our_site.user, organization=self.default_site_org)
+        CourseEnrollmentFactory(course_id=course_overviews[1].id, user=uom_our_site.user)
+
+        expected_ce = [CourseEnrollmentFactory(course_id=course_overviews[0].id, user=uom_our_site.user)]
+        course_enrollments = figures.sites.get_course_enrollments_for_site(self.site)
+        assert set([ce.id for ce in course_enrollments]) == set(
+                   [ce.id for ce in expected_ce])
+
 
     def test_get_student_modules_for_course_in_site(self):
         course_overviews = [CourseOverviewFactory() for i in range(3)]
