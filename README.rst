@@ -11,7 +11,7 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 TBD Q3 2021 - Figures release 0.4 "Official"
 ============================================
 
-**Most recent release**: "0.4.dev14" on June 29, 2021
+**Most recent release**: "0.4.dev16" on August 11, 2021
 
 Figures is iterating through "0.4.dev" development releases on the way to
 an official 0.4 release.

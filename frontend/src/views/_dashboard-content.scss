@@ -26,7 +26,7 @@
     padding: calcRem(15) calcRem(25);
     margin: calcRem(30) auto calcRem(50);
     font-weight: bold;
-    color: $primary-color;
+    color: $primary-color !important;
     border: calcRem(2) solid $primary-color;
     background: transparent;
     cursor: pointer;
@@ -35,7 +35,7 @@
     text-decoration: none;
 
     &:hover {
-      color: #fff;
+      color: #fff !important;
       background: $primary-color;
     }
   }

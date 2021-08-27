@@ -19,7 +19,7 @@ from figures.pipeline.site_monthly_metrics import fill_month
 from figures.models import EnrollmentData
 
 
-def backfill_monthly_metrics_for_site(site, overwrite=False):
+def backfill_monthly_metrics_for_site(site, overwrite=False, use_raw_sql=False):
     """Backfill specified months' historical site metrics for the specified site
     """
     site_sm = get_student_modules_for_site(site)
@@ -38,7 +38,8 @@ def backfill_monthly_metrics_for_site(site, overwrite=False):
         obj, created = fill_month(site=site,
                                   month_for=dt,
                                   student_modules=site_sm,
-                                  overwrite=overwrite)
+                                  overwrite=overwrite,
+                                  use_raw=use_raw_sql)
         backfilled.append(dict(obj=obj, created=created, dt=dt))
 
     return backfilled

@@ -5,11 +5,14 @@ from datetime import datetime
 import pytest
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, MONTHLY
+from six.moves import range
+from six.moves import zip
+
+from django.db import connection
 from django.utils.timezone import utc
 
 from figures.backfill import backfill_monthly_metrics_for_site
 from figures.models import SiteMonthlyMetrics
-
 from tests.factories import (
     CourseOverviewFactory,
     OrganizationFactory,
@@ -17,8 +20,6 @@ from tests.factories import (
     StudentModuleFactory,
     SiteFactory)
 from tests.helpers import organizations_support_sites
-from six.moves import range
-from six.moves import zip
 
 
 if organizations_support_sites():
@@ -72,8 +73,23 @@ def backfill_test_data(db):
     )
 
 
+def patched__get_fill_month_raw_sql_for_month(site_ids, month_for):
+    """Get SQL statement for fill_month use_raw_sql option... that works with SQLite in test.
+    """
+    if (connection.vendor == 'sqlite'):
+        month = str(month_for.month).zfill(2)
+        year = month_for.year
+        return """\
+        SELECT COUNT(DISTINCT student_id) from courseware_studentmodule
+        where id in {}
+        and strftime('%m', datetime(modified)) = '{}'
+        and strftime('%Y', datetime(modified)) = '{}'
+        """.format(site_ids, month, year)
+
+
 @pytest.mark.freeze_time('2019-09-01 12:00:00')
-def test_backfill_monthly_metrics_for_site(backfill_test_data):
+@pytest.mark.parametrize('use_raw_sql', (True, False))
+def test_backfill_monthly_metrics_for_site(monkeypatch, backfill_test_data, use_raw_sql):
     """Simple coverage and data validation check for the function under test
 
     Example backfilled results
@@ -98,10 +114,16 @@ def test_backfill_monthly_metrics_for_site(backfill_test_data):
     and make sure that `modified` dates are used in the production code and not
     `created` dates
     """
+    # monkeypatch the function which produces the raw sql w/one will work in test
+    monkeypatch.setattr(
+        "figures.pipeline.site_monthly_metrics._get_fill_month_raw_sql_for_month",
+        patched__get_fill_month_raw_sql_for_month
+    )
+
     site = backfill_test_data['site']
     count_check = backfill_test_data['count_check']
     assert not SiteMonthlyMetrics.objects.count()
-    backfilled = backfill_monthly_metrics_for_site(site=site, overwrite=True)
+    backfilled = backfill_monthly_metrics_for_site(site=site, overwrite=True, use_raw_sql=use_raw_sql)
     assert len(backfilled) == backfill_test_data['months_back']
     assert len(backfilled) == SiteMonthlyMetrics.objects.count()
     assert len(backfilled) == len(count_check)
