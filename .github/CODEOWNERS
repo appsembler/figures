@@ -1,3 +1,10 @@
 # see: https://appsembler.atlassian.net/wiki/spaces/ED/pages/2227503161/CODEOWNERS
 
+
+# Code owner
 * @johnbaldwin
+
+
+# Default reviewers
+* @johnbaldwin @omarithawi @melvinsoft @shadinaif @estherjsuh
+
