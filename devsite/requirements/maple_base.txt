@@ -1,0 +1,80 @@
+# Requirements needed by the devsite app server and test suite
+# For initial development, we're just importing all the packages needed
+# for both running the devsite server and for the pytest dependencies
+#
+
+# Versions should match those used in Open edX Juniper
+
+##
+## General Python package dependencies
+###
+
+celery==4.4.7
+six==1.16.0
+
+# Faker is used to seed mock data in devsite
+Faker==4.1.0 # TODO
+python-dateutil==2.7.3
+path.py==12.5.0
+
+pytz==2021.3
+
+##
+## Django package dependencies
+##
+
+Django==3.2.10
+
+djangorestframework==3.12.4
+django-countries==7.2.1
+django-webpack-loader==0.7.0
+django-model-utils==4.2.0
+django-filter==21.1
+django-environ==0.8.1
+django-waffle==2.2.1
+
+jsonfield==3.1.0
+
+# For
+
+
+##
+## Documentation (Sphinx) dependencies
+##
+
+Sphinx==3.1.2
+#recommonmark==0.6.0 #! 0.4.0 #caniusepython3 flagged
+
+##
+## Open edX package dependencies
+##
+
+edx-opaque-keys[django]==2.2.2
+#edx-drf-extensions==6.0.0
+
+
+##
+## Devsite 
+##
+
+django-debug-toolbar==2.2 # TODO
+
+
+##
+## Test dependencies
+##
+
+coverage==6.2
+factory-boy==3.2.0
+flake8==3.8.1
+pylint==2.9.6
+pylint-django==2.4.4
+pytest==6.2.5
+pytest-django==4.4.0
+pytest-mock==3.2.0 # TODO
+pytest-pythonpath==0.7.3 # TODO
+pytest-cov==3.0.0
+tox==3.24.4
+freezegun==0.3.12
+edx-lint==5.2.0
+mock==4.0.3
