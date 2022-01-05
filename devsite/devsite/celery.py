@@ -8,13 +8,13 @@ from celery import Celery
 from django.conf import settings
 
 
-CELERY_CHECK_MSG_PREFIX = 'figures-devsite-celery-check'
+CELERY_CHECK_MSG_PREFIX = "figures-devsite-celery-check"
 
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'devsite.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "devsite.settings")
 
-app = Celery('devsite')
+app = Celery("devsite")
 
 # For Celery 4.0+
 #
@@ -25,21 +25,21 @@ app = Celery('devsite')
 # See: https://docs.celeryproject.org/en/4.0/whatsnew-4.0.html
 # `app.config_from_object('django.conf:settings', namespace='CELERY')`
 
-app.config_from_object('django.conf:settings')
+app.config_from_object("django.conf:settings")
 
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
-
+# TODO update django-celery is not needed for celery 4.4.+
 app.conf.update(
-    CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',
+    CELERY_RESULT_BACKEND="djcelery.backends.database:DatabaseBackend",
 )
 
 
 @app.task(bind=True)
 def debug_task(self):
-    print(('Request: {0!r}'.format(self.request)))
+    print(("Request: {0!r}".format(self.request)))
 
 
 @app.task(bind=True)
@@ -49,4 +49,4 @@ def celery_check(self, msg):
     Returns a value so that we can test Celery results backend configuration
     """
     print(('Called devsite.celery.celery.check with message "{}"'.format(msg)))
-    return '{prefix}:{msg}'.format(prefix=CELERY_CHECK_MSG_PREFIX, msg=msg)
+    return "{prefix}:{msg}".format(prefix=CELERY_CHECK_MSG_PREFIX, msg=msg)
