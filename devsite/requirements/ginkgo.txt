@@ -9,7 +9,7 @@
 ## General Python package dependencies
 ###
 
-celery==3.1.18
+celery==5.2.2
 
 # Faker is used to seed mock data in devsite
 Faker==1.0.4

@@ -9,7 +9,7 @@
 ## General Python package dependencies
 ###
 
-celery==3.1.26.post2
+celery==5.2.2
 django-celery==3.3.1
 six==1.15.0
 
