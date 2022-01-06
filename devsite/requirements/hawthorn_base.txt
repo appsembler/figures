@@ -34,7 +34,7 @@ django-webpack-loader==0.6.0
 ## Celery packages
 ##
 
-celery==3.1.25
+celery==5.2.2
 django-celery==3.3.1
 
 ##
