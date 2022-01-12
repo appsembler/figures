@@ -170,7 +170,7 @@ class CourseOverviewViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
     lookup_value_regex = settings.COURSE_ID_PATTERN
 
     def get_queryset(self):
-        site = django.contrib.sites.shortcuts.get_current_site(self.request)
+        site = get_requested_site(self.request)
         queryset = figures.sites.get_courses_for_site(site)
         return queryset
 
