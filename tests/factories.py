@@ -76,7 +76,7 @@ class UserProfileFactory(DjangoModelFactory):
         ['p','m','b','a','hs','jh','el','none', 'other',]
         )
     profile_image_uploaded_at = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,0o4,0o1, tzinfo=factory.compat.UTC))
+        2018,0o4,0o1, tzinfo=utc))
 
 
 class UserFactory(DjangoModelFactory):
@@ -90,7 +90,7 @@ class UserFactory(DjangoModelFactory):
     is_staff = False
     is_superuser = False
     date_joined = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 4, 1, tzinfo=factory.compat.UTC))
+        2018, 4, 1, tzinfo=utc))
 
     # TODO: Figure out if this can be a SubFactory and the advantages
     profile = factory.RelatedFactory(UserProfileFactory, 'user')
@@ -146,7 +146,7 @@ class OrganizationCourseFactory(DjangoModelFactory):
 
 
 if organizations_support_sites():
-    class UserOrganizationMappingFactory(factory.DjangoModelFactory):
+    class UserOrganizationMappingFactory(DjangoModelFactory):
         class Meta(object):
             model = organizations.models.UserOrganizationMapping
 
@@ -156,7 +156,7 @@ if organizations_support_sites():
         is_amc_admin = False
 
 
-class CourseOverviewFactory(factory.DjangoModelFactory):
+class CourseOverviewFactory(DjangoModelFactory):
     class Meta:
         model = CourseOverview
 
@@ -170,15 +170,15 @@ class CourseOverviewFactory(factory.DjangoModelFactory):
         version = CourseOverview.VERSION
     display_org_with_default = factory.LazyAttribute(lambda o: o.org)
     created = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 2, 1, tzinfo=factory.compat.UTC))
+        2018, 2, 1, tzinfo=utc))
     enrollment_start = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 3, 1, tzinfo=factory.compat.UTC))
+        2018, 3, 1, tzinfo=utc))
     enrollment_end = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 3, 15, tzinfo=factory.compat.UTC))
+        2018, 3, 15, tzinfo=utc))
     start = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 4, 1, tzinfo=factory.compat.UTC))
+        2018, 4, 1, tzinfo=utc))
     end = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 6, 1, tzinfo=factory.compat.UTC))
+        2018, 6, 1, tzinfo=utc))
     self_paced = False
 
 
@@ -216,9 +216,9 @@ class StudentModuleFactory(DjangoModelFactory):
     course_id = factory.Sequence(lambda n: as_course_key(
         COURSE_ID_STR_TEMPLATE.format(n)))
     created = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,2,2, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=utc))
     modified = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,2,2, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=utc))
 
 
 if OPENEDX_RELEASE == GINKGO:
