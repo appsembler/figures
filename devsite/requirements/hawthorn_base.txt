@@ -26,7 +26,7 @@ django-waffle==0.12.0
 # edx-platform hawthorn does not use django-extensions
 django-extensions==1.5.9
 django-environ==0.4.5
-django-filter==1.0.4
+django-filter==2.4.0
 django-model-utils==3.0.0
 django-webpack-loader==0.6.0
 

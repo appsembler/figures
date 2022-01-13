@@ -30,7 +30,7 @@ djangorestframework==3.9.4
 django-countries==5.5
 django-webpack-loader==0.7.0
 django-model-utils==4.0.0
-django-filter==2.3.0
+django-filter==2.4.0
 django-environ==0.4.5
 django-waffle==0.18.0
 

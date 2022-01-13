@@ -30,7 +30,7 @@ django-extensions==1.5.9
 # ./edx/base.txt:git+https://github.com/edx/django-rest-framework.git@3c72cb5ee5baebc4328947371195eae2077197b0#egg=djangorestframework==3.2.3
 djangorestframework==3.2.3
 django-countries==4.0
-django-filter==0.11.0
+django-filter==2.4.0
 django-webpack-loader==0.4.1
 # appsembler/gingko/master users 0.4.1
 
