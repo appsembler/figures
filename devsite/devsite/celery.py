@@ -33,7 +33,7 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 # TODO update django-celery is not needed for celery 4.4.+
 app.conf.update(
-    CELERY_RESULT_BACKEND="djcelery.backends.database:DatabaseBackend",
+    CELERY_RESULT_BACKEND="django-db",
 )
 
 

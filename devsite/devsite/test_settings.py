@@ -78,7 +78,7 @@ INSTALLED_APPS = [
 ]
 
 if OPENEDX_RELEASE != 'GINGKO':
-    INSTALLED_APPS.append('djcelery')
+    # INSTALLED_APPS.append('djcelery')
 
     # We need this in order for figures.tasks unit tests to not fail with:
     #   "error: [Errno 61] Connection refused"
