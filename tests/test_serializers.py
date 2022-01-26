@@ -7,7 +7,7 @@ import datetime
 from dateutil.parser import parse as dateutil_parse
 from decimal import Decimal
 import pytest
-import pytz
+# import pytz
 
 from django.contrib.sites.models import Site
 from django.db import models
@@ -55,27 +55,8 @@ from tests.factories import (
     SiteFactory,
     )
 
-from tests.helpers import platform_release
+from tests.helpers import as_datetime_utc, platform_release
 import six
-
-
-def as_datetime_utc(datetime_string):
-    """Returns `datetime` instance with UTC timezone
-
-    This helpler function centralizes converting  "datetime as a string" to a
-    datetime object in UTC.
-
-    We use dateutil.parser.parse because it is convenient. However, these tests
-    need to support mulitple versions of Open edX and with that, multiple versions
-    of the dateutil package. While the dateutil package does handle timezone
-    assignment, this approach is more portable.
-
-    We may want to iterate on this to create a 'datetime_matches' function.
-    However, then we have to consider type checking for the parameters, or
-    enforce one type as string and the other as datetime, or do conversions.
-    Basically, we might be making testing more complicated
-    """
-    return dateutil_parse(datetime_string).replace(tzinfo=utc)
 
 
 class TestSerializableCountryField(object):
@@ -428,7 +409,7 @@ class TestGeneralUserDataSerializer(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.a_datetime = datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC)
+        self.a_datetime = datetime.datetime(2018, 2, 2, tzinfo=utc)
         self.user_attributes = {
             'username': 'alpha_one',
             'email': 'alpha_one@example.com',
