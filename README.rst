@@ -343,6 +343,61 @@ From the `figures` repository root directory:
 
 If all goes well, the Figures unit tests will all complete succesfully
 
+
+-------------
+Configuration
+-------------
+
+Figures can be configured via Django settings' ``FIGURES`` key. Open edX reads configuration from
+the ``/edx/etc/lms.yml`` file both in devstack and production servers. In releases before Juniper it
+was the ``lms.env.json`` file.
+
+A Figures configuration may look like the following:
+
+
+::
+
+	FEATURES:  # The standard Open edX feature flags
+		# ... other features goes here ...
+		FIGURES_IS_MULTISITE: True
+		# ... more features goes there ...
+
+	FIGURES:  # Other Figures configurations
+		SITES_BACKEND: 'openedx.core.djangoapps.appsembler.sites.utils:get_active_sites'
+		REQUESTED_SITE_BACKEND: 'tahoe_figures_plugins.sites:get_current_site_or_by_uuid'
+		FIGURES_PIPELINE_TASKS_ROUTING_KEY: 'edx.lms.core.high'
+		DAILY_METRICS_IMPORT_HOUR: 13
+		DAILY_METRICS_IMPORT_MINUTE: 0
+
+
+Settings like ``SITES_BACKEND`` require a path to a Python function or class. The path is consists of two parts:
+a Python module e.g. ``my_plugin_package.helpers`` and an object e.g ``my_helper`` separated by a colon e.g.
+``my_plugin_package.helpers:my_helper``.
+
+This object would be imported by the ``import_from_path`` helper in the
+`figures/helpers.py <https://github.com/appsembler/figures/blob/932eeab84c469a34dfcb94232bbe6f7c08146b3f/figures/helpers.py#L84-L98>`__ module.
+
+.....................
+Configuration options
+.....................
+
+
+* ``FEATURES.FIGURES_IS_MULTISITE`` (default ``False``): Boolean feature flag to run Figures in a single-site mode by
+  default (when set to ``False``) most popular Open edX installation option.
+  The multisite mode requires a custom ``edx-organizations`` fork that is used for
+  Appsembler Tahoe clusters.
+
+* ``FIGURES.SITES_BACKEND`` (default ``None``): A Python path to function to list figures sites.
+  For example, this is useful to customize which sites are processed and which are considered inactive.
+  By default (when ``None`` is used) all sites are listed in the multi-site mode.
+
+* ``REQUESTED_SITE_BACKEND`` (default ``None``): Python path to a function that gets the current site.
+  For example it can be used for API purposes to pass a Site ID to get a different site.
+  By default (when ``None`` is used) the Django's ``get_current_site()`` helper is used.
+
+
+**TBD:** Document ``FIGURES_PIPELINE_TASKS_ROUTING_KEY``, ``DAILY_METRICS_IMPORT_HOUR`` and ``DAILY_METRICS_IMPORT_MINUTE``.
+
 ------
 Future
 ------
