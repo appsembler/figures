@@ -437,6 +437,54 @@ def test_student_modules_for_course_enrollment(monkeypatch):
     assert set(sm) == set(ce_sm)
 
 
+@pytest.mark.django_db
+def test_get_requested_site_default_behaviour(settings):
+    """
+    Test `get_requested_site` returns Django's get_current_site() by default.
+    """
+    example_site = Site.objects.get()  # gets the example site
+    settings.SITE_ID = example_site.id
+
+    current_site = figures.sites.get_requested_site(request=mock.Mock())
+    assert current_site == example_site, 'Use Django\'s get_current_site().'
+
+
+@pytest.mark.django_db
+def test_get_requested_site_custom_backend(settings):
+    """
+    Test `get_requested_site` can use custom backends.
+    """
+    orange_site = SiteFactory.create(name='orange site')
+
+    settings.ENV_TOKENS = {
+        'FIGURES': {
+            'REQUESTED_SITE_BACKEND': 'organizations:get_orange_site'
+        }
+    }
+    with mock.patch('organizations.get_orange_site', create=True, return_value=orange_site):
+        requested_site = figures.sites.get_requested_site(request=mock.Mock())
+    assert requested_site == orange_site, 'Should use custom backend.'
+
+
+@pytest.mark.django_db
+def test_get_requested_site_broken_backend(settings):
+    """
+    Test `get_requested_site` don't hide errors from custom backends.
+
+    Figures should keep a simple backend implementation without attempting to fix errors in site configuration or
+    faulty backends.
+    """
+    settings.ENV_TOKENS = {
+        'FIGURES': {
+            'REQUESTED_SITE_BACKEND': 'organizations:broken_backend'
+        }
+    }
+    with mock.patch('organizations.broken_backend', create=True, side_effect=RuntimeError):
+        with pytest.raises(RuntimeError):
+            # Should fail if the REQUESTED_SITE_BACKEND fails
+            figures.sites.get_requested_site(request=mock.Mock())
+
+
 @pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')
 @pytest.mark.django_db
 def test_get_sites_default_behaviour():
