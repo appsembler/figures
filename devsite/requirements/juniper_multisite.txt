@@ -4,3 +4,4 @@
 
 # Organization/site mapping requires Appsembler's fork
 git+https://github.com/appsembler/edx-organizations.git@5.2.0-appsembler13
+-e git+https://github.com/appsembler/tahoe-sites.git@59f86403bf881eeac2efd3e6efdbc323ccda36fe#egg=tahoe-sites
