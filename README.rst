@@ -8,30 +8,25 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
-TBD Q3 2021 - Figures release 0.4 "Official"
-============================================
+`Figures is on PyPI <https://pypi.org/project/Figures/>`__
 
-**Most recent release**: "0.4.dev16" on August 11, 2021
 
-Figures is iterating through "0.4.dev" development releases on the way to
-an official 0.4 release.
+Feb 4, 2022 - Main Branch
+=========================
 
-The Figures 0.4.dev releases support Open edX Juniper, Hawthorn, and Ginkgo
+`main` is the new default branch
 
-* The reason for "dev" (development) instead of "rc" (release candidate) is that
-  the 'dev' label lets us be free to make breaking changes, whereas an "rc"
-  label is about making sure a release is stable for general community use
 
-* Appsembler deploys "0.4.dev" releases to Tahoe production and Figures is used
-  by our customers. This is similar to how Open edX deploys "master/main" to
-  "edx.org" then creates named releases
+Jan 28, 2022 - Figures release 0.4.1
+====================================
 
-* Most of the ongoing work is in the following areas
-  
-  * Improving the daily pipeline tasks for accuracy, reliability, and
-    performance
-  * Improving API performance
-  * Bug fixing
+Figures 0.4.1 is finally here. After several development releases, we realized it was time to just move to production releases.
+
+
+
+
+Figures 0.4.x release series supports Open edX Juniper, Hawthorn, and Ginkgo
+
 
 Please visit Figures `releases page <https://github.com/appsembler/figures/releases>`__ for details on specific releases.
 
