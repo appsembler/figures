@@ -134,7 +134,9 @@ class TestHandlersForMultisiteMode(object):
         is_multisite = figures.helpers.is_multisite()
         assert is_multisite
         self.site = SiteFactory(domain='foo.test')
+        self.default_site = Site.objects.get(id=1)
         self.organization = OrganizationFactory(sites=[self.site])
+        self.default_site_org = OrganizationFactory(sites=[self.default_site])
         assert Site.objects.count() == 2
         self.features = {'FIGURES_IS_MULTISITE': True}
 
@@ -193,18 +195,40 @@ class TestHandlersForMultisiteMode(object):
 
     @pytest.mark.parametrize('ce_count', [0, 1, 2])
     def test_get_course_enrollments_for_site(self, ce_count):
-
         course_overview = CourseOverviewFactory()
         OrganizationCourseFactory(organization=self.organization,
                                   course_id=str(course_overview.id))
         uoms = [UserOrganizationMappingFactory(
             organization=self.organization) for i in range(ce_count)]
+
         expected_ce = [CourseEnrollmentFactory(
             course_id=course_overview.id,
             user=uoms[i].user) for i in range(ce_count)]
         course_enrollments = figures.sites.get_course_enrollments_for_site(self.site)
         assert set([ce.id for ce in course_enrollments]) == set(
                    [ce.id for ce in expected_ce])
+
+    def test_get_course_enrollments_for_site_exclude_same_user_different_site(self):
+        """
+        Test that CEs are not returned from course from another Site, in cases where a user has
+        CEs in desired Site, but also in another Site.
+        """
+        course_overviews = [CourseOverviewFactory() for i in range(2)]
+        OrganizationCourseFactory(organization=self.organization,
+                                  course_id=str(course_overviews[0].id))
+        OrganizationCourseFactory(organization=self.default_site_org,
+                                  course_id=str(course_overviews[1].id))
+        uom_our_site = UserOrganizationMappingFactory(organization=self.organization)
+
+        # enroll same user in a course associated w/ an Organization not connected to our Site
+        uom_other_site = UserOrganizationMappingFactory(user=uom_our_site.user, organization=self.default_site_org)
+        CourseEnrollmentFactory(course_id=course_overviews[1].id, user=uom_our_site.user)
+
+        expected_ce = [CourseEnrollmentFactory(course_id=course_overviews[0].id, user=uom_our_site.user)]
+        course_enrollments = figures.sites.get_course_enrollments_for_site(self.site)
+        assert set([ce.id for ce in course_enrollments]) == set(
+                   [ce.id for ce in expected_ce])
+
 
     def test_get_student_modules_for_course_in_site(self):
         course_overviews = [CourseOverviewFactory() for i in range(3)]
@@ -411,6 +435,54 @@ def test_student_modules_for_course_enrollment(monkeypatch):
 
     sm = figures.sites.student_modules_for_course_enrollment(site, ce)
     assert set(sm) == set(ce_sm)
+
+
+@pytest.mark.django_db
+def test_get_requested_site_default_behaviour(settings):
+    """
+    Test `get_requested_site` returns Django's get_current_site() by default.
+    """
+    example_site = Site.objects.get()  # gets the example site
+    settings.SITE_ID = example_site.id
+
+    current_site = figures.sites.get_requested_site(request=mock.Mock())
+    assert current_site == example_site, 'Use Django\'s get_current_site().'
+
+
+@pytest.mark.django_db
+def test_get_requested_site_custom_backend(settings):
+    """
+    Test `get_requested_site` can use custom backends.
+    """
+    orange_site = SiteFactory.create(name='orange site')
+
+    settings.ENV_TOKENS = {
+        'FIGURES': {
+            'REQUESTED_SITE_BACKEND': 'organizations:get_orange_site'
+        }
+    }
+    with mock.patch('organizations.get_orange_site', create=True, return_value=orange_site):
+        requested_site = figures.sites.get_requested_site(request=mock.Mock())
+    assert requested_site == orange_site, 'Should use custom backend.'
+
+
+@pytest.mark.django_db
+def test_get_requested_site_broken_backend(settings):
+    """
+    Test `get_requested_site` don't hide errors from custom backends.
+
+    Figures should keep a simple backend implementation without attempting to fix errors in site configuration or
+    faulty backends.
+    """
+    settings.ENV_TOKENS = {
+        'FIGURES': {
+            'REQUESTED_SITE_BACKEND': 'organizations:broken_backend'
+        }
+    }
+    with mock.patch('organizations.broken_backend', create=True, side_effect=RuntimeError):
+        with pytest.raises(RuntimeError):
+            # Should fail if the REQUESTED_SITE_BACKEND fails
+            figures.sites.get_requested_site(request=mock.Mock())
 
 
 @pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')

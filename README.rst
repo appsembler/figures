@@ -8,30 +8,25 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 
 .. _notice_section:
 
-TBD Q3 2021 - Figures release 0.4 "Official"
-============================================
+`Figures is on PyPI <https://pypi.org/project/Figures/>`__
 
-**Most recent release**: "0.4.dev14" on June 29, 2021
 
-Figures is iterating through "0.4.dev" development releases on the way to
-an official 0.4 release.
+Feb 4, 2022 - Main Branch
+=========================
 
-The Figures 0.4.dev releases support Open edX Juniper, Hawthorn, and Ginkgo
+`main` is the new default branch
 
-* The reason for "dev" (development) instead of "rc" (release candidate) is that
-  the 'dev' label lets us be free to make breaking changes, whereas an "rc"
-  label is about making sure a release is stable for general community use
 
-* Appsembler deploys "0.4.dev" releases to Tahoe production and Figures is used
-  by our customers. This is similar to how Open edX deploys "master/main" to
-  "edx.org" then creates named releases
+Jan 28, 2022 - Figures release 0.4.1
+====================================
 
-* Most of the ongoing work is in the following areas
-  
-  * Improving the daily pipeline tasks for accuracy, reliability, and
-    performance
-  * Improving API performance
-  * Bug fixing
+Figures 0.4.1 is finally here. After several development releases, we realized it was time to just move to production releases.
+
+
+
+
+Figures 0.4.x release series supports Open edX Juniper, Hawthorn, and Ginkgo
+
 
 Please visit Figures `releases page <https://github.com/appsembler/figures/releases>`__ for details on specific releases.
 
@@ -342,6 +337,61 @@ From the `figures` repository root directory:
 	py.test
 
 If all goes well, the Figures unit tests will all complete succesfully
+
+
+-------------
+Configuration
+-------------
+
+Figures can be configured via Django settings' ``FIGURES`` key. Open edX reads configuration from
+the ``/edx/etc/lms.yml`` file both in devstack and production servers. In releases before Juniper it
+was the ``lms.env.json`` file.
+
+A Figures configuration may look like the following:
+
+
+::
+
+	FEATURES:  # The standard Open edX feature flags
+		# ... other features goes here ...
+		FIGURES_IS_MULTISITE: True
+		# ... more features goes there ...
+
+	FIGURES:  # Other Figures configurations
+		SITES_BACKEND: 'openedx.core.djangoapps.appsembler.sites.utils:get_active_sites'
+		REQUESTED_SITE_BACKEND: 'tahoe_figures_plugins.sites:get_current_site_or_by_uuid'
+		FIGURES_PIPELINE_TASKS_ROUTING_KEY: 'edx.lms.core.high'
+		DAILY_METRICS_IMPORT_HOUR: 13
+		DAILY_METRICS_IMPORT_MINUTE: 0
+
+
+Settings like ``SITES_BACKEND`` require a path to a Python function or class. The path is consists of two parts:
+a Python module e.g. ``my_plugin_package.helpers`` and an object e.g ``my_helper`` separated by a colon e.g.
+``my_plugin_package.helpers:my_helper``.
+
+This object would be imported by the ``import_from_path`` helper in the
+`figures/helpers.py <https://github.com/appsembler/figures/blob/932eeab84c469a34dfcb94232bbe6f7c08146b3f/figures/helpers.py#L84-L98>`__ module.
+
+.....................
+Configuration options
+.....................
+
+
+* ``FEATURES.FIGURES_IS_MULTISITE`` (default ``False``): Boolean feature flag to run Figures in a single-site mode by
+  default (when set to ``False``) most popular Open edX installation option.
+  The multisite mode requires a custom ``edx-organizations`` fork that is used for
+  Appsembler Tahoe clusters.
+
+* ``FIGURES.SITES_BACKEND`` (default ``None``): A Python path to function to list figures sites.
+  For example, this is useful to customize which sites are processed and which are considered inactive.
+  By default (when ``None`` is used) all sites are listed in the multi-site mode.
+
+* ``REQUESTED_SITE_BACKEND`` (default ``None``): Python path to a function that gets the current site.
+  For example it can be used for API purposes to pass a Site ID to get a different site.
+  By default (when ``None`` is used) the Django's ``get_current_site()`` helper is used.
+
+
+**TBD:** Document ``FIGURES_PIPELINE_TASKS_ROUTING_KEY``, ``DAILY_METRICS_IMPORT_HOUR`` and ``DAILY_METRICS_IMPORT_MINUTE``.
 
 ------
 Future
