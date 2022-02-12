@@ -34,12 +34,9 @@ environ.Env.read_env(os.path.join(DEVSITE_BASE_DIR, '.env'))
 
 OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
 
-if OPENEDX_RELEASE == 'GINKGO':
-    ENABLE_DEVSITE_CELERY = False
-else:
-    ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
+ENABLE_DEVSITE_CELERY = env('ENABLE_DEVSITE_CELERY')
 
-MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
+MOCKS_DIR = 'mocks/'
 
 # SECURITY WARNING: Use a real key when running in the cloud and keep it secret
 SECRET_KEY = 'insecure-secret-key'
@@ -83,47 +80,24 @@ INSTALLED_APPS = [
     # Also note the paths set in edx-figures/pytest.ini
     'openedx.core.djangoapps.content.course_overviews',
     'openedx.core.djangoapps.course_groups',
+    'lms.djangoapps.certificates',
+    'lms.djangoapps.courseware',
     'student',
 ]
 
 if ENABLE_DEVSITE_CELERY:
     INSTALLED_APPS.append('djcelery')
 
-# certificates app
-if OPENEDX_RELEASE == 'GINKGO':
-    INSTALLED_APPS.append('certificates')
-    INSTALLED_APPS.append('courseware')
-elif OPENEDX_RELEASE == 'HAWTHORN':
-    INSTALLED_APPS.append('lms.djangoapps.certificates')
-    INSTALLED_APPS.append('courseware')
-else:
-    INSTALLED_APPS.append('lms.djangoapps.certificates')
-    INSTALLED_APPS.append('lms.djangoapps.courseware')
-
-
-if OPENEDX_RELEASE == 'JUNIPER':
-    MIDDLEWARE = (
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'django.middleware.security.SecurityMiddleware',
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-    )
-else:
-    MIDDLEWARE_CLASSES = (
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'django.middleware.security.SecurityMiddleware',
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-    )
+MIDDLEWARE = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+)
 
 ROOT_URLCONF = 'devsite.urls'
 
@@ -239,9 +213,9 @@ FEATURES = {
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
-
+FIGURES_PIPELINE_TASKS_ROUTING_KEY = "" #TODO: (maple) is this correct? I just copied what was in the test_settings
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
-update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
+update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS, FIGURES_PIPELINE_TASKS_ROUTING_KEY)
 
 # Used by Django Debug Toolbar
 INTERNAL_IPS = [
@@ -253,7 +227,7 @@ DEVSITE_SEED = {
     'NUM_LEARNERS_PER_COURSE': env('SEED_NUM_LEARNERS_PER_COURSE')
 }
 
-ENABLE_OPENAPI_DOCS = env('ENABLE_OPENAPI_DOCS') and OPENEDX_RELEASE not in ['GINKGO', 'HAWTHORN']
+ENABLE_OPENAPI_DOCS = env('ENABLE_OPENAPI_DOCS')
 
 if ENABLE_OPENAPI_DOCS:
-    INSTALLED_APPS += ['drf_yasg2']
+    INSTALLED_APPS += ['drf_yasg']

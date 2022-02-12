@@ -19,9 +19,6 @@ class FiguresRouter(object):
 
 
 def get_build_label(release_line):
-    if release_line in ['ginkgo', 'hawthorn']:
-        return 'rb10'
-    else:
         return 'rb16'
 
 
