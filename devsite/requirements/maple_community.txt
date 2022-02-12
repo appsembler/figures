@@ -1,5 +1,0 @@
-# Requirements needed for Juniper community environment
-
--r maple_base.txt
-
-edx-organizations==6.10.0

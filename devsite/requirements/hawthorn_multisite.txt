@@ -1,6 +1,0 @@
-# Requirements needed for Hawthorn multisite environment
-
--r hawthorn_base.txt
-
-# Organization/site mapping requires Appsembler's fork
-git+https://github.com/appsembler/edx-organizations.git@0.4.12-appsembler4

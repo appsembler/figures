@@ -1,6 +1,6 @@
 # Requirements for developer environment with Python 3.8+
 
--r juniper_community.txt
+-r community.txt
 
 # Used to serve OpenAPI docs
 # See Figures docs/source/api.rst
