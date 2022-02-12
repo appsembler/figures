@@ -11,7 +11,7 @@ from figures.tasks import (FPM_LOG_PREFIX,
                            run_figures_monthly_metrics)
 
 from tests.factories import SiteFactory
-from tests.helpers import OPENEDX_RELEASE, GINKGO, FakeException
+from tests.helpers import FakeException
 
 
 def test_populate_monthly_metrics_for_site(transactional_db, monkeypatch):
@@ -93,8 +93,6 @@ def test_run_figures_monthly_metrics_with_faked_subtask(transactional_db, monkey
     assert set(sites_visited) == set([rec.id for rec in expected_sites])
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Broken test. Apparent Django 1.8 incompatibility')
 def test_run_figures_monthly_metrics_with_unfaked_subtask(transactional_db, monkeypatch):
     """Verify we visit the function our subtasks calls
 
