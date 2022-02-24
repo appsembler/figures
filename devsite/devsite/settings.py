@@ -14,6 +14,7 @@ import environ
 from figures.settings.lms_production import (
     update_webpack_loader,
     update_celerybeat_schedule,
+    update_celery_routes,
 )
 
 DEVSITE_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +23,7 @@ PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
 env = environ.Env(
     DEBUG=(bool, True),
     ALLOWED_HOSTS=(list, []),
-    OPENEDX_RELEASE=(str, 'HAWTHORN'),
+    OPENEDX_RELEASE=(str, 'JUNIPER'),
     FIGURES_IS_MULTISITE=(bool, False),
     ENABLE_DEVSITE_CELERY=(bool, True),
     ENABLE_OPENAPI_DOCS=(bool, False),
@@ -240,8 +241,16 @@ FEATURES = {
 # We have an empty dict here to replicate behavior in the LMS
 ENV_TOKENS = {}
 
+PRJ_SETTINGS = {
+    'CELERY_ROUTES': "app.celery.routes"
+}
+
+FIGURES_PIPELINE_TASKS_ROUTING_KEY = ""
+
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
-update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS)
+update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS, FIGURES_PIPELINE_TASKS_ROUTING_KEY)
+update_celery_routes(PRJ_SETTINGS, ENV_TOKENS, FIGURES_PIPELINE_TASKS_ROUTING_KEY)
+
 
 # Used by Django Debug Toolbar
 INTERNAL_IPS = [
