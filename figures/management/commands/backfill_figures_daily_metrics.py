@@ -75,11 +75,6 @@ class Command(BaseBackfillCommand):
                 metrics_func(**kwargs)
             else:
                 metrics_func.delay(**kwargs)  # pragma: no cover
-            # except Exception as e:  # pylint: disable=bare-except
-            #     if options['ignore_exceptions']:
-            #         self.print_exc("daily", dt, e.message)
-            #     else:
-            #         raise
 
             print('END: Backfill Figures daily metrics metrics for: {}'.format(dt))
 
