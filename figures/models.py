@@ -5,7 +5,7 @@ TODO: Create a base "SiteModel" or a "SiteModelMixin"
 
 from __future__ import absolute_import
 from datetime import date
-import timeit
+from time import time
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -283,7 +283,7 @@ class EnrollmentDataManager(models.Manager):
 
         if not ed_recs or ed_recs[0].date_for < date_for or force_update:
             # We do the update
-            start_time = timeit.default_timer()
+            start_time = time()
             # get the progress data
             ep = EnrollmentProgress(user=course_enrollment.user,
                                     course_id=str(course_enrollment.course_id))
@@ -298,7 +298,7 @@ class EnrollmentDataManager(models.Manager):
                 is_enrolled=course_enrollment.is_active,
                 date_enrolled=course_enrollment.created,
             )
-            elapsed = timeit.default_timer() - start_time
+            elapsed = time() - start_time
             defaults['collect_elapsed'] = elapsed
 
             ed_rec, created = self.update_or_create(
