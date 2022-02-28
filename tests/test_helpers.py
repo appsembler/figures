@@ -22,6 +22,7 @@ from figures.helpers import (
     previous_months_iterator,
     first_last_days_for_month,
     import_from_path,
+    utc_yesterday,
     )
 
 from tests.factories import COURSE_ID_STR_TEMPLATE
@@ -206,6 +207,7 @@ class TestMonthIterator(object):
         vals = list(previous_months_iterator(month_for, months_back))
         assert vals == expected_vals
 
+
 def test_first_last_days_for_month():
     month_for = '2/2020'
     month = 2
@@ -244,3 +246,15 @@ def test_import_from_bad_syntax():
     with pytest.raises(ValueError):
         # Malformed path
         import_from_path(utc_tz_path)
+
+
+def test_utc_yesterday():
+    """Basic sanity check and test coverage using live time
+
+    If we find a need or wante to get elaborate, we test a specific time for
+    any time by with monkeypatch/mock of `utcnow()` call in `figures.helpers`
+    If it is for a need because the expected and actual do not match up, then
+    document why.
+    """
+    expected = datetime.datetime.utcnow().date() - datetime.timedelta(days=1)
+    assert utc_yesterday() == expected

@@ -1,6 +1,7 @@
 """Helper functions to make data handling and conversions easier
 
 # Figures 0.3.13 - Defining scope of this module
+# Figures 0.4.x - Yep, this module is still handy and the scope hasn't exploded
 
 The purpose of this module is to provide conveniece methods around commonly
 executed statements. These convenience methods should serve as shorthand for
@@ -34,6 +35,8 @@ repeat yourself) the code and make the code more readable
 
 ## What does not belong here?
 
+* Most importantly, if you have to import from another figures module, it does
+  not belong here!
 * "Feature" functionality does not belong here
 * Long functions do not belong here
 * Code that communicates outside of Figures does not belong here. No database,
@@ -42,7 +45,10 @@ repeat yourself) the code and make the code more readable
 This is not an exhaustive list. We'll grow it as needed.
 
 An important point is that we should not expect this module to be a permanent
-home for functionality.
+home for the functionality included. As we evolve Figures, we may find functions
+here that have a stronger context with another module. For example, we've got
+a decent set of date oriented functions that are candidatdes for a datetime and
+date handling module.
 """
 
 from __future__ import absolute_import
@@ -186,6 +192,15 @@ def next_day(val):
 
 def prev_day(val):
     return days_from(val, -1)
+
+
+def utc_yesterday():
+    """Get "yesterday" form the utc datetime
+
+    We primarily use this for the daily metrics collection. However, it proves
+    handy as a convenience function for exploring data in the Django shell
+    """
+    return prev_day(datetime.datetime.utcnow().date())
 
 
 def days_in_month(month_for):
