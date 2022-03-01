@@ -18,13 +18,14 @@ from celery import chord, group
 from celery.app import shared_task
 from celery.utils.log import get_task_logger
 
-from figures.backfill import backfill_enrollment_data_for_site
 from figures.compat import CourseEnrollment, CourseOverview
 from figures.helpers import as_course_key, as_date, is_past_date
 from figures.log import log_exec_time
+from figures.sites import get_sites, get_sites_by_id, site_course_ids
+
+from figures.pipeline.backfill import backfill_enrollment_data_for_site
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
 from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
-from figures.sites import get_sites, get_sites_by_id, site_course_ids
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.helpers import DateForCannotBeFutureError
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
@@ -319,6 +320,19 @@ def populate_daily_metrics_next(site_id=None, force_update=False):
     logger.info(msg.format(prefix=FPD_LOG_PREFIX,
                            date_for=date_for,
                            site_count=sites_count))
+
+
+@shared_task
+def backfill_enrollment_data_for_course(course_id):
+    """Create or update EnrollmentData records for the course
+
+    Simple wrapper to run the enrollment update as a Celery task
+
+    We usually run this task through the Figures Django management command,
+    `backfill_figures_enrollment_data`
+    """
+    ed_objects = update_enrollment_data_for_course(course_id)
+    return [obj.id for obj in ed_objects]
 
 
 #
