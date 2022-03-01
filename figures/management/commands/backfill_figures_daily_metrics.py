@@ -70,7 +70,7 @@ class Command(BaseBackfillCommand):
                 del kwargs['site_id']  # not implemented for experimental
             else:
                 metrics_func = populate_daily_metrics
-            # try:
+
             if options['no_delay']:
                 metrics_func(**kwargs)
             else:
