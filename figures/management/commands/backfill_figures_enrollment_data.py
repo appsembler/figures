@@ -9,7 +9,7 @@ from __future__ import absolute_import
 from textwrap import dedent
 
 from figures.management.base import BaseBackfillCommand
-from figures.tasks import update_enrollment_data
+from figures.tasks import update_enrollment_data_for_site
 
 
 class Command(BaseBackfillCommand):
@@ -23,8 +23,8 @@ class Command(BaseBackfillCommand):
         for site_id in self.get_site_ids(options['site']):
             print('Updating EnrollmentData for site {}'.format(site_id))
             if options['no_delay']:
-                update_enrollment_data(site_id=site_id)
+                update_enrollment_data_for_site(site_id=site_id)
             else:
-                update_enrollment_data.delay(site_id=site_id)  # pragma: no cover
+                update_enrollment_data_for_site.delay(site_id=site_id)  # pragma: no cover
 
         print('DONE: Backfill Figures EnrollmentData')

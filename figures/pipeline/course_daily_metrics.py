@@ -30,6 +30,10 @@ from figures.models import CourseDailyMetrics, PipelineError
 from figures.pipeline.logger import log_error
 import figures.pipeline.loaders
 from figures.pipeline.enrollment_metrics import bulk_calculate_course_progress_data
+from figures.pipeline.enrollment_metrics_next import (
+    calculate_course_progress as calculate_course_progress_next
+)
+
 from figures.serializers import CourseIndexSerializer
 import figures.sites
 from figures.pipeline.helpers import pipeline_date_for_rule
@@ -235,16 +239,32 @@ class CourseDailyMetricsExtractor(object):
     BUT, we will then need to find a transform
     """
 
-    def extract(self, course_id, date_for, **_kwargs):
-        """
-            defaults = dict(
+    def extract(self, course_id, date_for, ed_next=False, **_kwargs):
+        """Extracts (collects) aggregated course level data
+
+        Args:
+            course_id (:obj:`str` or :obj:`CourseKey`): The course for which we collect data
+            date_for (str or date): Deprecated. Was to backfill data.
+                Specialized TBD backfill data will be called instead.
+            ed_next (bool, optional): "Enrollment Data Next" flag. If set to `True`
+                then we collect metrics with our updated workflow. See here:
+                https://github.com/appsembler/figures/issues/428
+
+        Returns:
+            dict with aggregate course level metrics
+
+            ```
+            dict(
                 enrollment_count=data['enrollment_count'],
                 active_learners_today=data['active_learners_today'],
                 average_progress=data.get('average_progress', None),
                 average_days_to_complete=data.get('average_days_to_complete, None'),
                 num_learners_completed=data['num_learners_completed'],
             )
-        TODO: refactor this class
+            ```
+
+        TODO: refactor this class. It doesn't need to be a class. Can be a
+        standalone function
         Add lazy loading method to load course enrollments
         - Create a method for each metric field
         """
@@ -290,17 +310,31 @@ class CourseDailyMetricsExtractor(object):
             logger.debug(msg.format(date_for=date_for, course_id=course_id))
         else:
             try:
-                progress_data = bulk_calculate_course_progress_data(course_id=course_id,
-                                                                    date_for=date_for)
+                # This conditional check is an interim solution until we make
+                # the progress function configurable and able to run Figures
+                # plugins
+                if ed_next:
+                    progress_data = calculate_course_progress_next(course_id=course_id)
+                else:
+                    progress_data = bulk_calculate_course_progress_data(course_id=course_id,
+                                                                        date_for=date_for)
                 data['average_progress'] = progress_data['average_progress']
             except Exception:  # pylint: disable=broad-except
                 # Broad exception for starters. Refine as we see what gets caught
                 # Make sure we set the average_progres to None so that upstream
                 # does not think things are normal
                 data['average_progress'] = None
-                msg = ('FIGURES:FAIL bulk_calculate_course_progress_data'
+
+                if ed_next:
+                    prog_func = 'calculate_course_progress_next'
+                else:
+                    prog_func = 'bulk_calculate_course_progress_data'
+
+                msg = ('FIGURES:FAIL {prog_func}'
                        ' date_for={date_for}, course_id="{course_id}"')
-                logger.exception(msg.format(date_for=date_for, course_id=course_id))
+                logger.exception(msg.format(prog_func=prog_func,
+                                            date_for=date_for,
+                                            course_id=course_id))
 
         data['average_days_to_complete'] = get_average_days_to_complete(
             course_id, date_for,)
@@ -319,10 +353,11 @@ class CourseDailyMetricsLoader(object):
         self.extractor = CourseDailyMetricsExtractor()
         self.site = figures.sites.get_site_for_course(self.course_id)
 
-    def get_data(self, date_for):
+    def get_data(self, date_for, ed_next=False):
         return self.extractor.extract(
             course_id=self.course_id,
-            date_for=date_for)
+            date_for=date_for,
+            ed_next=ed_next)
 
     @transaction.atomic
     def save_metrics(self, date_for, data):
@@ -350,7 +385,7 @@ class CourseDailyMetricsLoader(object):
         cdm.clean_fields()
         return (cdm, created,)
 
-    def load(self, date_for=None, force_update=False, **_kwargs):
+    def load(self, date_for=None, ed_next=False, force_update=False, **_kwargs):
         """
         TODO: clean up how we do this. We want to be able to call the loader
         with an existing data set (not having to call the extractor) but we
@@ -376,5 +411,5 @@ class CourseDailyMetricsLoader(object):
             # record not found, move on to creating
             pass
 
-        data = self.get_data(date_for=date_for)
+        data = self.get_data(date_for=date_for, ed_next=ed_next)
         return self.save_metrics(date_for=date_for, data=data)
