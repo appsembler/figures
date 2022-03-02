@@ -90,11 +90,15 @@ INSTALLED_APPS = [
 if ENABLE_DEVSITE_CELERY:
     INSTALLED_APPS.append('djcelery')
 
-# certificates app
+
 if OPENEDX_RELEASE == 'GINKGO':
+    # certificates and courseware do NOT use the `lms.djangoapps.` namespace
+    # prefix on Ginkgo. See here: https://github.com/appsembler/figures/issues/433
     INSTALLED_APPS.append('certificates')
-    INSTALLED_APPS.append('lms.djangoapps.courseware')
+    INSTALLED_APPS.append('courseware')
 elif OPENEDX_RELEASE == 'HAWTHORN':
+    # Yes, this is correct, certificates was updated to uses the full namespace
+    # and courseware has not yet been updated
     INSTALLED_APPS.append('lms.djangoapps.certificates')
     INSTALLED_APPS.append('courseware')
 else:
