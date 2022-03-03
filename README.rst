@@ -11,6 +11,54 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 `Figures is on PyPI <https://pypi.org/project/Figures/>`__
 
 
+Mar 3, 2022 - Figures release 0.4.2
+===================================
+
+This release adds an optionan new pipeline workflow
+
+For details, `please read here <https://github.com/appsembler/figures/issues/428>`__
+
+To enable this feature, you need to update the LMS settings (aka 'server-vars.yml') as follows:
+
+server-vars.yml::
+
+  FIGURES: 
+    DAILY_TASK: 'figures.tasks.populate_daily_metrics_next'
+
+In Django settigs, you would check the var here::
+
+  from django.conf import settings
+  settings.ENV_TOKENS['FIGURES'].get('DAILY_TASK')
+
+PR about the workflow update:
+
+* Pipeline improvement prerequisites 
+
+  * https://github.com/appsembler/figures/pull/427
+
+* Figures pipeline performance improvement 
+
+  * https://github.com/appsembler/figures/pull/429
+
+* Fix enrollment data backfill Django management command
+
+  * https://github.com/appsembler/figures/pull/432
+
+Other PRs
+
+* Revert devsite 'courseware' app namepace back to originial
+
+  * https://github.com/appsembler/figures/pull/434
+
+* Bump url-parse from 1.5.1 to 1.5.10 in /frontend
+
+  * https://github.com/appsembler/figures/pull/431
+
+* Bump urijs from 1.19.6 to 1.19.8 in /frontend
+
+  * https://github.com/appsembler/figures/pull/430
+
+
 Feb 4, 2022 - Main Branch
 =========================
 
