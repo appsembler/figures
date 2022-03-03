@@ -18,7 +18,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
 
-from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
+from common.djangoapps.student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole  # noqa pylint: disable=import-error
 
 from figures.compat import (CourseEnrollment,
                             CourseOverview,

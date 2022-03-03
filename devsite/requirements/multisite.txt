@@ -1,4 +1,4 @@
-# Requirements needed for Juniper multisite environment
+# Requirements needed for multisite environment
 
 -r base.txt
 

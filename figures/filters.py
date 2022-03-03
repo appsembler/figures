@@ -303,7 +303,7 @@ class UserFilterSet(django_filters.FilterSet):
     """Provides filtering for User model objects
 
     Note: User has a 1:1 relationship with the edx-platform LMS
-    student.models.UserProfile model
+    common.djangoapps.student.models.UserProfile model
 
     We're starting with a few fields and will add as we find we want/need them
     """

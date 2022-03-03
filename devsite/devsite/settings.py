@@ -82,7 +82,7 @@ INSTALLED_APPS = [
     'openedx.core.djangoapps.course_groups',
     'lms.djangoapps.certificates',
     'lms.djangoapps.courseware',
-    'student',
+    'common.djangoapps.student',
 ]
 
 if ENABLE_DEVSITE_CELERY:

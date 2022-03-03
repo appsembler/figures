@@ -23,7 +23,7 @@ from opaque_keys.edx.django.models import CourseKeyField
 
 class UserProfile(models.Model):
     '''
-    The production model is student.models.UserProfile
+    The production model is common.djangoapps.student.models.UserProfile
     '''
     user = models.OneToOneField(User, unique=True, db_index=True,
                                 related_name='profile', on_delete=models.CASCADE)
@@ -103,7 +103,7 @@ class CourseEnrollmentManager(models.Manager):
 
         """
         # To avoid circular imports.
-        from student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
+        from common.djangoapps.student.roles import CourseCcxCoachRole, CourseInstructorRole, CourseStaffRole
         course_locator = course_id
 
         if getattr(course_id, 'ccx', None):
@@ -135,7 +135,7 @@ class CourseEnrollmentManager(models.Manager):
 
 class CourseEnrollment(models.Model):
     '''
-    The production model is student.models.CourseEnrollment
+    The production model is common.djangoapps.student.models.CourseEnrollment
 
     The purpose of this mock is to provide the model needed to
     retrieve:

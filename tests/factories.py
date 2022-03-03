@@ -29,7 +29,7 @@ from openedx.core.djangoapps.course_groups.models import (
 
 from figures.compat import StudentModule, CourseKeyField, GeneratedCertificate
 
-from student.models import CourseAccessRole, CourseEnrollment, UserProfile
+from common.djangoapps.student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 import organizations

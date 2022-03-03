@@ -19,7 +19,7 @@ class FiguresRouter(object):
 
 
 def get_build_label(release_line):
-        return 'rb16'
+    return 'rb16'
 
 
 def update_webpack_loader(webpack_loader_settings, figures_env_tokens):
