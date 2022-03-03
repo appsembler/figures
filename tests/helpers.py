@@ -9,6 +9,7 @@ from packaging import version
 
 from django.utils.timezone import utc
 
+from opaque_keys.edx.keys import CourseKey
 from organizations.models import Organization
 
 
@@ -35,6 +36,10 @@ def make_course_key_str(org, number, run='test-run'):
     Helper method to create a string representation of a CourseKey
     """
     return 'course-v1:{}+{}+{}'.format(org, number, run)
+
+
+def fake_course_key(num):
+    return CourseKey.from_string('course-v1:TestOrg+TO+{}'.format(num))
 
 
 def create_metrics_model_timeseries(factory, first_day, last_day):

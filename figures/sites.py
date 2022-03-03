@@ -134,7 +134,7 @@ def get_site_for_course(course_id):
             site = None
     else:
         # Operating in single site / standalone mode, return the default site
-        site = Site.objects.get(id=settings.SITE_ID)
+        site = default_site()
     return site
 
 

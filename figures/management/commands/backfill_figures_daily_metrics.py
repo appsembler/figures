@@ -70,16 +70,11 @@ class Command(BaseBackfillCommand):
                 del kwargs['site_id']  # not implemented for experimental
             else:
                 metrics_func = populate_daily_metrics
-            # try:
+
             if options['no_delay']:
                 metrics_func(**kwargs)
             else:
                 metrics_func.delay(**kwargs)  # pragma: no cover
-            # except Exception as e:  # pylint: disable=bare-except
-            #     if options['ignore_exceptions']:
-            #         self.print_exc("daily", dt, e.message)
-            #     else:
-            #         raise
 
             print('END: Backfill Figures daily metrics metrics for: {}'.format(dt))
 

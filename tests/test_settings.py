@@ -12,7 +12,10 @@ import pytest
 
 
 from figures import helpers as figures_helpers
-from figures.settings.lms_production import plugin_settings
+from figures.settings.lms_production import (
+    FIGURES_DEFAULT_DAILY_TASK,
+    plugin_settings
+)
 
 
 @pytest.mark.parametrize('features, expected', [
@@ -90,6 +93,44 @@ class TestUpdateSettings(object):
         assert settings.ENV_TOKENS['FIGURES'] == figures_env_tokens
 
 
+class TestDailyTaskFunction(object):
+    """Tests setting for Figures top level Celery daily job task
+
+    The top level Celery daily job task is what the scheduler calls to populate
+    Figures enrollment data snapshots and Figures daily aggregate metrics
+
+    We added this test case so that we can improve the daily Figures jobs, while
+    retaining the ability for deployments to run the previously implemented
+    daily jobs by default. This is a risk reduction strategy
+    """
+    ALTERNATE_TASK = 'figures.tasks.populate_daily_metrics_v2'
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db):
+        self.settings = mock.Mock(
+            WEBPACK_LOADER={},
+            CELERYBEAT_SCHEDULE={},
+            FEATURES={},
+            ENV_TOKENS={},
+            CELERY_IMPORTS=[],
+        )
+
+    def test_uses_default_daily_task(self):
+        """Do the default settings define the default Celery task in CeleryBeat?
+        """
+        plugin_settings(self.settings)
+        task_found = self.settings.CELERYBEAT_SCHEDULE['figures-populate-daily-metrics']['task']
+        assert task_found == FIGURES_DEFAULT_DAILY_TASK
+
+    def test_uses_env_extra_daily_task(self):
+        """Does overriding the Celery task function setting in CeleryBeat?
+        """
+        self.settings.ENV_TOKENS['FIGURES'] = {'DAILY_TASK': self.ALTERNATE_TASK}
+        plugin_settings(self.settings)
+        task_found = self.settings.CELERYBEAT_SCHEDULE['figures-populate-daily-metrics']['task']
+        assert task_found == self.ALTERNATE_TASK
+
+
 class TestDailyMauPipelineSettings(object):
     """Tests MAU pipeline settings
 
@@ -115,14 +156,14 @@ class TestDailyMauPipelineSettings(object):
         )
 
     def test_daily_mau_pipeline_flag_enabled(self):
-        self.settings.ENV_TOKENS['FIGURES'] = { 'ENABLE_DAILY_MAU_IMPORT': True }
+        self.settings.ENV_TOKENS['FIGURES'] = {'ENABLE_DAILY_MAU_IMPORT': True}
         plugin_settings(self.settings)
         assert self.TASK_NAME in self.settings.CELERYBEAT_SCHEDULE
         assert set(['task', 'schedule', 'options']) == set(
             self.settings.CELERYBEAT_SCHEDULE[self.TASK_NAME].keys())
 
     def test_daily_mau_pipeline_flag_disabled(self):
-        self.settings.ENV_TOKENS['FIGURES'] = { 'ENABLE_DAILY_MAU_IMPORT': False }
+        self.settings.ENV_TOKENS['FIGURES'] = {'ENABLE_DAILY_MAU_IMPORT': False}
         plugin_settings(self.settings)
         assert self.TASK_NAME not in self.settings.CELERYBEAT_SCHEDULE
 
