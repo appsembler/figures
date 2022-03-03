@@ -152,7 +152,7 @@ DATABASES = {
 }
 
 LOCALE_PATHS = [
-   os.path.join(PROJECT_ROOT_DIR, 'figures', 'conf', 'locale')
+    os.path.join(PROJECT_ROOT_DIR, 'figures', 'conf', 'locale')
 ]
 
 
@@ -212,8 +212,11 @@ FEATURES = {
 
 # The LMS defines ``ENV_TOKENS`` to load settings declared in `lms.env.json`
 # We have an empty dict here to replicate behavior in the LMS
-ENV_TOKENS = {}
-FIGURES_PIPELINE_TASKS_ROUTING_KEY = "" #TODO: (maple) is this correct? I just copied what was in the test_settings
+ENV_TOKENS = {
+    'FIGURES': {},
+}
+# TODO: (maple) is this correct? I just copied what was in the test_settings
+FIGURES_PIPELINE_TASKS_ROUTING_KEY = ""
 update_webpack_loader(WEBPACK_LOADER, ENV_TOKENS)
 update_celerybeat_schedule(CELERYBEAT_SCHEDULE, ENV_TOKENS, FIGURES_PIPELINE_TASKS_ROUTING_KEY)
 

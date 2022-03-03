@@ -157,7 +157,7 @@ def site_course_ids(site):
     """
     if is_multisite():
         return organizations.models.OrganizationCourse.objects.filter(
-                organization__sites__in=[site]).values_list('course_id', flat=True)
+            organization__sites__in=[site]).values_list('course_id', flat=True)
     else:
         # Needs work. See about returning a queryset
         return [str(key) for key in CourseOverview.objects.all().values_list(
