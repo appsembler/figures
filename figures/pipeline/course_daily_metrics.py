@@ -12,7 +12,6 @@ Future: add a remote mode to pull data via REST API
 # TODO: Move extractors to figures.pipeline.extract module
 """
 from __future__ import absolute_import
-from decimal import Decimal
 import logging
 
 from dateutil.relativedelta import relativedelta
@@ -26,9 +25,7 @@ from figures.compat import (CourseEnrollment,
                             StudentModule)
 from figures.helpers import as_course_key, as_datetime, is_past_date, next_day
 import figures.metrics
-from figures.models import CourseDailyMetrics, PipelineError
-from figures.pipeline.logger import log_error
-import figures.pipeline.loaders
+from figures.models import CourseDailyMetrics
 from figures.pipeline.enrollment_metrics import bulk_calculate_course_progress_data
 from figures.pipeline.enrollment_metrics_next import (
     calculate_course_progress as calculate_course_progress_next
@@ -85,48 +82,6 @@ def get_active_learner_ids_today(course_id, date_for):
         modified__month=date_for_as_datetime.month,
         modified__day=date_for_as_datetime.day,
         ).values_list('student__id', flat=True).distinct()
-
-
-def get_average_progress_deprecated(course_id, date_for, course_enrollments):
-    """Collects and aggregates raw course grades data
-    """
-    progress = []
-    for ce in course_enrollments:
-        try:
-            course_progress = figures.metrics.LearnerCourseGrades.course_progress(ce)
-            figures.pipeline.loaders.save_learner_course_grades(
-                site=figures.sites.get_site_for_course(course_id),
-                date_for=date_for,
-                course_enrollment=ce,
-                course_progress_details=course_progress['course_progress_details'])
-        # TODO: Use more specific database-related exception
-        except Exception as e:  # pylint: disable=broad-except
-            error_data = dict(
-                msg='Unable to get course blocks',
-                username=ce.user.username,
-                course_id=str(ce.course_id),
-                exception=str(e),
-                )
-            log_error(
-                error_data=error_data,
-                error_type=PipelineError.GRADES_DATA,
-                user=ce.user,
-                course_id=ce.course_id,
-                )
-            course_progress = dict(
-                progress_percent=0.0,
-                course_progress_details=None)
-        if course_progress:
-            progress.append(course_progress)
-
-    if progress:
-        progress_percent = [rec['progress_percent'] for rec in progress]
-        average_progress = float(sum(progress_percent)) / float(len(progress_percent))
-        average_progress = float(Decimal(average_progress).quantize(Decimal('.00')))
-    else:
-        average_progress = 0.0
-
-    return average_progress
 
 
 def get_days_to_complete(course_id, date_for):
