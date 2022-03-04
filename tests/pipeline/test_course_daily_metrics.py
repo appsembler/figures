@@ -160,45 +160,6 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             course_id=self.course_overview.id, date_for=self.today)
         assert recs.count() == len(self.course_enrollments)
 
-    def test_get_average_progress_deprecated(self):
-        """
-        [John] This test needs work. The function it is testing needs work too
-        for testability. We don't want to reproduce the function's behavior, we
-        just want to be able to set up the source data with expected output and
-        go.
-        """
-        course_enrollments = CourseEnrollment.objects.filter(
-            course_id=self.course_overview.id)
-        actual = pipeline_cdm.get_average_progress_deprecated(
-            course_id=self.course_overview.id,
-            date_for=self.today,
-            course_enrollments=course_enrollments
-            )
-        # See tests/mocks/lms/djangoapps/grades/course_grade.py for
-        # the source subsection grades that
-
-        # TODO: make the mock data more configurable so we don't have to
-        # hardcode the expected value
-        assert actual == 0.5
-
-    @mock.patch(
-        'figures.metrics.LearnerCourseGrades.course_progress',
-        side_effect=PermissionDenied('mock-failure')
-    )
-    def test_get_average_progress_deprecated_has_error(self, mock_lcg):
-
-        assert PipelineError.objects.count() == 0
-        course_enrollments = CourseEnrollment.objects.filter(
-            course_id=self.course_overview.id)
-
-        results = pipeline_cdm.get_average_progress_deprecated(
-                course_id=self.course_overview.id,
-                date_for=self.today,
-                course_enrollments=course_enrollments
-                )
-        assert results == pytest.approx(0.0)
-        assert PipelineError.objects.count() == course_enrollments.count()
-
     def test_get_days_to_complete(self):
         expected = dict(days=self.cert_days_to_complete,
                         errors=[])
