@@ -1,6 +1,11 @@
 name: figures tests
 
-on: push
+on:
+    push:
+        branches:
+            - main
+            - develop/maple
+    pull_request:
 
 jobs:
   test:
