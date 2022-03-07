@@ -19,6 +19,7 @@ from figures.pipeline.site_monthly_metrics import fill_month
 from figures.models import EnrollmentData
 
 
+# This function called just by mgmt command, backfill_figures_monthly_metrics.py
 def backfill_monthly_metrics_for_site(site, overwrite=False, use_raw_sql=False):
     """Backfill specified months' historical site metrics for the specified site
     """
