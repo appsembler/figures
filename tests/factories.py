@@ -40,6 +40,7 @@ from figures.models import (
     CourseMauMetrics,
     EnrollmentData,
     LearnerCourseGradeMetrics,
+    MonthlyActiveEnrollment,
     SiteDailyMetrics,
     SiteMonthlyMetrics,
     SiteMauMetrics,
@@ -354,6 +355,17 @@ class LearnerCourseGradeMetricsFactory(DjangoModelFactory):
     points_earned = 15.0
     sections_worked = 5
     sections_possible = 10
+
+
+class MonthlyActiveEnrollmentFactory(DjangoModelFactory):
+    class Meta:
+        model = MonthlyActiveEnrollment
+    site = factory.SubFactory(SiteFactory)
+    month_for = factory.Sequence(lambda n: (
+        datetime.date(2020, 6, 1) - relativedelta(months=n)))
+    course_id = factory.Sequence(lambda n:
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    user = factory.SubFactory(UserFactory)
 
 
 class SiteDailyMetricsFactory(DjangoModelFactory):
