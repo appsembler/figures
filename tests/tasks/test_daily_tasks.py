@@ -58,7 +58,6 @@ Of secondary importance is testing log output
 """
 from __future__ import absolute_import
 from datetime import date
-import logging
 import pytest
 from six.moves import range
 from django.contrib.sites.models import Site
@@ -72,15 +71,17 @@ from figures.tasks import (FPD_LOG_PREFIX,
                            populate_single_cdm,
                            populate_single_sdm,
                            populate_daily_metrics_for_site,
-                           populate_daily_metrics)
+                           populate_daily_metrics,
+                           populate_daily_metrics_next)
 from tests.factories import (CourseDailyMetricsFactory,
                              CourseOverviewFactory,
                              SiteDailyMetricsFactory,
                              SiteFactory)
-from tests.helpers import OPENEDX_RELEASE, GINKGO, FakeException
+from tests.helpers import OPENEDX_RELEASE, GINKGO, FakeException, fake_course_key
 
 
-def test_populate_single_cdm(transactional_db, monkeypatch):
+@pytest.mark.parametrize('extra_params', [{}, {'ed_next': True}])
+def test_populate_single_cdm(transactional_db, monkeypatch, extra_params):
     """Test figures.tasks.populate_single_cdm nominal case
 
     This tests the normal execution to popluate a single CourseDailyMetrics
@@ -100,31 +101,33 @@ def test_populate_single_cdm(transactional_db, monkeypatch):
         'figures.pipeline.course_daily_metrics.CourseDailyMetricsLoader.load',
         mock_cdm_load)
 
-    populate_single_cdm(course_id, date_for)
+    populate_single_cdm(course_id, date_for, **extra_params)
 
     assert CourseDailyMetrics.objects.count() == 1
     assert as_date(CourseDailyMetrics.objects.first().date_for) == as_date(date_for)
 
 
 @pytest.mark.django_db
-def test_disable_populate_daily_metrics(caplog):
+@pytest.mark.parametrize('func', [populate_daily_metrics, populate_daily_metrics_next])
+def test_disable_populate_daily_metrics(caplog, func):
     """Test figures.tasks.populate_daily_metrics
 
     Tests that when WAFFLE_DISABLE_PIPELINE is active, the disabled warning msg is logged
     """
     with override_switch('figures.disable_pipeline', active=True):
-        populate_daily_metrics()
+        func()
         assert 'disabled' in caplog.text
 
 
 @pytest.mark.django_db
-def test_enable_populate_daily_metrics(caplog):
+@pytest.mark.parametrize('func', [populate_daily_metrics, populate_daily_metrics_next])
+def test_enable_populate_daily_metrics(caplog, func):
     """Test figures.tasks.populate_daily_metrics
 
     Tests that when WAFFLE_DISABLE_PIPELINE is not active, the disabled warning msg is not logged
     """
     with override_switch('figures.disable_pipeline', active=False):
-        populate_daily_metrics()
+        func()
         assert 'disabled' not in caplog.text
 
 
@@ -156,11 +159,13 @@ def test_populate_single_sdm(transactional_db, monkeypatch):
     as_date('2020-12-12'),
     as_datetime('2020-12-12')
 ])
+@pytest.mark.parametrize('extra_params', [{}, {'ed_next': True}])
 def test_populate_daily_metrics_for_site_basic(transactional_db,
                                                monkeypatch,
-                                               date_for):
+                                               date_for,
+                                               extra_params):
     site = SiteFactory()
-    course_ids = ['fake-course-1', 'fake-course-2']
+    course_ids = [fake_course_key(i) for i in range(2)]
     collected_course_ids = []
 
     def fake_populate_single_cdm(course_id, **_kwargs):
@@ -169,37 +174,49 @@ def test_populate_daily_metrics_for_site_basic(transactional_db,
     def fake_populate_single_sdm(site_id, **_kwargs):
         assert site_id == site.id
 
+    def fake_update_enrollment_data_for_course(course_id):
+        assert extra_params['ed_next']
+
     monkeypatch.setattr('figures.tasks.site_course_ids', lambda site: course_ids)
     monkeypatch.setattr('figures.tasks.populate_single_cdm',
                         fake_populate_single_cdm)
     monkeypatch.setattr('figures.tasks.populate_single_sdm',
                         fake_populate_single_sdm)
+    monkeypatch.setattr('figures.tasks.update_enrollment_data_for_course',
+                        fake_update_enrollment_data_for_course)
 
-    populate_daily_metrics_for_site(site_id=site.id, date_for=date_for)
+    populate_daily_metrics_for_site(site_id=site.id, date_for=date_for, **extra_params)
     assert set(collected_course_ids) == set(course_ids)
 
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
                     reason='Apparent Django 1.8 incompatibility')
+@pytest.mark.parametrize('extra_params', [{}, {'ed_next': True}])
 def test_populate_daily_metrics_for_site_error_on_cdm(transactional_db,
                                                       monkeypatch,
-                                                      caplog):
+                                                      caplog,
+                                                      extra_params):
 
     date_for = date.today()
     site = SiteFactory()
-    fake_course_ids = ['fake-course-id-1']
+    fake_course_ids = [fake_course_key(1)]
 
     def fake_pop_single_cdm_fails(**kwargs):
         # TODO: test with different exceptions
         # At least one with and without `message_dict`
         raise FakeException('Hey!')
 
+    def fake_update_enrollment_data_for_course(course_id):
+        assert extra_params['ed_next']
+
     monkeypatch.setattr('figures.tasks.site_course_ids',
                         lambda site: fake_course_ids)
     monkeypatch.setattr('figures.tasks.populate_single_cdm',
                         fake_pop_single_cdm_fails)
+    monkeypatch.setattr('figures.tasks.update_enrollment_data_for_course',
+                        fake_update_enrollment_data_for_course)
 
-    populate_daily_metrics_for_site(site_id=site.id, date_for=date_for)
+    populate_daily_metrics_for_site(site_id=site.id, date_for=date_for, **extra_params)
 
     last_log = caplog.records[-1]
     expected_msg = ('{prefix}:SITE:COURSE:FAIL:populate_daily_metrics_for_site. '
@@ -215,9 +232,11 @@ def test_populate_daily_metrics_for_site_error_on_cdm(transactional_db,
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
                     reason='Apparent Django 1.8 incompatibility')
+@pytest.mark.parametrize('extra_params', [{}, {'ed_next': True}])
 def test_populate_daily_metrics_for_site_site_dne(transactional_db,
                                                   monkeypatch,
-                                                  caplog):
+                                                  caplog,
+                                                  extra_params):
     """
     If there is an invalid site id, logs error and raises it
     """
@@ -226,7 +245,9 @@ def test_populate_daily_metrics_for_site_site_dne(transactional_db,
     assert not Site.objects.filter(id=bad_site_id).exists()
 
     with pytest.raises(Exception) as e:
-        populate_daily_metrics_for_site(site_id=bad_site_id, date_for=date_for)
+        populate_daily_metrics_for_site(site_id=bad_site_id,
+                                        date_for=date_for,
+                                        **extra_params)
 
     assert str(e.value) == 'Site matching query does not exist.'
     last_log = caplog.records[-1]
@@ -237,9 +258,13 @@ def test_populate_daily_metrics_for_site_site_dne(transactional_db,
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
                     reason='Apparent Django 1.8 incompatibility')
+@pytest.mark.parametrize('func', [
+    populate_daily_metrics, populate_daily_metrics_next
+])
 def test_populate_daily_metrics_site_level_error(transactional_db,
                                                  monkeypatch,
-                                                 caplog):
+                                                 caplog,
+                                                 func):
     """
     Generic test that the first site fails but we can process the second site
     """
@@ -249,7 +274,6 @@ def test_populate_daily_metrics_site_level_error(transactional_db,
     bad_site = SiteFactory()
     populated_site_ids = []
     failed_site_ids = []
-    date_for = date.today()
 
     def fake_populate_daily_metrics_for_site(site_id, **_kwargs):
         """
@@ -263,7 +287,8 @@ def test_populate_daily_metrics_site_level_error(transactional_db,
     monkeypatch.setattr('figures.tasks.populate_daily_metrics_for_site',
                         fake_populate_daily_metrics_for_site)
 
-    populate_daily_metrics(date_for=date_for)
+    func()
+
     assert set(populated_site_ids) == set([good_site.id])
     assert set(failed_site_ids) == set([bad_site.id])
 
@@ -297,13 +322,13 @@ def test_populate_daily_metrics_enrollment_data_error(transactional_db,
 
     monkeypatch.setattr('figures.tasks.populate_daily_metrics_for_site',
                         fake_populate_daily_metrics_for_site)
-    monkeypatch.setattr('figures.tasks.update_enrollment_data',
+    monkeypatch.setattr('figures.tasks.update_enrollment_data_for_site',
                         fake_update_enrollment_data_fails)
 
     populate_daily_metrics(date_for=date_for)
 
     last_log = caplog.records[-1]
-    expected_msg = ('{prefix}:FAIL figures.tasks update_enrollment_data '
+    expected_msg = ('{prefix}:FAIL figures.tasks update_enrollment_data_for_site '
                     ' unhandled exception. site[{site_id}]:{domain}').format(
                     prefix=FPD_LOG_PREFIX,
                     site_id=site.id,
@@ -313,9 +338,11 @@ def test_populate_daily_metrics_enrollment_data_error(transactional_db,
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
                     reason='Broken test. Apparent Django 1.8 incompatibility')
-def test_populate_daily_metrics_multisite(transactional_db, monkeypatch):
+@pytest.mark.parametrize('func', [
+    populate_daily_metrics, populate_daily_metrics_next
+])
+def test_populate_daily_metrics_multisite(transactional_db, monkeypatch, caplog, func):
     # Stand up test data
-    date_for = '2019-01-02'
     site_links = []
     for domain in ['alpha.domain', 'bravo.domain']:
         site_links.append(dict(
@@ -323,4 +350,6 @@ def test_populate_daily_metrics_multisite(transactional_db, monkeypatch):
             courses=[CourseOverviewFactory() for i in range(2)],
         ))
 
-        populate_daily_metrics(date_for=date_for)
+        func()
+
+        assert not caplog.records

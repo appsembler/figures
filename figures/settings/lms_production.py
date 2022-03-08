@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import os
 from celery.schedules import crontab
 
+FIGURES_DEFAULT_DAILY_TASK = 'figures.tasks.populate_daily_metrics'
+
 
 class FiguresRouter(object):
 
@@ -61,8 +63,10 @@ def update_celerybeat_schedule(
     https://stackoverflow.com/questions/51631455/how-to-route-tasks-to-different-queues-with-celery-and-django
     """
     if figures_env_tokens.get('ENABLE_DAILY_METRICS_IMPORT', True):
+        figures_daily_task = figures_env_tokens.get('DAILY_TASK',
+                                                    FIGURES_DEFAULT_DAILY_TASK)
         celerybeat_schedule_settings['figures-populate-daily-metrics'] = {
-            'task': 'figures.tasks.populate_daily_metrics',
+            'task': figures_daily_task,
             'schedule': crontab(
                 hour=figures_env_tokens.get('DAILY_METRICS_IMPORT_HOUR', 2),
                 minute=figures_env_tokens.get('DAILY_METRICS_IMPORT_MINUTE', 0),
