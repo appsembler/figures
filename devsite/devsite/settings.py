@@ -23,7 +23,7 @@ PROJECT_ROOT_DIR = os.path.dirname(DEVSITE_BASE_DIR)
 env = environ.Env(
     DEBUG=(bool, True),
     ALLOWED_HOSTS=(list, []),
-    OPENEDX_RELEASE=(str, 'JUNIPER'),
+    OPENEDX_RELEASE=(str, 'MAPLE'),
     FIGURES_IS_MULTISITE=(bool, False),
     ENABLE_DEVSITE_CELERY=(bool, True),
     ENABLE_OPENAPI_DOCS=(bool, False),
@@ -89,7 +89,7 @@ INSTALLED_APPS = [
 if ENABLE_DEVSITE_CELERY:
     INSTALLED_APPS.append('djcelery')
 
-<<<<<<< HEAD
+
 MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

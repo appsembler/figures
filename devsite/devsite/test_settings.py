@@ -28,7 +28,7 @@ def root(*args):
 
 
 env = environ.Env(
-    OPENEDX_RELEASE=(str, 'JUNIPER'),
+    OPENEDX_RELEASE=(str, 'MAPLE'),
 )
 
 environ.Env.read_env(join(dirname(dirname(__file__)), '.env'))

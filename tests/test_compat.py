@@ -62,8 +62,8 @@ def patch_module(module_path, extra_properties=None):
 
 # TODO: Test with no release line
 
-@patch('openedx.core.release.RELEASE_LINE', 'juniper')
-def test_release_line_with_juniper():
+@patch('openedx.core.release.RELEASE_LINE', 'maple')
+def test_release_line_with_maple():
     """Test Hawthorn compat path works
 
     Yes, we have a number of assertions here. We are testing the state of
@@ -83,7 +83,7 @@ def test_release_line_with_juniper():
                                       {'CourseKeyField': 'ckf'}):
                         import figures.compat
                         reload(figures.compat)
-                        assert figures.compat.RELEASE_LINE == 'juniper'
+                        assert figures.compat.RELEASE_LINE == 'maple'
                         assert hasattr(figures.compat, 'CourseGradeFactory')
                         assert figures.compat.CourseGradeFactory == 'cgf'
                         assert hasattr(figures.compat, 'GeneratedCertificate')

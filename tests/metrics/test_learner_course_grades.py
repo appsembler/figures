@@ -17,20 +17,13 @@ from tests.factories import (
     GeneratedCertificateFactory,
     )
 
-from tests.helpers import OPENEDX_RELEASE, GINKGO
 
 # Mock objects to test course and course section grade metrics
-if OPENEDX_RELEASE == GINKGO:
-    from lms.djangoapps.grades.new.course_grade import (
-        MockAggregatedScore,
-        MockSubsectionGrade,
-        )
 
-else:
-    from lms.djangoapps.grades.course_grade import (
-        MockAggregatedScore,
-        MockSubsectionGrade,
-        )
+from lms.djangoapps.grades.course_grade import (
+    MockAggregatedScore,
+    MockSubsectionGrade,
+    )
 
 
 @pytest.mark.django_db
@@ -39,10 +32,7 @@ class TestLearnerCourseGrades(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.course_enrollment = CourseEnrollmentFactory()
-        if OPENEDX_RELEASE == GINKGO:
-            self.course_id = self.course_enrollment.course_id
-        else:
-            self.course_id = self.course_enrollment.course.id
+        self.course_id = self.course_enrollment.course.id
 
         self.lcg = LearnerCourseGrades(self.course_enrollment.user.id,
                                        self.course_id)

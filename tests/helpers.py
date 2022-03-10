@@ -13,13 +13,16 @@ from opaque_keys.edx.keys import CourseKey
 from organizations.models import Organization
 
 
-# Ginkgo is the earliest supported platform
-GINKGO = 'GINKGO'
-HAWTHORN = 'HAWTHORN'
-
-
 def platform_release():
-    return os.environ.get('OPENEDX_RELEASE', HAWTHORN)
+    """Identifies for which Open edX release we should test
+    This is to handle breaking changes between releases
+
+    With the Maple upgrade, we've removed all Ginkgo handling, which in turn
+    removed all references to this function and OPENEDX_RELEASE
+    However, we will retain it "for now", at least until we upgrade post-Maple,
+    and decide if we retain this testing feature or remove it
+    """
+    return os.environ.get('OPENEDX_RELEASE', 'MAPLE')
 
 
 OPENEDX_RELEASE = platform_release()
