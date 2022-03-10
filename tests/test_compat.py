@@ -62,73 +62,8 @@ def patch_module(module_path, extra_properties=None):
 
 # TODO: Test with no release line
 
-
-@patch('openedx.core.release.RELEASE_LINE', 'ginkgo')
-def test_compat_module_with_ginkgo():
-    """Test Ginkgo compat path works
-
-    Yes, we have a number of assertions here. We are testing the state of
-    `figures.compat` when we expect Figures to run in Ginkgo. Running in one
-    test also saves execution time as we need to ste up the whole module to
-    import as Ginkgo even if we are only testing one object in the module
-    """
-    with patch_module('lms.djangoapps.grades.new.course_grade_factory',
-                      {'CourseGradeFactory': 'cgf'}):
-        with patch_module('certificates.models', {'GeneratedCertificate': 'gc'}):
-            with patch_module('courseware.models', {'StudentModule': 'sm'}):
-                with patch_module('courseware.courses', {'get_course_by_id': 'gcbid'}):
-                    with patch_module('openedx.core.djangoapps.xmodule_django.models',
-                                      {'CourseKeyField': 'ckf'}):
-                        import figures.compat
-                        reload(figures.compat)
-                        assert figures.compat.RELEASE_LINE == 'ginkgo'
-                        assert hasattr(figures.compat, 'CourseGradeFactory')
-                        assert figures.compat.CourseGradeFactory == 'cgf'
-                        assert hasattr(figures.compat, 'GeneratedCertificate')
-                        assert figures.compat.GeneratedCertificate == 'gc'
-                        assert hasattr(figures.compat, 'StudentModule')
-                        assert figures.compat.StudentModule == 'sm'
-                        assert hasattr(figures.compat, 'get_course_by_id')
-                        assert figures.compat.get_course_by_id == 'gcbid'
-                        assert hasattr(figures.compat, 'CourseKeyField')
-                        assert figures.compat.CourseKeyField == 'ckf'
-
-
-@patch('openedx.core.release.RELEASE_LINE', 'hawthorn')
-def test_release_line_with_hawthorn():
-    """Test Hawthorn compat path works
-
-    Yes, we have a number of assertions here. We are testing the state of
-    `figures.compat` when we expect Figures to run in Ginkgo. Running in one
-    test also saves execution time as we need to ste up the whole module to
-    import as Ginkgo even if we are only testing one object in the module
-    """
-    with patch_module('lms.djangoapps.grades.course_grade_factory',
-                      {'CourseGradeFactory': 'cgf'}):
-        with patch_module('lms.djangoapps.certificates.models',
-                          {'GeneratedCertificate': 'gc'}):
-            with patch_module('courseware.models', {'StudentModule': 'sm'}):
-                with patch_module('courseware.courses',
-                                  {'get_course_by_id': 'gcbid'}):
-                    with patch_module('opaque_keys.edx.django.models',
-                                      {'CourseKeyField': 'ckf'}):
-                        import figures.compat
-                        reload(figures.compat)
-                        assert figures.compat.RELEASE_LINE == 'hawthorn'
-                        assert hasattr(figures.compat, 'CourseGradeFactory')
-                        assert figures.compat.CourseGradeFactory == 'cgf'
-                        assert hasattr(figures.compat, 'GeneratedCertificate')
-                        assert figures.compat.GeneratedCertificate == 'gc'
-                        assert hasattr(figures.compat, 'StudentModule')
-                        assert figures.compat.StudentModule == 'sm'
-                        assert hasattr(figures.compat, 'get_course_by_id')
-                        assert figures.compat.get_course_by_id == 'gcbid'
-                        assert hasattr(figures.compat, 'CourseKeyField')
-                        assert figures.compat.CourseKeyField == 'ckf'
-
-
-@patch('openedx.core.release.RELEASE_LINE', 'juniper')
-def test_release_line_with_juniper():
+@patch('openedx.core.release.RELEASE_LINE', 'maple')
+def test_release_line_with_maple():
     """Test Hawthorn compat path works
 
     Yes, we have a number of assertions here. We are testing the state of
@@ -148,7 +83,7 @@ def test_release_line_with_juniper():
                                       {'CourseKeyField': 'ckf'}):
                         import figures.compat
                         reload(figures.compat)
-                        assert figures.compat.RELEASE_LINE == 'juniper'
+                        assert figures.compat.RELEASE_LINE == 'maple'
                         assert hasattr(figures.compat, 'CourseGradeFactory')
                         assert figures.compat.CourseGradeFactory == 'cgf'
                         assert hasattr(figures.compat, 'GeneratedCertificate')

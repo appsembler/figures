@@ -1,4 +1,3 @@
-
 # Figures Developer Quickstart Guide
 
 ## 1. Overview
@@ -15,9 +14,9 @@ You should use a Python virtualenv to run Figures standalone development mode. T
 
 Here are links to help guide setting up virtualenv
 
-* https://virtualenv.pypa.io/en/stable/installation/
-* https://virtualenv.pypa.io/en/stable/userguide/
-* https://docs.python-guide.org/dev/virtualenvs/#lower-level-virtualenv
+- https://virtualenv.pypa.io/en/stable/installation/
+- https://virtualenv.pypa.io/en/stable/userguide/
+- https://docs.python-guide.org/dev/virtualenvs/#lower-level-virtualenv
 
 ## 3. Clone Figures, install dependencies, and test
 
@@ -25,19 +24,18 @@ On your development machine, open a terminal (command line shell) and create or 
 
 **These instructions assume you are running a Python virtualenv**
 
-
 In the terminal, run the following:
 
 ```
 git clone https://github.com/appsembler/figures.git
 cd figures
-pip install -r devsite/requirements/py35_juniper.txt
+pip install -r devsite/requirements/community.txt
 ```
 
 now we'll run [pytest](https://docs.pytest.org/) to make sure that the tests pass:
 
 ```
-OPENEDX_RELEASE=JUNIPER pytest -c pytest-juniper.ini
+pytest
 ```
 
 ## 4. Build front end assets
@@ -45,7 +43,6 @@ OPENEDX_RELEASE=JUNIPER pytest -c pytest-juniper.ini
 Figures front end assets need to be build from the front end sources. Make sure you have (Yarn)[https://yarnpkg.com/lang/en/] installed. Then do the following:
 
 Navigate to the `figures/frontend` directory.
-
 
 Then download JavaScript dependencies:
 
@@ -110,10 +107,10 @@ _Section incomplete_
 
 Pages of interest:
 
-* http://127.0.0.1:8000/admin/
-* http://127.0.0.1:8000/figures/
-* http://127.0.0.1:8000/figures/api/
-* http://127.0.0.1:8000/admin/figures/
+- http://127.0.0.1:8000/admin/
+- http://127.0.0.1:8000/figures/
+- http://127.0.0.1:8000/figures/api/
+- http://127.0.0.1:8000/admin/figures/
 
 ## 8. Running the pipeline manually
 
@@ -129,7 +126,7 @@ Make sure you have your development virtualenv running. Then navigate to the `de
 
 This will run the pipeline immediately instead of being queued to celery.
 
-*NOTE* The above is just for running the pipeline in Figures standalone mode with the included devsite. If you are working with Figures in Open edX (either devstack or fullstack), run the following:
+_NOTE_ The above is just for running the pipeline in Figures standalone mode with the included devsite. If you are working with Figures in Open edX (either devstack or fullstack), run the following:
 
 ```
 ./manage.py lms populate_figures_metrics --no-delay
@@ -142,7 +139,6 @@ You will need yarn installed.
 Go to the `frontend` directory and run `yarn`. This will install dependencies
 
 Run `yarn build` to compile the front end assets.
-
 
 ## 10. Running the frontend Webpack server
 

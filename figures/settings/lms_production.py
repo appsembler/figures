@@ -21,10 +21,7 @@ class FiguresRouter(object):
 
 
 def get_build_label(release_line):
-    if release_line in ['ginkgo', 'hawthorn']:
-        return 'rb10'
-    else:
-        return 'rb16'
+    return 'rb16'
 
 
 def update_webpack_loader(webpack_loader_settings, figures_env_tokens):

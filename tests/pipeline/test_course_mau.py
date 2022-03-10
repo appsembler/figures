@@ -9,6 +9,7 @@ from datetime import datetime, date
 import pytest
 from mock import Mock
 
+from django.utils.timezone import utc
 from factory import fuzzy
 
 from figures.pipeline.mau_pipeline import (
@@ -45,8 +46,8 @@ def create_student_module_recs(course_id):
     # Create SM in our month
     year_for = 2020
     month_for = 1
-    start_dt = datetime(year_for, month_for, 1, tzinfo=fuzzy.compat.UTC)
-    end_dt = datetime(year_for, month_for, 31, tzinfo=fuzzy.compat.UTC)
+    start_dt = datetime(year_for, month_for, 1, tzinfo=utc)
+    end_dt = datetime(year_for, month_for, 31, tzinfo=utc)
     date_gen = fuzzy.FuzzyDateTime(start_dt=start_dt, end_dt=end_dt)
 
     in_range = [StudentModuleFactory(created=start_dt,
@@ -54,9 +55,9 @@ def create_student_module_recs(course_id):
                                      course_id=course_id)
                 for i in range(3)]
     # Create a rec before
-    before_date = datetime(2019, 12, 31, tzinfo=fuzzy.compat.UTC)
+    before_date = datetime(2019, 12, 31, tzinfo=utc)
     # Create a rec after
-    after_date = datetime(2020, 2, 1, tzinfo=fuzzy.compat.UTC)
+    after_date = datetime(2020, 2, 1, tzinfo=utc)
     out_range = [
         StudentModuleFactory(created=before_date,
                              modified=before_date,

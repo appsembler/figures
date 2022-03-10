@@ -33,11 +33,7 @@ from tests.factories import (
     OrganizationCourseFactory,
     SiteFactory,
     UserFactory)
-from tests.helpers import (
-    OPENEDX_RELEASE,
-    GINKGO,
-    organizations_support_sites
-)
+from tests.helpers import organizations_support_sites
 
 if organizations_support_sites():
     from tests.factories import UserOrganizationMappingFactory
@@ -111,7 +107,6 @@ def site_data(db, settings):
     return site_data
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO, reason='Breaks on CourseEnrollmentFactory')
 def test_set_enrollment_data_new_record(site_data):
     """Test we create a new EnrollmentData record
 
@@ -134,7 +129,6 @@ def test_set_enrollment_data_new_record(site_data):
     assert obj.user == lcgm.user
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO, reason='Breaks on CourseEnrollmentFactory')
 def test_set_enrollment_data_update_existing(site_data):
     """Test we update an existing EnrollmentData record
     """

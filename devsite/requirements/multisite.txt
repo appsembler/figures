@@ -1,0 +1,6 @@
+# Requirements needed for multisite environment
+
+-r base.txt
+
+# Organization/site mapping requires Appsembler's fork
+git+https://github.com/appsembler/edx-organizations.git@5.2.0-appsembler13

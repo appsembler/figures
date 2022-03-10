@@ -77,7 +77,7 @@ from tests.factories import (CourseDailyMetricsFactory,
                              CourseOverviewFactory,
                              SiteDailyMetricsFactory,
                              SiteFactory)
-from tests.helpers import OPENEDX_RELEASE, GINKGO, FakeException, fake_course_key
+from tests.helpers import FakeException, fake_course_key
 
 
 @pytest.mark.parametrize('extra_params', [{}, {'ed_next': True}])
@@ -189,8 +189,6 @@ def test_populate_daily_metrics_for_site_basic(transactional_db,
     assert set(collected_course_ids) == set(course_ids)
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Apparent Django 1.8 incompatibility')
 @pytest.mark.parametrize('extra_params', [{}, {'ed_next': True}])
 def test_populate_daily_metrics_for_site_error_on_cdm(transactional_db,
                                                       monkeypatch,
@@ -230,8 +228,6 @@ def test_populate_daily_metrics_for_site_error_on_cdm(transactional_db,
     assert last_log.message == expected_msg
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Apparent Django 1.8 incompatibility')
 @pytest.mark.parametrize('extra_params', [{}, {'ed_next': True}])
 def test_populate_daily_metrics_for_site_site_dne(transactional_db,
                                                   monkeypatch,
@@ -256,8 +252,6 @@ def test_populate_daily_metrics_for_site_site_dne(transactional_db,
     assert last_log.message == expected_message.format(bad_site_id)
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Apparent Django 1.8 incompatibility')
 @pytest.mark.parametrize('func', [
     populate_daily_metrics, populate_daily_metrics_next
 ])
@@ -303,8 +297,6 @@ def test_populate_daily_metrics_site_level_error(transactional_db,
 # TODO: def test_populate_daily_metrics_future_date_error
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Apparent Django 1.8 incompatibility')
 def test_populate_daily_metrics_enrollment_data_error(transactional_db,
                                                       monkeypatch,
                                                       caplog):
@@ -336,8 +328,6 @@ def test_populate_daily_metrics_enrollment_data_error(transactional_db,
     assert last_log.message == expected_msg
 
 
-@pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
-                    reason='Broken test. Apparent Django 1.8 incompatibility')
 @pytest.mark.parametrize('func', [
     populate_daily_metrics, populate_daily_metrics_next
 ])

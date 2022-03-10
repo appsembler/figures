@@ -29,7 +29,7 @@ from openedx.core.djangoapps.course_groups.models import (
 
 from figures.compat import StudentModule, CourseKeyField, GeneratedCertificate
 
-from student.models import CourseAccessRole, CourseEnrollment, UserProfile
+from common.djangoapps.student.models import CourseAccessRole, CourseEnrollment, UserProfile
 from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
 
 import organizations
@@ -45,11 +45,8 @@ from figures.models import (
     SiteMauMetrics,
 )
 
-from tests.helpers import (
-    organizations_support_sites,
-    OPENEDX_RELEASE,
-    GINKGO,
-)
+from tests.helpers import organizations_support_sites
+
 import six
 
 
@@ -76,7 +73,7 @@ class UserProfileFactory(DjangoModelFactory):
         ['p','m','b','a','hs','jh','el','none', 'other',]
         )
     profile_image_uploaded_at = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,0o4,0o1, tzinfo=factory.compat.UTC))
+        2018,0o4,0o1, tzinfo=utc))
 
 
 class UserFactory(DjangoModelFactory):
@@ -90,7 +87,7 @@ class UserFactory(DjangoModelFactory):
     is_staff = False
     is_superuser = False
     date_joined = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 4, 1, tzinfo=factory.compat.UTC))
+        2018, 4, 1, tzinfo=utc))
 
     # TODO: Figure out if this can be a SubFactory and the advantages
     profile = factory.RelatedFactory(UserProfileFactory, 'user')
@@ -146,7 +143,7 @@ class OrganizationCourseFactory(DjangoModelFactory):
 
 
 if organizations_support_sites():
-    class UserOrganizationMappingFactory(factory.DjangoModelFactory):
+    class UserOrganizationMappingFactory(DjangoModelFactory):
         class Meta(object):
             model = organizations.models.UserOrganizationMapping
 
@@ -156,7 +153,7 @@ if organizations_support_sites():
         is_amc_admin = False
 
 
-class CourseOverviewFactory(factory.DjangoModelFactory):
+class CourseOverviewFactory(DjangoModelFactory):
     class Meta:
         model = CourseOverview
 
@@ -165,20 +162,18 @@ class CourseOverviewFactory(factory.DjangoModelFactory):
         COURSE_ID_STR_TEMPLATE.format(n)))
     display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
     org = 'StarFleetAcademy'
-
-    if not OPENEDX_RELEASE == GINKGO:
-        version = CourseOverview.VERSION
+    version = CourseOverview.VERSION
     display_org_with_default = factory.LazyAttribute(lambda o: o.org)
     created = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 2, 1, tzinfo=factory.compat.UTC))
+        2018, 2, 1, tzinfo=utc))
     enrollment_start = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 3, 1, tzinfo=factory.compat.UTC))
+        2018, 3, 1, tzinfo=utc))
     enrollment_end = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 3, 15, tzinfo=factory.compat.UTC))
+        2018, 3, 15, tzinfo=utc))
     start = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 4, 1, tzinfo=factory.compat.UTC))
+        2018, 4, 1, tzinfo=utc))
     end = factory.fuzzy.FuzzyDateTime(datetime.datetime(
-        2018, 6, 1, tzinfo=factory.compat.UTC))
+        2018, 6, 1, tzinfo=utc))
     self_paced = False
 
 
@@ -216,9 +211,9 @@ class StudentModuleFactory(DjangoModelFactory):
     course_id = factory.Sequence(lambda n: as_course_key(
         COURSE_ID_STR_TEMPLATE.format(n)))
     created = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,2,2, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=utc))
     modified = fuzzy.FuzzyDateTime(datetime.datetime(
-        2018,2,2, tzinfo=factory.compat.UTC))
+        2018,2,2, tzinfo=utc))
 
 
     @classmethod
@@ -235,57 +230,42 @@ class StudentModuleFactory(DjangoModelFactory):
         return cls(**kwargs)
 
 
-if OPENEDX_RELEASE == GINKGO:
-    class CourseEnrollmentFactory(DjangoModelFactory):
-        class Meta:
-            model = CourseEnrollment
+class CourseEnrollmentFactory(DjangoModelFactory):
+    class Meta(object):
+        model = CourseEnrollment
 
-        user = factory.SubFactory(
-            UserFactory,
-        )
-        course_id = factory.SelfAttribute('course_overview.id')
-        course_overview = factory.SubFactory(CourseOverviewFactory)
-        created = factory.Sequence(lambda n:
-            (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
+    user = factory.SubFactory(UserFactory)
 
-else:
-
-    class CourseEnrollmentFactory(DjangoModelFactory):
-        class Meta(object):
-            model = CourseEnrollment
-
-        user = factory.SubFactory(UserFactory)
-
-        created = factory.Sequence(lambda n:
-            (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
+    created = factory.Sequence(lambda n:
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
 
 
-        @classmethod
-        def _create(cls, model_class, *args, **kwargs):
-            manager = cls._get_manager(model_class)
-            course_kwargs = {}
-            for key in kwargs.keys():
-                if key.startswith('course__'):
-                    course_kwargs[key.split('__')[1]] = kwargs.pop(key)
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        manager = cls._get_manager(model_class)
+        course_kwargs = {}
+        for key in kwargs.keys():
+            if key.startswith('course__'):
+                course_kwargs[key.split('__')[1]] = kwargs.pop(key)
 
-            if 'course' not in kwargs:
-                course_id = kwargs.get('course_id')
-                course_overview = None
-                if course_id is not None:
-                    if isinstance(course_id, six.string_types):
-                        course_id = as_course_key(course_id)
-                        course_kwargs.setdefault('id', course_id)
+        if 'course' not in kwargs:
+            course_id = kwargs.get('course_id')
+            course_overview = None
+            if course_id is not None:
+                if isinstance(course_id, six.string_types):
+                    course_id = as_course_key(course_id)
+                    course_kwargs.setdefault('id', course_id)
 
-                    try:
-                        course_overview = CourseOverview.get_from_id(course_id)
-                    except CourseOverview.DoesNotExist:
-                        pass
+                try:
+                    course_overview = CourseOverview.get_from_id(course_id)
+                except CourseOverview.DoesNotExist:
+                    pass
 
-                if course_overview is None:
-                    course_overview = CourseOverviewFactory(**course_kwargs)
-                kwargs['course'] = course_overview
+            if course_overview is None:
+                course_overview = CourseOverviewFactory(**course_kwargs)
+            kwargs['course'] = course_overview
 
-            return manager.create(*args, **kwargs)
+        return manager.create(*args, **kwargs)
 
 
 class CourseAccessRoleFactory(DjangoModelFactory):

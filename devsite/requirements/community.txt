@@ -1,0 +1,5 @@
+# Requirements needed for Juniper community environment
+
+-r base.txt
+
+edx-organizations==6.10.0

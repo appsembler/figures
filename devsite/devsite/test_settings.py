@@ -28,14 +28,14 @@ def root(*args):
 
 
 env = environ.Env(
-    OPENEDX_RELEASE=(str, 'JUNIPER'),
+    OPENEDX_RELEASE=(str, 'MAPLE'),
 )
 
 environ.Env.read_env(join(dirname(dirname(__file__)), '.env'))
 
 OPENEDX_RELEASE = env('OPENEDX_RELEASE').upper()
 
-MOCKS_DIR = 'mocks/{}'.format(OPENEDX_RELEASE.lower())
+MOCKS_DIR = 'mocks/'
 
 sys.path.append(root('mocks', MOCKS_DIR))
 
@@ -73,26 +73,19 @@ INSTALLED_APPS = [
     # Also note the paths set in edx-figures/pytest.ini
     'openedx.core.djangoapps.content.course_overviews',
     'openedx.core.djangoapps.course_groups',
-    'student',
+    'common.djangoapps.student',
     'organizations'
 ]
 
-if OPENEDX_RELEASE != 'GINGKO':
-    INSTALLED_APPS.append('djcelery')
+# INSTALLED_APPS.append('djcelery')
 
-    # We need this in order for figures.tasks unit tests to not fail with:
-    #   "error: [Errno 61] Connection refused"
-    CELERY_ALWAYS_EAGER = True
+# We need this in order for figures.tasks unit tests to not fail with:
+#   "error: [Errno 61] Connection refused"
+CELERY_ALWAYS_EAGER = True
 
-if OPENEDX_RELEASE == 'GINKGO':
-    INSTALLED_APPS.append('certificates')
-    INSTALLED_APPS.append('courseware')
-elif OPENEDX_RELEASE == 'HAWTHORN':
-    INSTALLED_APPS.append('lms.djangoapps.certificates')
-    INSTALLED_APPS.append('courseware')
-else:
-    INSTALLED_APPS.append('lms.djangoapps.certificates')
-    INSTALLED_APPS.append('lms.djangoapps.courseware')
+
+INSTALLED_APPS.append('lms.djangoapps.certificates')
+INSTALLED_APPS.append('lms.djangoapps.courseware')
 
 
 TEMPLATES = [

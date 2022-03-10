@@ -21,7 +21,7 @@ from django.utils.timezone import utc
 from figures.compat import StudentModule
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from student.models import CourseAccessRole, CourseEnrollment, UserProfile
+from common.djangoapps.student.models import CourseAccessRole, CourseEnrollment, UserProfile
 
 from organizations.models import Organization, OrganizationCourse
 

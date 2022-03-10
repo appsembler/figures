@@ -1,3 +1,5 @@
+figures/static/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -107,6 +109,9 @@ node_modules
 
 # PyCharm
 .idea
+
+# VScode
+.vscode
 
 frontend/webpack-stats.json
 
