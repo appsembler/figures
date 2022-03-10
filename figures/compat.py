@@ -27,6 +27,20 @@ from __future__ import absolute_import
 from django.http import Http404
 from figures.helpers import as_course_key
 
+from openedx.core.release import RELEASE_LINE
+
+from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory  # noqa pylint: disable=unused-import,import-error
+from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
+from lms.djangoapps.courseware.models import StudentModule  # noqa pylint: disable=unused-import,import-error
+from lms.djangoapps.courseware.courses import get_course_by_id  # noqa pylint: disable=unused-import,import-error
+from opaque_keys.edx.django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
+
+# preemptive addition. Added it here to avoid adding to figures.models
+# In fact, we should probably do a refactoring that makes all Figures import it
+# from here
+from common.djangoapps.student.models import CourseAccessRole, CourseEnrollment  # noqa pylint: disable=unused-import,import-error
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=unused-import,import-error
+
 
 class UnsuportedOpenedXRelease(Exception):
     pass
@@ -38,21 +52,10 @@ class CourseNotFound(Exception):
     pass
 
 
-
-from openedx.core.release import RELEASE_LINE
-
-from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory  # noqa pylint: disable=unused-import,import-error
-from lms.djangoapps.certificates.models import GeneratedCertificate  # noqa pylint: disable=unused-import,import-error
-from lms.djangoapps.courseware.models import StudentModule  # noqa pylint: disable=unused-import,import-error
-from lms.djangoapps.courseware.courses import get_course_by_id  # noqa pylint: disable=unused-import,import-error
-from opaque_keys.edx.django.models import CourseKeyField  # noqa pylint: disable=unused-import,import-error
-
-
-# preemptive addition. Added it here to avoid adding to figures.models
-# In fact, we should probably do a refactoring that makes all Figures import it
-# from here
-from common.djangoapps.student.models import CourseAccessRole, CourseEnrollment  # noqa pylint: disable=unused-import,import-error
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview  # noqa pylint: disable=unused-import,import-error
+if RELEASE_LINE != 'maple':
+    raise UnsuportedOpenedXRelease(
+      'The current Open edX is {}. This release of Figures requires Maple'.format(
+        RELEASE_LINE))
 
 
 def course_grade(learner, course):
@@ -61,7 +64,6 @@ def course_grade(learner, course):
 
     Returns the course grade for the specified learner and course
     """
-    
     return CourseGradeFactory().read(learner, course)
 
 
@@ -91,9 +93,10 @@ def course_grade_from_course_id(learner, course_id):
 
 def chapter_grade_values(chapter_grades):
     '''
+    **Maple upgrade note: We should be able to either do away with this function
+    or assume chapter_grades is a dict. **
 
     Ginkgo introduced ``BlockUsageLocator``into the ``chapter_grades`` collection
-
 
     For the current functionality we need, we can simply check if chapter_grades
     acts as a list or a dict

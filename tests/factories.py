@@ -45,11 +45,8 @@ from figures.models import (
     SiteMauMetrics,
 )
 
-from tests.helpers import (
-    organizations_support_sites,
-    OPENEDX_RELEASE,
-    GINKGO,
-)
+from tests.helpers import organizations_support_sites
+
 import six
 
 
@@ -165,9 +162,7 @@ class CourseOverviewFactory(DjangoModelFactory):
         COURSE_ID_STR_TEMPLATE.format(n)))
     display_name = factory.Sequence(lambda n: 'SFA Course {}'.format(n))
     org = 'StarFleetAcademy'
-
-    if not OPENEDX_RELEASE == GINKGO:
-        version = CourseOverview.VERSION
+    version = CourseOverview.VERSION
     display_org_with_default = factory.LazyAttribute(lambda o: o.org)
     created = factory.fuzzy.FuzzyDateTime(datetime.datetime(
         2018, 2, 1, tzinfo=utc))
@@ -235,57 +230,42 @@ class StudentModuleFactory(DjangoModelFactory):
         return cls(**kwargs)
 
 
-if OPENEDX_RELEASE == GINKGO:
-    class CourseEnrollmentFactory(DjangoModelFactory):
-        class Meta:
-            model = CourseEnrollment
+class CourseEnrollmentFactory(DjangoModelFactory):
+    class Meta(object):
+        model = CourseEnrollment
 
-        user = factory.SubFactory(
-            UserFactory,
-        )
-        course_id = factory.SelfAttribute('course_overview.id')
-        course_overview = factory.SubFactory(CourseOverviewFactory)
-        created = factory.Sequence(lambda n:
-            (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
+    user = factory.SubFactory(UserFactory)
 
-else:
-
-    class CourseEnrollmentFactory(DjangoModelFactory):
-        class Meta(object):
-            model = CourseEnrollment
-
-        user = factory.SubFactory(UserFactory)
-
-        created = factory.Sequence(lambda n:
-            (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
+    created = factory.Sequence(lambda n:
+        (datetime.datetime(2018, 1, 1) + datetime.timedelta(days=n)).replace(tzinfo=utc))
 
 
-        @classmethod
-        def _create(cls, model_class, *args, **kwargs):
-            manager = cls._get_manager(model_class)
-            course_kwargs = {}
-            for key in kwargs.keys():
-                if key.startswith('course__'):
-                    course_kwargs[key.split('__')[1]] = kwargs.pop(key)
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        manager = cls._get_manager(model_class)
+        course_kwargs = {}
+        for key in kwargs.keys():
+            if key.startswith('course__'):
+                course_kwargs[key.split('__')[1]] = kwargs.pop(key)
 
-            if 'course' not in kwargs:
-                course_id = kwargs.get('course_id')
-                course_overview = None
-                if course_id is not None:
-                    if isinstance(course_id, six.string_types):
-                        course_id = as_course_key(course_id)
-                        course_kwargs.setdefault('id', course_id)
+        if 'course' not in kwargs:
+            course_id = kwargs.get('course_id')
+            course_overview = None
+            if course_id is not None:
+                if isinstance(course_id, six.string_types):
+                    course_id = as_course_key(course_id)
+                    course_kwargs.setdefault('id', course_id)
 
-                    try:
-                        course_overview = CourseOverview.get_from_id(course_id)
-                    except CourseOverview.DoesNotExist:
-                        pass
+                try:
+                    course_overview = CourseOverview.get_from_id(course_id)
+                except CourseOverview.DoesNotExist:
+                    pass
 
-                if course_overview is None:
-                    course_overview = CourseOverviewFactory(**course_kwargs)
-                kwargs['course'] = course_overview
+            if course_overview is None:
+                course_overview = CourseOverviewFactory(**course_kwargs)
+            kwargs['course'] = course_overview
 
-            return manager.create(*args, **kwargs)
+        return manager.create(*args, **kwargs)
 
 
 class CourseAccessRoleFactory(DjangoModelFactory):

@@ -28,12 +28,8 @@ from tests.factories import (
     SiteFactory,
     StudentModuleFactory,
 )
+from tests.helpers import organizations_support_sites
 
-from tests.helpers import (
-    organizations_support_sites,
-    OPENEDX_RELEASE,
-    GINKGO,
-)
 from six.moves import range
 
 
@@ -86,12 +82,8 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     def setup(self, db):
         self.today = datetime.date(2018, 6, 1)
         self.course_overview = CourseOverviewFactory()
-        if OPENEDX_RELEASE == GINKGO:
-            self.course_enrollments = [CourseEnrollmentFactory(
-                course_id=self.course_overview.id) for i in range(4)]
-        else:
-            self.course_enrollments = [CourseEnrollmentFactory(
-                course=self.course_overview) for i in range(4)]
+        self.course_enrollments = [CourseEnrollmentFactory(
+            course=self.course_overview) for i in range(4)]
 
         if organizations_support_sites():
             self.my_site = SiteFactory(domain='my-site.test')
@@ -276,10 +268,7 @@ class TestCourseDailyMetricsLoader(object):
 
     def test_load(self, monkeypatch):
         # pick a course, any course (we'll just pick the first, but doesn't matter which)
-        if OPENEDX_RELEASE == GINKGO:
-            course_id = self.course_enrollments[0].course_id
-        else:
-            course_id = self.course_enrollments[0].course.id
+        course_id = self.course_enrollments[0].course.id
 
         def get_data(self, date_for, ed_next=False):
             return {

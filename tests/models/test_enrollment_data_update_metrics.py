@@ -53,7 +53,6 @@ if organizations_support_sites():
                                         organization=org) for user in users]
 
 
-# @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO, reason='Breaks on CourseEnrollmentFactory')
 @pytest.mark.django_db
 class TestUpdateMetrics(object):
     """Test EnrollmentDataManager.update_metrics method
