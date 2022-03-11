@@ -1,12 +1,10 @@
-'''Helpers to generate model instances for testing.
+"""Helpers to generate model instances for testing.
 
 Defines model factories for Figures, edX platform, and other models that we
 need to create for our tests.
 
 Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
-
-'''
-
+"""
 from __future__ import absolute_import
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -223,7 +221,7 @@ class StudentModuleFactory(DjangoModelFactory):
 
     @classmethod
     def from_course_enrollment(cls, course_enrollment, **kwargs):
-        """Contruct a StudentModule  for the given CourseEnrollment
+        """Contruct a StudentModule for the given CourseEnrollment
 
         kwargs provides for additional optional parameters if you need to
         override the default factory assignment
@@ -339,6 +337,19 @@ class EnrollmentDataFactory(DjangoModelFactory):
     points_earned = 15.0
     sections_worked = 5
     sections_possible = 10
+
+    @classmethod
+    def from_course_enrollment(cls, course_enrollment, **kwargs):
+        """Construct an EnrollmentData for the given CourseEnrollment
+
+        kwargs provides for additional optional parameters if you need to
+        override the default factory assignment
+        """
+        kwargs.update({
+            'user': course_enrollment.user,
+            'course_id': course_enrollment.course_id,
+            })
+        return cls(**kwargs)
 
 
 class LearnerCourseGradeMetricsFactory(DjangoModelFactory):

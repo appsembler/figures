@@ -326,13 +326,16 @@ def populate_daily_metrics_next(site_id=None, force_update=False):
 def backfill_enrollment_data_for_course(course_id):
     """Create or update EnrollmentData records for the course
 
-    Simple wrapper to run the enrollment update as a Celery task
+    This is a simple wrapper to run the enrollment update as a Celery task
 
     We usually run this task through the Figures Django management command,
     `backfill_figures_enrollment_data`
     """
-    ed_objects = update_enrollment_data_for_course(course_id)
-    return [obj.id for obj in ed_objects]
+    # results are a list of (object, created_flag) tuples
+    updated = update_enrollment_data_for_course(course_id)
+    msg = ('figures.tasks.backfill_enrollment_data_for_course "{course_id}".'
+           ' Updated {edrec_count} enrollment data records.')
+    logger.info(msg.format(course_id=course_id, edrec_count=len(updated)))
 
 
 #
