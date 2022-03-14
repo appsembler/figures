@@ -108,3 +108,13 @@ class TestCourse(object):
         course = Course(self.course_overview.id)
         found_ce = course.enrollments_active_on_date(our_date_for)
         assert set(found_ce) == set(our_ce)
+
+    def test_enrollments_with_student_modules(self):
+        ce = [CourseEnrollmentFactory(course_id=self.course_overview.id)
+              for _ in range(3)]
+
+        StudentModuleFactory.from_course_enrollment(ce[0])
+        [StudentModuleFactory.from_course_enrollment(ce[1]) for _ in range(2)]
+        course = Course(self.course_overview.id)
+        found_ce = course.enrollments_with_student_modules()
+        assert set(found_ce) == set(ce[:2])
