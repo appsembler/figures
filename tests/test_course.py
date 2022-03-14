@@ -20,7 +20,7 @@ fake = Faker()
 
 
 @pytest.mark.django_db
-class TestCourse:
+class TestCourse(object):
     """
     Starting with just basic tests
     """
