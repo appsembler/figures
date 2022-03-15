@@ -118,3 +118,11 @@ class TestCourse(object):
         course = Course(self.course_overview.id)
         found_ce = course.enrollments_with_student_modules()
         assert set(found_ce) == set(ce[:2])
+
+    def test_enrollments_with_student_modules_but_no_student_modules(self):
+        ce = [CourseEnrollmentFactory(course_id=self.course_overview.id)
+              for _ in range(3)]
+
+        course = Course(self.course_overview.id)
+        assert not course.student_modules
+        assert not course.enrollments_with_student_modules()
