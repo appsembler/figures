@@ -31,6 +31,7 @@ This module provides
 """
 from django.db.models import Avg
 from figures.course import Course
+from figures.enrollment import is_enrollment_data_out_of_date
 from figures.helpers import utc_yesterday
 from figures.models import EnrollmentData
 from figures.sites import UnlinkedCourseError
@@ -42,6 +43,8 @@ def update_enrollment_data_for_course(course_id):
     `EnrollmentData` records
 
     Return results are a list of the results returned by `update_enrollment_data`
+
+    TODO: Add check if the course data actually exists in Mongo
     """
     date_for = utc_yesterday()
     the_course = Course(course_id)
@@ -53,6 +56,39 @@ def update_enrollment_data_for_course(course_id):
     active_enrollments = the_course.enrollments_active_on_date(date_for)
     return [EnrollmentData.objects.update_metrics(the_course.site, ce)
             for ce in active_enrollments]
+
+
+def stale_course_enrollments(course_id):
+    """Find missing/out of date EnrollmentData records for the course
+
+    The `EnrollmentData` model holds the most recent data about the enrollment.
+    This model is not created until after two events happen in sequence
+    1. The enrollment has activity that creates one or more`StudentModule` records
+    2. Figures daily metrics ran after the `StudentModule` records were created
+       OR
+       Figures `EnrollmentData` backfill was run
+
+    Maybe... We might want to add query methods to EnrollmentDataManager to
+    get out of date `EnrollmentData` records for a course.
+
+    NOTE: Naming this function was a bit of a challenge. What I used before:
+
+    "update_enrollment_data_for_course"
+    "enrollments_with_out_of_date_enrollment_data"
+    "ce_needs_enrollment_data_update"
+
+    Since we are in the context of Figures and figures doesn't modifity the platform,
+    we should be save with saying "stale_course_enrollments" for brevity
+    """
+    course = Course(course_id)
+
+    # If we have a course with no activity, nothing can be out of date.
+    # As such if the course has no student modules, the loop won't execute
+
+    # We are only interested in enrollments with activity
+    for enrollment in course.enrollments_with_student_modules():
+        if is_enrollment_data_out_of_date(enrollment):
+            yield enrollment
 
 
 def calculate_course_progress(course_id):
