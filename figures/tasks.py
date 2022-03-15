@@ -19,8 +19,10 @@ from celery.app import shared_task
 from celery.utils.log import get_task_logger
 
 from figures.compat import CourseEnrollment, CourseOverview
+from figures.course import Course
 from figures.helpers import as_course_key, as_date, is_past_date
 from figures.log import log_exec_time
+from figures.models import EnrollmentData
 from figures.sites import get_sites, get_sites_by_id, site_course_ids
 
 from figures.pipeline.backfill import backfill_enrollment_data_for_site
@@ -29,7 +31,10 @@ from figures.pipeline.site_daily_metrics import SiteDailyMetricsLoader
 from figures.pipeline.mau_pipeline import collect_course_mau
 from figures.pipeline.helpers import DateForCannotBeFutureError
 from figures.pipeline.site_monthly_metrics import fill_last_month as fill_last_smm_month
-from figures.pipeline.enrollment_metrics_next import update_enrollment_data_for_course
+from figures.pipeline.enrollment_metrics_next import (
+    update_enrollment_data_for_course,
+    stale_course_enrollments,
+)
 
 
 logger = get_task_logger(__name__)
@@ -324,15 +329,38 @@ def populate_daily_metrics_next(site_id=None, force_update=False):
 
 @shared_task
 def backfill_enrollment_data_for_course(course_id):
-    """Create or update EnrollmentData records for the course
+    """Update EnrollmentData records for activity before "yesterday"
 
-    This is a simple wrapper to run the enrollment update as a Celery task
+    This task function is to get `EnrollmentData` records up to date. This is
+    needed under at least the following conditions
 
-    We usually run this task through the Figures Django management command,
-    `backfill_figures_enrollment_data`
+    A. Figures is being installed/enabled on an existing Open edX deployment
+    B. The daily pipeline was stopped or failed to run for longer than a day
+
+    Why this function is needed is because it costs too much time to query
+    an enrollment's `StudentModule` record to find the latest date it was
+    modified. For the regular day to day pipeline, Figures can perform a **much**
+    fasater query to find if `StudentModule` records exist for the specific day
+    we gather our daily metrics. This is always the previous calendar day given
+    UTC time. The following function is what updates `EnrollmentData` on the
+    daily job:
+
+    ```
+    figures.pipeline.enrollment_metrics_next.update_enrollment_data_for_course
+    ```
+
+    There is a Figures Django management command to run this task:
+
+    ```
+    backfill_figures_enrollment_data
+    ```
     """
-    # results are a list of (object, created_flag) tuples
-    updated = update_enrollment_data_for_course(course_id)
+    course = Course(course_id)
+    updated = []
+    for enrollment in stale_course_enrollments(course_id):
+        # `update_metrics` results are a (object, created_flag) tuple
+        updated.append(EnrollmentData.objects.update_metrics(course.site, enrollment))
+
     msg = ('figures.tasks.backfill_enrollment_data_for_course "{course_id}".'
            ' Updated {edrec_count} enrollment data records.')
     logger.info(msg.format(course_id=course_id, edrec_count=len(updated)))

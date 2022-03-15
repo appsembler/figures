@@ -2,6 +2,7 @@
 """
 from __future__ import absolute_import
 import logging
+import mock
 import pytest
 
 from figures.tasks import backfill_enrollment_data_for_course
@@ -28,7 +29,7 @@ class TestBackfillEnrollmentDataForCourse(object):
         # The function returns a list of tuples with (object, created)
         # ed_recs = [(EnrollmentDataFactory(), False) for _ in range(2)]
         caplog.set_level(logging.INFO)
-        func_path = 'figures.tasks.update_enrollment_data_for_course'
+        func_path = 'figures.tasks.stale_course_enrollments'
         monkeypatch.setattr(func_path, lambda course_id: [])
         backfill_enrollment_data_for_course(course_id)
         assert len(caplog.records) == 1
@@ -46,9 +47,11 @@ class TestBackfillEnrollmentDataForCourse(object):
         # The function returns a list of tuples with (object, created)
         ed_recs = [(EnrollmentDataFactory(), False) for _ in range(2)]
         caplog.set_level(logging.INFO)
-        func_path = 'figures.tasks.update_enrollment_data_for_course'
-        monkeypatch.setattr(func_path, lambda course_id: ed_recs)
-        backfill_enrollment_data_for_course(course_id)
+        monkeypatch.setattr('figures.tasks.stale_course_enrollments', lambda course_id: ed_recs)
+        with mock.patch('figures.tasks.EnrollmentData') as mock_ed_class:
+            mock_ed_class.return_value.objects.update_metrics.return_value = ed_recs
+            backfill_enrollment_data_for_course(course_id)
+
         assert len(caplog.records) == 1
         assert caplog.records[0].message == self.expected_message_template.format(
             course_id=course_id,
