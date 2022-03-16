@@ -1,7 +1,6 @@
-"""Test Figures Django management commands
+"""Test Figures Django management command, 'backfill_figures_enrollment_data'
 """
 from __future__ import absolute_import
-
 import pytest
 import mock
 
@@ -24,6 +23,12 @@ class TestBackfillEnrollmentDataCommand(object):
         * has one course id, has two course ids
         * has one or more site domains, and one or more courses
             * expects to ignore the sites arg and only process the courses arg
+
+    ## Test class notes:
+
+    We really only need to test immediate or delay mode once, as the comand
+    class's `update_enrollments` method is called whether site or course identifiers
+    are provided.
     """
     TASK = 'figures.tasks.backfill_enrollment_data_for_course'
     MANAGEMENT_COMMAND = 'backfill_figures_enrollment_data'
@@ -34,7 +39,7 @@ class TestBackfillEnrollmentDataCommand(object):
     @pytest.mark.parametrize('delay_suffix, do_delay', [
         ('', False), ('.delay', True)
     ])
-    def test_backfill_with_sites_arg(self, domains, delay_suffix, do_delay):
+    def test_with_sites_arg(self, domains, delay_suffix, do_delay):
         sites = [SiteFactory(domain=domain) for domain in domains]
         courses = [CourseOverviewFactory() for _ in range(2)]
         course_ids = [str(obj.id) for obj in courses]
@@ -55,7 +60,10 @@ class TestBackfillEnrollmentDataCommand(object):
         ['course-v1:TestOrg+T01+run'],
         ['course-v1:TestOrg+T01+run', 'course-v1:TestOrg+T02+run'],
     ])
-    def test_backfill_with_courses_arg_immediate(self, course_ids):
+    @pytest.mark.parametrize('delay_suffix, use_celery', [
+        ('', False), ('.delay', True)
+    ])
+    def test_with_courses_arg(self, course_ids, delay_suffix, use_celery):
         """Test called with courses arg and not run in Celery worker
 
         This tests that the expected task function is called with specific
@@ -80,27 +88,18 @@ class TestBackfillEnrollmentDataCommand(object):
         kwargs = {'courses': course_ids, 'use_celery': False}
         calls = [mock.call(course_id) for course_id in course_ids]
 
-        with mock.patch(self.TASK) as mock_task:
-            with mock.patch(self.TASK + '.delay') as mock_task_delay:
-                call_command(self.MANAGEMENT_COMMAND, **kwargs)
-                assert mock_task.has_calls(calls)
-                assert not mock_task_delay.called
+        with mock.patch(self.TASK + delay_suffix) as mock_task:
+            call_command(self.MANAGEMENT_COMMAND, **kwargs)
+            assert mock_task.has_calls(calls)
 
-    @pytest.mark.parametrize('course_ids', [
-        ['course-v1:TestOrg+T01+run'],
-        ['course-v1:TestOrg+T01+run', 'course-v1:TestOrg+T02+run'],
-    ])
-    def test_backfill_with_courses_arg_delay(self, course_ids):
-        """Test called with courses arg and run in Celery worker
+    def test_with_courses_simple_list_file(self):
+        course_ids = ['course-v1:TestOrg+T0{}+run'.format(i) for i in range(3)]
 
-        See comment in the test method immediate above this one.
-        """
         [CourseOverviewFactory(id=cid) for cid in course_ids]
-        kwargs = {'courses': course_ids, 'use_celery': True}
-        calls = [mock.call(course_id) for course_id in course_ids]
+        file_contents = "# some comment here. Blah, blah, blah"
+        for course_id in course_ids:
+            file_contents += '\n' + course_id
 
-        with mock.patch(self.TASK) as mock_task:
-            with mock.patch(self.TASK + '.delay') as mock_task_delay:
-                call_command(self.MANAGEMENT_COMMAND, **kwargs)
-                assert mock_task_delay.has_calls(calls)
-                assert not mock_task.called
+        with mock.patch('builtins.open', mock.mock_open(read_data=file_contents)) as mo:
+            kwargs = {'courses_file': mo.return_value}
+            call_command(self.MANAGEMENT_COMMAND, **kwargs)

@@ -12,6 +12,7 @@ from django.contrib.sites.models import Site
 from figures.compat import CourseEnrollment
 from figures.pipeline.enrollment_metrics_next import (
     update_enrollment_data_for_course,
+    stale_course_enrollments,
     calculate_course_progress,
 )
 from figures.sites import UnlinkedCourseError
@@ -20,6 +21,7 @@ from tests.factories import (
     CourseEnrollmentFactory,
     CourseOverviewFactory,
     EnrollmentDataFactory,
+    StudentModuleFactory,
 )
 
 
@@ -89,6 +91,58 @@ class TestUpdateMetrics(object):
         #         update_enrollment_data_for_course(self.course_overview.id)
         expected_msg = 'No site found for course "{}"'.format(str(self.course_overview.id))
         assert str(excinfo.value) == expected_msg
+
+
+@pytest.mark.django_db
+class TestStaleCourseEnrollments(object):
+    """Tests `stale_course_enrollments`
+    """
+
+    @pytest.fixture(autouse=True)
+    def setup(self, db, settings):
+        self.course_overview = CourseOverviewFactory()
+        self.site = Site.objects.first()
+
+    def test_empty_course_list_comprehension(self):
+        found = [rec for rec in stale_course_enrollments(self.course_overview.id)]
+        assert found == []
+
+    def test_emtpy_course_next(self):
+        # import pdb; pdb.set_trace()
+
+        with pytest.raises(StopIteration):
+            rec = next(stale_course_enrollments(self.course_overview.id))
+
+
+    def test_no_update_needed(self, monkeypatch):
+        """Call to function yields no results
+
+        This test and the next one, 'test_needs_update' do "all or nothing" for
+        returning boolean values from `is_enrollment_out_of_date`. That's ok,
+        because there's test coverage specifically for this function in `test_enrollments.py`
+        So as long as this function has unit tests for its possible states, we
+        don't need to do it here.
+        """
+        # Need to mock/monkeypatch. Either code within 'is_enrollment_data_out_of_date'
+        # or the function itself.
+        # See test_enrollment.py::TestIsEnrollmentDataOutOfDate
+
+        ce_recs = [CourseEnrollmentFactory(course_id=self.course_overview.id) for _ in range(2)]
+        [StudentModuleFactory.from_course_enrollment(ce) for ce in ce_recs]
+        monkeypatch.setattr('figures.pipeline.enrollment_metrics_next.is_enrollment_data_out_of_date', lambda val: False)
+        assert not [rec for rec in stale_course_enrollments(self.course_overview.id)]
+
+    def test_needs_update(self, monkeypatch):
+        """Call to function yields two results
+
+        We create three enrollments and leave one enrollment without any StudentModule
+        """
+        ce = [CourseEnrollmentFactory(course_id=self.course_overview.id) for _ in range(3)]
+        StudentModuleFactory.from_course_enrollment(ce[0])
+        StudentModuleFactory.from_course_enrollment(ce[1])
+        monkeypatch.setattr('figures.pipeline.enrollment_metrics_next.is_enrollment_data_out_of_date', lambda val: True)
+        found = [rec for rec in stale_course_enrollments(self.course_overview.id)]
+        assert set(found) == set(ce[:2])
 
 
 @pytest.mark.django_db

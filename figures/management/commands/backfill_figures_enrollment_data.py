@@ -37,6 +37,7 @@ For potential improvements to this management command, see here:
 from __future__ import print_function
 from __future__ import absolute_import
 
+import argparse
 from textwrap import dedent
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand, CommandError
@@ -82,7 +83,7 @@ class Command(BaseCommand):
             sites.append(Site.objects.get(domain=site_identifier))
         return set(sites)
 
-    def get_course_ids(self, options):
+    def get_course_ids_from_courses_param(self, options):
         """Return a validated list of course id strings.
 
         If no courses are specified, returns an empty list
@@ -101,23 +102,47 @@ class Command(BaseCommand):
             course_ids.append(str(course_overview.id))
         return course_ids
 
-    def update_enrollments(self, course_ids, use_celery=True):
+    def get_course_ids_from_file(self, options):
+        """"Gets a list of verified course ids from a flat file
+        Initially, we start with a flat file of course ids
+        The '#' sign is a comment
+        """
+        course_ids = []
+        lines = options['courses_file'].read().splitlines()
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                course_overview = CourseOverview.objects.get(id=as_course_key(line))
+                course_ids.append(str(course_overview.id))
+        return course_ids
+
+    def update_enrollments(self, course_ids, use_celery):
+        """This method calls the Celery task in delay or immediate mode
+
+        TODO: If running as Celery tasks, improve the function, collect the
+        task ids, return them to the caller (Currently it is the `handle`
+        function) and report on processing state. Allow the user to quit and
+        the tasks keep running.
+        """
         for course_id in course_ids:
+            print('Updating enrollment data for course "{}"'.format(str(course_id)))
             if use_celery:
                 # Call the Celery task with delay
                 backfill_enrollment_data_for_course.delay(str(course_id))
+
             else:
                 # Call the Celery task immediately
                 backfill_enrollment_data_for_course(str(course_id))
 
     def add_arguments(self, parser):
         """
-
         If site domain or id or set of ides are provided, but no course or
         courses provided, runs for all courses in the site
 
         If a course id or list of course ids provided, processes those courses
-        If a site
+        If a site domain or list of site domains, process those, unless course_ids
+        are provided. If course ids are provided, those are processed and sites
+        ignored.
         """
         parser.add_argument('--sites',
                             nargs='+',
@@ -127,15 +152,28 @@ class Command(BaseCommand):
                             nargs='+',
                             default=[],
                             help='backfill a specific course. provide course id string')
+        parser.add_argument('--courses-file', type=argparse.FileType('r'),
+                            help='Course IDs file. A flat file with course ids')
+        # TODO: document this
+        # we want to allow explicit --use-celery false
         parser.add_argument('--use-celery',
                             action='store_true',
-                            default=True,
-                            help='Run with Celery worker. Set to false to run in app space ')
+                            default=False,
+                            help='Run with Celery worker. Default is to run in immediate mode')
 
     def handle(self, *args, **options):
+
         print('BEGIN: Backfill Figures EnrollmentData')
         sites = self.get_sites(options)
-        course_ids = self.get_course_ids(options)
+
+        if options['courses_file']:
+            # Implmented two different methods just to keep them separate for
+            # this release and make it clear where the course ids are from
+            # Later on, we might abstract this to just `seof.get_course_ids(options)`
+            course_ids = self.get_course_ids_from_file(options)
+        else:
+            course_ids = self.get_course_ids_from_courses_param(options)
+
         use_celery = options['use_celery']
 
         # Would it benefit to implement a generator method to yield the course id?
