@@ -113,3 +113,11 @@ class Course(object):
         user_ids = sm.values('student_id').distinct()
         return CourseEnrollment.objects.filter(course_id=self.course_key,
                                                user_id__in=user_ids)
+
+    def enrollments_with_student_modules(self):
+        """Return CourseEnrollment objects that have StudentModule records
+        """
+        sm = StudentModule.objects.filter(course_id=self.course_key)
+        user_ids = sm.values('student_id').distinct()
+        return CourseEnrollment.objects.filter(course_id=self.course_key,
+                                               user_id__in=user_ids).distinct()
