@@ -83,3 +83,6 @@ freezegun==0.3.12
 
 # Added to address: TypeError: attrib() got an unexpected keyword argument 'convert'
 attrs==19.1.0
+
+# Added to enable mock.mock_open using 'builtins.open'
+future==0.18.2
