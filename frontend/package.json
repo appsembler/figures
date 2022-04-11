@@ -37,7 +37,7 @@
     "immutable": "^3.8.2",
     "iso-639-1": "^2.0.3",
     "jest": "^24.8.0",
-    "moment": "^2.22.1",
+    "moment": "^2.29.2",
     "multiselect-react-dropdown": "^1.5.7",
     "node-sass": "^4.13.1",
     "object-assign": "4.1.1",

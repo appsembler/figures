@@ -23,6 +23,7 @@ from figures.helpers import as_course_key, utc_yesterday
 from figures.progress import EnrollmentProgress
 
 
+# Remove this. Import from figures.sites or will we get dependency issues?
 def default_site():
     """
     Wrapper aroung `django.conf.settings.SITE_ID` so we do not have to create a
@@ -205,6 +206,19 @@ class EnrollmentDataManager(models.Manager):
     EnrollmentData instances.
 
     """
+
+    def get_for_enrollment(self, course_enrollment):
+        """Returns EnrollmentData object or None for the given CourseEnrollment
+
+        This is a context specific `get_or_none` function that uses the `user_id`
+        and `course_id` from the enrollment argument.
+        """
+        try:
+            return self.get(user_id=course_enrollment.user_id,
+                            course_id=str(course_enrollment.course_id))
+        except EnrollmentData.DoesNotExist:
+            return None
+
     def set_enrollment_data(self, site, user, course_id, course_enrollment=None):
         """
         This is an expensive call as it needs to call CourseGradeFactory if
