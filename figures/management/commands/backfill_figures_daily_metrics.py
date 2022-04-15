@@ -37,7 +37,6 @@ class Command(BaseCommand):
         logdir = kwargs.get('logdir', None)
         force_update = kwargs.get('force_update', False)
 
-        return 'nop'
         return backfill_daily_metrics_for_site_and_date(site,
                                                         date_for,
                                                         process_sdm=process_sdm,
@@ -106,4 +105,4 @@ class Command(BaseCommand):
                 date_for.isoformat(), results['courses_processed']))
             print('Wrote log file: "{}"'.format(results['logfile']))
             print('CDM processing time: {}, SDM processing time: {}'.format(
-                results['cdm_elapsed'], results['sdm_elapsed']))
+                results['cdms_elapsed'], results['sdm_elapsed']))
