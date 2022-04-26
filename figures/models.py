@@ -4,8 +4,9 @@ TODO: Create a base "SiteModel" or a "SiteModelMixin"
 """
 
 from __future__ import absolute_import
-from datetime import date
+from datetime import datetime, date
 from time import time
+import six
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -582,6 +583,68 @@ class LearnerCourseGradeMetrics(TimeStampedModel):
     def completed(self):
         return (self.sections_worked > 0 and
                 self.sections_worked == self.sections_possible)
+
+
+class MonthlyActiveEnrollmentManager(models.Manager):
+    """Model manager for MonthlyActiveEnrollment
+
+    TODO:
+    * Add query convenience methods to get aggregate metrics,
+        * mau_for_site_and_month(self, site, month_for or year and month)
+        * mau_for_course_and_month(self, course, month_for or year and month)
+        * current month site MAU
+        * current month course MAU
+    """
+
+    def add_mae(self, site_id, course_id, user_id, date_for=None, overwrite=False):
+        """
+        We use 'date_for' instead of 'month_for' to enforce the day of month for
+        the 'month_for' field
+        """
+        if date_for:
+            month_for = date(year=date_for.year, month=date_for.month, day=1)
+        else:
+            today = datetime.utcnow()
+            month_for = date(year=today.year, month=today.month, day=1)
+        if not overwrite:
+            try:
+                obj = self.get(
+                    site_id=site_id,
+                    course_id=six.text_type(course_id),  # noqa: F821
+                    user_id=user_id,
+                    month_for=month_for)
+                return (obj, False)
+            except MonthlyActiveEnrollment.DoesNotExist:
+                pass
+
+        return self.update_or_create(
+            site_id=site_id,
+            course_id=six.text_type(course_id),  # noqa: F821
+            user_id=user_id,
+            month_for=month_for)
+
+
+@python_2_unicode_compatible
+class MonthlyActiveEnrollment(TimeStampedModel):
+    """Capture enrollment activity for a given month
+
+    An enrollment is a unique user+course pair
+
+    """
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    course_id = models.CharField(max_length=255, db_index=True)
+    month_for = models.DateField(db_index=True)
+
+    objects = MonthlyActiveEnrollmentManager()
+
+    class Meta:
+        ordering = ['-month_for', 'site', 'course_id']
+        unique_together = ['site', 'course_id', 'user', 'month_for']
+
+    def __str__(self):
+        return "id:{}, site:{} course_id:{} user:{} month_for:{},".format(
+            self.id, self.site.domain, self.course_id, self.user.username, self.month_for)
 
 
 @python_2_unicode_compatible
