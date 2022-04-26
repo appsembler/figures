@@ -120,9 +120,26 @@ class TestCourse(object):
         assert set(found_ce) == set(ce[:2])
 
     def test_enrollments_with_student_modules_but_no_student_modules(self):
-        ce = [CourseEnrollmentFactory(course_id=self.course_overview.id)
-              for _ in range(3)]
+        [CourseEnrollmentFactory(course_id=self.course_overview.id)
+         for _ in range(3)]
 
         course = Course(self.course_overview.id)
         assert not course.student_modules
         assert not course.enrollments_with_student_modules()
+
+    def test_first_enrollment_timestamp_without_enrollments(self):
+        course = Course(self.course_overview.id)
+        assert course.first_enrollment_timestamp() is None
+
+    def test_first_enrollment_timestamp_with_enrollments(self):
+        ce = [CourseEnrollmentFactory(course_id=self.course_overview.id)
+              for _ in range(3)]
+        dates = sorted([rec.created for rec in ce])
+
+        # Make sure we don't have duplicates
+        # If this assertion ever fails, go revisit the `created` field assignment
+        # for CourseEnrollmentFactory
+        assert len(set(dates)) == len(dates)
+
+        course = Course(self.course_overview.id)
+        assert course.first_enrollment_timestamp() == dates[0]

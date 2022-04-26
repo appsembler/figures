@@ -10,11 +10,11 @@ import pytest
 
 from dateutil.relativedelta import relativedelta
 
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 
 from figures.compat import CourseAccessRole, CourseEnrollment
 from figures.helpers import as_datetime, next_day, prev_day
-from figures.models import CourseDailyMetrics, PipelineError
+from figures.models import CourseDailyMetrics
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 import figures.sites
 
@@ -85,13 +85,21 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.today = datetime.date(2018, 6, 1)
+        self.enrollment_dates = [
+            '2018-04-27', '2018-04-28', '2018-04-29', '2018-04-30'
+        ]
+
         self.course_overview = CourseOverviewFactory()
         if OPENEDX_RELEASE == GINKGO:
             self.course_enrollments = [CourseEnrollmentFactory(
-                course_id=self.course_overview.id) for i in range(4)]
+                course_id=self.course_overview.id,
+                created=as_datetime(dt)
+                ) for dt in self.enrollment_dates]
         else:
             self.course_enrollments = [CourseEnrollmentFactory(
-                course=self.course_overview) for i in range(4)]
+                course=self.course_overview,
+                created=as_datetime(dt)
+                ) for dt in self.enrollment_dates]
 
         if organizations_support_sites():
             self.my_site = SiteFactory(domain='my-site.test')
