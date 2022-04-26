@@ -14,6 +14,7 @@ from figures.models import (
     SiteDailyMetrics,
     SiteMonthlyMetrics,
     LearnerCourseGradeMetrics,
+    MonthlyActiveEnrollment,
     PipelineError,
     CourseMauMetrics,
     )
@@ -39,6 +40,7 @@ class TestModelAdminRepresentations(object):
             (SiteDailyMetrics, figures.admin.SiteDailyMetricsAdmin),
             (SiteMonthlyMetrics, figures.admin.SiteMonthlyMetricsAdmin),
             (LearnerCourseGradeMetrics, figures.admin.LearnerCourseGradeMetricsAdmin),
+            (MonthlyActiveEnrollment, figures.admin.MonthlyActiveEnrollmentAdmin),
             (PipelineError, figures.admin.PipelineErrorAdmin),
             (CourseMauMetrics, figures.admin.CourseMauMetricsAdmin),
         ])
