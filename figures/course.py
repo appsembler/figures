@@ -121,3 +121,18 @@ class Course(object):
         user_ids = sm.values('student_id').distinct()
         return CourseEnrollment.objects.filter(course_id=self.course_key,
                                                user_id__in=user_ids).distinct()
+
+    def first_enrollment_timestamp(self):
+        """Get the `created` datetime of the first enrollment in this course
+
+        If there are no enrollments, then `None` is returned
+
+        We can improve this a bit by caching the query in self.enrollments
+        property method, but for now we do this to avoid a second database query
+        if there are no enrollments
+        """
+        enrollments = self.enrollments
+        if enrollments:
+            return enrollments.earliest('created').created
+        else:
+            return None
