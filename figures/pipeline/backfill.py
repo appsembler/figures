@@ -213,6 +213,12 @@ def backfill_daily_metrics_for_site_and_date(site,
     course_ids = courses_enrolled_on_or_before(site, date_for)
     course_id_count = len(course_ids)
 
+    # The log file has the site id and date for as identifiers
+    # We have the log file in append mode so that we don't overwrite the existing
+    # file in case something fails, we can pick up the logging in the same file
+    # when restarting the backfill for the same site and date
+    # if we find doing the log file in append more some kind of pain point, we
+    # can improve the engineering then
     with open(filepath, 'a', encoding='utf-8') as logfile:
         start_time = time()
         logfile.write('START: backfill {} courses, date_for: {}\n'.format(

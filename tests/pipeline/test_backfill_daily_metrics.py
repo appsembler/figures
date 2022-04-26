@@ -81,6 +81,7 @@ class TestBackfillDailyMetricsForSiteAndDate(object):
                 site=self.site,
                 date_for=date_for)
 
+        # If this fails, check the write mode
         open_mock.assert_called_with(results['logfile'], 'a', encoding='utf-8')
 
         # For now, we're just basic that records were created for the expected
