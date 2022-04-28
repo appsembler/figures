@@ -450,10 +450,11 @@ def test_get_requested_site_default_behaviour(settings):
 
 
 @pytest.mark.django_db
-def test_get_requested_site_custom_backend(settings):
+def test_get_requested_site_custom_backend(monkeypatch, settings):
     """
     Test `get_requested_site` can use custom backends.
     """
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
     orange_site = SiteFactory.create(name='orange site')
 
     settings.ENV_TOKENS = {
@@ -467,13 +468,14 @@ def test_get_requested_site_custom_backend(settings):
 
 
 @pytest.mark.django_db
-def test_get_requested_site_broken_backend(settings):
+def test_get_requested_site_broken_backend(monkeypatch, settings):
     """
     Test `get_requested_site` don't hide errors from custom backends.
 
-    Figures should keep a simple backend implementation without attempting to fix errors in site configuration or
-    faulty backends.
+    Figures should keep a simple backend implementation without attempting to
+    fix errors in site configuration or faulty backends.
     """
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
     settings.ENV_TOKENS = {
         'FIGURES': {
             'REQUESTED_SITE_BACKEND': 'organizations:broken_backend'
@@ -485,18 +487,29 @@ def test_get_requested_site_broken_backend(settings):
             figures.sites.get_requested_site(request=mock.Mock())
 
 
-@pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')
 @pytest.mark.django_db
-def test_get_sites_default_behaviour():
+def test_get_sites_default_behaviour_multisite(monkeypatch):
+
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
     default_site = Site.objects.get()  # gets the example site
     another_site = SiteFactory()
     all_sites = figures.sites.get_sites()
     assert list(all_sites) == [default_site, another_site], 'Should return all sites.'
 
 
-@pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')
 @pytest.mark.django_db
-def test_get_sites_custom_backend(settings):
+def test_get_sites_default_behaviour_standalone(monkeypatch, settings):
+
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: False)
+    default_site = Site.objects.get(id=settings.SITE_ID)  # gets the example site
+    SiteFactory()  # Create another site. We don't need the variable
+    all_sites = figures.sites.get_sites()
+    assert len(all_sites) == 1, 'There should be only one site returned'
+    assert all_sites[0] == default_site, 'The returned site should be the default site'
+
+
+@pytest.mark.django_db
+def test_get_sites_custom_backend(monkeypatch, settings):
     _orange_site = SiteFactory(name='orange site')
     blue_site_1 = SiteFactory(name='blue site 1')
     blue_site_2 = SiteFactory(name='blue site 2')
@@ -508,19 +521,20 @@ def test_get_sites_custom_backend(settings):
             'SITES_BACKEND': 'organizations:get_blue_sites'
         }
     }
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
     with mock.patch('organizations.get_blue_sites', create=True, return_value=blue_sites):
         all_sites = figures.sites.get_sites()
     assert list(all_sites) == [blue_site_1, blue_site_2], 'Should return just blue sites.'
 
 
-@pytest.mark.skipif(not organizations_support_sites(), reason='needed only in multisite mode')
 @pytest.mark.django_db
-def test_get_sites_broken_backend(settings):
+def test_get_sites_broken_backend(monkeypatch, settings):
     settings.ENV_TOKENS = {
         'FIGURES': {
             'SITES_BACKEND': 'organizations:broken_backend'
         }
     }
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
     with mock.patch('organizations.broken_backend', create=True, side_effect=ValueError):
         with pytest.raises(ValueError):
             figures.sites.get_sites()  # Should fail if the SITES_BACKEND fails

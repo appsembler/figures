@@ -20,10 +20,10 @@ from celery.utils.log import get_task_logger
 
 from figures.compat import CourseEnrollment, CourseOverview
 from figures.course import Course
-from figures.helpers import as_course_key, as_date, is_past_date
+from figures.helpers import as_course_key, as_date, is_past_date, is_multisite
 from figures.log import log_exec_time
 from figures.models import EnrollmentData
-from figures.sites import get_sites, get_sites_by_id, site_course_ids
+from figures.sites import default_site, get_sites, get_sites_by_id, site_course_ids
 
 from figures.pipeline.backfill import backfill_enrollment_data_for_site
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
@@ -108,6 +108,10 @@ def populate_daily_metrics_for_site(site_id, date_for, ed_next=False, force_upda
         logger.exception(msg.format(prefix=FPD_LOG_PREFIX, site_id=site_id))
         raise e
 
+    msg = '{prefix}:SITE:START:{id}:{domain}'
+    logger.info(msg.format(prefix=FPD_LOG_PREFIX,
+                           id=site.id,
+                           domain=site.domain))
     for course_id in site_course_ids(site):
         try:
             if ed_next:
@@ -129,6 +133,11 @@ def populate_daily_metrics_for_site(site_id, date_for, ed_next=False, force_upda
     populate_single_sdm(site_id=site.id,
                         date_for=date_for,
                         force_update=force_update)
+
+    msg = '{prefix}:SITE:END:{id}:{domain}'
+    logger.info(msg.format(prefix=FPD_LOG_PREFIX,
+                           id=site.id,
+                           domain=site.domain))
 
 
 @shared_task
@@ -161,6 +170,12 @@ def update_enrollment_data_for_site(site_id, **_kwargs):
         msg = ('FIGURES:DAILYLFAIL daily metrics:update_enrollment_data_for_site'
                ' for site_id={}'.format(site_id))
         logger.exception(msg)
+
+
+@shared_task
+def daily_metrics_callback(results, *args):
+    logger.info(results)
+    logger.info(args)
 
 
 @shared_task
@@ -225,48 +240,30 @@ def populate_daily_metrics(site_id=None, date_for=None, force_update=False):
                'calculated for past date {date_for}')
         logger.info(msg.format(date_for=date_for, prefix=FPD_LOG_PREFIX))
 
-    for i, site in enumerate(sites):
+    logger.info('Starting figures.tasks.populate_daily_metrics...')
 
-        msg = '{prefix}:SITE:START:{id}:{domain} - Site {i:04d} of {n:04d}'
-        logger.info(msg.format(prefix=FPD_LOG_PREFIX,
-                               id=site.id,
-                               domain=site.domain,
-                               i=i,
-                               n=sites_count))
-        try:
-            populate_daily_metrics_for_site(site_id=site.id,
-                                            date_for=date_for,
-                                            force_update=force_update)
+    msg_metrics_end = """
+                      {prefix}:END:date_for={date_for}, site_count={site_count}
+                      """.format(prefix=FPD_LOG_PREFIX,
+                                 date_for=date_for,
+                                 site_count=sites_count)
 
-        except Exception:  # pylint: disable=broad-except
-            msg = ('{prefix}:FAIL populate_daily_metrics unhandled site level'
-                   ' exception for site[{site_id}]={domain}')
-            logger.exception(msg.format(prefix=FPD_LOG_PREFIX,
-                                        site_id=site.id,
-                                        domain=site.domain))
+    daily_tasks_list = [
+        populate_daily_metrics_for_site.s(
+            site_id=site.id,
+            date_for=date_for.strftime('%m/%d/%Y'),
+            force_update=force_update) for site in sites
+    ]
+    all_sites_daily_metrics_jobs = chord(
+        daily_tasks_list, daily_metrics_callback.s(msg_metrics_end)
+    )
+    all_sites_daily_metrics_jobs.apply_async()
 
-        # Until we implement signal triggers
-        if do_update_enrollment_data:
-            try:
-                update_enrollment_data_for_site(site_id=site.id)
-            except Exception:  # pylint: disable=broad-except
-                msg = ('{prefix}:FAIL figures.tasks update_enrollment_data_for_site '
-                       ' unhandled exception. site[{site_id}]:{domain}')
-                logger.exception(msg.format(prefix=FPD_LOG_PREFIX,
-                                            site_id=site.id,
-                                            domain=site.domain))
-
-        msg = '{prefix}:SITE:END:{id}:{domain} - Site {i:04d} of {n:04d}'
-        logger.info(msg.format(prefix=FPD_LOG_PREFIX,
-                               id=site.id,
-                               domain=site.domain,
-                               i=i,
-                               n=sites_count))
-
-    msg = '{prefix}:END:date_for={date_for}, site_count={site_count}'
-    logger.info(msg.format(prefix=FPD_LOG_PREFIX,
-                           date_for=date_for,
-                           site_count=sites_count))
+    if do_update_enrollment_data:
+        all_update_enrollment_jobs = group(
+            update_enrollment_data_for_site.s(site_id=site.id) for site in sites
+        )
+        all_update_enrollment_jobs.delay()
 
 
 @shared_task
@@ -302,29 +299,13 @@ def populate_daily_metrics_next(site_id=None, force_update=False):
     logger.info(msg.format(prefix=FPD_LOG_PREFIX,
                            date_for=date_for,
                            site_count=sites_count))
-    for i, site in enumerate(sites):
-        msg = '{prefix}:SITE:START:{id}:{domain} - Site {i:04d} of {n:04d}'
-        logger.info(msg.format(prefix=FPD_LOG_PREFIX,
-                               id=site.id,
-                               domain=site.domain,
-                               i=i,
-                               n=sites_count))
-        try:
-            populate_daily_metrics_for_site(site_id=site.id,
-                                            date_for=date_for,
-                                            ed_next=True,
-                                            force_update=force_update)
-        except Exception:  # pylint: disable=broad-except
-            msg = ('{prefix}:FAIL populate_daily_metrics unhandled site level'
-                   ' exception for site[{site_id}]={domain}')
-            logger.exception(msg.format(prefix=FPD_LOG_PREFIX,
-                                        site_id=site.id,
-                                        domain=site.domain))
 
-    msg = '{prefix}:END:date_for={date_for}, site_count={site_count}'
-    logger.info(msg.format(prefix=FPD_LOG_PREFIX,
-                           date_for=date_for,
-                           site_count=sites_count))
+    logger.info('Starting figures.tasks.populate_daily_metrics...')
+    msg_metrics_end = '{prefix}:END:date_for={date_for}, site_count={site_count}'.format(prefix=FPD_LOG_PREFIX, date_for=date_for, site_count=sites_count)
+    #daily_metrics_callback = logger.info()
+    daily_tasks_list = [populate_daily_metrics_for_site.s(site_id=site.id, date_for=date_for.strftime('%m/%d/%Y'), ed_next=True, force_update=force_update) for site in sites]
+    all_sites_daily_metrics_jobs = chord(daily_tasks_list, daily_metrics_callback.s(msg_metrics_end))
+    all_sites_daily_metrics_jobs.apply_async()
 
 
 @shared_task
@@ -487,6 +468,8 @@ def populate_all_mau():
 def populate_monthly_metrics_for_site(site_id):
     try:
         site = Site.objects.get(id=site_id)
+        logger.info('figures.tasks.populate_monthly_metrics_for_site({}): {}'.format(
+            site_id, site.domain))
         msg = 'Ran populate_monthly_metrics_for_site. [{}]:{}'
         with log_exec_time(msg.format(site.id, site.domain)):
             fill_last_smm_month(site=site)
@@ -508,6 +491,13 @@ def run_figures_monthly_metrics():
                     WAFFLE_DISABLE_PIPELINE)
         return
 
-    logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
-    all_sites_jobs = group(populate_monthly_metrics_for_site.s(site.id) for site in get_sites())
-    all_sites_jobs.delay()
+    msg = 'Starting figures.tasks.run_figures_monthly_metrics in "{}"" mode...'
+
+    if is_multisite():
+        logger.info(msg.format('multisite'))
+        all_sites_jobs = group(populate_monthly_metrics_for_site.s(site.id) for site in get_sites())
+        all_sites_jobs.delay()
+    else:
+        # running standalone, single site, no need to delay subtask
+        logger.info(msg.format('standalone'))
+        populate_monthly_metrics_for_site(default_site().id)
