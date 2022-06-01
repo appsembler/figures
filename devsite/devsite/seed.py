@@ -25,7 +25,7 @@ from student.models import CourseAccessRole, CourseEnrollment, UserProfile
 
 from organizations.models import Organization, OrganizationCourse
 
-from figures.backfill import backfill_enrollment_data_for_site
+from figures.pipeline.backfill import backfill_enrollment_data_for_site
 from figures.compat import RELEASE_LINE, GeneratedCertificate
 from figures.models import (
     CourseDailyMetrics,
@@ -166,7 +166,8 @@ def seed_users(data=None):
                     country=profile_rec.get('country', None),
                 )
         except IntegrityError as e:
-            print(('skipping duplicate user email {}'.format(e)))
+            print(('skipping duplicate user email {} for email: {}'.format(
+                e, rec['emailX'])))
     return created_users
 
 
