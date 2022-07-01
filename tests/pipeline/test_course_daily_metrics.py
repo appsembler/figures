@@ -10,11 +10,11 @@ import pytest
 
 from dateutil.relativedelta import relativedelta
 
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 
 from figures.compat import CourseAccessRole, CourseEnrollment
 from figures.helpers import as_datetime, next_day, prev_day
-from figures.models import CourseDailyMetrics, PipelineError
+from figures.models import CourseDailyMetrics
 from figures.pipeline import course_daily_metrics as pipeline_cdm
 import figures.sites
 
@@ -85,13 +85,21 @@ class TestCourseDailyMetricsPipelineFunctions(object):
     @pytest.fixture(autouse=True)
     def setup(self, db):
         self.today = datetime.date(2018, 6, 1)
+        self.enrollment_dates = [
+            '2018-04-27', '2018-04-28', '2018-04-29', '2018-04-30'
+        ]
+
         self.course_overview = CourseOverviewFactory()
         if OPENEDX_RELEASE == GINKGO:
             self.course_enrollments = [CourseEnrollmentFactory(
-                course_id=self.course_overview.id) for i in range(4)]
+                course_id=self.course_overview.id,
+                created=as_datetime(dt)
+                ) for dt in self.enrollment_dates]
         else:
             self.course_enrollments = [CourseEnrollmentFactory(
-                course=self.course_overview) for i in range(4)]
+                course=self.course_overview,
+                created=as_datetime(dt)
+                ) for dt in self.enrollment_dates]
 
         if organizations_support_sites():
             self.my_site = SiteFactory(domain='my-site.test')
@@ -160,45 +168,6 @@ class TestCourseDailyMetricsPipelineFunctions(object):
             course_id=self.course_overview.id, date_for=self.today)
         assert recs.count() == len(self.course_enrollments)
 
-    def test_get_average_progress_deprecated(self):
-        """
-        [John] This test needs work. The function it is testing needs work too
-        for testability. We don't want to reproduce the function's behavior, we
-        just want to be able to set up the source data with expected output and
-        go.
-        """
-        course_enrollments = CourseEnrollment.objects.filter(
-            course_id=self.course_overview.id)
-        actual = pipeline_cdm.get_average_progress_deprecated(
-            course_id=self.course_overview.id,
-            date_for=self.today,
-            course_enrollments=course_enrollments
-            )
-        # See tests/mocks/lms/djangoapps/grades/course_grade.py for
-        # the source subsection grades that
-
-        # TODO: make the mock data more configurable so we don't have to
-        # hardcode the expected value
-        assert actual == 0.5
-
-    @mock.patch(
-        'figures.metrics.LearnerCourseGrades.course_progress',
-        side_effect=PermissionDenied('mock-failure')
-    )
-    def test_get_average_progress_deprecated_has_error(self, mock_lcg):
-
-        assert PipelineError.objects.count() == 0
-        course_enrollments = CourseEnrollment.objects.filter(
-            course_id=self.course_overview.id)
-
-        results = pipeline_cdm.get_average_progress_deprecated(
-                course_id=self.course_overview.id,
-                date_for=self.today,
-                course_enrollments=course_enrollments
-                )
-        assert results == pytest.approx(0.0)
-        assert PipelineError.objects.count() == course_enrollments.count()
-
     def test_get_days_to_complete(self):
         expected = dict(days=self.cert_days_to_complete,
                         errors=[])
@@ -239,34 +208,58 @@ class TestCourseDailyMetricsExtractor(object):
         self.student_module = StudentModuleFactory()
         self.date_for = datetime.datetime.utcnow().date()
 
-    def test_extract(self, monkeypatch):
+    def test_extract_default(self, monkeypatch):
+        """Default progress calculator is called when `ed_next` param not set
+        """
+        expected_avg_prog = 'fake-average-progress'
         course_id = self.course_enrollments[0].course_id
         monkeypatch.setattr(figures.pipeline.course_daily_metrics,
                             'bulk_calculate_course_progress_data',
-                            lambda **_kwargs: dict(average_progress=0.5))
+                            lambda **_kwargs: dict(average_progress=expected_avg_prog))
 
         results = pipeline_cdm.CourseDailyMetricsExtractor().extract(
             course_id, self.date_for)
+        assert results['average_progress'] == expected_avg_prog
+
+    @pytest.mark.parametrize('prog_func, ed_next', [
+            ('bulk_calculate_course_progress_data', False),
+            ('calculate_course_progress_next', True)
+        ])
+    def test_extract_ed_next(self, monkeypatch, prog_func, ed_next):
+        """Tests default and alternate progress calculators
+        """
+        course_id = self.course_enrollments[0].course_id
+        prog_func_str = 'figures.pipeline.course_daily_metrics.{}'.format(prog_func)
+        with mock.patch(prog_func_str) as prog_mock:
+            results = pipeline_cdm.CourseDailyMetricsExtractor().extract(
+                course_id, self.date_for, ed_next=ed_next)
+            assert prog_mock.called
         assert results
 
-    def test_when_bulk_calculate_course_progress_data_fails(self,
-                                                            monkeypatch,
-                                                            caplog):
+    @pytest.mark.parametrize('prog_func, ed_next', [
+            ('bulk_calculate_course_progress_data', False),
+            ('calculate_course_progress_next', True)
+        ])
+    def test_when_calculate_course_progress_data_fails(self,
+                                                       monkeypatch,
+                                                       caplog,
+                                                       prog_func,
+                                                       ed_next):
         course_id = self.course_enrollments[0].course_id
 
-        def mock_bulk(**_kwargs):
+        def prog_func_mock(**_kwargs):
             raise Exception('fake exception')
 
         monkeypatch.setattr(figures.pipeline.course_daily_metrics,
-                            'bulk_calculate_course_progress_data',
-                            mock_bulk)
+                            prog_func,
+                            prog_func_mock)
 
         results = pipeline_cdm.CourseDailyMetricsExtractor().extract(
-            course_id, self.date_for)
+            course_id, self.date_for, ed_next)
 
         last_log = caplog.records[-1]
         assert last_log.message.startswith(
-            'FIGURES:FAIL bulk_calculate_course_progress_data')
+            'FIGURES:FAIL {}'.format(prog_func))
         assert not results['average_progress']
 
 
@@ -296,7 +289,7 @@ class TestCourseDailyMetricsLoader(object):
         else:
             course_id = self.course_enrollments[0].course.id
 
-        def get_data(self, date_for):
+        def get_data(self, date_for, ed_next=False):
             return {
                 'average_progress': 1.0,
                 'num_learners_completed': 2,

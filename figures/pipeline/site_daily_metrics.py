@@ -10,10 +10,12 @@ from __future__ import absolute_import
 
 from django.db.models import Sum
 
+from figures.course import Course
 from figures.helpers import as_course_key, as_datetime, next_day
 from figures.mau import site_mau_1g_for_month_as_of_day
 from figures.models import CourseDailyMetrics, SiteDailyMetrics
 from figures.sites import (
+    site_course_ids,
     get_courses_for_site,
     get_users_for_site,
     get_student_modules_for_site,
@@ -53,6 +55,33 @@ def missing_course_daily_metrics(site, date_for):
 #
 # Standalone methods to extract data/aggregate data for use in SiteDailyMetrics
 #
+
+
+def get_course_ids_enrolled_on_or_before(site, date_for):
+    """Best guess to get site courses created on or before the specified date
+
+    CourseOverview does not have a reliable 'created' field
+    So we need to get the first enrollment for the courses
+    Unfortunately, we need to iterate over the courses OR create a complex and
+    slow query, so our implementation is the safe brute force to iterate over
+    courses, get the first enrollment and see if that enrollment is on or before
+    the date.
+
+    We will first implement this using `figures.course.Course` as it can
+    provide the first enrollment date for a course. There is a slight overhead
+    of an extra query in that `Course`'s contructor retrieves the site for the
+    course. If this turns out to be expensive, then we can furter optimize. But
+    first, let's see if we can do this withoutg duplicating code.
+    """
+    found_course_ids = []
+    compare_date = next_day(as_datetime(date_for))
+    for course_id in site_course_ids(site):
+        course = Course(course_id)
+        course_fe_ts = course.first_enrollment_timestamp()
+        if course_fe_ts and course_fe_ts < compare_date:
+            found_course_ids.append(course_id)
+    return found_course_ids
+
 
 def get_site_active_users_for_date(site, date_for):
     '''
@@ -123,9 +152,9 @@ class SiteDailyMetricsExtractor(object):
         site_users = get_users_for_site(site)
         user_count = site_users.filter(
             date_joined__lt=as_datetime(next_day(date_for))).count()
-        site_courses = get_courses_for_site(site)
-        course_count = site_courses.filter(
-            created__lt=as_datetime(next_day(date_for))).count()
+
+        course_ids = get_course_ids_enrolled_on_or_before(site, date_for)
+        course_count = len(course_ids)
 
         todays_active_users = get_site_active_users_for_date(site, date_for)
         todays_active_user_count = todays_active_users.count()

@@ -277,6 +277,10 @@ class TestSiteDailyMetricsExtractor(object):
         monkeypatch.setattr(pipeline_sdm, 'get_previous_cumulative_active_user_count',
                             mock_get_previous_cumulative_active_user_count)
 
+        course_ids = [str(co.id) for co in self.course_overviews]
+        monkeypatch.setattr(pipeline_sdm, 'get_course_ids_enrolled_on_or_before',
+                            lambda site, date_for: course_ids)
+
         for course in figures.sites.get_courses_for_site(self.site):
             assert course.created.date() < self.date_for
         for user in figures.sites.get_users_for_site(self.site):

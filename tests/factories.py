@@ -1,12 +1,10 @@
-'''Helpers to generate model instances for testing.
+"""Helpers to generate model instances for testing.
 
 Defines model factories for Figures, edX platform, and other models that we
 need to create for our tests.
 
 Uses Factory Boy: https://factoryboy.readthedocs.io/en/latest/
-
-'''
-
+"""
 from __future__ import absolute_import
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -40,6 +38,7 @@ from figures.models import (
     CourseMauMetrics,
     EnrollmentData,
     LearnerCourseGradeMetrics,
+    MonthlyActiveEnrollment,
     SiteDailyMetrics,
     SiteMonthlyMetrics,
     SiteMauMetrics,
@@ -221,6 +220,20 @@ class StudentModuleFactory(DjangoModelFactory):
         2018,2,2, tzinfo=factory.compat.UTC))
 
 
+    @classmethod
+    def from_course_enrollment(cls, course_enrollment, **kwargs):
+        """Contruct a StudentModule for the given CourseEnrollment
+
+        kwargs provides for additional optional parameters if you need to
+        override the default factory assignment
+        """
+        kwargs.update({
+            'student': course_enrollment.user,
+            'course_id': course_enrollment.course_id,
+            })
+        return cls(**kwargs)
+
+
 if OPENEDX_RELEASE == GINKGO:
     class CourseEnrollmentFactory(DjangoModelFactory):
         class Meta:
@@ -326,6 +339,19 @@ class EnrollmentDataFactory(DjangoModelFactory):
     sections_worked = 5
     sections_possible = 10
 
+    @classmethod
+    def from_course_enrollment(cls, course_enrollment, **kwargs):
+        """Construct an EnrollmentData for the given CourseEnrollment
+
+        kwargs provides for additional optional parameters if you need to
+        override the default factory assignment
+        """
+        kwargs.update({
+            'user': course_enrollment.user,
+            'course_id': course_enrollment.course_id,
+            })
+        return cls(**kwargs)
+
 
 class LearnerCourseGradeMetricsFactory(DjangoModelFactory):
     class Meta:
@@ -340,6 +366,17 @@ class LearnerCourseGradeMetricsFactory(DjangoModelFactory):
     points_earned = 15.0
     sections_worked = 5
     sections_possible = 10
+
+
+class MonthlyActiveEnrollmentFactory(DjangoModelFactory):
+    class Meta:
+        model = MonthlyActiveEnrollment
+    site = factory.SubFactory(SiteFactory)
+    month_for = factory.Sequence(lambda n: (
+        datetime.date(2020, 6, 1) - relativedelta(months=n)))
+    course_id = factory.Sequence(lambda n:
+        'course-v1:StarFleetAcademy+SFA{}+2161'.format(n))
+    user = factory.SubFactory(UserFactory)
 
 
 class SiteDailyMetricsFactory(DjangoModelFactory):

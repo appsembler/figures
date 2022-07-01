@@ -102,13 +102,35 @@ def site_data(db, settings):
 
     lcgm = [
         LearnerCourseGradeMetricsFactory(site=site_data['site'],
-            user=ce.user,
-            course_id=str(ce.course_id),
-            date_for='2020-10-01'),
+                                         user=ce.user,
+                                         course_id=str(ce.course_id),
+                                         date_for='2020-10-01'),
     ]
 
     site_data['lcgm'] = lcgm
     return site_data
+
+
+@pytest.mark.django_db
+def test_get_for_enrollment_has():
+    """Test we get an EnrollmentData record
+
+    We have a CourseEnrollment and we have an EnrollmentData record.
+    """
+    ce = CourseEnrollmentFactory()
+    ed = EnrollmentDataFactory.from_course_enrollment(ce)
+
+    assert EnrollmentData.objects.get_for_enrollment(ce) == ed
+
+
+@pytest.mark.django_db
+def test_get_for_enrollment_has_not():
+    """Test we get `None` for enrollment w/out EnrollmentData record
+
+    We have a CourseEnrollment, but no EnrollmentData record.
+    """
+    ce = CourseEnrollmentFactory()
+    assert EnrollmentData.objects.get_for_enrollment(ce) is None
 
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO, reason='Breaks on CourseEnrollmentFactory')
@@ -140,10 +162,9 @@ def test_set_enrollment_data_update_existing(site_data):
     """
     site = site_data['site']
     ce = site_data['enrollments'][0]
-    lcgm = site_data['lcgm'][0]
-    ed = EnrollmentDataFactory(site=site,
-                               course_id=str(ce.course_id),
-                               user=ce.user)
+    EnrollmentDataFactory(site=site,
+                          course_id=str(ce.course_id),
+                          user=ce.user)
     assert EnrollmentData.objects.count() == 1
     obj, created = EnrollmentData.objects.set_enrollment_data(
         site=site,

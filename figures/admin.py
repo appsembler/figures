@@ -120,6 +120,18 @@ class LearnerCourseGradeMetricsAdmin(UserRelatedMixin, admin.ModelAdmin):
     read_only_fields = ('user', 'user_link')
 
 
+@admin.register(figures.models.MonthlyActiveEnrollment)
+class MonthlyActiveEnrollmentAdmin(admin.ModelAdmin):
+    """Defines the admin interface for the MonthlyActiveEnrollment model
+    """
+    list_display = ('id', 'site', 'course_id', 'user', 'month_for')
+    list_filter = (
+        ('site', RelatedOnlyDropdownFilter),
+        ('course_id', AllValuesDropdownFilter),
+        ('user', RelatedOnlyFieldListFilter),
+        'month_for')
+
+
 @admin.register(figures.models.PipelineError)
 class PipelineErrorAdmin(admin.ModelAdmin):
     """Defines the admin interface for the PipelineError model

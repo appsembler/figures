@@ -3,9 +3,13 @@
 
 from __future__ import absolute_import
 import os
+from dateutil.parser import parse as dateutil_parse
 from dateutil.rrule import rrule, DAILY
 from packaging import version
 
+from django.utils.timezone import utc
+
+from opaque_keys.edx.keys import CourseKey
 from organizations.models import Organization
 
 
@@ -32,6 +36,10 @@ def make_course_key_str(org, number, run='test-run'):
     Helper method to create a string representation of a CourseKey
     """
     return 'course-v1:{}+{}+{}'.format(org, number, run)
+
+
+def fake_course_key(num):
+    return CourseKey.from_string('course-v1:TestOrg+TO+{}'.format(num))
 
 
 def create_metrics_model_timeseries(factory, first_day, last_day):
@@ -65,3 +73,22 @@ def django_filters_pre_v2():
     """
     import django_filters
     return version.parse(django_filters.__version__) < version.parse('2.0.0')
+
+
+def as_datetime_utc(datetime_string):
+    """Returns `datetime` instance with UTC timezone
+
+    This helpler function centralizes converting  "datetime as a string" to a
+    datetime object in UTC.
+
+    We use dateutil.parser.parse because it is convenient. However, these tests
+    need to support mulitple versions of Open edX and with that, multiple versions
+    of the dateutil package. While the dateutil package does handle timezone
+    assignment, this approach is more portable.
+
+    We may want to iterate on this to create a 'datetime_matches' function.
+    However, then we have to consider type checking for the parameters, or
+    enforce one type as string and the other as datetime, or do conversions.
+    Basically, we might be making testing more complicated
+    """
+    return dateutil_parse(datetime_string).replace(tzinfo=utc)

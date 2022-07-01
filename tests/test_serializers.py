@@ -6,9 +6,8 @@ from __future__ import absolute_import
 import datetime
 from dateutil.parser import parse as dateutil_parse
 from decimal import Decimal
-from dateutil.parser import parse
 import pytest
-import pytz
+# import pytz
 
 from django.contrib.sites.models import Site
 from django.db import models
@@ -56,7 +55,7 @@ from tests.factories import (
     SiteFactory,
     )
 
-from tests.helpers import platform_release
+from tests.helpers import as_datetime_utc, platform_release
 import six
 
 
@@ -148,8 +147,8 @@ class TestCourseDetailsSerializer(object):
         assert data['course_name'] == self.course_overview.display_name
         assert data['course_code'] == self.course_overview.number
         assert data['org'] == self.course_overview.org
-        assert parse(data['start_date']) == self.course_overview.start
-        assert parse(data['end_date']) == self.course_overview.end
+        assert as_datetime_utc(data['start_date']) == self.course_overview.start
+        assert as_datetime_utc(data['end_date']) == self.course_overview.end
         assert data['self_paced'] == self.course_overview.self_paced
 
     def test_get_staff_with_no_course(self):
@@ -187,7 +186,7 @@ class TestCourseEnrollmentSerializer(object):
         # assert data['course']['display_name'] == self.model_obj.course.display_name
         # assert data['course']['org'] == self.model_obj.course.org
 
-        assert dateutil_parse(data['created']) == self.model_obj.created
+        assert as_datetime_utc(data['created']) == self.model_obj.created
         assert data['user']['fullname'] == self.model_obj.user.profile.name
 
         for field_name in (self.expected_results_keys - self.special_fields):
@@ -234,8 +233,8 @@ class TestCourseDailyMetricsSerializer(object):
 
         # Hack: Check date and datetime values explicitly
         assert data['date_for'] == str(self.metrics.date_for)
-        assert dateutil_parse(data['created']) == self.metrics.created
-        assert dateutil_parse(data['modified']) == self.metrics.modified
+        assert as_datetime_utc(data['created']) == self.metrics.created
+        assert as_datetime_utc(data['modified']) == self.metrics.modified
         check_fields = self.expected_results_keys - self.date_fields - set(['site'])
         for field_name in check_fields:
             db_field = getattr(self.metrics, field_name)
@@ -297,8 +296,8 @@ class TestSiteDailyMetricsSerializer(object):
 
         # Hack: Check date and datetime values explicitly
         assert data['date_for'] == str(self.site_daily_metrics.date_for)
-        assert dateutil_parse(data['created']) == self.site_daily_metrics.created
-        assert dateutil_parse(data['modified']) == self.site_daily_metrics.modified
+        assert as_datetime_utc(data['created']) == self.site_daily_metrics.created
+        assert as_datetime_utc(data['modified']) == self.site_daily_metrics.modified
         check_fields = self.expected_results_keys - self.date_fields - set(['site'])
         for field_name in check_fields:
             assert data[field_name] == getattr(self.site_daily_metrics,field_name)
@@ -385,8 +384,8 @@ class TestGeneralCourseDataSerializer(object):
         assert data['course_name'] == self.course_overview.display_name
         assert data['course_code'] == self.course_overview.number
         assert data['org'] == self.course_overview.org
-        assert parse(data['start_date']) == self.course_overview.start
-        assert parse(data['end_date']) == self.course_overview.end
+        assert as_datetime_utc(data['start_date']) == self.course_overview.start
+        assert as_datetime_utc(data['end_date']) == self.course_overview.end
         assert data['self_paced'] == self.course_overview.self_paced
 
     def test_get_metrics_with_cdm_records(self):
@@ -410,7 +409,7 @@ class TestGeneralUserDataSerializer(object):
 
     @pytest.fixture(autouse=True)
     def setup(self, db):
-        self.a_datetime = datetime.datetime(2018, 2, 2, tzinfo=pytz.UTC)
+        self.a_datetime = datetime.datetime(2018, 2, 2, tzinfo=utc)
         self.user_attributes = {
             'username': 'alpha_one',
             'email': 'alpha_one@example.com',
@@ -628,7 +627,7 @@ class TestCourseMauMetricsSerializer(object):
         assert data['mau'] == self.obj.mau
         assert data['domain'] == self.obj.site.domain
         assert data['course_id'] == self.obj.course_id
-        assert dateutil_parse(data['date_for']).date() == self.obj.date_for 
+        assert dateutil_parse(data['date_for']).date() == self.obj.date_for
 
 
 @pytest.mark.django_db

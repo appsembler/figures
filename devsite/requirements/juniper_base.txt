@@ -24,7 +24,7 @@ pytz==2020.1
 ## Django package dependencies
 ##
 
-Django==2.2.24
+Django==2.2.28
 
 djangorestframework==3.9.4
 django-countries==5.5

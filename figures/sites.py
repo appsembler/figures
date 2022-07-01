@@ -12,6 +12,7 @@ Document how organization site mapping works
 
 from __future__ import absolute_import
 from django.contrib.auth import get_user_model
+from django.contrib.sites import shortcuts as sites_shortcuts
 from django.contrib.sites.models import Site
 from django.conf import settings
 
@@ -133,7 +134,7 @@ def get_site_for_course(course_id):
             site = None
     else:
         # Operating in single site / standalone mode, return the default site
-        site = Site.objects.get(id=settings.SITE_ID)
+        site = default_site()
     return site
 
 
@@ -302,6 +303,24 @@ def _get_all_sites():
     Default backend for get_sites() in multi-site mode.
     """
     return Site.objects.all()
+
+
+def get_requested_site(request):
+    """
+    From a request return the corresponding site.
+
+    This functions makes use of the `REQUESTED_SITE_BACKEND` setting if configured, otherwise
+    it defaults to Django's get_current_site().
+
+    :return Site
+    """
+    backend_path = settings.ENV_TOKENS['FIGURES'].get('REQUESTED_SITE_BACKEND')
+    if backend_path:
+        requested_site_backend = import_from_path(backend_path)
+        requested_site = requested_site_backend(request)
+    else:
+        requested_site = sites_shortcuts.get_current_site(request)
+    return requested_site
 
 
 def get_sites():

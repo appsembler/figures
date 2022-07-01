@@ -11,7 +11,7 @@ from six.moves import zip
 from django.db import connection
 from django.utils.timezone import utc
 
-from figures.backfill import backfill_monthly_metrics_for_site
+from figures.pipeline.backfill import backfill_monthly_metrics_for_site
 from figures.models import SiteMonthlyMetrics
 from tests.factories import (
     CourseOverviewFactory,
