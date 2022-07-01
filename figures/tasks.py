@@ -487,6 +487,8 @@ def populate_all_mau():
 def populate_monthly_metrics_for_site(site_id):
     try:
         site = Site.objects.get(id=site_id)
+        logger.info('figures.tasks.populate_monthly_metrics_for_site({}): {}'.format(
+            site_id, site.domain))
         msg = 'Ran populate_monthly_metrics_for_site. [{}]:{}'
         with log_exec_time(msg.format(site.id, site.domain)):
             fill_last_smm_month(site=site)
