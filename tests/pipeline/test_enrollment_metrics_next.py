@@ -4,10 +4,12 @@ These tests exercies the module, `figures.pipeline.enrollment_metrics_next`.
 
 See the module docstring for details.
 """
+from decimal import Decimal
 import pytest
 from mock import patch
 
 from django.contrib.sites.models import Site
+from django.forms import DecimalField
 
 from figures.compat import CourseEnrollment
 from figures.pipeline.enrollment_metrics_next import (
@@ -161,12 +163,30 @@ class TestCalculateProgress(object):
 
     def test_calc_course_progress(self):
         """The course has EnrollmentData records
+
+        The average progress calculator should round the number with a precision
+        of 3 and a scale of two (two digits to the right of the decimal point)
         """
-        some_percentages = [0.0, 25.0, 50.0]
+        some_percentages = [0.0, 0.25, 0.50, 0.66]
         expected_average = sum(some_percentages)/len(some_percentages)
+        expected_average = float(Decimal(expected_average).quantize(Decimal('.00')))
         [
             EnrollmentDataFactory(course_id=str(self.course_overview.id), progress_percent=pp)
             for pp in some_percentages
         ]
         results = calculate_course_progress(self.course_overview.id)
         assert results['average_progress'] == pytest.approx(expected_average)
+
+        # Crude, but checks that we meet the fixed decimal precision requirements
+        # This will raise a django.core.exceptions.ValidationError if it doesn't pass
+        DecimalField(max_digits=3, decimal_places=2).clean(results['average_progress'])
+
+
+    def test_calc_course_progress_invalid_values(self):
+        """ Placeholder test method
+
+        Not implementing this yet, but included this test method to consider if
+        we should add a test for when invalid values are stored in the
+        EnrollmentData.progress_percent field
+        """
+        pass
