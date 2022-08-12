@@ -11,6 +11,22 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 `Figures is on PyPI <https://pypi.org/project/Figures/>`__
 
 
+Aug 15, 2022 - Figures release 0.4.3
+====================================
+
+This release includes bug fixes. Of note:
+
+* `Fix tasks for standalone and fix average progress validation error <https://github.com/appsembler/figures/pull/463>`__
+* `Enable daily metrics models backfill of historical data in platform, but not progress <https://github.com/appsembler/figures/pull/452>`__
+* `Update SDM historic course count calculation <https://github.com/appsembler/figures/pull/458>`__
+* `Enrollment data handling fixes <https://github.com/appsembler/figures/pull/449>`__
+* `Fix broken devsite data seeding <https://github.com/appsembler/figures/pull/460>`__
+* Front end package dependency updates
+
+Also includes a foundational update for MAU 2:
+
+* `MAU 2 - Add Monthly Active Enrollment Model <https://github.com/appsembler/figures/pull/446>`__
+
 Mar 3, 2022 - Figures release 0.4.2
 ===================================
 
