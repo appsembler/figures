@@ -73,7 +73,7 @@ def test_populate_monthly_metrics_for_site_other_error(transactional_db,
     assert last_log.message == expected_log
 
 
-def test_run_figures_monthly_metrics_with_faked_subtask(transactional_db, monkeypatch):
+def test_run_figures_monthly_metrics_with_faked_subtask_multisite(transactional_db, monkeypatch):
     """Verify we visit the site in the subtask
 
     Faking the subtask for the function under test
@@ -86,11 +86,37 @@ def test_run_figures_monthly_metrics_with_faked_subtask(transactional_db, monkey
         for t in celery_task_group.tasks:
             sites_visited.extend(t.args)
 
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
+    monkeypatch.setattr('figures.tasks.is_multisite', lambda: True)
     monkeypatch.setattr('celery.group.delay', fake_populate_monthly_metrics_for_site)
 
     run_figures_monthly_metrics()
 
     assert set(sites_visited) == set([rec.id for rec in expected_sites])
+
+
+def test_run_figures_monthly_metrics_with_faked_subtask_standalone(transactional_db,
+                                                                   monkeypatch,
+                                                                   settings):
+    """Verify we visit the site in the subtask
+
+    Faking the subtask for the function under test
+    """
+    expected_site = settings.SITE_ID
+    sites_visited = []
+
+    def fake_populate_monthly_metrics_for_site(site_id):
+        sites_visited.append(site_id)
+
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: False)
+    monkeypatch.setattr('figures.tasks.is_multisite', lambda: False)
+    monkeypatch.setattr('figures.tasks.populate_monthly_metrics_for_site',
+                        fake_populate_monthly_metrics_for_site)
+
+    run_figures_monthly_metrics()
+
+    assert len(sites_visited) == 1
+    assert sites_visited[0] == expected_site
 
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
@@ -107,7 +133,6 @@ def test_run_figures_monthly_metrics_with_unfaked_subtask(transactional_db, monk
     sites_visited = []
 
     def fake_fill_last_smm_month(site):
-        # assert site == expected_site
         sites_visited.append(site)
 
     monkeypatch.setattr('figures.tasks.fill_last_smm_month',

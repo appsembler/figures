@@ -63,9 +63,10 @@ from six.moves import range
 from django.contrib.sites.models import Site
 from waffle.testutils import override_switch
 
-from figures.helpers import as_date, as_datetime
+from figures.helpers import as_date, as_datetime, is_multisite
 from figures.models import (CourseDailyMetrics,
                             SiteDailyMetrics)
+from figures.sites import default_site
 
 from figures.tasks import (FPD_LOG_PREFIX,
                            populate_single_cdm,
@@ -258,6 +259,7 @@ def test_populate_daily_metrics_for_site_site_dne(transactional_db,
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
                     reason='Apparent Django 1.8 incompatibility')
+@pytest.mark.skipif(not is_multisite(), reason='Multisite only test')
 @pytest.mark.parametrize('func', [
     populate_daily_metrics, populate_daily_metrics_next
 ])
@@ -305,12 +307,18 @@ def test_populate_daily_metrics_site_level_error(transactional_db,
 
 @pytest.mark.skipif(OPENEDX_RELEASE == GINKGO,
                     reason='Apparent Django 1.8 incompatibility')
+@pytest.mark.parametrize('site_func, multisite', [
+    (default_site, False),
+    (SiteFactory, True )
+])
 def test_populate_daily_metrics_enrollment_data_error(transactional_db,
                                                       monkeypatch,
-                                                      caplog):
+                                                      caplog,
+                                                      site_func,
+                                                      multisite):
     # Needs to be 'today' so that enrollment data update gets called
     date_for = date.today()
-    site = SiteFactory()
+    site = site_func()
 
     def fake_populate_daily_metrics_for_site(**_kwargs):
         pass
@@ -325,6 +333,9 @@ def test_populate_daily_metrics_enrollment_data_error(transactional_db,
     monkeypatch.setattr('figures.tasks.update_enrollment_data_for_site',
                         fake_update_enrollment_data_fails)
 
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: multisite)
+    monkeypatch.setattr('figures.tasks.is_multisite', lambda: multisite)
+
     populate_daily_metrics(date_for=date_for)
 
     last_log = caplog.records[-1]
@@ -333,6 +344,7 @@ def test_populate_daily_metrics_enrollment_data_error(transactional_db,
                     prefix=FPD_LOG_PREFIX,
                     site_id=site.id,
                     domain=site.domain)
+
     assert last_log.message == expected_msg
 
 
@@ -342,8 +354,14 @@ def test_populate_daily_metrics_enrollment_data_error(transactional_db,
     populate_daily_metrics, populate_daily_metrics_next
 ])
 def test_populate_daily_metrics_multisite(transactional_db, monkeypatch, caplog, func):
+    """
+    """
     # Stand up test data
     site_links = []
+
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: False)
+    monkeypatch.setattr('figures.tasks.is_multisite', lambda: False)
+
     for domain in ['alpha.domain', 'bravo.domain']:
         site_links.append(dict(
             site=SiteFactory(domain=domain),
