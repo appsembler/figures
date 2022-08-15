@@ -327,17 +327,25 @@ def get_sites():
     """
     Get a list of sites for Figures purposes in a configurable manner.
 
-    This functions makes use of the `SITES_BACKEND` setting if configured, otherwise
+    :return list of Site (QuerySet)
+
+    For multisite mode, when `settings.FEATURES['FIGURES_IS_MULTISITE'] == True`,
+    this functions makes use of the `SITES_BACKEND` setting if configured, otherwise
     it defaults to  _get_all_sites().
 
-    :return list of Site (QuerySet)
+    For standalone mode, the default site is returned as the single record in
+    the QuerySet result
     """
-    sites_backend_path = settings.ENV_TOKENS['FIGURES'].get('SITES_BACKEND')
-    if sites_backend_path:
-        sites_backend = import_from_path(sites_backend_path)
-        sites = sites_backend()
+    if is_multisite():
+        sites_backend_path = settings.ENV_TOKENS['FIGURES'].get('SITES_BACKEND')
+        if sites_backend_path:
+            sites_backend = import_from_path(sites_backend_path)
+            sites = sites_backend()
+        else:
+            sites = _get_all_sites()
     else:
-        sites = _get_all_sites()
+        # We do the filter so that we are returning a QuerySet object
+        sites = Site.objects.filter(id__in=[default_site().id])
 
     return sites
 

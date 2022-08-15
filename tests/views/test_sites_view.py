@@ -44,7 +44,8 @@ class TestSiteViewSet(BaseViewTest):
         ('?domain=bravo', {'domain__icontains': 'bravo'}),
         ('?name=alpha', {'name__icontains': 'alpha'})
         ])
-    def test_get(self, query_params, filter_args):
+    def test_get(self, monkeypatch, query_params, filter_args):
+        monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
         qp_msg = 'query_params={query_params}'
         expected_data = Site.objects.filter(**filter_args)
         request = APIRequestFactory().get(self.request_path + query_params)

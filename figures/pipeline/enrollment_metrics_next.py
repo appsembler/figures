@@ -29,6 +29,7 @@ This module improves on the existing enrollment metrics collection module,
 This module provides
 
 """
+from decimal import Decimal
 from django.db.models import Avg
 from figures.course import Course
 from figures.enrollment import is_enrollment_data_out_of_date
@@ -101,4 +102,7 @@ def calculate_course_progress(course_id):
     # have None for progress if there's no data. But check how SQL AVG performs
     if results['average_progress'] is None:
         results['average_progress'] = 0.0
+    else:
+        rounded_val = Decimal(results['average_progress']).quantize(Decimal('.00'))
+        results['average_progress'] = float(rounded_val)
     return results

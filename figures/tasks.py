@@ -20,10 +20,10 @@ from celery.utils.log import get_task_logger
 
 from figures.compat import CourseEnrollment, CourseOverview
 from figures.course import Course
-from figures.helpers import as_course_key, as_date, is_past_date
+from figures.helpers import as_course_key, as_date, is_past_date, is_multisite
 from figures.log import log_exec_time
 from figures.models import EnrollmentData
-from figures.sites import get_sites, get_sites_by_id, site_course_ids
+from figures.sites import default_site, get_sites, get_sites_by_id, site_course_ids
 
 from figures.pipeline.backfill import backfill_enrollment_data_for_site
 from figures.pipeline.course_daily_metrics import CourseDailyMetricsLoader
@@ -314,12 +314,13 @@ def populate_daily_metrics_next(site_id=None, force_update=False):
                                             date_for=date_for,
                                             ed_next=True,
                                             force_update=force_update)
-        except Exception:  # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             msg = ('{prefix}:FAIL populate_daily_metrics unhandled site level'
-                   ' exception for site[{site_id}]={domain}')
+                   ' exception for site[{site_id}]={domain}. msg: {msg}')
             logger.exception(msg.format(prefix=FPD_LOG_PREFIX,
                                         site_id=site.id,
-                                        domain=site.domain))
+                                        domain=site.domain,
+                                        msg=str(ex)))
 
     msg = '{prefix}:END:date_for={date_for}, site_count={site_count}'
     logger.info(msg.format(prefix=FPD_LOG_PREFIX,
@@ -510,6 +511,13 @@ def run_figures_monthly_metrics():
                     WAFFLE_DISABLE_PIPELINE)
         return
 
-    logger.info('Starting figures.tasks.run_figures_monthly_metrics...')
-    all_sites_jobs = group(populate_monthly_metrics_for_site.s(site.id) for site in get_sites())
-    all_sites_jobs.delay()
+    msg = 'Starting figures.tasks.run_figures_monthly_metrics in "{}"" mode...'
+
+    if is_multisite():
+        logger.info(msg.format('multisite'))
+        all_sites_jobs = group(populate_monthly_metrics_for_site.s(site.id) for site in get_sites())
+        all_sites_jobs.delay()
+    else:
+        # running standalone, single site, no need to delay subtask
+        logger.info(msg.format('standalone'))
+        populate_monthly_metrics_for_site(default_site().id)

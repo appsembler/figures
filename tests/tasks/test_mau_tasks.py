@@ -81,6 +81,8 @@ def test_populate_all_mau_multiple_site(transactional_db, monkeypatch):
     def mock_populate_mau_metrics_for_site(site_id, force_update=False):
         sites_visited.append(site_id)
 
+    monkeypatch.setattr('figures.sites.is_multisite', lambda: True)
+    monkeypatch.setattr('figures.tasks.is_multisite', lambda: True)
     monkeypatch.setattr('figures.tasks.populate_mau_metrics_for_site',
                         mock_populate_mau_metrics_for_site)
 
