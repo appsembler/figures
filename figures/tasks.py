@@ -132,6 +132,52 @@ def populate_daily_metrics_for_site(site_id, date_for, ed_next=False, force_upda
 
 
 @shared_task
+def populate_daily_metrics_for_site_async_sites(site_id, date_for,
+                                                ed_next=False, force_update=False):
+    """Collect metrics for the given site and date,
+    """
+    try:
+        site = Site.objects.get(id=site_id)
+    except Site.DoesNotExist as e:
+        msg = ('{prefix}:SITE:FAIL:populate_daily_metrics_for_site:site_id: '
+               '{site_id} does not exist')
+        logger.exception(msg.format(prefix=FPD_LOG_PREFIX, site_id=site_id))
+        raise e
+
+    msg = '{prefix}:SITE:START:{id}:{domain}'
+    logger.info(msg.format(prefix=FPD_LOG_PREFIX,
+                           id=site.id,
+                           domain=site.domain))
+
+    for course_id in site_course_ids(site):
+        try:
+            if ed_next:
+                update_enrollment_data_for_course(course_id)
+
+            populate_single_cdm(course_id=course_id,
+                                date_for=date_for,
+                                ed_next=ed_next,
+                                force_update=force_update)
+        except Exception as e:  # pylint: disable=broad-except
+            msg = ('{prefix}:SITE:COURSE:FAIL:populate_daily_metrics_for_site.'
+                   ' site_id:{site_id}, date_for:{date_for}. course_id:{course_id}'
+                   ' exception:{exception}')
+            logger.exception(msg.format(prefix=FPD_LOG_PREFIX,
+                                        site_id=site_id,
+                                        date_for=date_for,
+                                        course_id=str(course_id),
+                                        exception=e))
+    populate_single_sdm(site_id=site.id,
+                        date_for=date_for,
+                        force_update=force_update)
+
+    msg = '{prefix}:SITE:END:{id}:{domain}'
+    logger.info(msg.format(prefix=FPD_LOG_PREFIX,
+                           id=site.id,
+                           domain=site.domain))
+
+
+@shared_task
 def update_enrollment_data_for_site(site_id, **_kwargs):
     """Original task to collect `EnrollmentData` records
 
@@ -326,6 +372,63 @@ def populate_daily_metrics_next(site_id=None, force_update=False):
     logger.info(msg.format(prefix=FPD_LOG_PREFIX,
                            date_for=date_for,
                            site_count=sites_count))
+
+
+@shared_task
+def daily_metrics_callback(results, *args):
+    logger.info(results)
+    logger.info(args)
+
+
+@shared_task
+def populate_daily_metrics_async_sites(site_id=None, force_update=False):
+    """Next iteration to collect daily metrics for all sites in a deployment
+
+    This is a top level Celery task run every 24 hours to update Figures data.
+
+    * It updates Figures per-enrollment data and collect daily aggregate metrics
+    * It's purpose is to collect new metrics on an ongoing basis and not serve
+      dual purpose of collecting ongoing data AND backfilling data.
+    * The driver for this change is to improve performance of the daily Celery jobs
+
+    What's different?
+
+    * Figures collects the enrollment data first, then aggregates daily data.
+
+    TODO: Draft up public architecture docs and reference them here
+    """
+    if waffle.switch_is_active(WAFFLE_DISABLE_PIPELINE):
+        logger.warning('Figures pipeline is disabled due to %s being active.',
+                       WAFFLE_DISABLE_PIPELINE)
+        return
+
+    date_for = datetime.datetime.utcnow().date()
+    if site_id is not None:
+        sites = get_sites_by_id((site_id, ))
+    else:
+        sites = get_sites()
+    sites_count = sites.count()
+    # This is our task entry log message
+    msg = '{prefix}:START:date_for={date_for}, site_count={site_count}'
+    logger.info(msg.format(prefix=FPD_LOG_PREFIX,
+                           date_for=date_for,
+                           site_count=sites_count))
+
+    logger.info('Starting figures.tasks.populate_daily_metrics...')
+    msg_metrics_end = '{prefix}:END:date_for={date_for}, site_count={site_count}'.format(
+        prefix=FPD_LOG_PREFIX, date_for=date_for, site_count=sites_count)
+
+    daily_tasks_list = [
+        populate_daily_metrics_for_site_async_sites.s(
+            site_id=site.id,
+            date_for=date_for.strftime('%m/%d/%Y'),
+            ed_next=True,
+            force_update=force_update) for site in sites
+    ]
+    all_sites_daily_metrics_jobs = chord(
+        daily_tasks_list, daily_metrics_callback.s(msg_metrics_end)
+    )
+    all_sites_daily_metrics_jobs.apply_async()
 
 
 @shared_task
