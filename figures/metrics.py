@@ -413,11 +413,11 @@ def total_site_certificates_as_of_date(site, date_for):
     return data['num_learners_completed__sum']
     ```
     """
-    qs = CourseDailyMetrics.objects.filter(
+    latest_daily_metrics = CourseDailyMetrics.objects.filter(
         site=site,
-        date_for__lte=date_for).order_by('-date_for')
-    if qs:
-        latest_date = qs[0].date_for
+        date_for__lte=date_for).order_by('-date_for').first()
+    if latest_daily_metrics:
+        latest_date = latest_daily_metrics.date_for
         recs = CourseDailyMetrics.objects.filter(site=site,
                                                  date_for=latest_date)
         data = recs.aggregate(Sum('num_learners_completed'))
