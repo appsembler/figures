@@ -11,6 +11,10 @@ Reporting and data retrieval app for `Open edX <https://open.edx.org/>`__.
 `Figures is on PyPI <https://pypi.org/project/Figures/>`__
 
 
+Oct 13, 2022 - Figures release 0.4.4
+====================================
+This release includes a performance fix for the site-monthly-metric API.
+
 Aug 15, 2022 - Figures release 0.4.3
 ====================================
 
