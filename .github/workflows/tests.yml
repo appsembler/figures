@@ -30,12 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
       - name: install dependencies
         run: |
-          pip install tox flake8
+          pip install tox==3.9 flake8
       - name: Uses Node.js
         uses: actions/setup-node@v1
         with:
