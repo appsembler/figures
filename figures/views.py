@@ -217,7 +217,7 @@ class GeneralCourseDataViewSet(CourseOverviewViewSet):
     pagination_class = FiguresKiloPagination
     filter_backends = (SearchFilter, DjangoFilterBackend, OrderingFilter)
     search_fields = ['display_name', 'id']
-    ordering_fields = ['display_name', 'self_paced', 'date_joined']
+    ordering_fields = ['display_name', 'self_paced', 'date_joined', 'start_date']
 
 
 class CourseDetailsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
