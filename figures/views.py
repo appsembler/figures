@@ -17,7 +17,7 @@ from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 
@@ -524,7 +524,7 @@ class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         queryset = LearnerCourseGradeMetrics.objects.filter(site=site)
         return queryset
 
-    @list_route()
+    @action(detail=False)
     def completed_ids(self, request):
         """Return distinct course id/user id pairs for completed enrollments
 
@@ -542,7 +542,7 @@ class EnrollmentMetricsViewSet(CommonAuthMixin, viewsets.ReadOnlyModelViewSet):
         serializer = CourseCompletedSerializer(qs, many=True)
         return Response(serializer.data)
 
-    @list_route()
+    @action(detail=False)
     def completed(self, request):
         """Experimental endpoint to return completed LCGM records
 
@@ -632,7 +632,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
                                                 month_for=month_for)
         return Response(data)
 
-    @detail_route()
+    @action(detail=True)
     def active_users(self, request, **kwargs):  # pylint: disable=unused-argument
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         date_for = datetime.utcnow().date()
@@ -646,7 +646,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         data = dict(active_users=active_users)
         return Response(data)
 
-    @detail_route()
+    @action(detail=True)
     def course_enrollments(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(course_enrollments=self.historic_data(
@@ -656,7 +656,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
             func=metrics.get_course_enrolled_users_for_time_period))
         return Response(data)
 
-    @detail_route()
+    @action(detail=True)
     def num_learners_completed(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(num_learners_completed=self.historic_data(
@@ -666,7 +666,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
             func=metrics.get_course_num_learners_completed_for_time_period))
         return Response(data)
 
-    @detail_route()
+    @action(detail=True)
     def avg_days_to_complete(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(avg_days_to_complete=self.historic_data(
@@ -676,7 +676,7 @@ class CourseMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
             func=metrics.get_course_average_days_to_complete_for_time_period))
         return Response(data)
 
-    @detail_route()
+    @action(detail=True)
     def avg_progress(self, request, **kwargs):
         site, course_id = self.site_course_helper(kwargs.get('pk', ''))
         data = dict(avg_progress=self.historic_data(
@@ -714,7 +714,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         data = metrics.get_current_month_site_metrics(site)
         return Response(data)
 
-    @list_route()
+    @action(detail=False)
     def registered_users(self, request):
         site = figures.sites.get_requested_site(request)
         date_for = datetime.utcnow().date()
@@ -729,7 +729,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         data = dict(registered_users=registered_users)
         return Response(data)
 
-    @list_route()
+    @action(detail=False)
     def new_users(self, request):
         """
         TODO: Rename the metrics module function to "new_users" to match this
@@ -747,7 +747,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         data = dict(new_users=new_users)
         return Response(data)
 
-    @list_route()
+    @action(detail=False)
     def course_completions(self, request):
         site = figures.sites.get_requested_site(request)
         date_for = datetime.utcnow().date()
@@ -762,7 +762,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         data = dict(course_completions=course_completions)
         return Response(data)
 
-    @list_route()
+    @action(detail=False)
     def course_enrollments(self, request):
         site = figures.sites.get_requested_site(request)
         date_for = datetime.utcnow().date()
@@ -777,7 +777,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         data = dict(course_enrollments=course_enrollments)
         return Response(data)
 
-    @list_route()
+    @action(detail=False)
     def site_courses(self, request):
         site = figures.sites.get_requested_site(request)
         date_for = datetime.utcnow().date()
@@ -792,7 +792,7 @@ class SiteMonthlyMetricsViewSet(CommonAuthMixin, viewsets.ViewSet):
         data = dict(site_courses=site_courses)
         return Response(data)
 
-    @list_route()
+    @action(detail=False)
     def active_users(self, request):
         site = figures.sites.get_requested_site(request)
         months_back = 6

@@ -12,7 +12,7 @@ from django.contrib.sites.models import Site
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F
-from django.utils.encoding import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 from jsonfield import JSONField
 
