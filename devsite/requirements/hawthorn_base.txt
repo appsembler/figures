@@ -18,7 +18,7 @@ pytz==2016.10
 ## Django packages
 ##
 
-Django==1.11.29
+Django==3.2.24
 djangorestframework==3.6.3
 django-countries==4.6.1
 django-waffle==0.12.0 
